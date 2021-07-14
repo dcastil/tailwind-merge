@@ -1,0 +1,22 @@
+{
+    "compilerOptions": {
+        // Type Checking
+        "allowUnreachableCode": false,
+        "allowUnusedLabels": false,
+        "noFallthroughCasesInSwitch": true,
+        "noImplicitOverride": true,
+        "noUncheckedIndexedAccess": true,
+        "noUnusedLocals": true,
+        "strict": true,
+        // Emit
+        "declaration": true,
+        "outDir": "dist",
+        "sourceMap": true,
+        // Interop Constraints
+        "esModuleInterop": true,
+        "forceConsistentCasingInFileNames": true,
+        // Language and Environment
+        "target": "ES2020"
+    },
+    "include": ["src/**/*"]
+}

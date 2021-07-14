@@ -1,7 +1,16 @@
 {
-  "name": "tailwind-merge",
-  "version": "0.1.0",
-  "description": "Merge TailwindCSS classes and resolve style conflicts",
-  "author": "Dany Castillo",
-  "license": "MIT"
+    "name": "tailwind-merge",
+    "version": "0.1.0",
+    "description": "Merge TailwindCSS classes and resolve style conflicts",
+    "author": "Dany Castillo",
+    "license": "MIT",
+    "main": "./dist/index.js",
+    "types": "./dist/index.d.ts",
+    "scripts": {
+        "build": "tsc --project tsconfig.json"
+    },
+    "devDependencies": {
+        "prettier": "^2.3.2",
+        "typescript": "^4.3.5"
+    }
 }
