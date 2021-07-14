@@ -1,0 +1,7 @@
+{
+  "name": "tailwind-merge",
+  "version": "0.1.0",
+  "description": "Merge TailwindCSS classes and resolve style conflicts",
+  "author": "Dany Castillo",
+  "license": "MIT"
+}
