@@ -1,116 +1,13 @@
-const SPACING_ABSOLUTE = [
-    '0',
-    'px',
-    '0.5',
-    '1',
-    '1.5',
-    '2',
-    '2.5',
-    '3',
-    '4',
-    '5',
-    '6',
-    '7',
-    '8',
-    '9',
-    '10',
-    '11',
-    '12',
-    '14',
-    '16',
-    '20',
-    '24',
-    '28',
-    '32',
-    '36',
-    '40',
-    '44',
-    '48',
-    '52',
-    '56',
-    '60',
-    '64',
-    '72',
-    '80',
-    '96',
-] as const
-const SPACING_VARIABLE_SIMPLE = ['1/2', '1/3', '2/3', '1/4', '2/4', '3/4', 'full'] as const
-const SPACING_VARIABLE_EXTENDED = [
-    '1/5',
-    '2/5',
-    '3/5',
-    '4/5',
-    '1/6',
-    '2/6',
-    '3/6',
-    '4/6',
-    '5/6',
-    '1/12',
-    '2/12',
-    '3/12',
-    '4/12',
-    '5/12',
-    '6/12',
-    '7/12',
-    '8/12',
-    '9/12',
-    '10/12',
-    '11/12',
-    'screen',
-] as const
+import { isAny, isInteger, isLength } from './config-helpers'
+
 const SIZES_SIMPLE = ['sm', 'md', 'lg', 'xl', '2xl'] as const
 const SIZES_EXTENDED = ['3xl', '4xl', '5xl', '6xl', '7xl'] as const
 const OVERSCROLL = ['auto', 'contain', 'none'] as const
 const OVERFLOW = ['auto', 'hidden', 'visible', 'scroll'] as const
-const PLACEMENT_POSITION = [...SPACING_ABSOLUTE, ...SPACING_VARIABLE_SIMPLE] as const
-const MARGIN = [...SPACING_ABSOLUTE, 'auto'] as const
-const OPACITIES = [
-    '0',
-    '5',
-    '10',
-    '20',
-    '30',
-    '40',
-    '50',
-    '60',
-    '70',
-    '75',
-    '80',
-    '90',
-    '95',
-    '100',
-] as const
-;(OPACITIES as any).delimiter = '/'
-const COLOR_SCALE = [
-    {
-        '50': OPACITIES,
-        '100': OPACITIES,
-        '200': OPACITIES,
-        '300': OPACITIES,
-        '400': OPACITIES,
-        '500': OPACITIES,
-        '600': OPACITIES,
-        '700': OPACITIES,
-        '800': OPACITIES,
-        '900': OPACITIES,
-    },
-] as const
-const COLORS = [
-    'transparent',
-    'current',
-    'black',
-    'white',
-    {
-        gray: COLOR_SCALE,
-        red: COLOR_SCALE,
-        yellow: COLOR_SCALE,
-        green: COLOR_SCALE,
-        blue: COLOR_SCALE,
-        indigo: COLOR_SCALE,
-        purple: COLOR_SCALE,
-        pink: COLOR_SCALE,
-    },
-] as const
+const LENGTH = [isLength] as const
+const MARGIN = ['auto', isLength] as const
+const INTEGER = [isInteger] as const
+const ANY = [isAny] as const
 const POSITIONS = [
     'bottom',
     'center',
@@ -123,7 +20,6 @@ const POSITIONS = [
     'top',
 ] as const
 const ROUNDED = ['none', '', ...SIZES_SIMPLE, '3xl', 'full'] as const
-const BORDERS = ['0', '2', '4', '8', ''] as const
 const BORDER_STYLES = ['solid', 'dashed', 'dotted', 'double', 'none'] as const
 const BLEND_MODES = [
     {
@@ -147,7 +43,6 @@ const BLEND_MODES = [
         ],
     },
 ] as const
-const SCALES = ['0', '50', '75', '90', '95', '100', '105', '110', '125', '150'] as const
 
 export const CONFIG = {
     prefixes: [
@@ -248,55 +143,55 @@ export const CONFIG = {
         ],
         inset: [
             /**
-             * Top / Right / Bottom / Left
-             * @see https://tailwindcss.com/docs/top-right-bottom-left
-             */
-            PLACEMENT_POSITION,
-            /**
              * Right / Left
              * @see https://tailwindcss.com/docs/top-right-bottom-left
              */
-            [{ x: PLACEMENT_POSITION }],
+            [{ x: LENGTH }],
             /**
              * Top / Bottom
              * @see https://tailwindcss.com/docs/top-right-bottom-left
              */
-            [{ y: PLACEMENT_POSITION }],
+            [{ y: LENGTH }],
+            /**
+             * Top / Right / Bottom / Left
+             * @see https://tailwindcss.com/docs/top-right-bottom-left
+             */
+            LENGTH,
         ],
         top: [
             /**
              * Top
              * @see https://tailwindcss.com/docs/top-right-bottom-left
              */
-            PLACEMENT_POSITION,
+            LENGTH,
         ],
         right: [
             /**
              * Right
              * @see https://tailwindcss.com/docs/top-right-bottom-left
              */
-            PLACEMENT_POSITION,
+            LENGTH,
         ],
         bottom: [
             /**
              * Bottom
              * @see https://tailwindcss.com/docs/top-right-bottom-left
              */
-            PLACEMENT_POSITION,
+            LENGTH,
         ],
         left: [
             /**
              * Left
              * @see https://tailwindcss.com/docs/top-right-bottom-left
              */
-            PLACEMENT_POSITION,
+            LENGTH,
         ],
         z: [
             /**
              * Z-Index
              * @see https://tailwindcss.com/docs/z-index
              */
-            ['0', '10', '20', '30', '40', '50', 'auto'],
+            LENGTH,
         ],
         // Flexbox and Grid
         flex: [
@@ -319,51 +214,31 @@ export const CONFIG = {
              * Flex Grow
              * @see https://tailwindcss.com/docs/flex-grow
              */
-            [{ grow: ['0', ''] }],
+            [{ grow: ['', isInteger] }],
             /**
              * Flex Shrink
              * @see https://tailwindcss.com/docs/flex-shrink
              */
-            [{ shrink: ['0', ''] }],
+            [{ shrink: ['', isInteger] }],
         ],
         order: [
             /**
              * Order
              * @see https://tailwindcss.com/docs/order
              */
-            [
-                '1',
-                '2',
-                '3',
-                '4',
-                '5',
-                '6',
-                '7',
-                '8',
-                '9',
-                '10',
-                '11',
-                '12',
-                'first',
-                'last',
-                'none',
-            ],
+            ['first', 'last', 'none', isInteger],
         ],
         grid: [
             /**
              * Grid Template Columns
              * @see https://tailwindcss.com/docs/grid-template-columns
              */
-            [
-                {
-                    cols: [['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', 'none']],
-                },
-            ],
+            [{ cols: [['none', isInteger]] }],
             /**
              * Grid Template Rows
              * @see https://tailwindcss.com/docs/grid-template-rows
              */
-            [{ rows: ['1', '2', '3', '4', '5', '6', 'none'] }],
+            [{ rows: ['none', isInteger] }],
             /**
              * Grid Auto Flow
              * @see https://tailwindcss.com/docs/grid-auto-flow
@@ -375,75 +250,34 @@ export const CONFIG = {
              * Grid Column Start / End
              * @see https://tailwindcss.com/docs/grid-column
              */
-            [
-                'auto',
-                { span: ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', 'full'] },
-            ],
+            ['auto', { span: INTEGER }],
             /**
              * Grid Column Start
              * @see https://tailwindcss.com/docs/grid-column
              */
-            [
-                {
-                    start: [
-                        '1',
-                        '2',
-                        '3',
-                        '4',
-                        '5',
-                        '6',
-                        '7',
-                        '8',
-                        '9',
-                        '10',
-                        '11',
-                        '12',
-                        '13',
-                        'auto',
-                    ],
-                },
-            ],
+            [{ start: ['auto', isInteger] }],
             /**
              * Grid Column End
              * @see https://tailwindcss.com/docs/grid-column
              */
-            [
-                {
-                    end: [
-                        '1',
-                        '2',
-                        '3',
-                        '4',
-                        '5',
-                        '6',
-                        '7',
-                        '8',
-                        '9',
-                        '10',
-                        '11',
-                        '12',
-                        '13',
-                        'auto',
-                    ],
-                },
-            ],
+            [{ end: ['auto', isInteger] }],
         ],
         row: [
             /**
              * Grid Row Start / End
              * @see https://tailwindcss.com/docs/grid-row
              */
-            ['auto', { span: ['1', '2', '3', '4', '5', '6', 'full'] }],
+            ['auto', { span: INTEGER }],
             /**
              * Grid Row Start
              * @see https://tailwindcss.com/docs/grid-row
              */
-            [{ start: ['1', '2', '3', '4', '5', '6', '7', 'auto'] }],
+            [{ start: ['auto', isInteger] }],
             /**
              * Grid Row End
              * @see https://tailwindcss.com/docs/grid-row
              */
-            [{ end: ['1', '2', '3', '4', '5', '6', '7', 'auto'] }],
+            [{ end: ['auto', isInteger] }],
         ],
         auto: [
             /**
@@ -459,20 +293,20 @@ export const CONFIG = {
         ],
         gap: [
             /**
-             * Gap
-             * @see https://tailwindcss.com/docs/gap
-             */
-            SPACING_ABSOLUTE,
-            /**
              * Gap X
              * @see https://tailwindcss.com/docs/gap
              */
-            [{ x: SPACING_ABSOLUTE }],
+            [{ x: LENGTH }],
             /**
              * Gap Y
              * @see https://tailwindcss.com/docs/gap
              */
-            [{ y: SPACING_ABSOLUTE }],
+            [{ y: LENGTH }],
+            /**
+             * Gap
+             * @see https://tailwindcss.com/docs/gap
+             */
+            LENGTH,
         ],
         justify: [
             /**
@@ -535,49 +369,49 @@ export const CONFIG = {
              * Padding
              * @see https://tailwindcss.com/docs/padding
              */
-            SPACING_ABSOLUTE,
+            LENGTH,
         ],
         px: [
             /**
              * Padding X
              * @see https://tailwindcss.com/docs/padding
              */
-            SPACING_ABSOLUTE,
+            LENGTH,
         ],
         py: [
             /**
              * Padding Y
              * @see https://tailwindcss.com/docs/padding
              */
-            SPACING_ABSOLUTE,
+            LENGTH,
         ],
         pt: [
             /**
              * Padding Top
              * @see https://tailwindcss.com/docs/padding
              */
-            SPACING_ABSOLUTE,
+            LENGTH,
         ],
         pr: [
             /**
              * Padding Right
              * @see https://tailwindcss.com/docs/padding
              */
-            SPACING_ABSOLUTE,
+            LENGTH,
         ],
         pb: [
             /**
              * Padding Bottom
              * @see https://tailwindcss.com/docs/padding
              */
-            SPACING_ABSOLUTE,
+            LENGTH,
         ],
         pl: [
             /**
              * Padding Left
              * @see https://tailwindcss.com/docs/padding
              */
-            SPACING_ABSOLUTE,
+            LENGTH,
         ],
         m: [
             /**
@@ -638,7 +472,7 @@ export const CONFIG = {
              * Space Between X
              * @see https://tailwindcss.com/docs/space
              */
-            [{ x: SPACING_ABSOLUTE }],
+            [{ x: LENGTH }],
             /**
              * Space Between Y Reverse
              * @see https://tailwindcss.com/docs/space
@@ -648,7 +482,7 @@ export const CONFIG = {
              * Space Between Y
              * @see https://tailwindcss.com/docs/space
              */
-            [{ y: SPACING_ABSOLUTE }],
+            [{ y: LENGTH }],
         ],
         // Sizing
         w: [
@@ -656,26 +490,19 @@ export const CONFIG = {
              * Width
              * @see https://tailwindcss.com/docs/width
              */
-            [
-                ...SPACING_ABSOLUTE,
-                ...SPACING_VARIABLE_SIMPLE,
-                'auto',
-                ...SPACING_VARIABLE_EXTENDED,
-                'min',
-                'max',
-            ],
+            ['auto', 'min', 'max', isLength],
         ],
         min: [
             /**
              * Min-Width
              * @see https://tailwindcss.com/docs/min-width
              */
-            [{ w: ['0', 'full', 'min', 'max'] }],
+            [{ w: ['full', 'min', 'max', isLength] }],
             /**
              * Min-Height
              * @see https://tailwindcss.com/docs/min-height
              */
-            [{ h: ['0', 'full', 'screen'] }],
+            [{ h: ['full', 'screen', isLength] }],
         ],
         max: [
             /**
@@ -701,14 +528,14 @@ export const CONFIG = {
              * Max-Height
              * @see https://tailwindcss.com/docs/max-height
              */
-            [{ h: [...SPACING_ABSOLUTE, 'full', 'screen'] }],
+            [{ h: ['full', 'screen', isLength] }],
         ],
         h: [
             /**
              * Height
              * @see https://tailwindcss.com/docs/height
              */
-            [...SPACING_ABSOLUTE, ...SPACING_VARIABLE_SIMPLE, 'auto', ...SPACING_VARIABLE_EXTENDED],
+            ['auto', isLength],
         ],
         // Typography
         font: [
@@ -745,15 +572,15 @@ export const CONFIG = {
              */
             ['left', 'center', 'right', 'justify'],
             /**
-             * Text Color
-             * @see https://tailwindcss.com/docs/text-color
-             */
-            COLORS,
-            /**
              * Text Opacity
              * @see https://tailwindcss.com/docs/text-opacity
              */
-            [{ opacity: OPACITIES }],
+            [{ opacity: INTEGER }],
+            /**
+             * Text Color
+             * @see https://tailwindcss.com/docs/text-color
+             */
+            ANY,
         ],
         tracking: [
             /**
@@ -767,22 +594,7 @@ export const CONFIG = {
              * Line Height
              * @see https://tailwindcss.com/docs/line-height
              */
-            [
-                '3',
-                '4',
-                '5',
-                '6',
-                '7',
-                '8',
-                '9',
-                '10',
-                'none',
-                'tight',
-                'snug',
-                'normal',
-                'relaxed',
-                'loose',
-            ],
+            ['none', 'tight', 'snug', 'normal', 'relaxed', 'loose', isLength],
         ],
         list: [
             /**
@@ -798,15 +610,15 @@ export const CONFIG = {
         ],
         placeholder: [
             /**
-             * Placeholder Color
-             * @see https://tailwindcss.com/docs/placeholder-color
-             */
-            COLORS,
-            /**
              * Placeholder Opacity
              * @see https://tailwindcss.com/docs/placeholder-opacity
              */
-            [{ opacity: OPACITIES }],
+            [{ opacity: INTEGER }],
+            /**
+             * Placeholder Color
+             * @see https://tailwindcss.com/docs/placeholder-color
+             */
+            ANY,
         ],
         align: [
             /**
@@ -842,15 +654,10 @@ export const CONFIG = {
              */
             [{ clip: ['border', 'padding', 'content', 'text'] }],
             /**
-             * Background Color
-             * @see https://tailwindcss.com/docs/background-color
-             */
-            COLORS,
-            /**
              * Background Opacity
              * @see https://tailwindcss.com/docs/background-opacity
              */
-            [{ opacity: OPACITIES }],
+            [{ opacity: INTEGER }],
             /**
              * Background Origin
              * @see https://tailwindcss.com/docs/background-origin
@@ -881,27 +688,32 @@ export const CONFIG = {
              * @see https://tailwindcss.com/docs/background-blend-mode
              */
             BLEND_MODES,
+            /**
+             * Background Color
+             * @see https://tailwindcss.com/docs/background-color
+             */
+            ANY,
         ],
         from: [
             /**
              * Gradient Color Stops From
              * @see https://tailwindcss.com/docs/gradient-color-stops
              */
-            COLORS,
+            ANY,
         ],
         via: [
             /**
              * Gradient Color Stops Via
              * @see https://tailwindcss.com/docs/gradient-color-stops
              */
-            COLORS,
+            ANY,
         ],
         to: [
             /**
              * Gradient Color Stops To
              * @see https://tailwindcss.com/docs/gradient-color-stops
              */
-            COLORS,
+            ANY,
         ],
         // Borders
         rounded: [
@@ -956,37 +768,32 @@ export const CONFIG = {
              * Border Width
              * @see https://tailwindcss.com/docs/border-width
              */
-            BORDERS,
+            LENGTH,
             /**
              * Border Width Top
              * @see https://tailwindcss.com/docs/border-width
              */
-            [{ t: BORDERS }],
+            [{ t: LENGTH }],
             /**
              * Border Width Right
              * @see https://tailwindcss.com/docs/border-width
              */
-            [{ r: BORDERS }],
+            [{ r: LENGTH }],
             /**
              * Border Width Bottom
              * @see https://tailwindcss.com/docs/border-width
              */
-            [{ b: BORDERS }],
+            [{ b: LENGTH }],
             /**
              * Border Width Left
              * @see https://tailwindcss.com/docs/border-width
              */
-            [{ l: BORDERS }],
-            /**
-             * Border Color
-             * @see https://tailwindcss.com/docs/border-color
-             */
-            COLORS,
+            [{ l: LENGTH }],
             /**
              * Border Opacity
              * @see https://tailwindcss.com/docs/border-opacity
              */
-            [{ opacity: OPACITIES }],
+            [{ opacity: INTEGER }],
             /**
              * Border Style
              * @see https://tailwindcss.com/docs/border-style
@@ -997,6 +804,11 @@ export const CONFIG = {
              * @see https://tailwindcss.com/docs/border-collapse
              */
             ['collapse', 'separate'],
+            /**
+             * Border Color
+             * @see https://tailwindcss.com/docs/border-color
+             */
+            ANY,
         ],
         divide: [
             /**
@@ -1008,7 +820,7 @@ export const CONFIG = {
              * Divide Width X
              * @see https://tailwindcss.com/docs/divide-width
              */
-            [{ x: BORDERS }],
+            [{ x: LENGTH }],
             /**
              * Divide Width Y Reverse
              * @see https://tailwindcss.com/docs/divide-width
@@ -1018,54 +830,54 @@ export const CONFIG = {
              * Divide Width Y
              * @see https://tailwindcss.com/docs/divide-width
              */
-            [{ y: BORDERS }],
-            /**
-             * Divide Color
-             * @see https://tailwindcss.com/docs/divide-color
-             */
-            COLORS,
+            [{ y: LENGTH }],
             /**
              * Divide Opacity
              * @see https://tailwindcss.com/docs/divide-opacity
              */
-            [{ opacity: OPACITIES }],
+            [{ opacity: INTEGER }],
             /**
              * Divide Style
              * @see https://tailwindcss.com/docs/divide-style
              */
             BORDER_STYLES,
+            /**
+             * Divide Color
+             * @see https://tailwindcss.com/docs/divide-color
+             */
+            ANY,
         ],
         ring: [
             /**
              * Ring Width
              * @see https://tailwindcss.com/docs/ring-width
              */
-            ['0', '1', '2', '4', '8', ''],
+            ['', isLength],
             /**
              * Ring Width Inset
              * @see https://tailwindcss.com/docs/ring-width
              */
             ['inset'],
             /**
-             * Ring Color
-             * @see https://tailwindcss.com/docs/ring-color
-             */
-            COLORS,
-            /**
              * Ring Opacity
              * @see https://tailwindcss.com/docs/ring-opacity
              */
-            [{ opacity: OPACITIES }],
+            [{ opacity: INTEGER }],
             /**
              * Ring Offset Width
              * @see https://tailwindcss.com/docs/ring-offset-width
              */
-            [{ offset: ['0', '1', '2', '4', '8'] }],
+            [{ offset: LENGTH }],
             /**
              * Ring Offset Color
              * @see https://tailwindcss.com/docs/ring-offset-color
              */
-            [{ offset: COLORS }],
+            [{ offset: ANY }],
+            /**
+             * Ring Color
+             * @see https://tailwindcss.com/docs/ring-color
+             */
+            ANY,
         ],
         // Effects
         shadow: [
@@ -1080,7 +892,7 @@ export const CONFIG = {
              * Opacity
              * @see https://tailwindcss.com/docs/opacity
              */
-            OPACITIES,
+            INTEGER,
         ],
         mix: [
             /**
@@ -1109,14 +921,14 @@ export const CONFIG = {
              * Brightness
              * @see https://tailwindcss.com/docs/brightness
              */
-            ['0', '50', '75', '90', '95', '100', '105', '110', '125', '150', '200'],
+            INTEGER,
         ],
         contrast: [
             /**
              * Contrast
              * @see https://tailwindcss.com/docs/contrast
              */
-            ['0', '50', '75', '100', '125', '150', '200'],
+            INTEGER,
         ],
         drop: [
             /**
@@ -1137,7 +949,7 @@ export const CONFIG = {
              * Hue Rotate
              * @see https://tailwindcss.com/docs/hue-rotate
              */
-            [{ rotate: ['0', '15', '30', '60', '90', '180'] }],
+            [{ rotate: INTEGER }],
         ],
         invert: [
             /**
@@ -1151,7 +963,7 @@ export const CONFIG = {
              * Saturate
              * @see https://tailwindcss.com/docs/saturate
              */
-            ['0', '50', '100', '150', '200'],
+            INTEGER,
         ],
         sepia: [
             /**
@@ -1175,28 +987,12 @@ export const CONFIG = {
              * Backdrop Brightness
              * @see https://tailwindcss.com/docs/backdrop-brightness
              */
-            [
-                {
-                    brightness: [
-                        '0',
-                        '50',
-                        '75',
-                        '90',
-                        '95',
-                        '100',
-                        '105',
-                        '110',
-                        '125',
-                        '150',
-                        '200',
-                    ],
-                },
-            ],
+            [{ brightness: INTEGER }],
             /**
              * Backdrop Contrast
              * @see https://tailwindcss.com/docs/backdrop-contrast
              */
-            [{ contrast: ['0', '50', '75', '100', '125', '150', '200'] }],
+            [{ contrast: INTEGER }],
             /**
              * Backdrop Grayscale
              * @see https://tailwindcss.com/docs/backdrop-grayscale
@@ -1206,7 +1002,7 @@ export const CONFIG = {
              * Backdrop Hue Rotate
              * @see https://tailwindcss.com/docs/backdrop-hue-rotate
              */
-            [{ 'hue-rotate': ['0', '15', '30', '60', '90', '180'] }],
+            [{ 'hue-rotate': INTEGER }],
             /**
              * Backdrop Invert
              * @see https://tailwindcss.com/docs/backdrop-invert
@@ -1216,12 +1012,12 @@ export const CONFIG = {
              * Backdrop Opacity
              * @see https://tailwindcss.com/docs/backdrop-opacity
              */
-            [{ opacity: OPACITIES }],
+            [{ opacity: INTEGER }],
             /**
              * Backdrop Saturate
              * @see https://tailwindcss.com/docs/backdrop-saturate
              */
-            [{ saturate: ['0', '50', '100', '150', '200'] }],
+            [{ saturate: INTEGER }],
             /**
              * Backdrop Sepia
              * @see https://tailwindcss.com/docs/backdrop-sepia
@@ -1249,7 +1045,7 @@ export const CONFIG = {
              * Transition Duration
              * @see https://tailwindcss.com/docs/transition-duration
              */
-            ['75', '100', '150', '200', '300', '500', '700', '1000'],
+            INTEGER,
         ],
         ease: [
             /**
@@ -1263,7 +1059,7 @@ export const CONFIG = {
              * Transition Delay
              * @see https://tailwindcss.com/docs/transition-delay
              */
-            ['75', '100', '150', '200', '300', '500', '700', '1000'],
+            INTEGER,
         ],
         animate: [
             /**
@@ -1304,48 +1100,48 @@ export const CONFIG = {
              * Scale
              * @see https://tailwindcss.com/docs/scale
              */
-            SCALES,
+            INTEGER,
             /**
              * Scale X
              * @see https://tailwindcss.com/docs/scale
              */
-            [{ x: SCALES }],
+            [{ x: INTEGER }],
             /**
              * Scale Y
              * @see https://tailwindcss.com/docs/scale
              */
-            [{ y: SCALES }],
+            [{ y: INTEGER }],
         ],
         rotate: [
             /**
              * Rotate
              * @see https://tailwindcss.com/docs/rotate
              */
-            ['0', '1', '2', '3', '6', '12', '45', '90', '180'],
+            INTEGER,
         ],
         translate: [
             /**
              * Translate X
              * @see https://tailwindcss.com/docs/translate
              */
-            [{ x: [...SPACING_ABSOLUTE, ...SPACING_VARIABLE_SIMPLE] }],
+            [{ x: LENGTH }],
             /**
              * Translate Y
              * @see https://tailwindcss.com/docs/translate
              */
-            [{ y: [...SPACING_ABSOLUTE, ...SPACING_VARIABLE_SIMPLE] }],
+            [{ y: LENGTH }],
         ],
         skew: [
             /**
              * Skew X
              * @see https://tailwindcss.com/docs/skew
              */
-            [{ x: ['0', '1', '2', '3', '6', '12'] }],
+            [{ x: INTEGER }],
             /**
              * Skew Y
              * @see https://tailwindcss.com/docs/skew
              */
-            [{ y: ['0', '1', '2', '3', '6', '12'] }],
+            [{ y: INTEGER }],
         ],
         // Interactivity
         cursor: [
@@ -1393,7 +1189,7 @@ export const CONFIG = {
              * Stroke Width
              * @see https://tailwindcss.com/docs/stroke-width
              */
-            ['0', '1', '2'],
+            LENGTH,
         ],
     },
     standaloneClasses: [
@@ -1506,272 +1302,71 @@ export const CONFIG = {
     ],
     conflictingClasses: [
         {
-            creators: [{ overflow: OVERFLOW }],
-            receivers: [{ 'overflow-x': OVERFLOW, 'overflow-y': OVERFLOW }],
+            creators: [{ overflow: ANY }],
+            receivers: [{ 'overflow-x': ANY, 'overflow-y': ANY }],
         },
         {
-            creators: [{ overscroll: OVERSCROLL }],
-            receivers: [{ 'overscroll-x': OVERSCROLL, 'overscroll-y': OVERSCROLL }],
+            creators: [{ overscroll: ANY }],
+            receivers: [{ 'overscroll-x': ANY, 'overscroll-y': ANY }],
         },
         {
-            creators: [{ inset: PLACEMENT_POSITION }],
+            creators: [{ inset: ANY }],
             receivers: [
-                {
-                    'inset-x': PLACEMENT_POSITION,
-                    'inset-y': PLACEMENT_POSITION,
-                    top: PLACEMENT_POSITION,
-                    right: PLACEMENT_POSITION,
-                    bottom: PLACEMENT_POSITION,
-                    left: PLACEMENT_POSITION,
-                },
+                { 'inset-x': ANY, 'inset-y': ANY, top: ANY, right: ANY, bottom: ANY, left: ANY },
             ],
         },
         {
-            creators: [{ 'inset-x': PLACEMENT_POSITION }],
-            receivers: [
-                {
-                    right: PLACEMENT_POSITION,
-                    left: PLACEMENT_POSITION,
-                },
-            ],
+            creators: [{ 'inset-x': ANY }],
+            receivers: [{ right: ANY, left: ANY }],
         },
         {
-            creators: [{ 'inset-y': PLACEMENT_POSITION }],
-            receivers: [
-                {
-                    top: PLACEMENT_POSITION,
-                    bottom: PLACEMENT_POSITION,
-                },
-            ],
+            creators: [{ 'inset-y': ANY }],
+            receivers: [{ top: ANY, bottom: ANY }],
         },
         {
             creators: [{ flex: ['1', 'auto', 'initial', 'none'] }],
-            receivers: [
-                {
-                    'flex-grow': ['0', ''],
-                    'flex-shrink': ['0', ''],
-                },
-            ],
+            receivers: [{ 'flex-grow': ANY, 'flex-shrink': ANY }],
         },
         {
-            creators: [
-                {
-                    col: [
-                        'auto',
-                        {
-                            span: [
-                                '1',
-                                '2',
-                                '3',
-                                '4',
-                                '5',
-                                '6',
-                                '7',
-                                '8',
-                                '9',
-                                '10',
-                                '11',
-                                '12',
-                                'full',
-                            ],
-                        },
-                    ],
-                },
-            ],
-            receivers: [
-                {
-                    col: [
-                        {
-                            start: [
-                                '1',
-                                '2',
-                                '3',
-                                '4',
-                                '5',
-                                '6',
-                                '7',
-                                '8',
-                                '9',
-                                '10',
-                                '11',
-                                '12',
-                                '13',
-                                'auto',
-                            ],
-                            end: [
-                                '1',
-                                '2',
-                                '3',
-                                '4',
-                                '5',
-                                '6',
-                                '7',
-                                '8',
-                                '9',
-                                '10',
-                                '11',
-                                '12',
-                                '13',
-                                'auto',
-                            ],
-                        },
-                    ],
-                },
-            ],
+            creators: [{ col: ['auto', { span: ANY }] }],
+            receivers: [{ col: [{ start: ANY, end: ANY }] }],
         },
         {
-            creators: [
-                {
-                    row: [
-                        'auto',
-                        {
-                            span: [
-                                '1',
-                                '2',
-                                '3',
-                                '4',
-                                '5',
-                                '6',
-                                '7',
-                                '8',
-                                '9',
-                                '10',
-                                '11',
-                                '12',
-                                'full',
-                            ],
-                        },
-                    ],
-                },
-            ],
-            receivers: [
-                {
-                    row: [
-                        {
-                            start: [
-                                '1',
-                                '2',
-                                '3',
-                                '4',
-                                '5',
-                                '6',
-                                '7',
-                                '8',
-                                '9',
-                                '10',
-                                '11',
-                                '12',
-                                '13',
-                                'auto',
-                            ],
-                            end: [
-                                '1',
-                                '2',
-                                '3',
-                                '4',
-                                '5',
-                                '6',
-                                '7',
-                                '8',
-                                '9',
-                                '10',
-                                '11',
-                                '12',
-                                '13',
-                                'auto',
-                            ],
-                        },
-                    ],
-                },
-            ],
+            creators: [{ row: ['auto', { span: ANY }] }],
+            receivers: [{ row: [{ start: ANY, end: ANY }] }],
         },
         {
-            creators: [{ gap: SPACING_ABSOLUTE }],
-            receivers: [{ gap: [{ x: SPACING_ABSOLUTE, y: SPACING_ABSOLUTE }] }],
+            creators: [{ gap: LENGTH }],
+            receivers: [{ gap: [{ x: LENGTH, y: LENGTH }] }],
         },
         {
-            creators: [{ p: SPACING_ABSOLUTE }],
-            receivers: [
-                {
-                    px: SPACING_ABSOLUTE,
-                    py: SPACING_ABSOLUTE,
-                    pt: SPACING_ABSOLUTE,
-                    pr: SPACING_ABSOLUTE,
-                    pb: SPACING_ABSOLUTE,
-                    pl: SPACING_ABSOLUTE,
-                },
-            ],
+            creators: [{ p: LENGTH }],
+            receivers: [{ px: LENGTH, py: LENGTH, pt: LENGTH, pr: LENGTH, pb: LENGTH, pl: LENGTH }],
         },
         {
-            creators: [{ px: SPACING_ABSOLUTE }],
-            receivers: [
-                {
-                    pr: SPACING_ABSOLUTE,
-                    pl: SPACING_ABSOLUTE,
-                },
-            ],
+            creators: [{ px: LENGTH }],
+            receivers: [{ pr: LENGTH, pl: LENGTH }],
         },
         {
-            creators: [{ py: SPACING_ABSOLUTE }],
-            receivers: [
-                {
-                    pt: SPACING_ABSOLUTE,
-                    pb: SPACING_ABSOLUTE,
-                },
-            ],
+            creators: [{ py: LENGTH }],
+            receivers: [{ pt: LENGTH, pb: LENGTH }],
         },
         {
-            creators: [{ m: SPACING_ABSOLUTE }],
-            receivers: [
-                {
-                    mx: SPACING_ABSOLUTE,
-                    my: SPACING_ABSOLUTE,
-                    mt: SPACING_ABSOLUTE,
-                    mr: SPACING_ABSOLUTE,
-                    mb: SPACING_ABSOLUTE,
-                    ml: SPACING_ABSOLUTE,
-                },
-            ],
+            creators: [{ m: LENGTH }],
+            receivers: [{ mx: LENGTH, my: LENGTH, mt: LENGTH, mr: LENGTH, mb: LENGTH, ml: LENGTH }],
         },
         {
-            creators: [{ mx: SPACING_ABSOLUTE }],
-            receivers: [
-                {
-                    mr: SPACING_ABSOLUTE,
-                    ml: SPACING_ABSOLUTE,
-                },
-            ],
+            creators: [{ mx: LENGTH }],
+            receivers: [{ mr: LENGTH, ml: LENGTH }],
         },
         {
-            creators: [{ py: SPACING_ABSOLUTE }],
-            receivers: [
-                {
-                    mt: SPACING_ABSOLUTE,
-                    mb: SPACING_ABSOLUTE,
-                },
-            ],
+            creators: [{ py: LENGTH }],
+            receivers: [{ mt: LENGTH, mb: LENGTH }],
         },
         {
             creators: [{ text: ['xs', ...SIZES_SIMPLE, 'base', ...SIZES_EXTENDED, '8xl', '9xl'] }],
             receivers: [
-                {
-                    leading: [
-                        '3',
-                        '4',
-                        '5',
-                        '6',
-                        '7',
-                        '8',
-                        '9',
-                        '10',
-                        'none',
-                        'tight',
-                        'snug',
-                        'normal',
-                        'relaxed',
-                        'loose',
-                    ],
-                },
+                { leading: ['none', 'tight', 'snug', 'normal', 'relaxed', 'loose', isLength] },
             ],
         },
         {
@@ -1795,84 +1390,27 @@ export const CONFIG = {
         },
         {
             creators: [{ 'rounded-t': ROUNDED }],
-            receivers: [
-                {
-                    rounded: [
-                        {
-                            tl: ROUNDED,
-                            tr: ROUNDED,
-                        },
-                    ],
-                },
-            ],
+            receivers: [{ rounded: [{ tl: ROUNDED, tr: ROUNDED }] }],
         },
         {
             creators: [{ 'rounded-r': ROUNDED }],
-            receivers: [
-                {
-                    rounded: [
-                        {
-                            tr: ROUNDED,
-                            br: ROUNDED,
-                        },
-                    ],
-                },
-            ],
+            receivers: [{ rounded: [{ tr: ROUNDED, br: ROUNDED }] }],
         },
         {
             creators: [{ 'rounded-b': ROUNDED }],
-            receivers: [
-                {
-                    rounded: [
-                        {
-                            br: ROUNDED,
-                            bl: ROUNDED,
-                        },
-                    ],
-                },
-            ],
+            receivers: [{ rounded: [{ br: ROUNDED, bl: ROUNDED }] }],
         },
         {
             creators: [{ 'rounded-l': ROUNDED }],
-            receivers: [
-                {
-                    rounded: [
-                        {
-                            tl: ROUNDED,
-                            bl: ROUNDED,
-                        },
-                    ],
-                },
-            ],
+            receivers: [{ rounded: [{ tl: ROUNDED, bl: ROUNDED }] }],
         },
         {
-            creators: [{ border: BORDERS }],
-            receivers: [
-                {
-                    border: [
-                        {
-                            t: BORDERS,
-                            r: BORDERS,
-                            b: BORDERS,
-                            l: BORDERS,
-                        },
-                    ],
-                },
-            ],
+            creators: [{ border: LENGTH }],
+            receivers: [{ border: [{ t: LENGTH, r: LENGTH, b: LENGTH, l: LENGTH }] }],
         },
         {
-            creators: [
-                {
-                    ring: ['0', '1', '2', '4', '8', ''],
-                    shadow: ['', ...SIZES_SIMPLE, 'inner', 'none'],
-                },
-            ],
-            receivers: [
-                {
-                    ring: ['0', '1', '2', '4', '8', ''],
-                    shadow: ['', ...SIZES_SIMPLE, 'inner', 'none'],
-                },
-            ],
+            creators: [{ ring: ['', isLength], shadow: ['', ...SIZES_SIMPLE, 'inner', 'none'] }],
+            receivers: [{ ring: ['', isLength], shadow: ['', ...SIZES_SIMPLE, 'inner', 'none'] }],
         },
     ],
 } as const
