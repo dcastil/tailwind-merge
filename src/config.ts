@@ -233,7 +233,7 @@ export const CONFIG = {
              * Grid Template Columns
              * @see https://tailwindcss.com/docs/grid-template-columns
              */
-            [{ cols: [['none', isInteger]] }],
+            [{ cols: ['none', isInteger] }],
             /**
              * Grid Template Rows
              * @see https://tailwindcss.com/docs/grid-template-rows
