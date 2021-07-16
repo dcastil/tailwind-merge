@@ -672,7 +672,7 @@ export const CONFIG = {
              * Background Repeat
              * @see https://tailwindcss.com/docs/background-repeat
              */
-            ['repeat', 'no-repeat', { repeat: ['x', 'y', 'round', 'space'] }],
+            ['no-repeat', { repeat: ['', 'x', 'y', 'round', 'space'] }],
             /**
              * Background Size
              * @see https://tailwindcss.com/docs/background-size
