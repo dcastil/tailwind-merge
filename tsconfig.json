@@ -8,6 +8,8 @@
         "noUncheckedIndexedAccess": true,
         "noUnusedLocals": true,
         "strict": true,
+        // Modules
+        "moduleResolution": "Node",
         // Emit
         "declaration": true,
         "outDir": "dist",
