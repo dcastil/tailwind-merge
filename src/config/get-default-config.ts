@@ -45,8 +45,9 @@ const BLEND_MODES = [
     },
 ] as const
 
-export function getDefaultConfig(): Config {
+export function getDefaultConfig() {
     return {
+        cacheSize: 100,
         prefixes: [
             ...SIZES_SIMPLE,
             'dark',
@@ -1620,5 +1621,5 @@ export function getDefaultConfig(): Config {
                 ],
             },
         ],
-    }
+    } as const
 }

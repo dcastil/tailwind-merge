@@ -5,6 +5,12 @@ export interface Config {
      */
     readonly prefixes: readonly string[]
     /**
+     * Integer indicating size of LRU cache used for memoizing results.
+     * - Cache might be up to twice as big as `cacheSize`
+     * - No cache is used for values <= 0
+     */
+    cacheSize: number
+    /**
      * Object with definitions of dynamic classes like `mx-auto` or `grid-cols-2`.
      * Keys must be part of class until first `-`-character.
      * @example
@@ -58,7 +64,7 @@ interface ClassNameConflict {
     receivers: readonly ConflictClassGroup[]
 }
 
-type ConflictClassGroup = [
+type ConflictClassGroup = readonly [
     classType: 'dynamicClasses' | 'standaloneClasses',
     keyWithoutDash: string,
     index: `${number}`
