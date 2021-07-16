@@ -18,41 +18,48 @@ export interface Config {
      *     ]
      * }
      */
-    readonly adjustableClasses: Record<string, readonly ClassNameGroup[]>
+    dynamicClasses: Record<string, readonly DynamicClassGroup[]>
     /**
      * Groups of classes that don't have any common starting characters
      * @example [['inline', 'block'], ['absolute', 'relative']]
      */
-    readonly standaloneClasses: readonly ClassNameGroup[]
+    standaloneClasses: readonly StandaloneClassGroup[]
     /**
      * Conflicting classes across groups
      * @example
      * [
      *     {
-     *         creators: ['border', 'border-0', ...],
-     *         receivers: ['border-t', 'border-t-0', ...]
+     *         creators: [['dynamicClasses', 'border', '0']],
+     *         receivers: [['dynamicClasses', 'border', '1'], ...]
      *     },
      *     {
-     *         creators: ['inset-x', ...],
-     *         receivers: ['right-0', 'left-0', ...]
+     *         creators: [['dynamicClasses', 'inset', '0']],
+     *         receivers: [['dynamicClasses', 'right', '0'], ...]
      *     }
      * ]
      */
-    readonly conflictingClasses: ClassNameConflict[]
+    conflictingClasses: readonly ClassNameConflict[]
 }
 
-type ClassNameGroup = readonly ClassNameDefinition[]
-type ClassNameDefinition = string | ClassNameFunction | ClassNameObject
-type ClassNameFunction = (classPart: string) => boolean
-type ClassNameObject = Record<string, readonly ClassNameDefinition[]>
+type DynamicClassGroup = readonly DynamicClassDefinition[]
+type DynamicClassDefinition = string | DynamicClassFunction | DynamicClassObject
+type DynamicClassFunction = (classPart: string) => boolean
+type DynamicClassObject = Record<string, readonly DynamicClassDefinition[]>
+type StandaloneClassGroup = readonly string[]
 
 interface ClassNameConflict {
     /**
      * Group of classes which produce a potential conflict
      */
-    readonly creators: ClassNameGroup
+    creators: readonly ConflictClassGroup[]
     /**
      * Group of classes which should be removed if followed by creator class to resolve conflict
      */
-    readonly receivers: ClassNameGroup
+    receivers: readonly ConflictClassGroup[]
 }
+
+type ConflictClassGroup = [
+    classType: 'dynamicClasses' | 'standaloneClasses',
+    keyWithoutDash: string,
+    index: `${number}`
+]

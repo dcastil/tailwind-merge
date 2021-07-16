@@ -65,7 +65,7 @@ export const CONFIG = {
         'active',
         'disabled',
     ],
-    adjustableClasses: {
+    dynamicClasses: {
         // Layout
         decoration: [
             /**
@@ -935,7 +935,7 @@ export const CONFIG = {
              * Drop Shadow
              * @see https://tailwindcss.com/docs/drop-shadow
              */
-            { shadow: ['', ...SIZES_SIMPLE, 'none'] },
+            [{ shadow: ['', ...SIZES_SIMPLE, 'none'] }],
         ],
         grayscale: [
             /**
@@ -1302,115 +1302,320 @@ export const CONFIG = {
     ],
     conflictingClasses: [
         {
-            creators: [{ overflow: ANY }],
-            receivers: [{ 'overflow-x': ANY, 'overflow-y': ANY }],
-        },
-        {
-            creators: [{ overscroll: ANY }],
-            receivers: [{ 'overscroll-x': ANY, 'overscroll-y': ANY }],
-        },
-        {
-            creators: [{ inset: ANY }],
+            creators: [
+                // Overflow
+                ['dynamicClasses', 'overflow', '0'],
+            ],
             receivers: [
-                { 'inset-x': ANY, 'inset-y': ANY, top: ANY, right: ANY, bottom: ANY, left: ANY },
+                // Overflow X
+                ['dynamicClasses', 'overflow', '1'],
+                // Overflow Y
+                ['dynamicClasses', 'overflow', '2'],
             ],
         },
         {
-            creators: [{ 'inset-x': ANY }],
-            receivers: [{ right: ANY, left: ANY }],
-        },
-        {
-            creators: [{ 'inset-y': ANY }],
-            receivers: [{ top: ANY, bottom: ANY }],
-        },
-        {
-            creators: [{ flex: ['1', 'auto', 'initial', 'none'] }],
-            receivers: [{ 'flex-grow': ANY, 'flex-shrink': ANY }],
-        },
-        {
-            creators: [{ col: ['auto', { span: ANY }] }],
-            receivers: [{ col: [{ start: ANY, end: ANY }] }],
-        },
-        {
-            creators: [{ row: ['auto', { span: ANY }] }],
-            receivers: [{ row: [{ start: ANY, end: ANY }] }],
-        },
-        {
-            creators: [{ gap: LENGTH }],
-            receivers: [{ gap: [{ x: LENGTH, y: LENGTH }] }],
-        },
-        {
-            creators: [{ p: LENGTH }],
-            receivers: [{ px: LENGTH, py: LENGTH, pt: LENGTH, pr: LENGTH, pb: LENGTH, pl: LENGTH }],
-        },
-        {
-            creators: [{ px: LENGTH }],
-            receivers: [{ pr: LENGTH, pl: LENGTH }],
-        },
-        {
-            creators: [{ py: LENGTH }],
-            receivers: [{ pt: LENGTH, pb: LENGTH }],
-        },
-        {
-            creators: [{ m: LENGTH }],
-            receivers: [{ mx: LENGTH, my: LENGTH, mt: LENGTH, mr: LENGTH, mb: LENGTH, ml: LENGTH }],
-        },
-        {
-            creators: [{ mx: LENGTH }],
-            receivers: [{ mr: LENGTH, ml: LENGTH }],
-        },
-        {
-            creators: [{ py: LENGTH }],
-            receivers: [{ mt: LENGTH, mb: LENGTH }],
-        },
-        {
-            creators: [{ text: ['xs', ...SIZES_SIMPLE, 'base', ...SIZES_EXTENDED, '8xl', '9xl'] }],
+            creators: [
+                // Overscroll
+                ['dynamicClasses', 'overscroll', '0'],
+            ],
             receivers: [
-                { leading: ['none', 'tight', 'snug', 'normal', 'relaxed', 'loose', isLength] },
+                // Overscroll X
+                ['dynamicClasses', 'overscroll', '1'],
+                // Overscroll Y
+                ['dynamicClasses', 'overscroll', '2'],
             ],
         },
         {
-            creators: [{ rounded: ROUNDED }],
+            creators: [
+                // Top / Right / Bottom / Left
+                ['dynamicClasses', 'inset', '2'],
+            ],
             receivers: [
-                {
-                    rounded: [
-                        {
-                            t: ROUNDED,
-                            r: ROUNDED,
-                            b: ROUNDED,
-                            l: ROUNDED,
-                            tl: ROUNDED,
-                            tr: ROUNDED,
-                            br: ROUNDED,
-                            bl: ROUNDED,
-                        },
-                    ],
-                },
+                // Right / Left
+                ['dynamicClasses', 'inset', '0'],
+                // Top / Bottom
+                ['dynamicClasses', 'inset', '1'],
+                // Top
+                ['dynamicClasses', 'top', '0'],
+                // Right
+                ['dynamicClasses', 'right', '0'],
+                // Bottom
+                ['dynamicClasses', 'bottom', '0'],
+                // Left
+                ['dynamicClasses', 'left', '0'],
             ],
         },
         {
-            creators: [{ 'rounded-t': ROUNDED }],
-            receivers: [{ rounded: [{ tl: ROUNDED, tr: ROUNDED }] }],
+            creators: [
+                // Right / Left
+                ['dynamicClasses', 'inset', '0'],
+            ],
+            receivers: [
+                // Right
+                ['dynamicClasses', 'right', '0'],
+                // Left
+                ['dynamicClasses', 'left', '0'],
+            ],
         },
         {
-            creators: [{ 'rounded-r': ROUNDED }],
-            receivers: [{ rounded: [{ tr: ROUNDED, br: ROUNDED }] }],
+            creators: [
+                // Top / Bottom
+                ['dynamicClasses', 'inset', '1'],
+            ],
+            receivers: [
+                // Top
+                ['dynamicClasses', 'top', '0'],
+                // Bottom
+                ['dynamicClasses', 'bottom', '0'],
+            ],
         },
         {
-            creators: [{ 'rounded-b': ROUNDED }],
-            receivers: [{ rounded: [{ br: ROUNDED, bl: ROUNDED }] }],
+            creators: [
+                // Flex
+                ['dynamicClasses', 'flex', '2'],
+            ],
+            receivers: [
+                // Flex Grow
+                ['dynamicClasses', 'flex', '3'],
+                // Flex Shrink
+                ['dynamicClasses', 'flex', '4'],
+            ],
         },
         {
-            creators: [{ 'rounded-l': ROUNDED }],
-            receivers: [{ rounded: [{ tl: ROUNDED, bl: ROUNDED }] }],
+            creators: [
+                // Grid Column Start / End
+                ['dynamicClasses', 'col', '0'],
+            ],
+            receivers: [
+                // Grid Column Start
+                ['dynamicClasses', 'col', '1'],
+                // Grid Column End
+                ['dynamicClasses', 'col', '2'],
+            ],
         },
         {
-            creators: [{ border: LENGTH }],
-            receivers: [{ border: [{ t: LENGTH, r: LENGTH, b: LENGTH, l: LENGTH }] }],
+            creators: [
+                // Grid Row Start / End
+                ['dynamicClasses', 'row', '0'],
+            ],
+            receivers: [
+                // Grid Row Start
+                ['dynamicClasses', 'row', '1'],
+                // Grid Row End
+                ['dynamicClasses', 'row', '2'],
+            ],
         },
         {
-            creators: [{ ring: ['', isLength], shadow: ['', ...SIZES_SIMPLE, 'inner', 'none'] }],
-            receivers: [{ ring: ['', isLength], shadow: ['', ...SIZES_SIMPLE, 'inner', 'none'] }],
+            creators: [
+                // Gap
+                ['dynamicClasses', 'gap', '2'],
+            ],
+            receivers: [
+                // Gap X
+                ['dynamicClasses', 'gap', '0'],
+                // Gap Y
+                ['dynamicClasses', 'gap', '1'],
+            ],
+        },
+        {
+            creators: [
+                // Padding
+                ['dynamicClasses', 'p', '0'],
+            ],
+            receivers: [
+                // Padding X
+                ['dynamicClasses', 'px', '0'],
+                // Padding Y
+                ['dynamicClasses', 'py', '0'],
+                // Padding Top
+                ['dynamicClasses', 'pt', '0'],
+                // Padding Right
+                ['dynamicClasses', 'pr', '0'],
+                // Padding Bottom
+                ['dynamicClasses', 'pb', '0'],
+                // Padding Left
+                ['dynamicClasses', 'pl', '0'],
+            ],
+        },
+        {
+            creators: [
+                // Padding X
+                ['dynamicClasses', 'px', '0'],
+            ],
+            receivers: [
+                // Padding Right
+                ['dynamicClasses', 'pr', '0'],
+                // Padding Left
+                ['dynamicClasses', 'pl', '0'],
+            ],
+        },
+        {
+            creators: [
+                // Padding Y
+                ['dynamicClasses', 'py', '0'],
+            ],
+            receivers: [
+                // Padding Top
+                ['dynamicClasses', 'pt', '0'],
+                // Padding Bottom
+                ['dynamicClasses', 'pb', '0'],
+            ],
+        },
+        {
+            creators: [
+                // Margin
+                ['dynamicClasses', 'm', '0'],
+            ],
+            receivers: [
+                // Margin X
+                ['dynamicClasses', 'mx', '0'],
+                // Margin Y
+                ['dynamicClasses', 'my', '0'],
+                // Margin Top
+                ['dynamicClasses', 'mt', '0'],
+                // Margin Right
+                ['dynamicClasses', 'mr', '0'],
+                // Margin Bottom
+                ['dynamicClasses', 'mb', '0'],
+                // Margin Left
+                ['dynamicClasses', 'ml', '0'],
+            ],
+        },
+        {
+            creators: [
+                // Margin X
+                ['dynamicClasses', 'mx', '0'],
+            ],
+            receivers: [
+                // Margin Right
+                ['dynamicClasses', 'mr', '0'],
+                // Margin Left
+                ['dynamicClasses', 'ml', '0'],
+            ],
+        },
+        {
+            creators: [
+                // Margin Y
+                ['dynamicClasses', 'my', '0'],
+            ],
+            receivers: [
+                // Margin Top
+                ['dynamicClasses', 'mt', '0'],
+                // Margin Bottom
+                ['dynamicClasses', 'mb', '0'],
+            ],
+        },
+        {
+            creators: [
+                // Font Size
+                ['dynamicClasses', 'text', '0'],
+            ],
+            receivers: [
+                // Line Height
+                ['dynamicClasses', 'leading', '0'],
+            ],
+        },
+        {
+            creators: [
+                // Border Radius
+                ['dynamicClasses', 'rounded', '0'],
+            ],
+            receivers: [
+                // Border Radius Top
+                ['dynamicClasses', 'rounded', '1'],
+                // Border Radius Right
+                ['dynamicClasses', 'rounded', '2'],
+                // Border Radius Bottom
+                ['dynamicClasses', 'rounded', '3'],
+                // Border Radius Left
+                ['dynamicClasses', 'rounded', '4'],
+                // Border Radius Top Left
+                ['dynamicClasses', 'rounded', '5'],
+                // Border Radius Top Right
+                ['dynamicClasses', 'rounded', '6'],
+                // Border Radius Bottom Right
+                ['dynamicClasses', 'rounded', '7'],
+                // Border Radius Bottom Left
+                ['dynamicClasses', 'rounded', '8'],
+            ],
+        },
+        {
+            creators: [
+                // Border Radius Top
+                ['dynamicClasses', 'rounded', '1'],
+            ],
+            receivers: [
+                // Border Radius Top Left
+                ['dynamicClasses', 'rounded', '5'],
+                // Border Radius Top Right
+                ['dynamicClasses', 'rounded', '6'],
+            ],
+        },
+        {
+            creators: [
+                // Border Radius Right
+                ['dynamicClasses', 'rounded', '2'],
+            ],
+            receivers: [
+                // Border Radius Top Right
+                ['dynamicClasses', 'rounded', '6'],
+                // Border Radius Bottom Right
+                ['dynamicClasses', 'rounded', '7'],
+            ],
+        },
+        {
+            creators: [
+                // Border Radius Bottom
+                ['dynamicClasses', 'rounded', '3'],
+            ],
+            receivers: [
+                // Border Radius Bottom Right
+                ['dynamicClasses', 'rounded', '7'],
+                // Border Radius Bottom Left
+                ['dynamicClasses', 'rounded', '8'],
+            ],
+        },
+        {
+            creators: [
+                // Border Radius Left
+                ['dynamicClasses', 'rounded', '4'],
+            ],
+            receivers: [
+                // Border Radius Top Left
+                ['dynamicClasses', 'rounded', '5'],
+                // Border Radius Bottom Left
+                ['dynamicClasses', 'rounded', '8'],
+            ],
+        },
+        {
+            creators: [
+                // Border Width
+                ['dynamicClasses', 'border', '0'],
+            ],
+            receivers: [
+                // Border Width Top
+                ['dynamicClasses', 'border', '1'],
+                // Border Width Right
+                ['dynamicClasses', 'border', '2'],
+                // Border Width Bottom
+                ['dynamicClasses', 'border', '3'],
+                // Border Width Left
+                ['dynamicClasses', 'border', '4'],
+            ],
+        },
+        {
+            creators: [
+                // Ring Width
+                ['dynamicClasses', 'ring', '0'],
+                //  Box Shadow
+                ['dynamicClasses', 'shadow', '0'],
+            ],
+            receivers: [
+                // Ring Width
+                ['dynamicClasses', 'ring', '0'],
+                //  Box Shadow
+                ['dynamicClasses', 'shadow', '0'],
+            ],
         },
     ],
-} as const
+}
