@@ -8,7 +8,7 @@ type CreateConfig = (getDefault: typeof getDefaultConfig) => Config
 
 export function createTailwindMerge(createConfig: CreateConfig) {
     const config = createConfig(getDefaultConfig)
-    const cache = getLruCache(config.cacheSize)
+    const cache = getLruCache<string>(config.cacheSize)
 
     return function tailwindMerge(...classLists: string[]) {
         const classList = classLists.join(' ')
