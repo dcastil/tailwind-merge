@@ -1,5 +1,4 @@
 import { isAny, isInteger, isLength } from './config-helpers'
-import { Config } from './types'
 
 const SIZES_SIMPLE = ['sm', 'md', 'lg', 'xl', '2xl'] as const
 const SIZES_EXTENDED = ['3xl', '4xl', '5xl', '6xl', '7xl'] as const

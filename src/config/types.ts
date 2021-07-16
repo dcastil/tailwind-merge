@@ -3,7 +3,7 @@ export interface Config {
      * Prefixes which can be prepended to Tailwind CSS classes
      * @example ['hover', 'focus']
      */
-    readonly prefixes: readonly string[]
+    prefixes: readonly string[]
     /**
      * Integer indicating size of LRU cache used for memoizing results.
      * - Cache might be up to twice as big as `cacheSize`
