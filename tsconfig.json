@@ -6,7 +6,6 @@
         "noFallthroughCasesInSwitch": true,
         "noImplicitOverride": true,
         "noUncheckedIndexedAccess": true,
-        "noUnusedLocals": true,
         "strict": true,
         // Modules
         "moduleResolution": "Node",
