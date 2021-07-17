@@ -98,7 +98,7 @@ const customTwMerge = createTailwindMerge((getDefaultConfig) => {
         // ↓ Here you define class groups with a common start in all class names
         dynamicClasses: {
             ...defaultConfig.dynamicClasses,
-            // ↓ It's important that keys directly in `dynamicClasses` don't have dashes in them.
+            // ↓ It's important that keys at this level don't have dashes in them.
             foo: [
                 // ↓ Creates group of classes which have conflicting styles
                 //   Classes here: foo-1, foo-2, foo-bar-baz-1, foo-bar-baz-2
