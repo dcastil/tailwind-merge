@@ -6,4 +6,5 @@ test('conflicts across prefixes', () => {
     expect(twMerge('hover:block hover:focus:inline focus:hover:inline')).toBe(
         'hover:block focus:hover:inline'
     )
+    expect(twMerge('focus-within:inline focus-within:block')).toBe('focus-within:block')
 })
