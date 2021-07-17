@@ -1,4 +1,4 @@
-import { isAny, isInteger, isLength } from './config-helpers'
+import { isAny, isInteger, isLength } from './config-validators'
 
 const SIZES_SIMPLE = ['sm', 'md', 'lg', 'xl', '2xl'] as const
 const SIZES_EXTENDED = ['3xl', '4xl', '5xl', '6xl', '7xl'] as const
@@ -1302,323 +1302,213 @@ export function getDefaultConfig() {
              */
             ['sr-only', 'not-sr-only'],
         ],
-        conflictingClasses: [
-            {
-                creators: [
-                    // Overflow
-                    ['dynamicClasses', 'overflow', '0'],
-                ],
-                receivers: [
-                    // Overflow X
-                    ['dynamicClasses', 'overflow', '1'],
-                    // Overflow Y
-                    ['dynamicClasses', 'overflow', '2'],
-                ],
-            },
-            {
-                creators: [
-                    // Overscroll
-                    ['dynamicClasses', 'overscroll', '0'],
-                ],
-                receivers: [
-                    // Overscroll X
-                    ['dynamicClasses', 'overscroll', '1'],
-                    // Overscroll Y
-                    ['dynamicClasses', 'overscroll', '2'],
-                ],
-            },
-            {
-                creators: [
-                    // Top / Right / Bottom / Left
-                    ['dynamicClasses', 'inset', '2'],
-                ],
-                receivers: [
-                    // Right / Left
-                    ['dynamicClasses', 'inset', '0'],
-                    // Top / Bottom
-                    ['dynamicClasses', 'inset', '1'],
-                    // Top
-                    ['dynamicClasses', 'top', '0'],
-                    // Right
-                    ['dynamicClasses', 'right', '0'],
-                    // Bottom
-                    ['dynamicClasses', 'bottom', '0'],
-                    // Left
-                    ['dynamicClasses', 'left', '0'],
-                ],
-            },
-            {
-                creators: [
-                    // Right / Left
-                    ['dynamicClasses', 'inset', '0'],
-                ],
-                receivers: [
-                    // Right
-                    ['dynamicClasses', 'right', '0'],
-                    // Left
-                    ['dynamicClasses', 'left', '0'],
-                ],
-            },
-            {
-                creators: [
-                    // Top / Bottom
-                    ['dynamicClasses', 'inset', '1'],
-                ],
-                receivers: [
-                    // Top
-                    ['dynamicClasses', 'top', '0'],
-                    // Bottom
-                    ['dynamicClasses', 'bottom', '0'],
-                ],
-            },
-            {
-                creators: [
-                    // Flex
-                    ['dynamicClasses', 'flex', '2'],
-                ],
-                receivers: [
-                    // Flex Grow
-                    ['dynamicClasses', 'flex', '3'],
-                    // Flex Shrink
-                    ['dynamicClasses', 'flex', '4'],
-                ],
-            },
-            {
-                creators: [
-                    // Grid Column Start / End
-                    ['dynamicClasses', 'col', '0'],
-                ],
-                receivers: [
-                    // Grid Column Start
-                    ['dynamicClasses', 'col', '1'],
-                    // Grid Column End
-                    ['dynamicClasses', 'col', '2'],
-                ],
-            },
-            {
-                creators: [
-                    // Grid Row Start / End
-                    ['dynamicClasses', 'row', '0'],
-                ],
-                receivers: [
-                    // Grid Row Start
-                    ['dynamicClasses', 'row', '1'],
-                    // Grid Row End
-                    ['dynamicClasses', 'row', '2'],
-                ],
-            },
-            {
-                creators: [
-                    // Gap
-                    ['dynamicClasses', 'gap', '2'],
-                ],
-                receivers: [
-                    // Gap X
-                    ['dynamicClasses', 'gap', '0'],
-                    // Gap Y
-                    ['dynamicClasses', 'gap', '1'],
-                ],
-            },
-            {
-                creators: [
-                    // Padding
-                    ['dynamicClasses', 'p', '0'],
-                ],
-                receivers: [
-                    // Padding X
-                    ['dynamicClasses', 'px', '0'],
-                    // Padding Y
-                    ['dynamicClasses', 'py', '0'],
-                    // Padding Top
-                    ['dynamicClasses', 'pt', '0'],
-                    // Padding Right
-                    ['dynamicClasses', 'pr', '0'],
-                    // Padding Bottom
-                    ['dynamicClasses', 'pb', '0'],
-                    // Padding Left
-                    ['dynamicClasses', 'pl', '0'],
-                ],
-            },
-            {
-                creators: [
-                    // Padding X
-                    ['dynamicClasses', 'px', '0'],
-                ],
-                receivers: [
-                    // Padding Right
-                    ['dynamicClasses', 'pr', '0'],
-                    // Padding Left
-                    ['dynamicClasses', 'pl', '0'],
-                ],
-            },
-            {
-                creators: [
-                    // Padding Y
-                    ['dynamicClasses', 'py', '0'],
-                ],
-                receivers: [
-                    // Padding Top
-                    ['dynamicClasses', 'pt', '0'],
-                    // Padding Bottom
-                    ['dynamicClasses', 'pb', '0'],
-                ],
-            },
-            {
-                creators: [
-                    // Margin
-                    ['dynamicClasses', 'm', '0'],
-                ],
-                receivers: [
-                    // Margin X
-                    ['dynamicClasses', 'mx', '0'],
-                    // Margin Y
-                    ['dynamicClasses', 'my', '0'],
-                    // Margin Top
-                    ['dynamicClasses', 'mt', '0'],
-                    // Margin Right
-                    ['dynamicClasses', 'mr', '0'],
-                    // Margin Bottom
-                    ['dynamicClasses', 'mb', '0'],
-                    // Margin Left
-                    ['dynamicClasses', 'ml', '0'],
-                ],
-            },
-            {
-                creators: [
-                    // Margin X
-                    ['dynamicClasses', 'mx', '0'],
-                ],
-                receivers: [
-                    // Margin Right
-                    ['dynamicClasses', 'mr', '0'],
-                    // Margin Left
-                    ['dynamicClasses', 'ml', '0'],
-                ],
-            },
-            {
-                creators: [
-                    // Margin Y
-                    ['dynamicClasses', 'my', '0'],
-                ],
-                receivers: [
-                    // Margin Top
-                    ['dynamicClasses', 'mt', '0'],
-                    // Margin Bottom
-                    ['dynamicClasses', 'mb', '0'],
-                ],
-            },
-            {
-                creators: [
-                    // Font Size
-                    ['dynamicClasses', 'text', '0'],
-                ],
-                receivers: [
-                    // Line Height
-                    ['dynamicClasses', 'leading', '0'],
-                ],
-            },
-            {
-                creators: [
-                    // Border Radius
-                    ['dynamicClasses', 'rounded', '0'],
-                ],
-                receivers: [
-                    // Border Radius Top
-                    ['dynamicClasses', 'rounded', '1'],
-                    // Border Radius Right
-                    ['dynamicClasses', 'rounded', '2'],
-                    // Border Radius Bottom
-                    ['dynamicClasses', 'rounded', '3'],
-                    // Border Radius Left
-                    ['dynamicClasses', 'rounded', '4'],
-                    // Border Radius Top Left
-                    ['dynamicClasses', 'rounded', '5'],
-                    // Border Radius Top Right
-                    ['dynamicClasses', 'rounded', '6'],
-                    // Border Radius Bottom Right
-                    ['dynamicClasses', 'rounded', '7'],
-                    // Border Radius Bottom Left
-                    ['dynamicClasses', 'rounded', '8'],
-                ],
-            },
-            {
-                creators: [
-                    // Border Radius Top
-                    ['dynamicClasses', 'rounded', '1'],
-                ],
-                receivers: [
-                    // Border Radius Top Left
-                    ['dynamicClasses', 'rounded', '5'],
-                    // Border Radius Top Right
-                    ['dynamicClasses', 'rounded', '6'],
-                ],
-            },
-            {
-                creators: [
-                    // Border Radius Right
-                    ['dynamicClasses', 'rounded', '2'],
-                ],
-                receivers: [
-                    // Border Radius Top Right
-                    ['dynamicClasses', 'rounded', '6'],
-                    // Border Radius Bottom Right
-                    ['dynamicClasses', 'rounded', '7'],
-                ],
-            },
-            {
-                creators: [
-                    // Border Radius Bottom
-                    ['dynamicClasses', 'rounded', '3'],
-                ],
-                receivers: [
-                    // Border Radius Bottom Right
-                    ['dynamicClasses', 'rounded', '7'],
-                    // Border Radius Bottom Left
-                    ['dynamicClasses', 'rounded', '8'],
-                ],
-            },
-            {
-                creators: [
-                    // Border Radius Left
-                    ['dynamicClasses', 'rounded', '4'],
-                ],
-                receivers: [
-                    // Border Radius Top Left
-                    ['dynamicClasses', 'rounded', '5'],
-                    // Border Radius Bottom Left
-                    ['dynamicClasses', 'rounded', '8'],
-                ],
-            },
-            {
-                creators: [
-                    // Border Width
-                    ['dynamicClasses', 'border', '0'],
-                ],
-                receivers: [
-                    // Border Width Top
-                    ['dynamicClasses', 'border', '1'],
-                    // Border Width Right
-                    ['dynamicClasses', 'border', '2'],
-                    // Border Width Bottom
-                    ['dynamicClasses', 'border', '3'],
-                    // Border Width Left
-                    ['dynamicClasses', 'border', '4'],
-                ],
-            },
-            {
-                creators: [
-                    // Ring Width
-                    ['dynamicClasses', 'ring', '0'],
-                    //  Box Shadow
-                    ['dynamicClasses', 'shadow', '0'],
-                ],
-                receivers: [
-                    // Ring Width
-                    ['dynamicClasses', 'ring', '0'],
-                    //  Box Shadow
-                    ['dynamicClasses', 'shadow', '0'],
-                ],
-            },
-        ],
+        conflictingClasses: {
+            // Overflow
+            'dynamicClasses.overflow.0': [
+                // Overflow X
+                'dynamicClasses.overflow.1',
+                // Overflow Y
+                'dynamicClasses.overflow.2',
+            ],
+            // Overscroll
+            'dynamicClasses.overscroll.0': [
+                // Overscroll X
+                'dynamicClasses.overscroll.1',
+                // Overscroll Y
+                'dynamicClasses.overscroll.2',
+            ],
+            // Top / Right / Bottom / Left
+            'dynamicClasses.inset.2': [
+                // Right / Left
+                'dynamicClasses.inset.0',
+                // Top / Bottom
+                'dynamicClasses.inset.1',
+                // Top
+                'dynamicClasses.top.0',
+                // Right
+                'dynamicClasses.right.0',
+                // Bottom
+                'dynamicClasses.bottom.0',
+                // Left
+                'dynamicClasses.left.0',
+            ],
+            // Right / Left
+            'dynamicClasses.inset.0': [
+                // Right
+                'dynamicClasses.right.0',
+                // Left
+                'dynamicClasses.left.0',
+            ],
+            // Top / Bottom
+            'dynamicClasses.inset.1': [
+                // Top
+                'dynamicClasses.top.0',
+                // Bottom
+                'dynamicClasses.bottom.0',
+            ],
+            // Flex
+            'dynamicClasses.flex.2': [
+                // Flex Grow
+                'dynamicClasses.flex.3',
+                // Flex Shrink
+                'dynamicClasses.flex.4',
+            ],
+            // Grid Column Start / End
+            'dynamicClasses.col.0': [
+                // Grid Column Start
+                'dynamicClasses.col.1',
+                // Grid Column End
+                'dynamicClasses.col.2',
+            ],
+            // Grid Row Start / End
+            'dynamicClasses.row.0': [
+                // Grid Row Start
+                'dynamicClasses.row.1',
+                // Grid Row End
+                'dynamicClasses.row.2',
+            ],
+            // Gap
+            'dynamicClasses.gap.2': [
+                // Gap X
+                'dynamicClasses.gap.0',
+                // Gap Y
+                'dynamicClasses.gap.1',
+            ],
+            // Padding
+            'dynamicClasses.p.0': [
+                // Padding X
+                'dynamicClasses.px.0',
+                // Padding Y
+                'dynamicClasses.py.0',
+                // Padding Top
+                'dynamicClasses.pt.0',
+                // Padding Right
+                'dynamicClasses.pr.0',
+                // Padding Bottom
+                'dynamicClasses.pb.0',
+                // Padding Left
+                'dynamicClasses.pl.0',
+            ],
+            // Padding X
+            'dynamicClasses.px.0': [
+                // Padding Right
+                'dynamicClasses.pr.0',
+                // Padding Left
+                'dynamicClasses.pl.0',
+            ],
+            // Padding Y
+            'dynamicClasses.py.0': [
+                // Padding Top
+                'dynamicClasses.pt.0',
+                // Padding Bottom
+                'dynamicClasses.pb.0',
+            ],
+            // Margin
+            'dynamicClasses.m.0': [
+                // Margin X
+                'dynamicClasses.mx.0',
+                // Margin Y
+                'dynamicClasses.my.0',
+                // Margin Top
+                'dynamicClasses.mt.0',
+                // Margin Right
+                'dynamicClasses.mr.0',
+                // Margin Bottom
+                'dynamicClasses.mb.0',
+                // Margin Left
+                'dynamicClasses.ml.0',
+            ],
+            // Margin X
+            'dynamicClasses.mx.0': [
+                // Margin Right
+                'dynamicClasses.mr.0',
+                // Margin Left
+                'dynamicClasses.ml.0',
+            ],
+            // Margin Y
+            'dynamicClasses.my.0': [
+                // Margin Top
+                'dynamicClasses.mt.0',
+                // Margin Bottom
+                'dynamicClasses.mb.0',
+            ],
+            // Font Size
+            'dynamicClasses.text.0': [
+                // Line Height
+                'dynamicClasses.leading.0',
+            ],
+            // Border Radius
+            'dynamicClasses.rounded.0': [
+                // Border Radius Top
+                'dynamicClasses.rounded.1',
+                // Border Radius Right
+                'dynamicClasses.rounded.2',
+                // Border Radius Bottom
+                'dynamicClasses.rounded.3',
+                // Border Radius Left
+                'dynamicClasses.rounded.4',
+                // Border Radius Top Left
+                'dynamicClasses.rounded.5',
+                // Border Radius Top Right
+                'dynamicClasses.rounded.6',
+                // Border Radius Bottom Right
+                'dynamicClasses.rounded.7',
+                // Border Radius Bottom Left
+                'dynamicClasses.rounded.8',
+            ],
+            // Border Radius Top
+            'dynamicClasses.rounded.1': [
+                // Border Radius Top Left
+                'dynamicClasses.rounded.5',
+                // Border Radius Top Right
+                'dynamicClasses.rounded.6',
+            ],
+            // Border Radius Right
+            'dynamicClasses.rounded.2': [
+                // Border Radius Top Right
+                'dynamicClasses.rounded.6',
+                // Border Radius Bottom Right
+                'dynamicClasses.rounded.7',
+            ],
+            // Border Radius Bottom
+            'dynamicClasses.rounded.3': [
+                // Border Radius Bottom Right
+                'dynamicClasses.rounded.7',
+                // Border Radius Bottom Left
+                'dynamicClasses.rounded.8',
+            ],
+            // Border Radius Left
+            'dynamicClasses.rounded.4': [
+                // Border Radius Top Left
+                'dynamicClasses.rounded.5',
+                // Border Radius Bottom Left
+                'dynamicClasses.rounded.8',
+            ],
+            // Border Width
+            'dynamicClasses.border.0': [
+                // Border Width Top
+                'dynamicClasses.border.1',
+                // Border Width Right
+                'dynamicClasses.border.2',
+                // Border Width Bottom
+                'dynamicClasses.border.3',
+                // Border Width Left
+                'dynamicClasses.border.4',
+            ],
+            // Ring Width
+            'dynamicClasses.ring.0': [
+                // Ring Width
+                'dynamicClasses.ring.0',
+                //  Box Shadow
+                'dynamicClasses.shadow.0',
+            ],
+            //  Box Shadow
+            'dynamicClasses.shadow.0': [
+                // Ring Width
+                'dynamicClasses.ring.0',
+                //  Box Shadow
+                'dynamicClasses.shadow.0',
+            ],
+        },
     } as const
 }

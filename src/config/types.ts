@@ -33,39 +33,29 @@ export interface Config {
     /**
      * Conflicting classes across groups
      * @example
-     * [
-     *     {
-     *         creators: [['dynamicClasses', 'border', '0']],
-     *         receivers: [['dynamicClasses', 'border', '1'], ...]
-     *     },
-     *     {
-     *         creators: [['dynamicClasses', 'inset', '0']],
-     *         receivers: [['dynamicClasses', 'right', '0'], ...]
-     *     }
-     * ]
+     * {
+     *     'dynamicClasses.gap.2': [
+     *         'dynamicClasses.gap.0',
+     *         'dynamicClasses.gap.1'
+     *     ],
+     * }
      */
-    conflictingClasses: readonly ClassNameConflict[]
+    conflictingClasses: Record<ClassGroupId, readonly ClassGroupId[]>
 }
 
 type DynamicClassGroup = readonly DynamicClassDefinition[]
-type DynamicClassDefinition = string | DynamicClassFunction | DynamicClassObject
-type DynamicClassFunction = (classPart: string) => boolean
-type DynamicClassObject = Record<string, readonly DynamicClassDefinition[]>
-type StandaloneClassGroup = readonly string[]
-
-interface ClassNameConflict {
+type DynamicClassDefinition = string | DynamicClassValidator | DynamicClassObject
+export type DynamicClassValidator = (classPart: string) => boolean
+type DynamicClassObject = Record<
     /**
      * Group of classes which produce a potential conflict
      */
-    creators: readonly ConflictClassGroup[]
+    string,
     /**
      * Group of classes which should be removed if followed by creator class to resolve conflict
      */
-    receivers: readonly ConflictClassGroup[]
-}
+    readonly DynamicClassDefinition[]
+>
+type StandaloneClassGroup = readonly string[]
 
-type ConflictClassGroup = readonly [
-    classType: 'dynamicClasses' | 'standaloneClasses',
-    keyWithoutDash: string,
-    index: `${number}`
-]
+type ClassGroupId = `dynamicClasses.${string}.${number}` | `standaloneClasses.${number}`
