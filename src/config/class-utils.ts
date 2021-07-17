@@ -1,4 +1,4 @@
-import { ClassGroupId, Config, DynamicClassValidator } from './types'
+import { ClassGroupId, Config, DynamicClassGroup, DynamicClassValidator } from './types'
 
 interface ClassPartObject {
     nextPart: Record<string, ClassPartObject>
@@ -21,15 +21,17 @@ export function createClassUtils(config: Config) {
 
     processStandaloneClasses(config, classMap)
 
+    const processDynamicClasses = createProcessDynamicClasses(config, classMap)
+
     function getGroup(className: string) {
         const classParts = className.split(CLASS_PART_SEPARATOR)
 
         // Classes like `-inset-1` produce an empty string as first classPart. We assume that classes for negative values are used correctly and remove it from classParts.
-        if (classParts[0] === '') {
+        if (classParts[0] === '' && classParts.length > 1) {
             classParts.unshift()
         }
 
-        // TODO: Implement processing of dynamic classes
+        processDynamicClasses(classParts[0]!)
 
         return getGroupRecursive(classParts, classMap)
     }
@@ -73,54 +75,98 @@ function getGroupRecursive(
 
 function processStandaloneClasses(config: Config, classMap: ClassPartObject) {
     config.standaloneClasses.forEach((classGroup, index) => {
-        const classPartObject = {
-            classGroupId: `standaloneClasses.${index}`,
-        } as const
+        const classGroupId: ClassGroupId = `standaloneClasses.${index}`
 
         classGroup.forEach((className) => {
-            addToClassMap({
-                classPartObject,
-                path: className.split(CLASS_PART_SEPARATOR),
-                classMap,
+            addToClassPart({
+                classPartObject: classMap,
+                path: className,
+                classGroupId,
             })
         })
     })
 }
 
-interface AddToClassMapProps {
-    classPartObject: Partial<ClassPartObject>
-    path: string[]
-    classMap: ClassPartObject
+function createProcessDynamicClasses(config: Config, classMap: ClassPartObject) {
+    const { dynamicClasses } = config
+    const processedKeys = new Set<string>()
+
+    return function processDynamicClasses(key: string) {
+        if (processedKeys.has(key) || dynamicClasses[key] === undefined) {
+            return
+        }
+
+        const classPartObject = getNextPart(classMap, key)
+
+        dynamicClasses[key]!.forEach((classGroup, index) => {
+            processClassesRecursively(classGroup, classPartObject, `dynamicClasses.${key}.${index}`)
+        })
+    }
 }
 
-function addToClassMap({ classPartObject, path, classMap }: AddToClassMapProps) {
-    let currentClassPartObject = classMap
-
-    path.forEach((pathPart) => {
-        if (!currentClassPartObject.nextPart[pathPart]) {
-            currentClassPartObject.nextPart[pathPart] = {
-                nextPart: {},
-                validators: [],
-            }
+function processClassesRecursively(
+    classGroup: DynamicClassGroup,
+    classPartObject: ClassPartObject,
+    classGroupId: ClassGroupId
+) {
+    classGroup.forEach((classDefinition) => {
+        if (typeof classDefinition === 'string') {
+            addToClassPart({
+                classPartObject,
+                // We default to undefined to set classGroupId on current classPartObject when classDefinition === ''
+                path: classDefinition === '' ? undefined : classDefinition,
+                classGroupId,
+            })
+        } else if (typeof classDefinition === 'function') {
+            addToClassPart({
+                classPartObject,
+                validator: {
+                    validator: classDefinition,
+                    classGroupId,
+                },
+            })
+        } else {
+            Object.entries(classDefinition).forEach(([key, classGroup]) => {
+                processClassesRecursively(
+                    classGroup,
+                    getNextPart(classPartObject, key),
+                    classGroupId
+                )
+            })
         }
-
-        currentClassPartObject = currentClassPartObject.nextPart[pathPart]!
     })
+}
 
-    const { nextPart, validators, classGroupId } = classPartObject
+interface AddToClassPartProps {
+    classPartObject: ClassPartObject
+    path?: string
+    validator?: ClassValidator
+    classGroupId?: ClassGroupId
+}
 
-    if (nextPart) {
-        currentClassPartObject.nextPart = {
-            ...currentClassPartObject.nextPart,
-            ...nextPart,
-        }
-    }
+function addToClassPart({ path, classPartObject, validator, classGroupId }: AddToClassPartProps) {
+    let currentClassPartObject = classPartObject
 
-    if (validators) {
-        currentClassPartObject.validators = [...currentClassPartObject.validators, ...validators]
-    }
+    path?.split(CLASS_PART_SEPARATOR).forEach((pathPart) => {
+        currentClassPartObject = getNextPart(currentClassPartObject, pathPart)
+    })
 
     if (classGroupId) {
         currentClassPartObject.classGroupId = classGroupId
     }
+
+    if (validator) {
+        currentClassPartObject.validators.push(validator)
+    }
+}
+
+function getNextPart(classPartObject: ClassPartObject, nextPart: string) {
+    if (classPartObject.nextPart[nextPart] === undefined) {
+        classPartObject.nextPart[nextPart] = {
+            nextPart: {},
+            validators: [],
+        }
+    }
+
+    return classPartObject.nextPart[nextPart]!
 }

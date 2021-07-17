@@ -11,7 +11,7 @@ export interface Config {
      */
     cacheSize: number
     /**
-     * Object with definitions of dynamic classes like `mx-auto` or `grid-cols-2`.
+     * Object with groups of dynamic classes like `mx-auto` or `grid-cols-2`.
      * Keys must be part of class until first `-`-character.
      * @example
      * {
@@ -45,7 +45,7 @@ export interface Config {
     conflictingGroups: Record<string, readonly ClassGroupId[]>
 }
 
-type DynamicClassGroup = readonly DynamicClassDefinition[]
+export type DynamicClassGroup = readonly DynamicClassDefinition[]
 type DynamicClassDefinition = string | DynamicClassValidator | DynamicClassObject
 export type DynamicClassValidator = (classPart: string) => boolean
 type DynamicClassObject = Record<string, readonly DynamicClassDefinition[]>
