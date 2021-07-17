@@ -1,7 +1,7 @@
 const customValueRegex = /^\[(.+)\]$/
 const fractionRegex = /^\d+\/\d+$/
 const stringLengths = new Set(['px', 'full', 'screen'])
-const lengthUnitRegex = /\d+(cap|ch|em|rem|ex|lh|rlh|vh|vw|vi|vb|vmin|vmax)/
+const lengthUnitRegex = /\d+(%|px|em|rem|vh|vw|pt|pc|in|cm|mm|cap|ch|ex|lh|rlh|vi|vb|vmin|vmax)/
 
 export function isLength(classPart: string) {
     const customValue = customValueRegex.exec(classPart)?.[1]
