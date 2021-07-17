@@ -46,7 +46,7 @@ const BLEND_MODES = [
 
 export function getDefaultConfig() {
     return {
-        cacheSize: 100,
+        cacheSize: 500,
         prefixes: [
             ...SIZES_SIMPLE,
             'dark',
