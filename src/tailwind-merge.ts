@@ -5,13 +5,14 @@ import { getLruCache } from './lru-cache'
 import { mergeClassList } from './merge-classlist'
 
 type CreateConfig = (getDefault: typeof getDefaultConfig) => Config
+type TailwindMerge = (...classLists: Array<string | undefined>) => string
 
-export function createTailwindMerge(createConfig: CreateConfig) {
+export function createTailwindMerge(createConfig: CreateConfig): TailwindMerge {
     const config = createConfig(getDefaultConfig)
     const configUtils = createConfigUtils(config)
     const cache = getLruCache<string>(config.cacheSize)
 
-    return function tailwindMerge(...classLists: (string | undefined)[]) {
+    return function tailwindMerge(...classLists) {
         const classList = classLists.filter(Boolean).join(' ')
         const cachedResult = cache.get(classList)
 
