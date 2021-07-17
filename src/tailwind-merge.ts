@@ -11,8 +11,8 @@ export function createTailwindMerge(createConfig: CreateConfig) {
     const configUtils = createConfigUtils(config)
     const cache = getLruCache<string>(config.cacheSize)
 
-    return function tailwindMerge(...classLists: string[]) {
-        const classList = classLists.join(' ')
+    return function tailwindMerge(...classLists: (string | undefined)[]) {
+        const classList = classLists.filter(Boolean).join(' ')
         const cachedResult = cache.get(classList)
 
         if (cachedResult) {
