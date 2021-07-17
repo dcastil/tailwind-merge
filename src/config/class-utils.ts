@@ -19,19 +19,7 @@ export function createClassUtils(config: Config) {
         validators: [],
     }
 
-    config.standaloneClasses.forEach((classGroup, index) => {
-        const classPartObject = {
-            classGroupId: `standaloneClasses.${index}`,
-        } as const
-
-        classGroup.forEach((className) => {
-            addToClassMap({
-                classPartObject,
-                path: className.split(CLASS_PART_SEPARATOR),
-                classMap,
-            })
-        })
-    })
+    processStandaloneClasses(config, classMap)
 
     function getGroup(className: string) {
         const classParts = className.split(CLASS_PART_SEPARATOR)
@@ -54,6 +42,49 @@ export function createClassUtils(config: Config) {
         getGroup,
         getConflictingGroups,
     }
+}
+
+function getGroupRecursive(
+    classParts: string[],
+    classPartObject: ClassPartObject
+): ClassGroupId | undefined {
+    if (classParts.length === 0) {
+        return classPartObject.classGroupId
+    }
+
+    const currentClassPart = classParts[0]!
+    const nextClassPartObject = classPartObject.nextPart[currentClassPart]
+    const classGroupFromNextClassPart = nextClassPartObject
+        ? getGroupRecursive(classParts.slice(1), nextClassPartObject)
+        : undefined
+
+    if (classGroupFromNextClassPart) {
+        return classGroupFromNextClassPart
+    }
+
+    if (classPartObject.validators.length === 0) {
+        return undefined
+    }
+
+    const classRest = classParts.join(CLASS_PART_SEPARATOR)
+
+    return classPartObject.validators.find(({ validator }) => validator(classRest))?.classGroupId
+}
+
+function processStandaloneClasses(config: Config, classMap: ClassPartObject) {
+    config.standaloneClasses.forEach((classGroup, index) => {
+        const classPartObject = {
+            classGroupId: `standaloneClasses.${index}`,
+        } as const
+
+        classGroup.forEach((className) => {
+            addToClassMap({
+                classPartObject,
+                path: className.split(CLASS_PART_SEPARATOR),
+                classMap,
+            })
+        })
+    })
 }
 
 interface AddToClassMapProps {
@@ -92,31 +123,4 @@ function addToClassMap({ classPartObject, path, classMap }: AddToClassMapProps) 
     if (classGroupId) {
         currentClassPartObject.classGroupId = classGroupId
     }
-}
-
-function getGroupRecursive(
-    classParts: string[],
-    classPartObject: ClassPartObject
-): ClassGroupId | undefined {
-    if (classParts.length === 0) {
-        return classPartObject.classGroupId
-    }
-
-    const currentClassPart = classParts[0]!
-    const nextClassPartObject = classPartObject.nextPart[currentClassPart]
-    const classGroupFromNextClassPart = nextClassPartObject
-        ? getGroupRecursive(classParts.slice(1), nextClassPartObject)
-        : undefined
-
-    if (classGroupFromNextClassPart) {
-        return classGroupFromNextClassPart
-    }
-
-    if (classPartObject.validators.length === 0) {
-        return undefined
-    }
-
-    const classRest = classParts.join(CLASS_PART_SEPARATOR)
-
-    return classPartObject.validators.find(({ validator }) => validator(classRest))?.classGroupId
 }
