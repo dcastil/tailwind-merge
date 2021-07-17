@@ -9,6 +9,8 @@ twMerge('px-2 py-1 bg-red hover:bg-dark-red', 'p-3 bg-[#B91C1C]')
 // → 'hover:bg-dark-red p-3 bg-[#B91C1C]'
 ```
 
+-   Supports Tailwind v2.0.0 up to v2.2.4
+
 ## What is it for
 
 If you use Tailwind with a component-based UI renderer like [React](https://reactjs.org) or [Vue](https://vuejs.org), you're probably familiar with this situation:
@@ -53,9 +55,46 @@ I didn't run any performance benchmarks so far, but you should be able to merge 
 -   Results get cached by default, so you don't need to worry about wasteful rerenders. The library uses a [LRU cache](<https://en.wikipedia.org/wiki/Cache_replacement_policies#Least_recently_used_(LRU)>) which stores 500 different results. The cache size can be modified or being opt-out of by using `createTailwinfMerge()`.
 -   Expensive computations of data structures happen on demand.
 
-### TODO: Write about features
+### Last conflicting class wins
 
-Rest will be written later.
+```ts
+twMerge('p-5 p-2 p-4') // → 'p-4'
+```
+
+### Resolves non-trivial conflicts
+
+```ts
+twMerge('inset-x-px -inset-1') // → '-inset-1'
+twMerge('bottom-auto inset-y-6') // → 'inset-y-6'
+twMerge('inline block') // → 'block'
+```
+
+### Supports prefixes and stacked prefixes
+
+```ts
+twMerge('p-2 hover:p-4') // → 'p-2 hover:p-4'
+twMerge('hover:p-2 hover:p-4') // → 'hover:p-4'
+twMerge('hover:focus:p-2 focus:hover:p-4') // → 'focus:hover:p-4'
+```
+
+### Supports custom values
+
+```ts
+twMerge('bg-black bg-[color:var(--mystery-var)]') // → 'bg-[color:var(--mystery-var)]'
+twMerge('grid-cols-[1fr,auto] grid-cols-2') // → 'grid-cols-2'
+```
+
+### Preserves non-Tailwind-related classes
+
+```ts
+twMerge('p-5 p-2 my-non-tailwind-class p-4') // → 'my-non-tailwind-class p-4'
+```
+
+### Supports custom colors out of the box
+
+```ts
+twMerge('text-red text-secret-sauce') // → 'text-secret-sauce'
+```
 
 ## API reference
 
