@@ -1,6 +1,5 @@
 import { createConfigUtils } from './config/config-utils'
 import { getDefaultConfig } from './config/default-config'
-
 import { Config } from './config/types'
 import { getLruCache } from './lru-cache'
 import { mergeClassList } from './merge-classlist'

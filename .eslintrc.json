@@ -1,11 +1,7 @@
 {
-    "extends": ["plugin:import/typescript"],
-    "plugins": ["import", "@typescript-eslint"],
-    "parser": "@typescript-eslint/parser",
-    "parserOptions": {
-        "sourceType": "module"
-    },
-    "ignorePatterns": ["dist/**/*"],
+    "extends": ["plugin:@typescript-eslint/base", "plugin:import/typescript"],
+    "plugins": ["import"],
+    "ignorePatterns": ["dist/**", "node_modules/**", "*.json", "*.lock", "*.md"],
     "rules": {
         "@typescript-eslint/consistent-type-assertions": "warn",
         "@typescript-eslint/no-array-constructor": "warn",
@@ -54,6 +50,7 @@
         "new-parens": "warn",
         "no-caller": "warn",
         "no-cond-assign": ["warn", "except-parens"],
+        "no-console": "warn",
         "no-const-assign": "warn",
         "no-control-regex": "warn",
         "no-delete-var": "warn",
