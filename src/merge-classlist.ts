@@ -48,14 +48,18 @@ export function mergeClassList(classList: string, configUtils: ConfigUtils) {
                     return true
                 }
 
-                const classId = `${parsed.prefix}:${parsed.classGroupId}`
+                const { prefix, classGroupId } = parsed
+
+                const classId = `${prefix}:${classGroupId}`
 
                 if (classGroupsInConflict.has(classId)) {
                     return false
                 }
 
                 classGroupsInConflict.add(classId)
-                // TODO: Add conflictingClasses to classGroupsInConflict
+                configUtils.class
+                    .getConflictingGroups(classGroupId)
+                    .forEach((group) => classGroupsInConflict.add(`${prefix}:${group}`))
 
                 return true
             })

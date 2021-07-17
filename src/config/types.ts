@@ -42,7 +42,7 @@ export interface Config {
      *     ],
      * }
      */
-    conflictingGroups: Record<ClassGroupId, readonly ClassGroupId[]>
+    conflictingGroups: Record<string, readonly ClassGroupId[]>
 }
 
 type DynamicClassGroup = readonly DynamicClassDefinition[]
@@ -51,4 +51,4 @@ export type DynamicClassValidator = (classPart: string) => boolean
 type DynamicClassObject = Record<string, readonly DynamicClassDefinition[]>
 type StandaloneClassGroup = readonly string[]
 
-type ClassGroupId = `dynamicClasses.${string}.${number}` | `standaloneClasses.${number}`
+export type ClassGroupId = `dynamicClasses.${string}.${number}` | `standaloneClasses.${number}`

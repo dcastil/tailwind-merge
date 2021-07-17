@@ -1,4 +1,4 @@
-import { Config, DynamicClassValidator } from './types'
+import { ClassGroupId, Config, DynamicClassValidator } from './types'
 
 export type ConfigUtils = ReturnType<typeof createConfigUtils>
 
@@ -39,8 +39,6 @@ interface ClassValidator {
     validator: DynamicClassValidator
 }
 
-type ClassGroupId = `dynamicClasses.${string}.${number}` | `standaloneClasses.${number}`
-
 const CLASS_PART_SEPARATOR = '-'
 
 function createClassUtils(config: Config) {
@@ -76,8 +74,13 @@ function createClassUtils(config: Config) {
         return getGroupRecursive(classParts, classMap)
     }
 
+    function getConflictingGroups(classGroupId: ClassGroupId) {
+        return config.conflictingGroups[classGroupId] || []
+    }
+
     return {
         getGroup,
+        getConflictingGroups,
     }
 }
 
