@@ -235,12 +235,12 @@ export function getDefaultConfig() {
                  * Grid Template Columns
                  * @see https://tailwindcss.com/docs/grid-template-columns
                  */
-                [{ cols: ['none', isInteger] }],
+                [{ cols: ANY }],
                 /**
                  * Grid Template Rows
                  * @see https://tailwindcss.com/docs/grid-template-rows
                  */
-                [{ rows: ['none', isInteger] }],
+                [{ rows: ANY }],
                 /**
                  * Grid Auto Flow
                  * @see https://tailwindcss.com/docs/grid-auto-flow
