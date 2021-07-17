@@ -1302,7 +1302,7 @@ export function getDefaultConfig() {
              */
             ['sr-only', 'not-sr-only'],
         ],
-        conflictingClasses: {
+        conflictingGroups: {
             // Overflow
             'dynamicClasses.overflow.0': [
                 // Overflow X

@@ -43,7 +43,7 @@ test('createTailwindMerge() has correct inputs and outputs', () => {
             prefixes: [],
             dynamicClasses: {},
             standaloneClasses: [],
-            conflictingClasses: {},
+            conflictingGroups: {},
         }))
     ).toStrictEqual(expect.any(Function))
 
@@ -57,7 +57,7 @@ test('createTailwindMerge() has correct inputs and outputs', () => {
             ],
         },
         standaloneClasses: [['hello', 'world']],
-        conflictingClasses: {
+        conflictingGroups: {
             'dynamicClasses.fooKey.1': ['standAloneClasses.0'],
         },
     }))

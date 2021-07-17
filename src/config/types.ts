@@ -31,7 +31,9 @@ export interface Config {
      */
     standaloneClasses: readonly StandaloneClassGroup[]
     /**
-     * Conflicting classes across groups
+     * Conflicting classes across groups.
+     * The key is class group which creates conflict, values are class groups which receive a conflict.
+     * A class group is a string path from the config root to the class group.
      * @example
      * {
      *     'dynamicClasses.gap.2': [
@@ -40,22 +42,13 @@ export interface Config {
      *     ],
      * }
      */
-    conflictingClasses: Record<ClassGroupId, readonly ClassGroupId[]>
+    conflictingGroups: Record<ClassGroupId, readonly ClassGroupId[]>
 }
 
 type DynamicClassGroup = readonly DynamicClassDefinition[]
 type DynamicClassDefinition = string | DynamicClassValidator | DynamicClassObject
 export type DynamicClassValidator = (classPart: string) => boolean
-type DynamicClassObject = Record<
-    /**
-     * Group of classes which produce a potential conflict
-     */
-    string,
-    /**
-     * Group of classes which should be removed if followed by creator class to resolve conflict
-     */
-    readonly DynamicClassDefinition[]
->
+type DynamicClassObject = Record<string, readonly DynamicClassDefinition[]>
 type StandaloneClassGroup = readonly string[]
 
 type ClassGroupId = `dynamicClasses.${string}.${number}` | `standaloneClasses.${number}`
