@@ -1,8 +1,9 @@
 import { ConfigUtils } from './config/config-utils'
 
+const SPLIT_CLASSES_REGEX = /\s+/
 // Regex is needed so we don't match against colons in labels for custom values like `text-[color:var(--mystery-var)]`
 // I'd prefer to use a negative lookbehind for all supported labels, but lookbheinds don't have good browser support yet. More info: https://caniuse.com/js-regexp-lookbehind
-const PREFIX_SEPARATOR_REGEX = /:(?![^\s[]*\])/
+const PREFIX_SEPARATOR_REGEX = /:(?![^[]*\])/
 const PREFIX_SEPARATOR = ':'
 
 export function mergeClassList(classList: string, configUtils: ConfigUtils) {
@@ -18,7 +19,7 @@ export function mergeClassList(classList: string, configUtils: ConfigUtils) {
     return (
         classList
             .trim()
-            .split(/\s+/)
+            .split(SPLIT_CLASSES_REGEX)
             .map((originalClassName) => {
                 const prefixes = originalClassName.split(PREFIX_SEPARATOR_REGEX)
                 const className = prefixes.pop()!
