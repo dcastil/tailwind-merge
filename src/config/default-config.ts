@@ -1,4 +1,4 @@
-import { isAny, isInteger, isLength } from './config-validators'
+import { isAny, isCustomValue, isInteger, isLength } from './config-validators'
 
 const SIZES_SIMPLE = ['sm', 'md', 'lg', 'xl', '2xl'] as const
 const SIZES_EXTENDED = ['3xl', '4xl', '5xl', '6xl', '7xl'] as const
@@ -66,6 +66,30 @@ export function getDefaultConfig() {
             'focus-visible',
             'active',
             'disabled',
+            'before',
+            'after',
+            'first-letter',
+            'first-line',
+            'selection',
+            'marker',
+            'only',
+            'first-of-type',
+            'last-of-type',
+            'only-of-type',
+            'target',
+            'default',
+            'indeterminate',
+            'placeholder-shown',
+            'autofill',
+            'required',
+            'valid',
+            'invalid',
+            'in-range',
+            'out-of-range',
+            'peer-hover',
+            'peer-focus',
+            'peer-checked',
+            'peer-disabled',
         ],
         dynamicClasses: {
             // Layout
@@ -333,6 +357,11 @@ export function getDefaultConfig() {
                  * @see https://tailwindcss.com/docs/align-content
                  */
                 ['center', 'start', 'end', 'between', 'around', 'evenly'],
+                /**
+                 * Content
+                 * @see https://tailwindcss.com/docs/just-in-time-mode#content-utilities
+                 */
+                [isCustomValue],
             ],
             items: [
                 /**
@@ -1212,6 +1241,13 @@ export function getDefaultConfig() {
                  * @see https://tailwindcss.com/docs/stroke-width
                  */
                 LENGTH,
+            ],
+            caret: [
+                /**
+                 * Caret Color
+                 * @see https://tailwindcss.com/docs/just-in-time-mode#caret-color-utilities
+                 */
+                ANY,
             ],
         },
         standaloneClasses: [

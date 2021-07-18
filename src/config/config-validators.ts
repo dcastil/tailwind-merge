@@ -27,6 +27,10 @@ export function isInteger(classPart: string) {
     return Number.isInteger(Number(classPart))
 }
 
+export function isCustomValue(classPart: string) {
+    return customValueRegex.test(classPart)
+}
+
 export function isAny() {
     return true
 }
