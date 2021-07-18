@@ -87,7 +87,14 @@ twMerge('bg-black bg-[color:var(--mystery-var)]') // → 'bg-[color:var(--myster
 twMerge('grid-cols-[1fr,auto] grid-cols-2') // → 'grid-cols-2'
 ```
 
-### Preserves non-Tailwind-related classes
+### Supports important modifier
+
+```ts
+twMerge('!p-3 !p-4 p-5') // → '!p-4 p-5'
+twMerge('!right-2 !-inset-x-1') // → '!-inset-x-1'
+```
+
+### Preserves non-Tailwind classes
 
 ```ts
 twMerge('p-5 p-2 my-non-tailwind-class p-4') // → 'my-non-tailwind-class p-4'
