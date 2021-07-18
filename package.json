@@ -2,11 +2,33 @@
     "name": "tailwind-merge",
     "version": "0.1.0",
     "description": "Merge Tailwind CSS classes without style conflicts",
-    "author": "Dany Castillo",
+    "keywords": [
+        "tailwindcss",
+        "tailwind",
+        "css",
+        "classes",
+        "className",
+        "classList",
+        "merge",
+        "conflict"
+    ],
+    "homepage": "https://github.com/dcastil/tailwind-merge",
+    "bugs": {
+        "url": "https://github.com/dcastil/tailwind-merge/issues"
+    },
     "license": "MIT",
+    "author": "Dany Castillo",
+    "files": [
+        "dist",
+        "src"
+    ],
     "type": "module",
     "main": "./dist/index.js",
     "types": "./dist/index.d.ts",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/dcastil/tailwind-merge.git"
+    },
     "scripts": {
         "build": "rm -rf dist/* && tsc --build",
         "watch": "rm -rf dist/* && tsc --build --watch",
