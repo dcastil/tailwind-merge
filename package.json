@@ -23,15 +23,19 @@
         "src"
     ],
     "type": "module",
-    "main": "./dist/index.js",
-    "types": "./dist/index.d.ts",
+    "source": "src/index.ts",
+    "exports": "./dist/index.js",
+    "module": "dist/index.module.js",
+    "main": "dist/index.cjs",
+    "types": "./dist/types/index.d.ts",
     "repository": {
         "type": "git",
         "url": "https://github.com/dcastil/tailwind-merge.git"
     },
     "scripts": {
-        "build": "rm -rf dist/* && tsc --build",
+        "build": "rm -rf dist/* && microbundle --strict --no-compress --format modern,esm,cjs",
         "test": "jest",
+        "type-check": "tsc --build",
         "lint": "eslint --max-warnings 0 '**'"
     },
     "dependencies": {
@@ -45,6 +49,7 @@
         "eslint-plugin-import": "^2.23.4",
         "eslint-plugin-jest": "^24.3.6",
         "jest": "^27.0.6",
+        "microbundle": "^0.13.3",
         "prettier": "^2.3.2",
         "ts-jest": "^27.0.3",
         "typescript": "^4.3.5"

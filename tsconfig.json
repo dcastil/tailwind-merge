@@ -8,16 +8,18 @@
         "noUncheckedIndexedAccess": true,
         "strict": true,
         // Modules
+        "module": "ESNext",
         "moduleResolution": "Node",
         // Emit
         "declaration": true,
+        "noEmit": true,
         "outDir": "dist",
         "sourceMap": true,
         // Interop Constraints
         "esModuleInterop": true,
         "forceConsistentCasingInFileNames": true,
         // Language and Environment
-        "target": "ES2020"
+        "target": "ESNext"
     },
     "include": ["src/**/*"]
 }
