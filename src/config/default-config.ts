@@ -807,6 +807,26 @@ export function getDefaultConfig() {
                  */
                 ['collapse', 'separate'],
                 /**
+                 * Border Color Top
+                 * @see https://tailwindcss.com/docs/border-color
+                 */
+                [{ t: ANY }],
+                /**
+                 * Border Color Right
+                 * @see https://tailwindcss.com/docs/border-color
+                 */
+                [{ r: ANY }],
+                /**
+                 * Border Color Bottom
+                 * @see https://tailwindcss.com/docs/border-color
+                 */
+                [{ b: ANY }],
+                /**
+                 * Border Color Left
+                 * @see https://tailwindcss.com/docs/border-color
+                 */
+                [{ l: ANY }],
+                /**
                  * Border Color
                  * @see https://tailwindcss.com/docs/border-color
                  */
@@ -1494,6 +1514,17 @@ export function getDefaultConfig() {
                 'dynamicClasses.border.3',
                 // Border Width Left
                 'dynamicClasses.border.4',
+            ],
+            // Border Color
+            'dynamicClasses.border.12': [
+                // Border Color Top
+                'dynamicClasses.border.8',
+                // Border Color Right
+                'dynamicClasses.border.9',
+                // Border Color Bottom
+                'dynamicClasses.border.10',
+                // Border Color Left
+                'dynamicClasses.border.11',
             ],
             // Ring Width
             'dynamicClasses.ring.0': [
