@@ -6,13 +6,13 @@ jobs:
     build:
         runs-on: ubuntu-latest
         steps:
-        - uses: actions/checkout@v2
-        - name: Use Node.js 16.x
-          uses: actions/setup-node@v2
-          with:
-              node-version: 16.x
-              cache: 'yarn'
-        - run: yarn install --frozen-lockfile
-        - run: yarn lint
-        - run: yarn test
-        - run: yarn build
+            - uses: actions/checkout@v2
+            - name: Use Node.js 16.x
+              uses: actions/setup-node@v2
+              with:
+                  node-version: 16.x
+                  cache: 'yarn'
+            - run: yarn install --frozen-lockfile
+            - run: yarn lint
+            - run: yarn test
+            - run: yarn build
