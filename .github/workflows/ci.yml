@@ -23,3 +23,8 @@ jobs:
             - run: yarn type-check
             - run: yarn test
             - run: yarn build
+            - uses: actions/upload-artifact@v2
+              with:
+                  name: build-output
+                  path: dist
+                  if-no-files-found: error
