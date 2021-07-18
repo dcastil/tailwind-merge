@@ -1,6 +1,6 @@
 {
     "name": "tailwind-merge",
-    "version": "0.1.1",
+    "version": "0.1.2",
     "description": "Merge Tailwind CSS classes without style conflicts",
     "keywords": [
         "tailwindcss",
