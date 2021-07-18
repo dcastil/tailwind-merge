@@ -7,6 +7,7 @@ const OVERFLOW = ['auto', 'hidden', 'visible', 'scroll'] as const
 const LENGTH = [isLength] as const
 const LENGTH_WITH_AUTO = ['auto', isLength] as const
 const INTEGER = [isInteger] as const
+const INTEGER_WITH_AUTO = ['auto', isInteger] as const
 const ANY = [isAny] as const
 const POSITIONS = [
     'bottom',
@@ -43,6 +44,7 @@ const BLEND_MODES = [
         ],
     },
 ] as const
+const ALIGN = ['start', 'end', 'center', 'between', 'around', 'evenly'] as const
 
 export function getDefaultConfig() {
     return {
@@ -281,12 +283,12 @@ export function getDefaultConfig() {
                  * Grid Column Start
                  * @see https://tailwindcss.com/docs/grid-column
                  */
-                [{ start: ['auto', isInteger] }],
+                [{ start: INTEGER_WITH_AUTO }],
                 /**
                  * Grid Column End
                  * @see https://tailwindcss.com/docs/grid-column
                  */
-                [{ end: ['auto', isInteger] }],
+                [{ end: INTEGER_WITH_AUTO }],
             ],
             row: [
                 /**
@@ -298,12 +300,12 @@ export function getDefaultConfig() {
                  * Grid Row Start
                  * @see https://tailwindcss.com/docs/grid-row
                  */
-                [{ start: ['auto', isInteger] }],
+                [{ start: INTEGER_WITH_AUTO }],
                 /**
                  * Grid Row End
                  * @see https://tailwindcss.com/docs/grid-row
                  */
-                [{ end: ['auto', isInteger] }],
+                [{ end: INTEGER_WITH_AUTO }],
             ],
             auto: [
                 /**
@@ -339,7 +341,7 @@ export function getDefaultConfig() {
                  * Justify Content
                  * @see https://tailwindcss.com/docs/justify-content
                  */
-                ['start', 'end', 'center', 'between', 'around', 'evenly'],
+                ALIGN,
                 /**
                  * Justify Items
                  * @see https://tailwindcss.com/docs/justify-items
@@ -356,7 +358,7 @@ export function getDefaultConfig() {
                  * Align Content
                  * @see https://tailwindcss.com/docs/align-content
                  */
-                ['center', 'start', 'end', 'between', 'around', 'evenly'],
+                ALIGN,
                 /**
                  * Content
                  * @see https://tailwindcss.com/docs/just-in-time-mode#content-utilities
@@ -382,7 +384,7 @@ export function getDefaultConfig() {
                  * Place Content
                  * @see https://tailwindcss.com/docs/place-content
                  */
-                [{ content: ['center', 'start', 'end', 'between', 'around', 'evenly', 'stretch'] }],
+                [{ content: [...ALIGN, 'stretch'] }],
                 /**
                  * Place Items
                  * @see https://tailwindcss.com/docs/place-items
@@ -559,14 +561,14 @@ export function getDefaultConfig() {
                  * Max-Height
                  * @see https://tailwindcss.com/docs/max-height
                  */
-                [{ h: ['full', 'screen', isLength] }],
+                [{ h: LENGTH }],
             ],
             h: [
                 /**
                  * Height
                  * @see https://tailwindcss.com/docs/height
                  */
-                ['auto', isLength],
+                LENGTH_WITH_AUTO,
             ],
             // Typography
             font: [
