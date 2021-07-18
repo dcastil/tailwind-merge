@@ -31,7 +31,6 @@
     },
     "scripts": {
         "build": "rm -rf dist/* && tsc --build",
-        "watch": "rm -rf dist/* && tsc --build --watch",
         "test": "jest",
         "lint": "eslint --max-warnings 0 '**'"
     },
