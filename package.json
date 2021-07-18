@@ -32,6 +32,7 @@
         "type": "git",
         "url": "https://github.com/dcastil/tailwind-merge.git"
     },
+    "sideEffects": false,
     "scripts": {
         "build": "rm -rf dist/* && microbundle --strict --no-compress --format modern,esm,cjs",
         "test": "jest",
