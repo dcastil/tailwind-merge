@@ -5,7 +5,7 @@ const SIZES_EXTENDED = ['3xl', '4xl', '5xl', '6xl', '7xl'] as const
 const OVERSCROLL = ['auto', 'contain', 'none'] as const
 const OVERFLOW = ['auto', 'hidden', 'visible', 'scroll'] as const
 const LENGTH = [isLength] as const
-const MARGIN = ['auto', isLength] as const
+const LENGTH_WITH_AUTO = ['auto', isLength] as const
 const INTEGER = [isInteger] as const
 const ANY = [isAny] as const
 const POSITIONS = [
@@ -172,45 +172,45 @@ export function getDefaultConfig() {
                  * Right / Left
                  * @see https://tailwindcss.com/docs/top-right-bottom-left
                  */
-                [{ x: LENGTH }],
+                [{ x: LENGTH_WITH_AUTO }],
                 /**
                  * Top / Bottom
                  * @see https://tailwindcss.com/docs/top-right-bottom-left
                  */
-                [{ y: LENGTH }],
+                [{ y: LENGTH_WITH_AUTO }],
                 /**
                  * Top / Right / Bottom / Left
                  * @see https://tailwindcss.com/docs/top-right-bottom-left
                  */
-                LENGTH,
+                LENGTH_WITH_AUTO,
             ],
             top: [
                 /**
                  * Top
                  * @see https://tailwindcss.com/docs/top-right-bottom-left
                  */
-                LENGTH,
+                LENGTH_WITH_AUTO,
             ],
             right: [
                 /**
                  * Right
                  * @see https://tailwindcss.com/docs/top-right-bottom-left
                  */
-                LENGTH,
+                LENGTH_WITH_AUTO,
             ],
             bottom: [
                 /**
                  * Bottom
                  * @see https://tailwindcss.com/docs/top-right-bottom-left
                  */
-                LENGTH,
+                LENGTH_WITH_AUTO,
             ],
             left: [
                 /**
                  * Left
                  * @see https://tailwindcss.com/docs/top-right-bottom-left
                  */
-                LENGTH,
+                LENGTH_WITH_AUTO,
             ],
             z: [
                 /**
@@ -449,49 +449,49 @@ export function getDefaultConfig() {
                  * Margin
                  * @see https://tailwindcss.com/docs/margin
                  */
-                MARGIN,
+                LENGTH_WITH_AUTO,
             ],
             mx: [
                 /**
                  * Margin X
                  * @see https://tailwindcss.com/docs/margin
                  */
-                MARGIN,
+                LENGTH_WITH_AUTO,
             ],
             my: [
                 /**
                  * Margin Y
                  * @see https://tailwindcss.com/docs/margin
                  */
-                MARGIN,
+                LENGTH_WITH_AUTO,
             ],
             mt: [
                 /**
                  * Margin Top
                  * @see https://tailwindcss.com/docs/margin
                  */
-                MARGIN,
+                LENGTH_WITH_AUTO,
             ],
             mr: [
                 /**
                  * Margin Right
                  * @see https://tailwindcss.com/docs/margin
                  */
-                MARGIN,
+                LENGTH_WITH_AUTO,
             ],
             mb: [
                 /**
                  * Margin Bottom
                  * @see https://tailwindcss.com/docs/margin
                  */
-                MARGIN,
+                LENGTH_WITH_AUTO,
             ],
             ml: [
                 /**
                  * Margin Left
                  * @see https://tailwindcss.com/docs/margin
                  */
-                MARGIN,
+                LENGTH_WITH_AUTO,
             ],
             space: [
                 /**
