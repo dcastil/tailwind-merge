@@ -1,6 +1,6 @@
 <h1>
     <a href="https://github.com/dcastil/tailwind-merge">
-        <img src="https://github.com/dcastil/tailwind-merge/blob/main/assets/logo-with-title.svg?raw=true" alt="tailwind-merge" />
+        <img src="https://github.com/dcastil/tailwind-merge/blob/main/assets/logo-with-title.svg?raw=true" alt="tailwind-merge" height="40px" />
     </a>
 </h1>
 
