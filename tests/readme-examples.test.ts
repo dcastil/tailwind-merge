@@ -13,6 +13,10 @@ test('readme examples', () => {
     // ### Last conflicting class wins
     expect(twMerge('p-5 p-2 p-4')).toBe('p-4')
 
+    // ### Allows refinements
+    expect(twMerge('p-3 px-5')).toBe('p-3 px-5')
+    expect(twMerge('inset-x-4 right-4')).toBe('inset-x-4 right-4')
+
     // ### Resolves non-trivial conflicts
     expect(twMerge('inset-x-px -inset-1')).toBe('-inset-1')
     expect(twMerge('bottom-auto inset-y-6')).toBe('inset-y-6')

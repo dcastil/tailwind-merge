@@ -64,6 +64,13 @@ I didn't run any performance benchmarks so far, but you should be able to merge 
 twMerge('p-5 p-2 p-4') // → 'p-4'
 ```
 
+### Allows refinements
+
+```ts
+twMerge('p-3 px-5') // → 'p-3 px-5'
+twMerge('inset-x-4 right-4') // → 'inset-x-4 right-4'
+```
+
 ### Resolves non-trivial conflicts
 
 ```ts
