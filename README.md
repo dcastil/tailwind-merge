@@ -1,8 +1,10 @@
-<a href="https://github.com/dcastil/tailwind-merge">
-    <img src="https://github.com/dcastil/tailwind-merge/blob/main/assets/logo.svg?raw=true" alt="tailwind-merge" width="221px" />
-</a>
-
-# tailwind-merge
+<h1>
+    <a href="https://github.com/dcastil/tailwind-merge">
+        <img src="https://github.com/dcastil/tailwind-merge/blob/main/assets/logo.svg?raw=true" alt="tailwind-merge" width="221px" />
+    </a>
+    <br />
+    tailwind-merge
+</h1>
 
 Utility function to efficiently merge [Tailwind CSS](https://tailwindcss.com) classes in JS without style conflicts.
 
