@@ -47,7 +47,7 @@ function MyGenericInput(props) {
 }
 ```
 
-tailwind-merge makes sure to override conflicting classes and keeps everything else untouched. In the case of hte `MySlightlyModifiedInput`, the input now only renders the class `p-3`.
+tailwind-merge makes sure to override conflicting classes and keeps everything else untouched. In the case of the `MySlightlyModifiedInput`, the input now only renders the class `p-3`.
 
 ## Features
 
