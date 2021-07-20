@@ -39,7 +39,7 @@
         "test": "jest",
         "type-check": "tsc --build",
         "lint": "eslint --max-warnings 0 '**'",
-        "version": "node scripts/package-build-stats && git add README.md"
+        "version": "yarn build && node scripts/package-build-stats && git add README.md"
     },
     "dependencies": {
         "hashlru": "^2.3.0"
