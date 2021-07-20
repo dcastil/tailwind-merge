@@ -14,7 +14,7 @@ const [packageStats, readme] = await Promise.all([
     fs.promises.readFile(readmePath, { encoding: 'utf-8' }),
 ])
 
-const gzipSize = `${(packageStats.gzip / 1000).toFixed(1)} kB`
+const gzipSize = `${(packageStats.gzip / 1024).toFixed(1)} kB`
 const totalCompositionSize = packageStats.dependencySizes.reduce(
     (sum, current) => sum + current.approximateSize,
     0
