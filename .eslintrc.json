@@ -151,6 +151,12 @@
         {
             "files": ["tests/**/*.ts"],
             "extends": ["plugin:jest/recommended", "plugin:jest/style"]
+        },
+        {
+            "files": ["scripts/**/*.js"],
+            "rules": {
+                "no-console": "off"
+            }
         }
     ]
 }
