@@ -74,8 +74,8 @@ function getGroupRecursive(
 }
 
 function processStandaloneClasses(config: Config, classMap: ClassPartObject) {
-    config.standaloneClasses.forEach((classGroup, index) => {
-        const classGroupId: ClassGroupId = `standaloneClasses.${index}`
+    Object.entries(config.standaloneClasses).forEach(([classGroupKey, classGroup]) => {
+        const classGroupId: ClassGroupId = `standaloneClasses.${classGroupKey}`
 
         classGroup.forEach((className) => {
             addToClassPart({
@@ -98,8 +98,12 @@ function createProcessDynamicClasses(config: Config, classMap: ClassPartObject) 
 
         const classPartObject = getNextPart(classMap, key)
 
-        dynamicClasses[key]!.forEach((classGroup, index) => {
-            processClassesRecursively(classGroup, classPartObject, `dynamicClasses.${key}.${index}`)
+        Object.entries(dynamicClasses[key]!).forEach(([classGroupKey, classGroup]) => {
+            processClassesRecursively(
+                classGroup,
+                classPartObject,
+                `dynamicClasses.${key}.${classGroupKey}`
+            )
         })
     }
 }

@@ -167,10 +167,11 @@ const customTwMerge = createTailwindMerge((getDefaultConfig) => {
                 //   Classes here: foo-1, foo-2, foo-bar-baz-1, foo-bar-baz-2
                 ['1', '2', { 'bar-baz': ['1', '2'] }],
             ],
-            bar: [
+            bar: {
                 // ↓ Another group with classes bar-auto, bar-1000, bar-1001, …
-                ['auto', (value) => Number(value) > 1000],
-            ],
+                //   Groups can be named to make referencing in conflictingGroups easier
+                namedGroup: ['auto', (value) => Number(value) > 1000],
+            },
         },
         // ↓ Same like `dynamicClasses`, just for classes with no common starting characters
         standaloneClasses: [
@@ -184,7 +185,7 @@ const customTwMerge = createTailwindMerge((getDefaultConfig) => {
             // ↓ Path to class group which creates a conflict with …
             'dynamicClasses.foo.0': [
                 // ↓ … classes from group at this path
-                'dynamicClasses.bar.0',
+                'dynamicClasses.bar.namedGroup',
             ],
         },
     }

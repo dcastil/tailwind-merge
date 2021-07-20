@@ -54,10 +54,14 @@ test('createTailwindMerge() has correct inputs and outputs', () => {
                 ['bar', 'baz'],
                 ['qux', 'quux'],
             ],
+            otherKey: {
+                namedGroup: ['named', 'group'],
+            },
         },
         standaloneClasses: [['hello', 'world']],
         conflictingGroups: {
             'dynamicClasses.fooKey.1': ['standaloneClasses.0'],
+            'dynamicClasses.otherKey.namedGroup': ['dynamicClasses.fooKey.0'],
         },
     }))
 

@@ -12,7 +12,7 @@ export interface Config {
     cacheSize: number
     /**
      * Object with groups of dynamic classes like `mx-auto` or `grid-cols-2`.
-     * Keys must be part of class until first `-`-character.
+     * Keys on first level must be part of class until first `-`-character.
      * @example
      * {
      *     my: [
@@ -24,12 +24,12 @@ export interface Config {
      *     ]
      * }
      */
-    dynamicClasses: Record<string, readonly DynamicClassGroup[]>
+    dynamicClasses: Record<string, ObjectOrArray<DynamicClassGroup>>
     /**
      * Groups of classes that don't have any common starting characters
      * @example [['inline', 'block'], ['absolute', 'relative']]
      */
-    standaloneClasses: readonly StandaloneClassGroup[]
+    standaloneClasses: ObjectOrArray<StandaloneClassGroup>
     /**
      * Conflicting classes across groups.
      * The key is class group which creates conflict, values are class groups which receive a conflict.
@@ -45,10 +45,11 @@ export interface Config {
     conflictingGroups: Record<string, readonly ClassGroupId[]>
 }
 
+type ObjectOrArray<T> = Readonly<Record<string, T> | Record<number, T>>
 export type DynamicClassGroup = readonly DynamicClassDefinition[]
 type DynamicClassDefinition = string | DynamicClassValidator | DynamicClassObject
 export type DynamicClassValidator = (classPart: string) => boolean
 type DynamicClassObject = Record<string, readonly DynamicClassDefinition[]>
 type StandaloneClassGroup = readonly string[]
 
-export type ClassGroupId = `dynamicClasses.${string}.${number}` | `standaloneClasses.${number}`
+export type ClassGroupId = `dynamicClasses.${string}.${string}` | `standaloneClasses.${string}`
