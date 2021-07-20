@@ -35,9 +35,11 @@
     "sideEffects": false,
     "scripts": {
         "build": "rm -rf dist/* && microbundle --strict --no-compress --format modern,esm,cjs",
+        "build:min": "rm -rf dist/* && microbundle --strict --format modern",
         "test": "jest",
         "type-check": "tsc --build",
-        "lint": "eslint --max-warnings 0 '**'"
+        "lint": "eslint --max-warnings 0 '**'",
+        "version": "node scripts/package-build-stats && git add README.md"
     },
     "dependencies": {
         "hashlru": "^2.3.0"
@@ -51,6 +53,7 @@
         "eslint-plugin-jest": "^24.3.6",
         "jest": "^27.0.6",
         "microbundle": "^0.13.3",
+        "package-build-stats": "^7.2.4",
         "prettier": "^2.3.2",
         "ts-jest": "^27.0.3",
         "typescript": "^4.3.5"
