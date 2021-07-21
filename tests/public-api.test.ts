@@ -40,28 +40,22 @@ test('createTailwindMerge() has correct inputs and outputs', () => {
         createTailwindMerge(() => ({
             cacheSize: 0,
             prefixes: [],
-            dynamicClasses: {},
-            standaloneClasses: [],
-            conflictingGroups: {},
+            classGroups: {},
+            conflictingClassGroups: {},
         }))
     ).toStrictEqual(expect.any(Function))
 
     const tailwindMerge = createTailwindMerge(() => ({
         cacheSize: 20,
         prefixes: ['my-prefix'],
-        dynamicClasses: {
-            fooKey: [
-                ['bar', 'baz'],
-                ['qux', 'quux'],
-            ],
-            otherKey: {
-                namedGroup: ['named', 'group'],
-            },
+        classGroups: {
+            fooKey: [{ fooKey: ['bar', 'baz'] }],
+            fooKey2: [{ fooKey: ['qux', 'quux'] }],
+            otherKey: ['nother', 'group'],
         },
-        standaloneClasses: [['hello', 'world']],
-        conflictingGroups: {
-            'dynamicClasses.fooKey.1': ['standaloneClasses.0'],
-            'dynamicClasses.otherKey.namedGroup': ['dynamicClasses.fooKey.0'],
+        conflictingClassGroups: {
+            fooKey: ['otherKey'],
+            otherKey: ['fooKey', 'fooKey2'],
         },
     }))
 
