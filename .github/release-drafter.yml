@@ -11,6 +11,8 @@ no-changes-template: 'No changes'
 categories:
     - title: '⚠️ Needs Changelog Edit'
       label: 'needs-changelog-edit'
+    - title: 'Breaking Changes'
+      label: 'breaking'
     - title: 'New Features'
       label: 'feature'
     - title: 'Bug Fixes'
@@ -23,19 +25,20 @@ prerelease: true
 version-resolver:
     major:
         labels:
-            - 'major'
+            - 'breaking'
     minor:
         labels:
-            - 'minor'
             - 'feature'
     patch:
         labels:
-            - 'patch'
             - 'bugfix'
-    default: patch
+            - 'other'
+    default: 'patch'
 autolabeler:
     - label: 'feature'
       branch:
+          - '/feature/i'
+      title:
           - '/feature/i'
     - label: 'bugfix'
       branch:
@@ -44,4 +47,7 @@ autolabeler:
           - '/fix/i'
     - label: 'other'
       branch:
-          - '/other/i'
+          - '/^other/i'
+    - label: 'breaking'
+      branch:
+          - '/^breaking-/i'
