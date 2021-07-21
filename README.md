@@ -1,7 +1,7 @@
 <div align="center">
     <br />
     <a href="https://github.com/dcastil/tailwind-merge">
-        <img src="https://github.com/dcastil/tailwind-merge/blob/main/assets/logo.svg?raw=true" alt="tailwind-merge" width="221px" />
+        <img src="https://github.com/dcastil/tailwind-merge/raw/main/assets/logo.svg" alt="tailwind-merge" width="221px" />
     </a>
 </div>
 
@@ -60,10 +60,8 @@ tailwind-merge makes sure to override conflicting classes and keeps everything e
 
 ### Optimized for speed
 
-I didn't run any performance benchmarks so far, but you should be able to merge a lot of classes per second. Some aspects of the library:
-
 -   Results get cached by default, so you don't need to worry about wasteful rerenders. The library uses a [LRU cache](<https://en.wikipedia.org/wiki/Cache_replacement_policies#Least_recently_used_(LRU)>) which stores up to 500 different results. The cache size can be modified or opt-out of by using [`createTailwindMerge()`](#createtailwindmerge).
--   Expensive computations of data structures happen on demand.
+-   Expensive computations happen during startup time so that `twMerge()` calls without a cache hit stay fast.
 
 ### Last conflicting class wins
 
@@ -158,35 +156,22 @@ const customTwMerge = createTailwindMerge((getDefaultConfig) => {
             ...defaultConfig.prefixes,
             'my-custom-prefix', // ← Adding custom prefix
         ],
-        // ↓ Here you define class groups with a common start in all class names
-        dynamicClasses: {
-            ...defaultConfig.dynamicClasses,
-            // ↓ It's important that keys at this level don't have dashes in them.
-            foo: [
-                // ↓ Creates group of classes which have conflicting styles
-                //   Classes here: foo-1, foo-2, foo-bar-baz-1, foo-bar-baz-2
-                ['1', '2', { 'bar-baz': ['1', '2'] }],
-            ],
-            bar: {
-                // ↓ Another group with classes bar-auto, bar-1000, bar-1001, …
-                //   Groups can be named to make referencing in conflictingGroups easier
-                namedGroup: ['auto', (value) => Number(value) > 1000],
-            },
+        // ↓ Here you define class groups
+        classGroups: {
+            ...defaultConfig.classGroups,
+            // ↓ The `foo` key here is the class group ID
+            //   ↓ Creates group of classes which have conflicting styles
+            //     Classes here: foo, foo-2, bar-baz, bar-baz-1, bar-baz-2
+            foo: ['foo', 'foo-2', { 'bar-baz': ['', '1', '2'] }],
+            //   ↓ Another group with classes qux-auto, qux-1000, qux-1001, …
+            bar: [{ qux: ['auto', (value) => Number(value) > 1000] }],
         },
-        // ↓ Same like `dynamicClasses`, just for classes with no common starting characters
-        standaloneClasses: [
-            ...defaultConfig.standaloneClasses,
-            // ↓ Same structure like in `dynamicClasses`, but only strings allowed
-            ['my-custom-class', 'other-class-same-group'],
-        ],
         // ↓ Here you can define additional conflicts across different groups
-        conflictingGroups: {
-            ...defaultConfig.conflictingGroups,
-            // ↓ Path to class group which creates a conflict with …
-            'dynamicClasses.foo.0': [
-                // ↓ … classes from group at this path
-                'dynamicClasses.bar.namedGroup',
-            ],
+        conflictingClassGroups: {
+            ...defaultConfig.conflictingClassGroups,
+            // ↓ ID of class group which creates a conflict with …
+            //     ↓ … classes from groups with these IDs
+            foo: ['bar'],
         },
     }
 })

@@ -3,7 +3,7 @@ tag-template: 'v$RESOLVED_VERSION'
 template: |
     $CHANGES
 
-    [`$PREVIOUS_TAG...$RESOLVED_VERSION`](https://github.com/dcastil/tailwind-merge/compare/$PREVIOUS_TAG...$RESOLVED_VERSION)
+    [`$PREVIOUS_TAG...v$RESOLVED_VERSION`](https://github.com/dcastil/tailwind-merge/compare/$PREVIOUS_TAG...v$RESOLVED_VERSION)
 category-template: '### $TITLE'
 change-template: '- $TITLE #$NUMBER @$AUTHOR'
 change-title-escapes: '\<*_&'
@@ -11,7 +11,9 @@ no-changes-template: 'No changes'
 categories:
     - title: '⚠️ Needs Changelog Edit'
       label: 'needs-changelog-edit'
-    - title: 'New Features'
+    - title: 'Breaking Changes'
+      label: 'breaking'
+    - title: 'Features'
       label: 'feature'
     - title: 'Bug Fixes'
       label: 'bugfix'
@@ -23,19 +25,20 @@ prerelease: true
 version-resolver:
     major:
         labels:
-            - 'major'
+            - 'breaking'
     minor:
         labels:
-            - 'minor'
             - 'feature'
     patch:
         labels:
-            - 'patch'
             - 'bugfix'
-    default: patch
+            - 'other'
+    default: 'patch'
 autolabeler:
     - label: 'feature'
       branch:
+          - '/feature/i'
+      title:
           - '/feature/i'
     - label: 'bugfix'
       branch:
@@ -44,4 +47,7 @@ autolabeler:
           - '/fix/i'
     - label: 'other'
       branch:
-          - '/other/i'
+          - '/^other/i'
+    - label: 'breaking'
+      branch:
+          - '/^breaking-/i'
