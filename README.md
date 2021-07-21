@@ -158,35 +158,22 @@ const customTwMerge = createTailwindMerge((getDefaultConfig) => {
             ...defaultConfig.prefixes,
             'my-custom-prefix', // ← Adding custom prefix
         ],
-        // ↓ Here you define class groups with a common start in all class names
-        dynamicClasses: {
-            ...defaultConfig.dynamicClasses,
-            // ↓ It's important that keys at this level don't have dashes in them.
-            foo: [
-                // ↓ Creates group of classes which have conflicting styles
-                //   Classes here: foo-1, foo-2, foo-bar-baz-1, foo-bar-baz-2
-                ['1', '2', { 'bar-baz': ['1', '2'] }],
-            ],
-            bar: {
-                // ↓ Another group with classes bar-auto, bar-1000, bar-1001, …
-                //   Groups can be named to make referencing in conflictingGroups easier
-                namedGroup: ['auto', (value) => Number(value) > 1000],
-            },
+        // ↓ Here you define class groups
+        classGroups: {
+            ...defaultConfig.classGroups,
+            // ↓ The `foo` key here is the class group ID
+            //   ↓ Creates group of classes which have conflicting styles
+            //     Classes here: foo, foo-2, bar-baz, bar-baz-1, bar-baz-2
+            foo: ['foo', 'foo-2', { 'bar-baz': ['', '1', '2'] }],
+            //   ↓ Another group with classes qux-auto, qux-1000, qux-1001, …
+            bar: [{ qux: ['auto', (value) => Number(value) > 1000] }],
         },
-        // ↓ Same like `dynamicClasses`, just for classes with no common starting characters
-        standaloneClasses: [
-            ...defaultConfig.standaloneClasses,
-            // ↓ Same structure like in `dynamicClasses`, but only strings allowed
-            ['my-custom-class', 'other-class-same-group'],
-        ],
         // ↓ Here you can define additional conflicts across different groups
-        conflictingGroups: {
-            ...defaultConfig.conflictingGroups,
-            // ↓ Path to class group which creates a conflict with …
-            'dynamicClasses.foo.0': [
-                // ↓ … classes from group at this path
-                'dynamicClasses.bar.namedGroup',
-            ],
+        conflictingClassGroups: {
+            ...defaultConfig.conflictingClassGroups,
+            // ↓ ID of class group which creates a conflict with …
+            //     ↓ … classes from groups with these IDs
+            foo: ['bar'],
         },
     }
 })
