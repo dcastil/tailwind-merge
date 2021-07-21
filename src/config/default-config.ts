@@ -377,7 +377,7 @@ export function getDefaultConfig() {
                  * Align Self
                  * @see https://tailwindcss.com/docs/align-self
                  */
-                ['auto', 'start', 'end', 'center', 'stretch'],
+                ['auto', 'start', 'end', 'center', 'stretch', 'baseline'],
             ],
             place: [
                 /**
