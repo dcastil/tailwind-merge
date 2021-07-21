@@ -7,7 +7,7 @@ template: |
 category-template: '### $TITLE'
 change-template: '- $TITLE #$NUMBER @$AUTHOR'
 change-title-escapes: '\<*_&'
-no-changes-template: '- No changes'
+no-changes-template: 'No changes'
 categories:
     - title: '⚠️ Needs Changelog Edit'
       label: 'needs-changelog-edit'
