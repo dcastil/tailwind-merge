@@ -39,7 +39,9 @@
         "test": "jest",
         "type-check": "tsc --build",
         "lint": "eslint --max-warnings 0 '**'",
-        "version": "yarn build && node scripts/package-build-stats && git add README.md"
+        "preversion": "git checkout main && git pull",
+        "version": "yarn build && node scripts/package-build-stats && git add README.md",
+        "postversion": "git push --follow-tags && open https://github.com/dcastil/tailwind-merge/releases"
     },
     "dependencies": {
         "hashlru": "^2.3.0"

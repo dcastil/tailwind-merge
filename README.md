@@ -206,4 +206,4 @@ This package follows the [SemVer](https://semver.org) versioning rules. More spe
 
 -   Releases with major version 0 might introduce breaking changes on a minor version update.
 
--   All changes are documented in [GitHub Releases](https://github.com/dcastil/tailwind-merge/releases). If a release can alter styles being applied, a warning is issued in the release description.
+-   A changelog is documented in [GitHub Releases](https://github.com/dcastil/tailwind-merge/releases). If a release can alter styles being applied, a warning is issued in the release description.
