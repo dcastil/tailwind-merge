@@ -32,7 +32,7 @@ export function mergeClassList(classList: string, configUtils: ConfigUtils) {
 
                 const arePrefixesValid = prefixes.every(configUtils.prefix.isValid)
                 const classGroupId = arePrefixesValid
-                    ? configUtils.class.getGroup(className)
+                    ? configUtils.class.getGroupId(className)
                     : undefined
 
                 if (!classGroupId) {
@@ -78,7 +78,7 @@ export function mergeClassList(classList: string, configUtils: ConfigUtils) {
 
                 classGroupsInConflict.add(classId)
                 configUtils.class
-                    .getConflictingGroups(classGroupId)
+                    .getConflictingGroupIds(classGroupId)
                     .forEach((group) => classGroupsInConflict.add(`${prefix}:${group}`))
 
                 return true

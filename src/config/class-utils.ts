@@ -21,7 +21,7 @@ export function createClassUtils(config: Config) {
 
     processClassGroups(config, classMap)
 
-    function getGroup(className: string) {
+    function getGroupId(className: string) {
         const classParts = className.split(CLASS_PART_SEPARATOR)
 
         // Classes like `-inset-1` produce an empty string as first classPart. We assume that classes for negative values are used correctly and remove it from classParts.
@@ -32,13 +32,13 @@ export function createClassUtils(config: Config) {
         return getGroupRecursive(classParts, classMap)
     }
 
-    function getConflictingGroups(classGroupId: ClassGroupId) {
+    function getConflictingGroupIds(classGroupId: ClassGroupId) {
         return config.conflictingClassGroups[classGroupId] || []
     }
 
     return {
-        getGroup,
-        getConflictingGroups,
+        getGroupId,
+        getConflictingGroupIds,
     }
 }
 
@@ -82,62 +82,35 @@ function processClassesRecursively(
 ) {
     classGroup.forEach((classDefinition) => {
         if (typeof classDefinition === 'string') {
-            addToClassPart({
-                classPartObject,
-                // We default to undefined to set classGroupId on current classPartObject when classDefinition === ''
-                path: classDefinition === '' ? undefined : classDefinition,
-                classGroupId,
-            })
+            const classPartObjectToEdit =
+                classDefinition === '' ? classPartObject : getPart(classPartObject, classDefinition)
+            classPartObjectToEdit.classGroupId = classGroupId
         } else if (typeof classDefinition === 'function') {
-            addToClassPart({
-                classPartObject,
-                validator: {
-                    validator: classDefinition,
-                    classGroupId,
-                },
+            classPartObject.validators.push({
+                validator: classDefinition,
+                classGroupId,
             })
         } else {
             Object.entries(classDefinition).forEach(([key, classGroup]) => {
-                processClassesRecursively(
-                    classGroup,
-                    getNextPart(classPartObject, key),
-                    classGroupId
-                )
+                processClassesRecursively(classGroup, getPart(classPartObject, key), classGroupId)
             })
         }
     })
 }
 
-interface AddToClassPartProps {
-    classPartObject: ClassPartObject
-    path?: string
-    validator?: ClassValidatorObject
-    classGroupId?: ClassGroupId
-}
-
-function addToClassPart({ path, classPartObject, validator, classGroupId }: AddToClassPartProps) {
+function getPart(classPartObject: ClassPartObject, path: string) {
     let currentClassPartObject = classPartObject
 
-    path?.split(CLASS_PART_SEPARATOR).forEach((pathPart) => {
-        currentClassPartObject = getNextPart(currentClassPartObject, pathPart)
+    path.split(CLASS_PART_SEPARATOR).forEach((pathPart) => {
+        if (currentClassPartObject.nextPart[pathPart] === undefined) {
+            currentClassPartObject.nextPart[pathPart] = {
+                nextPart: {},
+                validators: [],
+            }
+        }
+
+        currentClassPartObject = currentClassPartObject.nextPart[pathPart]!
     })
 
-    if (classGroupId) {
-        currentClassPartObject.classGroupId = classGroupId
-    }
-
-    if (validator) {
-        currentClassPartObject.validators.push(validator)
-    }
-}
-
-function getNextPart(classPartObject: ClassPartObject, nextPart: string) {
-    if (classPartObject.nextPart[nextPart] === undefined) {
-        classPartObject.nextPart[nextPart] = {
-            nextPart: {},
-            validators: [],
-        }
-    }
-
-    return classPartObject.nextPart[nextPart]!
+    return currentClassPartObject
 }
