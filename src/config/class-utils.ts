@@ -1,14 +1,14 @@
-import { ClassGroupId, Config, DynamicClassGroup, DynamicClassValidator } from './types'
+import { ClassGroupId, Config, ClassGroup, ClassValidator } from './types'
 
 interface ClassPartObject {
     nextPart: Record<string, ClassPartObject>
-    validators: ClassValidator[]
+    validators: ClassValidatorObject[]
     classGroupId?: ClassGroupId
 }
 
-interface ClassValidator {
+interface ClassValidatorObject {
     classGroupId: ClassGroupId
-    validator: DynamicClassValidator
+    validator: ClassValidator
 }
 
 const CLASS_PART_SEPARATOR = '-'
@@ -19,9 +19,7 @@ export function createClassUtils(config: Config) {
         validators: [],
     }
 
-    processStandaloneClasses(config, classMap)
-
-    const processDynamicClasses = createProcessDynamicClasses(config, classMap)
+    processClassGroups(config, classMap)
 
     function getGroup(className: string) {
         const classParts = className.split(CLASS_PART_SEPARATOR)
@@ -31,13 +29,11 @@ export function createClassUtils(config: Config) {
             classParts.shift()
         }
 
-        processDynamicClasses(classParts[0]!)
-
         return getGroupRecursive(classParts, classMap)
     }
 
     function getConflictingGroups(classGroupId: ClassGroupId) {
-        return config.conflictingGroups[classGroupId] || []
+        return config.conflictingClassGroups[classGroupId] || []
     }
 
     return {
@@ -73,43 +69,14 @@ function getGroupRecursive(
     return classPartObject.validators.find(({ validator }) => validator(classRest))?.classGroupId
 }
 
-function processStandaloneClasses(config: Config, classMap: ClassPartObject) {
-    Object.entries(config.standaloneClasses).forEach(([classGroupKey, classGroup]) => {
-        const classGroupId: ClassGroupId = `standaloneClasses.${classGroupKey}`
-
-        classGroup.forEach((className) => {
-            addToClassPart({
-                classPartObject: classMap,
-                path: className,
-                classGroupId,
-            })
-        })
+function processClassGroups(config: Config, classMap: ClassPartObject) {
+    Object.entries(config.classGroups).forEach(([classGroupId, classGroup]) => {
+        processClassesRecursively(classGroup, classMap, classGroupId)
     })
 }
 
-function createProcessDynamicClasses(config: Config, classMap: ClassPartObject) {
-    const { dynamicClasses } = config
-    const processedKeys = new Set<string>()
-
-    return function processDynamicClasses(key: string) {
-        if (processedKeys.has(key) || dynamicClasses[key] === undefined) {
-            return
-        }
-
-        const classPartObject = getNextPart(classMap, key)
-
-        Object.entries(dynamicClasses[key]!).forEach(([classGroupKey, classGroup]) => {
-            processClassesRecursively(
-                classGroup,
-                classPartObject,
-                `dynamicClasses.${key}.${classGroupKey}`
-            )
-        })
-    }
-}
-
 function processClassesRecursively(
-    classGroup: DynamicClassGroup,
+    classGroup: ClassGroup,
     classPartObject: ClassPartObject,
     classGroupId: ClassGroupId
 ) {
@@ -144,7 +111,7 @@ function processClassesRecursively(
 interface AddToClassPartProps {
     classPartObject: ClassPartObject
     path?: string
-    validator?: ClassValidator
+    validator?: ClassValidatorObject
     classGroupId?: ClassGroupId
 }
 
