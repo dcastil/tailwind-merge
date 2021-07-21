@@ -60,10 +60,8 @@ tailwind-merge makes sure to override conflicting classes and keeps everything e
 
 ### Optimized for speed
 
-I didn't run any performance benchmarks so far, but you should be able to merge a lot of classes per second. Some aspects of the library:
-
 -   Results get cached by default, so you don't need to worry about wasteful rerenders. The library uses a [LRU cache](<https://en.wikipedia.org/wiki/Cache_replacement_policies#Least_recently_used_(LRU)>) which stores up to 500 different results. The cache size can be modified or opt-out of by using [`createTailwindMerge()`](#createtailwindmerge).
--   Expensive computations of data structures happen on demand.
+-   Expensive computations happen during startup time so that `twMerge()` calls without a cache hit stay fast.
 
 ### Last conflicting class wins
 
