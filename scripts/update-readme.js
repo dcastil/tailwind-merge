@@ -14,7 +14,7 @@ const PACKAGE_PATH = `${ROOT_PATH}/package.json`
 await $`yarn build`
 
 const [packageStats, readme, packageJson] = await Promise.all([
-    packageBuildStats.getPackageStats(ROOT_PATH, { client: 'yarn' }),
+    packageBuildStats.getPackageStats(ROOT_PATH),
     fs.readFile(README_PATH, { encoding: 'utf-8' }),
     fs.readFile(PACKAGE_PATH, { encoding: 'utf-8' }),
 ])
