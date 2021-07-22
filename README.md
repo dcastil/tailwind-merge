@@ -61,7 +61,8 @@ tailwind-merge makes sure to override conflicting classes and keeps everything e
 ### Optimized for speed
 
 -   Results get cached by default, so you don't need to worry about wasteful rerenders. The library uses a [LRU cache](<https://en.wikipedia.org/wiki/Cache_replacement_policies#Least_recently_used_(LRU)>) which stores up to 500 different results. The cache size can be modified or opt-out of by using [`createTailwindMerge()`](#createtailwindmerge).
--   Expensive computations happen during startup time so that `twMerge()` calls without a cache hit stay fast.
+-   Expensive computations happen upfront so that `twMerge()` calls without a cache hit stay fast.
+-   These computations are called lazily on the first call to `twMerge()` to prevent it from impacting app startup performance if it isn't used initially.
 
 ### Last conflicting class wins
 
@@ -147,6 +148,8 @@ Function to create merge function with custom config.
 You need to provide a function which resolves to the config tailwind-merge should use for the new merge function. You can either extend from the default config or create a new one from scratch.
 
 ```ts
+// ↓ Callback passed to `createTailwindMerge()` is called when
+//   `customTwMerge()` gets called the first time.
 const customTwMerge = createTailwindMerge((getDefaultConfig) => {
     const defaultConfig = getDefaultConfig()
 
