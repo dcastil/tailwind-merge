@@ -5,16 +5,16 @@ export function createPrefixUtils(config: Config) {
         config.prefixes.map((prefix, index) => [prefix, index])
     )
 
-    function isValid(maybePrefix: string) {
+    function isPrefixValid(maybePrefix: string) {
         return prefixToIndexMap[maybePrefix] !== undefined
     }
 
-    function compare(firstPrefix: string, secondPrefix: string) {
+    function comparePrefixes(firstPrefix: string, secondPrefix: string) {
         return prefixToIndexMap[firstPrefix]! - prefixToIndexMap[secondPrefix]!
     }
 
     return {
-        isValid,
-        compare,
+        isPrefixValid,
+        comparePrefixes,
     }
 }

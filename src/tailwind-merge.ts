@@ -1,28 +1,43 @@
-import { createConfigUtils } from './config/config-utils'
-import { getDefaultConfig } from './config/default-config'
-import { Config } from './config/types'
-import { getLruCache } from './lru-cache'
+import { createConfigUtils } from './config-utils'
+import { getDefaultConfig } from './default-config'
+import { Config } from './types'
 import { mergeClassList } from './merge-classlist'
 
 type CreateConfig = (getDefault: typeof getDefaultConfig) => Config
-type TailwindMerge = (...classLists: Array<string | undefined>) => string
+type ClassLists = Array<string | undefined>
+type TailwindMerge = (...classLists: ClassLists) => string
+type ConfigUtils = ReturnType<typeof createConfigUtils>
 
 export function createTailwindMerge(createConfig: CreateConfig): TailwindMerge {
-    const config = createConfig(getDefaultConfig)
-    const configUtils = createConfigUtils(config)
-    const cache = getLruCache<string>(config.cacheSize)
+    let configUtils: ConfigUtils
+    let cacheGet: ConfigUtils['cache']['get']
+    let cacheSet: ConfigUtils['cache']['set']
+    let functionToCall = initTailwindMerge
 
-    return function tailwindMerge(...classLists) {
+    function initTailwindMerge(classLists: ClassLists) {
+        configUtils = createConfigUtils(createConfig(getDefaultConfig))
+        cacheGet = configUtils.cache.get
+        cacheSet = configUtils.cache.set
+        functionToCall = tailwindMerge
+
+        return tailwindMerge(classLists)
+    }
+
+    function tailwindMerge(classLists: ClassLists) {
         const classList = classLists.filter(Boolean).join(' ')
-        const cachedResult = cache.get(classList)
+        const cachedResult = cacheGet(classList)
 
         if (cachedResult) {
             return cachedResult
         }
 
         const result = mergeClassList(classList, configUtils)
-        cache.set(classList, result)
+        cacheSet(classList, result)
 
         return result
+    }
+
+    return function callTailwindMerge(...classLists) {
+        return functionToCall(classLists)
     }
 }
