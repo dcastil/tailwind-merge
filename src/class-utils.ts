@@ -21,7 +21,7 @@ export function createClassUtils(config: Config) {
 
     processClassGroups(config, classMap)
 
-    function getGroupId(className: string) {
+    function getClassGroupId(className: string) {
         const classParts = className.split(CLASS_PART_SEPARATOR)
 
         // Classes like `-inset-1` produce an empty string as first classPart. We assume that classes for negative values are used correctly and remove it from classParts.
@@ -32,13 +32,13 @@ export function createClassUtils(config: Config) {
         return getGroupRecursive(classParts, classMap)
     }
 
-    function getConflictingGroupIds(classGroupId: ClassGroupId) {
+    function getConflictingClassGroupIds(classGroupId: ClassGroupId) {
         return config.conflictingClassGroups[classGroupId] || []
     }
 
     return {
-        getGroupId,
-        getConflictingGroupIds,
+        getClassGroupId,
+        getConflictingClassGroupIds,
     }
 }
 

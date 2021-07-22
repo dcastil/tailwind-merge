@@ -1,4 +1,4 @@
-import { ConfigUtils } from './config/config-utils'
+import { ConfigUtils } from './config-utils'
 
 const SPLIT_CLASSES_REGEX = /\s+/
 const IMPORTANT_MODIFIER = '!'
@@ -8,6 +8,9 @@ const PREFIX_SEPARATOR_REGEX = /:(?![^[]*\])/
 const PREFIX_SEPARATOR = ':'
 
 export function mergeClassList(classList: string, configUtils: ConfigUtils) {
+    const { isPrefixValid, getClassGroupId, comparePrefixes, getConflictingClassGroupIds } =
+        configUtils
+
     /**
      * Set of classGroupIds in following format:
      * `{importantModifier}{variantPrefixes}{classGroupId}`
@@ -30,10 +33,8 @@ export function mergeClassList(classList: string, configUtils: ConfigUtils) {
                 const prefixes = classNameWithoutImportant.split(PREFIX_SEPARATOR_REGEX)
                 const className = prefixes.pop()!
 
-                const arePrefixesValid = prefixes.every(configUtils.prefix.isValid)
-                const classGroupId = arePrefixesValid
-                    ? configUtils.class.getGroupId(className)
-                    : undefined
+                const arePrefixesValid = prefixes.every(isPrefixValid)
+                const classGroupId = arePrefixesValid ? getClassGroupId(className) : undefined
 
                 if (!classGroupId) {
                     return {
@@ -45,10 +46,7 @@ export function mergeClassList(classList: string, configUtils: ConfigUtils) {
                 const variantPrefix =
                     prefixes.length === 0
                         ? ''
-                        : prefixes
-                              .sort(configUtils.prefix.compare)
-                              .concat('')
-                              .join(PREFIX_SEPARATOR)
+                        : prefixes.sort(comparePrefixes).concat('').join(PREFIX_SEPARATOR)
 
                 const fullPrefix = hasImportantModifier
                     ? IMPORTANT_MODIFIER + variantPrefix
@@ -77,9 +75,10 @@ export function mergeClassList(classList: string, configUtils: ConfigUtils) {
                 }
 
                 classGroupsInConflict.add(classId)
-                configUtils.class
-                    .getConflictingGroupIds(classGroupId)
-                    .forEach((group) => classGroupsInConflict.add(`${prefix}:${group}`))
+
+                getConflictingClassGroupIds(classGroupId).forEach((group) =>
+                    classGroupsInConflict.add(`${prefix}:${group}`)
+                )
 
                 return true
             })
