@@ -40,7 +40,7 @@
         "type-check": "tsc --build",
         "lint": "eslint --max-warnings 0 '**'",
         "preversion": "git checkout main && git pull",
-        "version": "zx scripts/update-readme.ts",
+        "version": "zx scripts/update-readme.js",
         "postversion": "git push --follow-tags && open https://github.com/dcastil/tailwind-merge/releases"
     },
     "dependencies": {
