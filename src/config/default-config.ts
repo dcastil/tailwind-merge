@@ -6,6 +6,7 @@ const OVERSCROLL = ['auto', 'contain', 'none'] as const
 const OVERFLOW = ['auto', 'hidden', 'visible', 'scroll'] as const
 const LENGTH = [isLength] as const
 const LENGTH_WITH_AUTO = ['auto', isLength] as const
+const LENGTH_WITH_EMPTY = ['', isLength] as const
 const INTEGER = [isInteger] as const
 const INTEGER_WITH_AUTO = ['auto', isInteger] as const
 const ANY = [isAny] as const
@@ -45,6 +46,7 @@ const BLEND_MODES = [
     },
 ] as const
 const ALIGN = ['start', 'end', 'center', 'between', 'around', 'evenly'] as const
+const ZERO_AND_EMPTY = ['', '0'] as const
 
 export function getDefaultConfig() {
     return {
@@ -777,27 +779,27 @@ export function getDefaultConfig() {
              * Border Width
              * @see https://tailwindcss.com/docs/border-width
              */
-            'border-w': [{ border: LENGTH }],
+            'border-w': [{ border: LENGTH_WITH_EMPTY }],
             /**
              * Border Width Top
              * @see https://tailwindcss.com/docs/border-width
              */
-            'border-w-t': [{ 'border-t': LENGTH }],
+            'border-w-t': [{ 'border-t': LENGTH_WITH_EMPTY }],
             /**
              * Border Width Right
              * @see https://tailwindcss.com/docs/border-width
              */
-            'border-w-r': [{ 'border-r': LENGTH }],
+            'border-w-r': [{ 'border-r': LENGTH_WITH_EMPTY }],
             /**
              * Border Width Bottom
              * @see https://tailwindcss.com/docs/border-width
              */
-            'border-w-b': [{ 'border-b': LENGTH }],
+            'border-w-b': [{ 'border-b': LENGTH_WITH_EMPTY }],
             /**
              * Border Width Left
              * @see https://tailwindcss.com/docs/border-width
              */
-            'border-w-l': [{ 'border-l': LENGTH }],
+            'border-w-l': [{ 'border-l': LENGTH_WITH_EMPTY }],
             /**
              * Border Opacity
              * @see https://tailwindcss.com/docs/border-opacity
@@ -812,7 +814,7 @@ export function getDefaultConfig() {
              * Divide Width X
              * @see https://tailwindcss.com/docs/divide-width
              */
-            'divide-x': [{ 'divide-x': LENGTH }],
+            'divide-x': [{ 'divide-x': LENGTH_WITH_EMPTY }],
             /**
              * Divide Width X Reverse
              * @see https://tailwindcss.com/docs/divide-width
@@ -822,7 +824,7 @@ export function getDefaultConfig() {
              * Divide Width Y
              * @see https://tailwindcss.com/docs/divide-width
              */
-            'divide-y': [{ 'divide-y': LENGTH }],
+            'divide-y': [{ 'divide-y': LENGTH_WITH_EMPTY }],
             /**
              * Divide Width Y Reverse
              * @see https://tailwindcss.com/docs/divide-width
@@ -872,12 +874,12 @@ export function getDefaultConfig() {
              * Ring Width
              * @see https://tailwindcss.com/docs/ring-width
              */
-            'ring-w': [{ ring: ['', isLength] }],
+            'ring-w': [{ ring: LENGTH_WITH_EMPTY }],
             /**
              * Ring Width Inset
              * @see https://tailwindcss.com/docs/ring-width
              */
-            'ring-w-inset': [{ ring: ['inset'] }],
+            'ring-w-inset': ['ring-inset'],
             /**
              * Ring Color
              * @see https://tailwindcss.com/docs/ring-color
@@ -944,7 +946,7 @@ export function getDefaultConfig() {
              * Grayscale
              * @see https://tailwindcss.com/docs/grayscale
              */
-            grayscale: [{ grayscale: ['0', ''] }],
+            grayscale: [{ grayscale: ZERO_AND_EMPTY }],
             /**
              * Hue Rotate
              * @see https://tailwindcss.com/docs/hue-rotate
@@ -954,7 +956,7 @@ export function getDefaultConfig() {
              * Invert
              * @see https://tailwindcss.com/docs/invert
              */
-            invert: [{ invert: ['0', ''] }],
+            invert: [{ invert: ZERO_AND_EMPTY }],
             /**
              * Saturate
              * @see https://tailwindcss.com/docs/saturate
@@ -964,7 +966,7 @@ export function getDefaultConfig() {
              * Sepia
              * @see https://tailwindcss.com/docs/sepia
              */
-            sepia: [{ sepia: ['0', ''] }],
+            sepia: [{ sepia: ZERO_AND_EMPTY }],
             /**
              * Backdrop Filter
              * @see https://tailwindcss.com/docs/backdrop-filter
@@ -989,7 +991,7 @@ export function getDefaultConfig() {
              * Backdrop Grayscale
              * @see https://tailwindcss.com/docs/backdrop-grayscale
              */
-            'backdrop-grayscale': [{ 'backdrop-grayscale': ['0', ''] }],
+            'backdrop-grayscale': [{ 'backdrop-grayscale': ZERO_AND_EMPTY }],
             /**
              * Backdrop Hue Rotate
              * @see https://tailwindcss.com/docs/backdrop-hue-rotate
@@ -999,7 +1001,7 @@ export function getDefaultConfig() {
              * Backdrop Invert
              * @see https://tailwindcss.com/docs/backdrop-invert
              */
-            'backdrop-invert': [{ 'backdrop-invert': ['0', ''] }],
+            'backdrop-invert': [{ 'backdrop-invert': ZERO_AND_EMPTY }],
             /**
              * Backdrop Opacity
              * @see https://tailwindcss.com/docs/backdrop-opacity
@@ -1014,7 +1016,7 @@ export function getDefaultConfig() {
              * Backdrop Sepia
              * @see https://tailwindcss.com/docs/backdrop-sepia
              */
-            'backdrop-sepia': [{ 'backdrop-sepia': ['0', ''] }],
+            'backdrop-sepia': [{ 'backdrop-sepia': ZERO_AND_EMPTY }],
             // Tables
             /**
              * Border Collapse
