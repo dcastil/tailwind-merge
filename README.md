@@ -1,7 +1,7 @@
 <div align="center">
     <br />
     <a href="https://github.com/dcastil/tailwind-merge">
-        <img src="https://github.com/dcastil/tailwind-merge/raw/main/assets/logo.svg" alt="tailwind-merge" width="221px" />
+        <img src="https://github.com/dcastil/tailwind-merge/raw/v0.4.0/assets/logo.svg" alt="tailwind-merge" width="221px" />
     </a>
 </div>
 
