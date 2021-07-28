@@ -39,6 +39,7 @@ function MySlightlyModifiedInput(props) {
             {...props}
             className="p-3" // ← Only want to change some padding
         />
+    )
 }
 ```
 
