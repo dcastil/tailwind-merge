@@ -29,7 +29,7 @@ If you use Tailwind with a component-based UI renderer like [React](https://reac
 import React from 'react'
 
 function MyGenericInput(props) {
-    const className = `px-2 py-1 ${props.className || ''}`
+    const className = `border rounded px-2 py-1 ${props.className || ''}`
     return <input {...props} className={className} />
 }
 
@@ -42,19 +42,19 @@ function MySlightlyModifiedInput(props) {
 }
 ```
 
-When the `MySlightlyModifiedInput` is rendered, an input with the className `px-2 py-1 p-3` gets created. But because of the way the [CSS cascade](https://developer.mozilla.org/en-US/docs/Web/CSS/Cascade) works, the styles of the `p-3` class are ignored. The order of the classes in the `className` string doesn't matter at all and the only way to apply the `p-3` styles is to remove both `px-2` and `py-1`.
+When the `MySlightlyModifiedInput` is rendered, an input with the className `border rounded px-2 py-1 p-3` gets created. But because of the way the [CSS cascade](https://developer.mozilla.org/en-US/docs/Web/CSS/Cascade) works, the styles of the `p-3` class are ignored. The order of the classes in the `className` string doesn't matter at all and the only way to apply the `p-3` styles is to remove both `px-2` and `py-1`.
 
 This is where tailwind-merge comes in.
 
 ```jsx
 function MyGenericInput(props) {
     // ↓ Now `props.className` can override conflicting classes
-    const className = twMerge('px-2 py-1', props.className)
+    const className = twMerge('border rounded px-2 py-1', props.className)
     return <input {...props} className={className} />
 }
 ```
 
-tailwind-merge makes sure to override conflicting classes and keeps everything else untouched. In the case of the `MySlightlyModifiedInput`, the input now only renders the class `p-3`.
+tailwind-merge makes sure to override conflicting classes and keeps everything else untouched. In the case of the `MySlightlyModifiedInput`, the input now only renders the classes `border rounded p-3`.
 
 ## Features
 
