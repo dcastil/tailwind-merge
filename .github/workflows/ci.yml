@@ -18,7 +18,10 @@ jobs:
               with:
                   node-version: 14
                   cache: 'yarn'
-            - run: yarn install --frozen-lockfile
+            - run: yarn install --immutable --immutable-cache
+              if: ${{ github.event_name != 'pull_request' }}
+            - run: yarn install --immutable --immutable-cache --check-cache
+              if: ${{ github.event_name == 'pull_request' }}
             - run: yarn lint
             - run: yarn type-check
             - run: yarn test
