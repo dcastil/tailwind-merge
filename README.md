@@ -168,7 +168,7 @@ const customTwMerge = createTailwindMerge((getDefaultConfig) => {
             //     Classes here: foo, foo-2, bar-baz, bar-baz-1, bar-baz-2
             foo: ['foo', 'foo-2', { 'bar-baz': ['', '1', '2'] }],
             //   ↓ Another group with classes qux-auto, qux-1000, qux-1001, …
-            bar: [{ qux: ['auto', (value) => Number(value) > 1000] }],
+            bar: [{ qux: ['auto', (value) => Number(value) >= 1000] }],
         },
         // ↓ Here you can define additional conflicts across different groups
         conflictingClassGroups: {
