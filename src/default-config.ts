@@ -47,6 +47,45 @@ const BLEND_MODES = [
 ] as const
 const ALIGN = ['start', 'end', 'center', 'between', 'around', 'evenly'] as const
 const ZERO_AND_EMPTY = ['', '0'] as const
+const PSEUDO_VARIANTS = [
+    // Positional
+    'first',
+    'last',
+    'only',
+    'odd',
+    'even',
+    'first-of-type',
+    'last-of-type',
+    'only-of-type',
+
+    // State
+    'visited',
+    'target',
+
+    // Forms
+    'default',
+    'checked',
+    'indeterminate',
+    'placeholder-shown',
+    'autofill',
+    'required',
+    'valid',
+    'invalid',
+    'in-range',
+    'out-of-range',
+    'read-only',
+
+    // Content
+    'empty',
+
+    // Interactive
+    'focus-within',
+    'hover',
+    'focus',
+    'focus-visible',
+    'active',
+    'disabled',
+] as const
 
 export function getDefaultConfig() {
     return {
@@ -56,44 +95,17 @@ export function getDefaultConfig() {
             'dark',
             'motion-safe',
             'motion-reduce',
-            'first',
-            'last',
-            'odd',
-            'even',
-            'visited',
-            'checked',
-            'group-hover',
-            'group-focus',
-            'focus-within',
-            'hover',
-            'focus',
-            'focus-visible',
-            'active',
-            'disabled',
             'before',
             'after',
             'first-letter',
             'first-line',
             'selection',
             'marker',
-            'only',
-            'first-of-type',
-            'last-of-type',
-            'only-of-type',
-            'target',
-            'default',
-            'indeterminate',
-            'placeholder-shown',
-            'autofill',
-            'required',
-            'valid',
-            'invalid',
-            'in-range',
-            'out-of-range',
-            'peer-hover',
-            'peer-focus',
-            'peer-checked',
-            'peer-disabled',
+            ...PSEUDO_VARIANTS,
+            {
+                group: PSEUDO_VARIANTS,
+                peer: PSEUDO_VARIANTS,
+            },
         ],
         classGroups: {
             // Layout
