@@ -11,3 +11,10 @@ test('handles conflicts across class groups correctly', () => {
     expect(twMerge('right-1 inset-x-1 inset-y-1')).toBe('inset-x-1 inset-y-1')
     expect(twMerge('inset-x-1 hover:left-1 inset-1')).toBe('hover:left-1 inset-1')
 })
+
+test('ring and shadow classes do not create conflict', () => {
+    expect(twMerge('ring shadow')).toBe('ring shadow')
+    expect(twMerge('ring-2 shadow-md')).toBe('ring-2 shadow-md')
+    expect(twMerge('shadow ring')).toBe('shadow ring')
+    expect(twMerge('shadow-md ring-2')).toBe('shadow-md ring-2')
+})
