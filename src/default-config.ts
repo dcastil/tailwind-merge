@@ -1249,8 +1249,6 @@ export function getDefaultConfig() {
                 'border-color-b',
                 'border-color-l',
             ],
-            'ring-w': ['shadow'],
-            shadow: ['ring-w'],
         },
     } as const
 }
