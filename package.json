@@ -1,6 +1,6 @@
 {
     "name": "tailwind-merge",
-    "version": "0.5.0",
+    "version": "0.5.1",
     "description": "Merge Tailwind CSS classes without style conflicts",
     "keywords": [
         "tailwindcss",
@@ -39,7 +39,6 @@
         "test": "jest",
         "type-check": "tsc --build",
         "lint": "eslint --max-warnings 0 '**'",
-        "preversion": "git checkout main && git pull",
         "version": "zx scripts/update-readme.js",
         "postversion": "git push --follow-tags && open https://github.com/dcastil/tailwind-merge/releases"
     },
