@@ -3,7 +3,7 @@ export interface Config {
      * Prefixes which can be prepended to Tailwind CSS classes
      * @example ['hover', 'focus']
      */
-    prefixes: readonly string[]
+    prefixes: readonly Prefix[]
     /**
      * Integer indicating size of LRU cache used for memoizing results.
      * - Cache might be up to twice as big as `cacheSize`
@@ -30,6 +30,7 @@ export interface Config {
     conflictingClassGroups: Record<ClassGroupId, readonly ClassGroupId[]>
 }
 
+export type Prefix = string | Record<string, readonly Prefix[]>
 export type ClassGroup = readonly ClassDefinition[]
 type ClassDefinition = string | ClassValidator | ClassObject
 export type ClassValidator = (classPart: string) => boolean
