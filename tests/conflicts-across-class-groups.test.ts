@@ -15,4 +15,6 @@ test('handles conflicts across class groups correctly', () => {
 test('ring and shadow classes do not create conflict', () => {
     expect(twMerge('ring shadow')).toBe('ring shadow')
     expect(twMerge('ring-2 shadow-md')).toBe('ring-2 shadow-md')
+    expect(twMerge('shadow ring')).toBe('shadow ring')
+    expect(twMerge('shadow-md ring-2')).toBe('shadow-md ring-2')
 })
