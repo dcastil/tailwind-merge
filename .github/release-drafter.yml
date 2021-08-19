@@ -21,7 +21,6 @@ categories:
       label: 'other'
 exclude-labels:
     - 'skip-changelog'
-prerelease: true
 version-resolver:
     major:
         labels:
