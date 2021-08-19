@@ -1244,6 +1244,18 @@ export function getDefaultConfig() {
             mx: ['mr', 'ml'],
             my: ['mt', 'mb'],
             'font-size': ['leading'],
+            'fvn-normal': [
+                'fvn-ordinal',
+                'fvn-slashed-zero',
+                'fvn-figure',
+                'fvn-spacing',
+                'fvn-fraction',
+            ],
+            'fvn-ordinal': ['fvn-normal'],
+            'fvn-slashed-zero': ['fvn-normal'],
+            'fvn-figure': ['fvn-normal'],
+            'fvn-spacing': ['fvn-normal'],
+            'fvn-fraction': ['fvn-normal'],
             rounded: [
                 'rounded-t',
                 'rounded-r',
