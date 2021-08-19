@@ -584,16 +584,32 @@ export function getDefaultConfig() {
              * Font Variant Numeric
              * @see https://tailwindcss.com/docs/font-variant-numeric
              */
-            'font-variant-numeric': [
-                'normal-nums',
-                'ordinal',
-                'slashed-zero',
-                'lining-nums',
-                'oldstyle-nums',
-                'tabular-nums',
-                'diagonal-nums',
-                'stacked-fractons',
-            ],
+            'fvn-normal': ['normal-nums'],
+            /**
+             * Font Variant Numeric
+             * @see https://tailwindcss.com/docs/font-variant-numeric
+             */
+            'fvn-ordinal': ['ordinal'],
+            /**
+             * Font Variant Numeric
+             * @see https://tailwindcss.com/docs/font-variant-numeric
+             */
+            'fvn-slashed-zero': ['slashed-zero'],
+            /**
+             * Font Variant Numeric
+             * @see https://tailwindcss.com/docs/font-variant-numeric
+             */
+            'fvn-figure': ['lining-nums', 'oldstyle-nums'],
+            /**
+             * Font Variant Numeric
+             * @see https://tailwindcss.com/docs/font-variant-numeric
+             */
+            'fvn-spacing': ['proportional-nums', 'tabular-nums'],
+            /**
+             * Font Variant Numeric
+             * @see https://tailwindcss.com/docs/font-variant-numeric
+             */
+            'fvn-fraction': ['diagonal-fractions', 'stacked-fractons'],
             /**
              * Letter Spacing
              * @see https://tailwindcss.com/docs/letter-spacing
