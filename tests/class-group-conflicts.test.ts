@@ -10,3 +10,14 @@ test('merges classes from same group correctly', () => {
         twMerge('overflow-x-auto hover:overflow-x-hidden hover:overflow-x-auto overflow-x-scroll')
     ).toBe('hover:overflow-x-auto overflow-x-scroll')
 })
+
+test('merges classes from Font Variant Numeric section correctly', () => {
+    expect(twMerge('lining-nums tabular-nums diagonal-fractions')).toBe(
+        'lining-nums tabular-nums diagonal-fractions'
+    )
+    expect(twMerge('normal-nums tabular-nums diagonal-fractions')).toBe(
+        'tabular-nums diagonal-fractions'
+    )
+    expect(twMerge('tabular-nums diagonal-fractions normal-nums')).toBe('normal-nums')
+    expect(twMerge('tabular-nums proportional-nums')).toBe('proportional-nums')
+})
