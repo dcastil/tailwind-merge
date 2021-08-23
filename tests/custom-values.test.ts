@@ -3,6 +3,7 @@ import { twMerge } from '../src'
 test('handles custom length conflicts correctly', () => {
     expect(twMerge('m-[2px] m-[10px]')).toBe('m-[10px]')
     expect(twMerge('my-[2px] m-[10rem]')).toBe('m-[10rem]')
+    expect(twMerge('cursor-pointer cursor-[grab]')).toBe('cursor-[grab]')
     expect(twMerge('m-[2px] m-[calc(100%-var(--custom))]')).toBe('m-[calc(100%-var(--custom))]')
     expect(twMerge('m-[2px] m-[length:var(--mystery-var)]')).toBe('m-[length:var(--mystery-var)]')
 })

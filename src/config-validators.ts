@@ -4,17 +4,22 @@ const stringLengths = new Set(['px', 'full', 'screen'])
 const lengthUnitRegex = /\d+(%|px|em|rem|vh|vw|pt|pc|in|cm|mm|cap|ch|ex|lh|rlh|vi|vb|vmin|vmax)/
 
 export function isLength(classPart: string) {
+    return (
+        isCustomLength(classPart) ||
+        !Number.isNaN(Number(classPart)) ||
+        stringLengths.has(classPart) ||
+        fractionRegex.test(classPart)
+    )
+}
+
+export function isCustomLength(classPart: string) {
     const customValue = customValueRegex.exec(classPart)?.[1]
 
     if (customValue) {
         return customValue.startsWith('length:') || lengthUnitRegex.test(customValue)
     }
 
-    return (
-        !Number.isNaN(Number(classPart)) ||
-        stringLengths.has(classPart) ||
-        fractionRegex.test(classPart)
-    )
+    return false
 }
 
 export function isInteger(classPart: string) {

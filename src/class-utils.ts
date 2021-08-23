@@ -1,6 +1,6 @@
 import { ClassGroupId, Config, ClassGroup, ClassValidator } from './types'
 
-interface ClassPartObject {
+export interface ClassPartObject {
     nextPart: Record<string, ClassPartObject>
     validators: ClassValidatorObject[]
     classGroupId?: ClassGroupId
@@ -14,12 +14,7 @@ interface ClassValidatorObject {
 const CLASS_PART_SEPARATOR = '-'
 
 export function createClassUtils(config: Config) {
-    const classMap: ClassPartObject = {
-        nextPart: {},
-        validators: [],
-    }
-
-    processClassGroups(config, classMap)
+    const classMap = createClassMap(config)
 
     function getClassGroupId(className: string) {
         const classParts = className.split(CLASS_PART_SEPARATOR)
@@ -69,10 +64,20 @@ function getGroupRecursive(
     return classPartObject.validators.find(({ validator }) => validator(classRest))?.classGroupId
 }
 
-function processClassGroups(config: Config, classMap: ClassPartObject) {
+/**
+ * Exported for testing only
+ */
+export function createClassMap(config: Config) {
+    const classMap: ClassPartObject = {
+        nextPart: {},
+        validators: [],
+    }
+
     Object.entries(config.classGroups).forEach(([classGroupId, classGroup]) => {
         processClassesRecursively(classGroup, classMap, classGroupId)
     })
+
+    return classMap
 }
 
 function processClassesRecursively(
