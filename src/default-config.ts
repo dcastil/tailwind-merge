@@ -1,4 +1,4 @@
-import { isAny, isCustomValue, isInteger, isLength } from './config-validators'
+import { isAny, isCustomLength, isCustomValue, isInteger, isLength } from './config-validators'
 
 const SIZES_SIMPLE = ['sm', 'md', 'lg', 'xl', '2xl'] as const
 const SIZES_EXTENDED = ['3xl', '4xl', '5xl', '6xl', '7xl'] as const
@@ -21,7 +21,7 @@ const POSITIONS = [
     'right-top',
     'top',
 ] as const
-const ROUNDED = ['none', '', ...SIZES_SIMPLE, '3xl', 'full'] as const
+const ROUNDED = ['none', '', ...SIZES_SIMPLE, '3xl', 'full', isCustomLength] as const
 const BORDER_STYLES = ['solid', 'dashed', 'dotted', 'double', 'none'] as const
 const BLEND_MODES = [
     {
@@ -271,7 +271,7 @@ export function getDefaultConfig() {
              * Flex
              * @see https://tailwindcss.com/docs/flex
              */
-            flex: [{ flex: ['1', 'auto', 'initial', 'none'] }],
+            flex: [{ flex: ['1', 'auto', 'initial', 'none', isCustomValue] }],
             /**
              * Flex Grow
              * @see https://tailwindcss.com/docs/flex-grow
@@ -543,13 +543,23 @@ export function getDefaultConfig() {
              * Font Family
              * @see https://tailwindcss.com/docs/font-family
              */
-            'font-family': [{ font: ['sans', 'serif', 'mono'] }],
+            'font-family': [{ font: ANY }],
             /**
              * Font Size
              * @see https://tailwindcss.com/docs/font-size
              */
             'font-size': [
-                { text: ['xs', ...SIZES_SIMPLE, 'base', ...SIZES_EXTENDED, '8xl', '9xl'] },
+                {
+                    text: [
+                        'xs',
+                        ...SIZES_SIMPLE,
+                        'base',
+                        ...SIZES_EXTENDED,
+                        '8xl',
+                        '9xl',
+                        isCustomLength,
+                    ],
+                },
             ],
             /**
              * Font Smoothing
@@ -614,7 +624,19 @@ export function getDefaultConfig() {
              * Letter Spacing
              * @see https://tailwindcss.com/docs/letter-spacing
              */
-            tracking: [{ tracking: ['tighter', 'tight', 'normal', 'wide', 'wider', 'widest'] }],
+            tracking: [
+                {
+                    tracking: [
+                        'tighter',
+                        'tight',
+                        'normal',
+                        'wide',
+                        'wider',
+                        'widest',
+                        isCustomLength,
+                    ],
+                },
+            ],
             /**
              * Line Height
              * @see https://tailwindcss.com/docs/line-height
@@ -954,7 +976,7 @@ export function getDefaultConfig() {
              * Blur
              * @see https://tailwindcss.com/docs/blur
              */
-            blur: [{ blur: ['none', '', ...SIZES_SIMPLE, '3xl'] }],
+            blur: [{ blur: ['none', '', ...SIZES_SIMPLE, '3xl', isCustomLength] }],
             /**
              * Brightness
              * @see https://tailwindcss.com/docs/brightness
@@ -1170,6 +1192,7 @@ export function getDefaultConfig() {
                         'move',
                         'help',
                         'not-allowed',
+                        isCustomValue,
                     ],
                 },
             ],
