@@ -4,7 +4,8 @@ import { Config } from './types'
 import { mergeClassList } from './merge-classlist'
 
 type CreateConfig = (getDefault: typeof getDefaultConfig) => Config
-type ClassLists = Array<string | undefined>
+type ClassLists = ClassListElement[]
+type ClassListElement = string | undefined | null
 type TailwindMerge = (...classLists: ClassLists) => string
 type ConfigUtils = ReturnType<typeof createConfigUtils>
 
@@ -14,17 +15,16 @@ export function createTailwindMerge(createConfig: CreateConfig): TailwindMerge {
     let cacheSet: ConfigUtils['cache']['set']
     let functionToCall = initTailwindMerge
 
-    function initTailwindMerge(classLists: ClassLists) {
+    function initTailwindMerge(classList: string) {
         configUtils = createConfigUtils(createConfig(getDefaultConfig))
         cacheGet = configUtils.cache.get
         cacheSet = configUtils.cache.set
         functionToCall = tailwindMerge
 
-        return tailwindMerge(classLists)
+        return tailwindMerge(classList)
     }
 
-    function tailwindMerge(classLists: ClassLists) {
-        const classList = classLists.filter(Boolean).join(' ')
+    function tailwindMerge(classList: string) {
         const cachedResult = cacheGet(classList)
 
         if (cachedResult) {
@@ -37,7 +37,7 @@ export function createTailwindMerge(createConfig: CreateConfig): TailwindMerge {
         return result
     }
 
-    return function callTailwindMerge(...classLists) {
-        return functionToCall(classLists)
+    return function callTailwindMerge(...classLists: ClassLists) {
+        return functionToCall(classLists.join(' '))
     }
 }
