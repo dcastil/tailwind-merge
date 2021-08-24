@@ -8,7 +8,7 @@ change-title-escapes: '\<*_&'
 no-changes-template: 'No changes'
 categories:
     - title: '⚠️ Needs Changelog Edit'
-      label: 'needs-changelog-edit'
+      label: 'needs changelog edit'
     - title: 'Breaking Changes'
       label: 'breaking'
     - title: 'Features'
@@ -18,7 +18,7 @@ categories:
     - title: 'Other'
       label: 'other'
 exclude-labels:
-    - 'skip-changelog'
+    - 'skip changelog'
 version-resolver:
     major:
         labels:
