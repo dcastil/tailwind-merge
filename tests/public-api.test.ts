@@ -14,6 +14,7 @@ test('twMerge() has correct inputs and outputs', () => {
         expect.any(String)
     )
     expect(twMerge('hello world', undefined)).toStrictEqual(expect.any(String))
+    expect(twMerge('hello world', undefined, null)).toStrictEqual(expect.any(String))
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const noRun = () => {
@@ -21,8 +22,6 @@ test('twMerge() has correct inputs and outputs', () => {
         twMerge(0)
         // @ts-expect-error
         twMerge(123)
-        // @ts-expect-error
-        twMerge(null)
         // @ts-expect-error
         twMerge(true)
         // @ts-expect-error
@@ -68,6 +67,7 @@ test('createTailwindMerge() has correct inputs and outputs', () => {
         expect.any(String)
     )
     expect(tailwindMerge('hello world', undefined)).toStrictEqual(expect.any(String))
+    expect(tailwindMerge('hello world', undefined, null)).toStrictEqual(expect.any(String))
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const noRun = () => {
@@ -75,8 +75,6 @@ test('createTailwindMerge() has correct inputs and outputs', () => {
         tailwindMerge(0)
         // @ts-expect-error
         tailwindMerge(123)
-        // @ts-expect-error
-        tailwindMerge(null)
         // @ts-expect-error
         tailwindMerge(true)
         // @ts-expect-error

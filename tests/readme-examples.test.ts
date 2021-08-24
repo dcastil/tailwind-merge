@@ -6,7 +6,7 @@ const twMergeExampleRegex =
     /twMerge\((?<arguments>[\w\s\-:[\]#(),!\n'"]+?)\)(?!.*(?<!\/\/.*)')\s*\n?\s*\/\/\s*→\s*['"](?<result>.+)['"]/g
 
 test('readme examples', () => {
-    expect.assertions(16)
+    expect.assertions(17)
 
     return fs.promises
         .readFile(`${__dirname}/../README.md`, { encoding: 'utf-8' })
