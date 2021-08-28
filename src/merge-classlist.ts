@@ -25,13 +25,14 @@ export function mergeClassList(classList: string, configUtils: ConfigUtils) {
             .trim()
             .split(SPLIT_CLASSES_REGEX)
             .map((originalClassName) => {
-                const hasImportantModifier = originalClassName.startsWith(IMPORTANT_MODIFIER)
-                const classNameWithoutImportant = hasImportantModifier
-                    ? originalClassName.substring(1)
-                    : originalClassName
+                const prefixes = originalClassName.split(PREFIX_SEPARATOR_REGEX)
+                const classNameWithImportantModifier = prefixes.pop()!
 
-                const prefixes = classNameWithoutImportant.split(PREFIX_SEPARATOR_REGEX)
-                const className = prefixes.pop()!
+                const hasImportantModifier =
+                    classNameWithImportantModifier.startsWith(IMPORTANT_MODIFIER)
+                const className = hasImportantModifier
+                    ? classNameWithImportantModifier.substring(1)
+                    : classNameWithImportantModifier
 
                 const arePrefixesValid = prefixes.every(isPrefixValid)
                 const classGroupId = arePrefixesValid ? getClassGroupId(className) : undefined
