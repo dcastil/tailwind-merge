@@ -126,10 +126,10 @@ twMerge('p-5 p-2 my-non-tailwind-class p-4') // → 'my-non-tailwind-class p-4'
 twMerge('text-red text-secret-sauce') // → 'text-secret-sauce'
 ```
 
-### Ignores `undefined` and `null` values
+### Ignores `undefined`, `null` and `false` values
 
 ```ts
-twMerge('some-class', undefined, null) // → 'some-class'
+twMerge('some-class', undefined, null, false) // → 'some-class'
 ```
 
 ## API reference
@@ -139,7 +139,7 @@ Reference to all exports of tailwind-merge.
 ### `twMerge`
 
 ```ts
-function twMerge(...classLists: Array<string | undefined | null>): string
+function twMerge(...classLists: Array<string | undefined | null | false>): string
 ```
 
 Default function to use if you're using the default Tailwind config or are close enough to the default config. You can use this function if all of the following points apply to your Tailwind config:
