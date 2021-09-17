@@ -1,11 +1,4 @@
 /.vscode/
-/.yarn/*
-!/.yarn/cache/
-!/.yarn/patches/
-!/.yarn/plugins/
-!/.yarn/releases/
-!/.yarn/sdks/
-!/.yarn/versions/
 /dist/
 node_modules/
 .DS_Store
