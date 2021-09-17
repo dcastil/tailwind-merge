@@ -43,7 +43,6 @@ export function createTailwindMerge(createConfig: CreateConfig): TailwindMerge {
 
         // Credits → https://github.com/lukeed/clsx/blob/v1.1.1/src/index.js
         for (let index = 0; index < arguments.length; index += 1) {
-            // eslint-disable-next-line no-cond-assign
             if ((temp = arguments[index])) {
                 classList && (classList += ' ')
                 classList += temp
