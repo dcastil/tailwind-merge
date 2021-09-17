@@ -39,9 +39,9 @@
         "test": "jest",
         "type-check": "tsc --build",
         "lint": "eslint --max-warnings 0 '**'",
-        "preversion-paused": "git checkout main && git pull",
+        "preversion": "git checkout main && git pull",
         "version": "zx scripts/update-readme.js",
-        "postversion-paused": "git push --follow-tags && open https://github.com/dcastil/tailwind-merge/releases"
+        "postversion": "git push --follow-tags && open https://github.com/dcastil/tailwind-merge/releases"
     },
     "dependencies": {
         "hashlru": "^2.3.0"
