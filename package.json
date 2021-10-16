@@ -34,8 +34,8 @@
     },
     "sideEffects": false,
     "scripts": {
-        "build": "rm -rf 'dist/*' && microbundle --strict --no-compress --format modern,esm,cjs",
-        "build:min": "rm -rf 'dist/*' && microbundle --strict --format modern",
+        "build": "rm -rf dist/* && microbundle --strict --no-compress --format modern,esm,cjs",
+        "build:min": "rm -rf dist/* && microbundle --strict --format modern",
         "test": "jest",
         "type-check": "tsc --build",
         "lint": "eslint --max-warnings 0 '**'",
