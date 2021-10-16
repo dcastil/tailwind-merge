@@ -2,8 +2,10 @@ name-template: 'v$RESOLVED_VERSION'
 tag-template: 'v$RESOLVED_VERSION'
 template: |
     $CHANGES
+
+    **Full Changelog**: https://github.com/dcastil/tailwind-merge/compare/$PREVIOUS_TAG...v$RESOLVED_VERSION
 category-template: '### $TITLE'
-change-template: '- $TITLE #$NUMBER @$AUTHOR'
+change-template: '- $TITLE by @$AUTHOR in https://github.com/dcastil/tailwind-merge/pull/$NUMBER'
 change-title-escapes: '\<*_&'
 no-changes-template: 'No changes'
 categories:
