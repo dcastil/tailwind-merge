@@ -24,7 +24,10 @@
     ],
     "type": "module",
     "source": "src/index.ts",
-    "exports": "./dist/index.js",
+    "exports": {
+        "require": "./dist/index.cjs",
+        "default": "./dist/index.js"
+    },
     "module": "dist/index.module.js",
     "main": "dist/index.cjs",
     "types": "./dist/types/index.d.ts",
