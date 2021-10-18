@@ -155,12 +155,12 @@ export function getDefaultConfig() {
              * Floats
              * @see https://tailwindcss.com/docs/float
              */
-            float: [{ float: ['right', 'left', 'none'] }],
+            float: [{ float: ['right', 'left', 'none', 'start', 'end'] }],
             /**
              * Clear
              * @see https://tailwindcss.com/docs/clear
              */
-            clear: [{ clear: ['left', 'right', 'both', 'none'] }],
+            clear: [{ clear: ['left', 'right', 'both', 'none', 'start', 'end'] }],
             /**
              * Isolation
              * @see https://tailwindcss.com/docs/isolation
@@ -246,6 +246,18 @@ export function getDefaultConfig() {
              * @see https://tailwindcss.com/docs/top-right-bottom-left
              */
             left: [{ left: LENGTH_WITH_AUTO }],
+            /**
+             * Left
+             * @see https://tailwindcss.com/docs/top-right-bottom-left
+             * @see https://github.com/20lives/tailwindcss-rtl#utilities
+             */
+            start: [{ start: LENGTH_WITH_AUTO }],
+            /**
+             * Left
+             * @see https://tailwindcss.com/docs/top-right-bottom-left
+             * @see https://github.com/20lives/tailwindcss-rtl#utilities
+             */
+            end: [{ end: LENGTH_WITH_AUTO }],
             /**
              * Visibility
              * @see https://tailwindcss.com/docs/visibility
@@ -438,6 +450,18 @@ export function getDefaultConfig() {
              * @see https://tailwindcss.com/docs/padding
              */
             pl: [{ pl: LENGTH }],
+
+            /**
+             * Padding start
+             * @see https://github.com/20lives/tailwindcss-rtl#utilities
+             */
+            ps: [{ ps: LENGTH }],
+
+            /**
+             * Padding end
+             * @see https://github.com/20lives/tailwindcss-rtl#utilities
+             */
+            pe: [{ pe: LENGTH }],
             /**
              * Margin
              * @see https://tailwindcss.com/docs/margin
@@ -473,11 +497,29 @@ export function getDefaultConfig() {
              * @see https://tailwindcss.com/docs/margin
              */
             ml: [{ ml: LENGTH_WITH_AUTO }],
+
+            /**
+             * Margin start
+             * @see https://github.com/20lives/tailwindcss-rtl#utilities
+             */
+            ms: [{ ms: LENGTH }],
+
+            /**
+             * Margin end
+             * @see https://github.com/20lives/tailwindcss-rtl#utilities
+             */
+            me: [{ me: LENGTH }],
             /**
              * Space Between X
              * @see https://tailwindcss.com/docs/space
              */
             'space-x': [{ 'space-x': LENGTH }],
+            /**
+             * Space Between Start Direction
+             * @see https://tailwindcss.com/docs/space
+             * @see https://github.com/20lives/tailwindcss-rtl#utilities
+             */
+            'space-s': [{ 'space-s': LENGTH }],
             /**
              * Space Between X Reverse
              * @see https://tailwindcss.com/docs/space
@@ -668,7 +710,7 @@ export function getDefaultConfig() {
              * Text Alignment
              * @see https://tailwindcss.com/docs/text-align
              */
-            'text-alignment': [{ text: ['left', 'center', 'right', 'justify'] }],
+            'text-alignment': [{ text: ['left', 'center', 'right', 'justify', 'start', 'end'] }],
             /**
              * Text Color
              * @see https://tailwindcss.com/docs/text-color
@@ -826,6 +868,36 @@ export function getDefaultConfig() {
              */
             'rounded-bl': [{ 'rounded-bl': ROUNDED }],
             /**
+             * Border Radius Start
+             * @see https://github.com/20lives/tailwindcss-rtl#utilities
+             */
+            'rounded-s': [{ 'rounded-s': ROUNDED }],
+            /**
+             * Border Radius End
+             * @see https://github.com/20lives/tailwindcss-rtl#utilities
+             */
+            'rounded-e': [{ 'rounded-e': ROUNDED }],
+            /**
+             * Border Radius Top Start
+             * @see https://github.com/20lives/tailwindcss-rtl#utilities
+             */
+            'rounded-ts': [{ 'rounded-ts': ROUNDED }],
+            /**
+             * Border Radius Top End
+             * @see https://github.com/20lives/tailwindcss-rtl#utilities
+             */
+            'rounded-te': [{ 'rounded-te': ROUNDED }],
+            /**
+             * Border Radius Bottom Start
+             * @see https://github.com/20lives/tailwindcss-rtl#utilities
+             */
+            'rounded-bs': [{ 'rounded-bs': ROUNDED }],
+            /**
+             * Border Radius Bottom End
+             * @see https://github.com/20lives/tailwindcss-rtl#utilities
+             */
+            'rounded-be': [{ 'rounded-be': ROUNDED }],
+            /**
              * Border Width
              * @see https://tailwindcss.com/docs/border-width
              */
@@ -851,6 +923,18 @@ export function getDefaultConfig() {
              */
             'border-w-l': [{ 'border-l': LENGTH_WITH_EMPTY }],
             /**
+             * Border Width Start
+             * @see https://tailwindcss.com/docs/border-width
+             * @see https://github.com/20lives/tailwindcss-rtl#utilities
+             */
+            'border-w-s': [{ 'border-s': LENGTH_WITH_EMPTY }],
+            /**
+             * Border Width End
+             * @see https://tailwindcss.com/docs/border-width
+             * @see https://github.com/20lives/tailwindcss-rtl#utilities
+             */
+            'border-w-e': [{ 'border-e': LENGTH_WITH_EMPTY }],
+            /**
              * Border Opacity
              * @see https://tailwindcss.com/docs/border-opacity
              */
@@ -865,6 +949,12 @@ export function getDefaultConfig() {
              * @see https://tailwindcss.com/docs/divide-width
              */
             'divide-x': [{ 'divide-x': LENGTH_WITH_EMPTY }],
+            /**
+             * Divide Width Start Direction
+             * @see https://tailwindcss.com/docs/divide-width
+             * @see https://github.com/20lives/tailwindcss-rtl#utilities
+             */
+            'divide-s': [{ 'divide-s': LENGTH_WITH_EMPTY }],
             /**
              * Divide Width X Reverse
              * @see https://tailwindcss.com/docs/divide-width
@@ -915,6 +1005,18 @@ export function getDefaultConfig() {
              * @see https://tailwindcss.com/docs/border-color
              */
             'border-color-l': [{ 'border-l': ANY }],
+            /**
+             * Border Color Start
+             * @see https://tailwindcss.com/docs/border-color
+             * @see https://github.com/20lives/tailwindcss-rtl#utilities
+             */
+            'border-color-s': [{ 'border-s': ANY }],
+            /**
+             * Border Color End
+             * @see https://tailwindcss.com/docs/border-color
+             * @see https://github.com/20lives/tailwindcss-rtl#utilities
+             */
+            'border-color-e': [{ 'border-e': ANY }],
             /**
              * Divide Color
              * @see https://tailwindcss.com/docs/divide-color
