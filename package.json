@@ -26,6 +26,7 @@
     "source": "src/index.ts",
     "exports": {
         "require": "./dist/index.cjs",
+        "import": "./dist/index.js",
         "default": "./dist/index.js"
     },
     "module": "dist/index.module.js",
