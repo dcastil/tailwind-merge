@@ -179,7 +179,8 @@ const customTwMerge = createTailwindMerge((getDefaultConfig) => {
             //   ↓ Creates group of classes which have conflicting styles
             //     Classes here: foo, foo-2, bar-baz, bar-baz-1, bar-baz-2
             foo: ['foo', 'foo-2', { 'bar-baz': ['', '1', '2'] }],
-            //   ↓ Another group with classes qux-auto, qux-1000, qux-1001, …
+            //   ↓ Functions can also be used to create a catch-all case.
+            //     Classes here: qux-auto, qux-1000, qux-1001, …
             bar: [{ qux: ['auto', (value) => Number(value) >= 1000] }],
         },
         // ↓ Here you can define additional conflicts across different groups
@@ -192,6 +193,32 @@ const customTwMerge = createTailwindMerge((getDefaultConfig) => {
     }
 })
 ```
+
+### `validators`
+
+```ts
+interface Validators {
+    isLength(classPart: string): boolean
+    isCustomLength(classPart: string): boolean
+    isInteger(classPart: string): boolean
+    isCustomValue(classPart: string): boolean
+    isAny(classPart: string): boolean
+}
+```
+
+An object containing all the validators used in tailwind-merge. They are useful if you want to use a custom config with [`createTailwindMerge()`](#createtailwindmerge). E.g. the `classGroup` for padding is defined as
+
+```ts
+const paddingClassGroup = [{ p: [validators.isLength] }]
+```
+
+Here is a brief summary for each validator:
+
+-   `isLength()` checks whether a class part is a number (`3`, `1.5`), a fraction (`3/4`), a custom length (`[3%]`, `[4px]`, `[length:var(--my-var)]`), or one of the strings `px`, `full` or `screen`.
+-   `isCustomLength()` checks for custom length values (`[3%]`, `[4px]`, `[length:var(--my-var)]`).
+-   `isInteger()` checks for integer values (`3`) and custom integer values (`[3]`).
+-   `isCustomValue()` checks whether the class part is enclosed in brackets (`[something]`)
+-   `isAny()` always returns true. Be careful with this validator as it might match unwanted classes. I use it primarily to match colors or when I'm ceertain there are no other class groups in a namespace.
 
 ## Versioning
 

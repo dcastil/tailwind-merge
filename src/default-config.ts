@@ -1,4 +1,4 @@
-import { isAny, isCustomLength, isCustomValue, isInteger, isLength } from './config-validators'
+import { isAny, isCustomLength, isCustomValue, isInteger, isLength } from './validators'
 
 const SIZES_SIMPLE = ['sm', 'md', 'lg', 'xl', '2xl'] as const
 const SIZES_EXTENDED = ['3xl', '4xl', '5xl', '6xl', '7xl'] as const
