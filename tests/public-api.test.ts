@@ -1,4 +1,4 @@
-import { twMerge, createTailwindMerge, validators, getDefaultConfig } from '../src'
+import { twMerge, createTailwindMerge, validators, getDefaultConfig, Config } from '../src'
 
 test('has correct export types', () => {
     expect(twMerge).toStrictEqual(expect.any(Function))
@@ -11,6 +11,12 @@ test('has correct export types', () => {
         isCustomValue: expect.any(Function),
         isAny: expect.any(Function),
     })
+
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const noRun = () => {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const config: Config = getDefaultConfig()
+    }
 })
 
 test('twMerge() has correct inputs and outputs', () => {
