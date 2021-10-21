@@ -153,7 +153,7 @@ If some of these points don't apply to you, it makes sense to test whether `twMe
 ### `createTailwindMerge`
 
 ```ts
-function createTailwindMerge(createConfig: CreateConfig): TailwindMerge
+function createTailwindMerge(...createConfig: CreateConfig[]): TailwindMerge
 ```
 
 Function to create merge function with custom config.
@@ -189,6 +189,23 @@ const customTwMerge = createTailwindMerge((getDefaultConfig) => {
             // ↓ ID of class group which creates a conflict with …
             //     ↓ … classes from groups with these IDs
             foo: ['bar'],
+        },
+    }
+})
+```
+
+You can also use multiple `createConfig` functions which is convenient if you want to combine your config with third-party plugins.
+
+```ts
+const customTwMerge = createTailwindConfig(withSomePlugin, (getConfig) => {
+    // ↓ Gets config returned by `withSomePlugin`
+    const config = getConfig()
+
+    return {
+        ...config,
+        classGroups: {
+            ...config.classGroups,
+            mySpecialClassGroup: [{ special: ['1', '2'] }],
         },
     }
 })

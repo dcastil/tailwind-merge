@@ -1,8 +1,15 @@
-import { twMerge, createTailwindMerge } from '../src'
+import { twMerge, createTailwindMerge, validators } from '../src'
 
 test('has correct export types', () => {
     expect(twMerge).toStrictEqual(expect.any(Function))
     expect(createTailwindMerge).toStrictEqual(expect.any(Function))
+    expect(validators).toEqual({
+        isLength: expect.any(Function),
+        isCustomLength: expect.any(Function),
+        isInteger: expect.any(Function),
+        isCustomValue: expect.any(Function),
+        isAny: expect.any(Function),
+    })
 })
 
 test('twMerge() has correct inputs and outputs', () => {
@@ -86,4 +93,12 @@ test('createTailwindMerge() has correct inputs and outputs', () => {
         // @ts-expect-error
         tailwindMerge(() => {})
     }
+})
+
+test('validators have correct inputs and outputs', () => {
+    expect(validators.isLength('')).toEqual(expect.any(Boolean))
+    expect(validators.isCustomLength('')).toEqual(expect.any(Boolean))
+    expect(validators.isInteger('')).toEqual(expect.any(Boolean))
+    expect(validators.isCustomValue('')).toEqual(expect.any(Boolean))
+    expect(validators.isAny()).toEqual(expect.any(Boolean))
 })
