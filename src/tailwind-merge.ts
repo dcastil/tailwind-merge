@@ -1,27 +1,31 @@
 import { createConfigUtils } from './config-utils'
-import { getDefaultConfig } from './default-config'
 import { Config } from './types'
 import { mergeClassList } from './merge-classlist'
 
-type CreateConfig = (getConfig: () => Config) => Config
+type CreateConfigFirst = () => Config
+type CreateConfigSubsequent = (config: Config) => Config
 type ClassLists = ClassListElement[]
 type ClassListElement = string | undefined | null | false
 type TailwindMerge = (...classLists: ClassLists) => string
 type ConfigUtils = ReturnType<typeof createConfigUtils>
 
-export function createTailwindMerge(...createConfigFunctions: CreateConfig[]): TailwindMerge {
+export function createTailwindMerge(
+    ...createConfig: [CreateConfigFirst, ...CreateConfigSubsequent[]]
+): TailwindMerge {
     let configUtils: ConfigUtils
     let cacheGet: ConfigUtils['cache']['get']
     let cacheSet: ConfigUtils['cache']['set']
     let functionToCall = initTailwindMerge
 
     function initTailwindMerge(classList: string) {
-        const createConfig = createConfigFunctions.reduce<() => Config>(
-            (getPreviousConfig, createConfigCurrent) => () =>
-                createConfigCurrent(getPreviousConfig),
-            getDefaultConfig
+        const [firstCreateConfig, ...restCreateConfig] = createConfig
+
+        const config = restCreateConfig.reduce(
+            (previousConfig, createConfigCurrent) => createConfigCurrent(previousConfig),
+            firstCreateConfig()
         )
-        configUtils = createConfigUtils(createConfig())
+
+        configUtils = createConfigUtils(config)
         cacheGet = configUtils.cache.get
         cacheSet = configUtils.cache.set
         functionToCall = tailwindMerge
