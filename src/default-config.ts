@@ -51,66 +51,9 @@ export function getDefaultConfig() {
         ] as const
     const getAlign = () => ['start', 'end', 'center', 'between', 'around', 'evenly'] as const
     const getZeroAndEmpty = () => ['', '0'] as const
-    const getPseudoVariants = () =>
-        [
-            // Positional
-            'first',
-            'last',
-            'only',
-            'odd',
-            'even',
-            'first-of-type',
-            'last-of-type',
-            'only-of-type',
-
-            // State
-            'visited',
-            'target',
-
-            // Forms
-            'default',
-            'checked',
-            'indeterminate',
-            'placeholder-shown',
-            'autofill',
-            'required',
-            'valid',
-            'invalid',
-            'in-range',
-            'out-of-range',
-            'read-only',
-
-            // Content
-            'empty',
-
-            // Interactive
-            'focus-within',
-            'hover',
-            'focus',
-            'focus-visible',
-            'active',
-            'disabled',
-        ] as const
 
     return {
         cacheSize: 500,
-        prefixes: [
-            ...getSizesSimple(),
-            'dark',
-            'motion-safe',
-            'motion-reduce',
-            'before',
-            'after',
-            'first-letter',
-            'first-line',
-            'selection',
-            'marker',
-            ...getPseudoVariants(),
-            {
-                group: getPseudoVariants(),
-                peer: getPseudoVariants(),
-            },
-        ],
         classGroups: {
             // Layout
             /**
