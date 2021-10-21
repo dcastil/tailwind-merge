@@ -3,7 +3,6 @@ import { createTailwindMerge } from '../src'
 test('createTailwindMerge works with single config function', () => {
     const tailwindMerge = createTailwindMerge(() => ({
         cacheSize: 20,
-        prefixes: ['my-prefix'],
         classGroups: {
             fooKey: [{ fooKey: ['bar', 'baz'] }],
             fooKey2: [{ fooKey: ['qux', 'quux'] }, 'other-2'],
@@ -18,7 +17,7 @@ test('createTailwindMerge works with single config function', () => {
     expect(tailwindMerge('')).toBe('')
     expect(tailwindMerge('my-prefix:fooKey-bar my-prefix:fooKey-baz')).toBe('my-prefix:fooKey-baz')
     expect(tailwindMerge('other-prefix:fooKey-bar other-prefix:fooKey-baz')).toBe(
-        'other-prefix:fooKey-bar other-prefix:fooKey-baz'
+        'other-prefix:fooKey-baz'
     )
     expect(tailwindMerge('group fooKey-bar')).toBe('fooKey-bar')
     expect(tailwindMerge('fooKey-bar group')).toBe('group')
@@ -40,7 +39,6 @@ test('createTailwindMerge works with multiple config functions', () => {
     const tailwindMerge = createTailwindMerge(
         () => ({
             cacheSize: 20,
-            prefixes: ['my-prefix'],
             classGroups: {
                 fooKey: [{ fooKey: ['bar', 'baz'] }],
                 fooKey2: [{ fooKey: ['qux', 'quux'] }, 'other-2'],
@@ -53,7 +51,6 @@ test('createTailwindMerge works with multiple config functions', () => {
         }),
         (config) => ({
             ...config,
-            prefixes: [...config.prefixes, 'second'],
             classGroups: {
                 ...config.classGroups,
                 helloFromSecondConfig: ['hello-there'],
@@ -68,7 +65,7 @@ test('createTailwindMerge works with multiple config functions', () => {
     expect(tailwindMerge('')).toBe('')
     expect(tailwindMerge('my-prefix:fooKey-bar my-prefix:fooKey-baz')).toBe('my-prefix:fooKey-baz')
     expect(tailwindMerge('other-prefix:fooKey-bar other-prefix:fooKey-baz')).toBe(
-        'other-prefix:fooKey-bar other-prefix:fooKey-baz'
+        'other-prefix:fooKey-baz'
     )
     expect(tailwindMerge('group fooKey-bar')).toBe('fooKey-bar')
     expect(tailwindMerge('fooKey-bar group')).toBe('group')

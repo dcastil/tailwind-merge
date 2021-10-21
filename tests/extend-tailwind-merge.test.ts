@@ -3,7 +3,6 @@ import { extendTailwindMerge } from '../src'
 test('extendTailwindMerge works corectly with single config', () => {
     const tailwindMerge = extendTailwindMerge({
         cacheSize: 20,
-        prefixes: ['my-prefix'],
         classGroups: {
             fooKey: [{ fooKey: ['bar', 'baz'] }],
             fooKey2: [{ fooKey: ['qux', 'quux'] }, 'other-2'],
@@ -18,7 +17,7 @@ test('extendTailwindMerge works corectly with single config', () => {
     expect(tailwindMerge('')).toBe('')
     expect(tailwindMerge('my-prefix:fooKey-bar my-prefix:fooKey-baz')).toBe('my-prefix:fooKey-baz')
     expect(tailwindMerge('other-prefix:fooKey-bar other-prefix:fooKey-baz')).toBe(
-        'other-prefix:fooKey-bar other-prefix:fooKey-baz'
+        'other-prefix:fooKey-baz'
     )
     expect(tailwindMerge('group fooKey-bar')).toBe('fooKey-bar')
     expect(tailwindMerge('fooKey-bar group')).toBe('group')
@@ -45,15 +44,16 @@ test('extendTailwindMerge works corectly with multiple configs', () => {
         },
         (config) => ({
             ...config,
-            prefixes: [...config.prefixes, 'my-prefix'],
+            classGroups: {
+                ...config.classGroups,
+                secondConfigKey: ['hi-there', 'hello'],
+            },
         })
     )
 
     expect(tailwindMerge('')).toBe('')
     expect(tailwindMerge('my-prefix:fooKey-bar my-prefix:fooKey-baz')).toBe('my-prefix:fooKey-baz')
-    expect(tailwindMerge('other-prefix:fooKey-bar other-prefix:fooKey-baz')).toBe(
-        'other-prefix:fooKey-bar other-prefix:fooKey-baz'
-    )
+    expect(tailwindMerge('other-prefix:hi-there other-prefix:hello')).toBe('other-prefix:hello')
     expect(tailwindMerge('group fooKey-bar')).toBe('fooKey-bar')
     expect(tailwindMerge('fooKey-bar group')).toBe('group')
     expect(tailwindMerge('group other-2')).toBe('group other-2')

@@ -36,17 +36,17 @@ version-resolver:
 autolabeler:
     - label: 'feature'
       branch:
-          - '/feature/i'
+          - '/\bfeature\b/i'
       title:
-          - '/feature/i'
+          - '/\bfeature\b/i'
     - label: 'bugfix'
       branch:
-          - '/fix/i'
+          - '/\b(bugfix|fix)\b/i'
       title:
-          - '/fix/i'
+          - '/\b(bugfix|fix)\b/i'
     - label: 'other'
       branch:
-          - '/^other/i'
+          - '/^other\b/i'
     - label: 'breaking'
       branch:
           - '/^breaking-/i'
