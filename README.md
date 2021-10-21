@@ -150,10 +150,24 @@ Default function to use if you're using the default Tailwind config or are close
 
 If some of these points don't apply to you, it makes sense to test whether `twMerge()` still works as intended with your custom classes. Otherwise, you can create your own custom merge function with [`createTailwindMerge()`](#createtailwindmerge).
 
+### `getDefaultConfig`
+
+```ts
+function getDefaultConfig(): Config
+```
+
+Function which returns the default config used by tailwind-merge. In fact, `twMerge` is just built like this:
+
+```ts
+const twMerge = createTailwindMerge(getDefaultConfig)
+```
+
 ### `createTailwindMerge`
 
 ```ts
-function createTailwindMerge(...createConfig: CreateConfig[]): TailwindMerge
+function createTailwindMerge(
+    ...createConfig: [() => Config, ...((config: Config) => Config)[]]
+): TailwindMerge
 ```
 
 Function to create merge function with custom config.
@@ -163,7 +177,7 @@ You need to provide a function which resolves to the config tailwind-merge shoul
 ```ts
 // ↓ Callback passed to `createTailwindMerge()` is called when
 //   `customTwMerge()` gets called the first time.
-const customTwMerge = createTailwindMerge((getDefaultConfig) => {
+const customTwMerge = createTailwindMerge(() => {
     const defaultConfig = getDefaultConfig()
 
     return {
@@ -194,21 +208,17 @@ const customTwMerge = createTailwindMerge((getDefaultConfig) => {
 })
 ```
 
-You can also use multiple `createConfig` functions which is convenient if you want to combine your config with third-party plugins.
+You can also use multiple `createConfig` functions which is convenient if you want to combine your config with third-party plugins. Just keep in mind that the first `createConfig` function does not get passed any arguments, whereas the subsequent functions get each passed the config from the previous function.
 
 ```ts
-const customTwMerge = createTailwindConfig(withSomePlugin, (getConfig) => {
-    // ↓ Gets config returned by `withSomePlugin`
-    const config = getConfig()
-
-    return {
-        ...config,
-        classGroups: {
-            ...config.classGroups,
-            mySpecialClassGroup: [{ special: ['1', '2'] }],
-        },
-    }
-})
+const customTwMerge = createTailwindConfig(getDefaultConfig, withSomePlugin, (config) => ({
+    // ↓ Config returned by `withSomePlugin`
+    ...config,
+    classGroups: {
+        ...config.classGroups,
+        mySpecialClassGroup: [{ special: ['1', '2'] }],
+    },
+}))
 ```
 
 ### `validators`
