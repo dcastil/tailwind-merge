@@ -41,24 +41,18 @@ test('createTailwindMerge() works with multiple config functions', () => {
                 otherKey: ['fooKey', 'fooKey2'],
             },
         }),
-        (getConfig) => {
-            const config = getConfig()
-            return {
-                ...config,
-                prefixes: [...config.prefixes, 'second'],
-                classGroups: {
-                    ...config.classGroups,
-                    helloFromSecondConfig: ['hello-there'],
-                },
-                conflictingClassGroups: {
-                    ...config.conflictingClassGroups,
-                    fooKey: [
-                        ...(config.conflictingClassGroups.fooKey ?? []),
-                        'helloFromSecondConfig',
-                    ],
-                },
-            }
-        }
+        (config) => ({
+            ...config,
+            prefixes: [...config.prefixes, 'second'],
+            classGroups: {
+                ...config.classGroups,
+                helloFromSecondConfig: ['hello-there'],
+            },
+            conflictingClassGroups: {
+                ...config.conflictingClassGroups,
+                fooKey: [...(config.conflictingClassGroups.fooKey ?? []), 'helloFromSecondConfig'],
+            },
+        })
     )
 
     expect(tailwindMerge('')).toBe('')

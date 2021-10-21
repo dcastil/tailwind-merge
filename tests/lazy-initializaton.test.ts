@@ -1,7 +1,7 @@
-import { createTailwindMerge } from '../src'
+import { createTailwindMerge, getDefaultConfig } from '../src'
 
 test('lazy initialization', () => {
-    const initMock = jest.fn((c) => c())
+    const initMock = jest.fn(getDefaultConfig)
     const twMerge = createTailwindMerge(initMock)
 
     expect(initMock).not.toHaveBeenCalled()
