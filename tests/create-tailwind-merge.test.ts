@@ -1,6 +1,6 @@
 import { createTailwindMerge } from '../src'
 
-test('createTailwindMerge() works with single config function', () => {
+test('createTailwindMerge works with single config function', () => {
     const tailwindMerge = createTailwindMerge(() => ({
         cacheSize: 20,
         prefixes: ['my-prefix'],
@@ -36,7 +36,7 @@ test('createTailwindMerge() works with single config function', () => {
     }
 })
 
-test('createTailwindMerge() works with multiple config functions', () => {
+test('createTailwindMerge works with multiple config functions', () => {
     const tailwindMerge = createTailwindMerge(
         () => ({
             cacheSize: 20,
