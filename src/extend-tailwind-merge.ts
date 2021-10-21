@@ -6,11 +6,13 @@ import { Config } from './types'
 type CreateConfigSubsequent = (config: Config) => Config
 
 export function extendTailwindMerge(
-    configExtension: Partial<Config>,
+    configExtension: Partial<Config> | CreateConfigSubsequent,
     ...createConfig: CreateConfigSubsequent[]
 ) {
-    return createTailwindMerge(
-        () => mergeConfigs(getDefaultConfig(), configExtension),
-        ...createConfig
-    )
+    return typeof configExtension === 'function'
+        ? createTailwindMerge(getDefaultConfig, configExtension, ...createConfig)
+        : createTailwindMerge(
+              () => mergeConfigs(getDefaultConfig(), configExtension),
+              ...createConfig
+          )
 }
