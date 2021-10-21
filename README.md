@@ -169,6 +169,7 @@ function extendTailwindMerge(
     configExtension: Partial<Config>,
     ...createConfig: Array<(config: Config) => Config>
 ): TailwindMerge
+function extendTailwindMerge(...createConfig: Array<(config: Config) => Config>): TailwindMerge
 ```
 
 Function to create merge function with custom config.
@@ -204,6 +205,12 @@ Additionally you can pass multiple `createConfig` functions (more to that in [`c
 
 ```ts
 const customTwMerge = extendTailwindMerge({ … }, withSomePlugin)
+```
+
+If you only use plugins, you can omit the `configExtension` object as well.
+
+```ts
+const customTwMerge = extendTailwindMerge(withSomePlugin)
 ```
 
 ### `createTailwindMerge`
@@ -309,6 +316,37 @@ interface Config { … }
 ```
 
 TypeScript type for config object. Useful if you want to build a `createConfig` function but don't want to define it inline in [`extendTailwindMerge()`](#extendtailwindmerge) or [`createTailwindMerge()`](#createtailwindmerge).
+
+## Writing plugins
+
+This library supports classes of the core Tailwind library out of the box, but not classes of any plugins. But it's possible and hopefully easy to write third-party plugins for tailwind-merge. In case you want to write a plugin, I welcome you to follow these steps:
+
+-   Create a package called `tailwind-merge-magic-plugin` with tailwind-merge as peer dependency which exports a function `withMagic` and replace "magic" with your plugin name.
+-   This function would be ideally a `createConfig` function which takes a config object as argument and returns the modified config object.
+-   Use the [`validators`](#validators) and [`mergeConfigs()`](#mergeconfigs) from tailwind-merge to extend the config with magic.
+
+Here is an example of how a plugin could look like:
+
+```ts
+import { mergeConfigs, validators, Config } from 'tailwind-merge'
+
+export function withMagic(config: Config): Config {
+    return mergeConfigs(config, {
+        classGroups: {
+            magic: [{ magic: ['1', '2'] }],
+        },
+    })
+}
+```
+
+This plugin can then be used like this:
+
+```ts
+import { extendTailwindMerge } from 'tailwind-merge'
+import { withMagic } from 'tailwind-merge-magic-plugin'
+
+const twMerge = extendTailwindMerge(withMagic)
+```
 
 ## Versioning
 
