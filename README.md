@@ -194,7 +194,7 @@ const customTwMerge = createTailwindMerge((getDefaultConfig) => {
 })
 ```
 
-You can also use multiple `createConfig` functions which is convenient if you want to combine plugins.
+You can also use multiple `createConfig` functions which is convenient if you want to combine your config with third-party plugins.
 
 ```ts
 const customTwMerge = createTailwindConfig(withSomePlugin, (getConfig) => {
