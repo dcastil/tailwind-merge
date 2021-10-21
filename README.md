@@ -221,6 +221,29 @@ const customTwMerge = createTailwindConfig(getDefaultConfig, withSomePlugin, (co
 }))
 ```
 
+But don't merge configs like that. Use [`mergeConfigs()`](#mergeconfigs) instead.
+
+### `mergeConfigs`
+
+```ts
+function mergeConfigs(baseConfig: Config, configToMerge: Config): Config
+```
+
+Helper function to merge multiple config objects. Objects are merged, arrays are concatenated, scalar values are overriden and `undefined` does nothing. The function assumes that both parameters are tailwind-merge config objects and shouldn't be used as a generic merge function.
+
+```ts
+const customTwMerge = createTailwindConfig(getDefaultConfig, (config) =>
+    mergeConfigs(config, {
+        classGroups: {
+            // ↓ Adding new class group
+            mySpecialClassGroup: [{ special: ['1', '2'] }],
+            // ↓ Adding value to existing class group
+            animate: ['animate-magic'],
+        },
+    })
+)
+```
+
 ### `validators`
 
 ```ts
@@ -246,6 +269,14 @@ Here is a brief summary for each validator:
 -   `isInteger()` checks for integer values (`3`) and custom integer values (`[3]`).
 -   `isCustomValue()` checks whether the class part is enclosed in brackets (`[something]`)
 -   `isAny()` always returns true. Be careful with this validator as it might match unwanted classes. I use it primarily to match colors or when I'm ceertain there are no other class groups in a namespace.
+
+### `Config`
+
+```ts
+interface Config { … }
+```
+
+TypeScript type for config object. Useful if you want to build a `createConfig` function but don't want to define it inline in [`createTailwindMerge()`](#createtailwindmerge).
 
 ## Versioning
 

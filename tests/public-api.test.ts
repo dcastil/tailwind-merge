@@ -1,4 +1,11 @@
-import { twMerge, createTailwindMerge, validators, getDefaultConfig, Config } from '../src'
+import {
+    twMerge,
+    createTailwindMerge,
+    validators,
+    getDefaultConfig,
+    Config,
+    mergeConfigs,
+} from '../src'
 
 test('has correct export types', () => {
     expect(twMerge).toStrictEqual(expect.any(Function))
@@ -11,6 +18,7 @@ test('has correct export types', () => {
         isCustomValue: expect.any(Function),
         isAny: expect.any(Function),
     })
+    expect(mergeConfigs).toStrictEqual(expect.any(Function))
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const noRun = () => {
@@ -108,4 +116,46 @@ test('validators have correct inputs and outputs', () => {
     expect(validators.isInteger('')).toEqual(expect.any(Boolean))
     expect(validators.isCustomValue('')).toEqual(expect.any(Boolean))
     expect(validators.isAny()).toEqual(expect.any(Boolean))
+})
+
+test('mergeConfigs has correct inputs and outputs', () => {
+    expect(
+        mergeConfigs(
+            {
+                cacheSize: 50,
+                prefixes: ['my-prefix'],
+                classGroups: {
+                    fooKey: [{ fooKey: ['one', 'two'] }],
+                    bla: [{ bli: ['blub', 'blublub'] }],
+                },
+                conflictingClassGroups: {},
+            },
+            {
+                cacheSize: 20,
+                prefixes: ['my-prefix-2'],
+                classGroups: {
+                    fooKey: [{ fooKey: ['bar', 'baz'] }],
+                    fooKey2: [{ fooKey: ['qux', 'quux'] }],
+                    otherKey: ['nother', 'group'],
+                },
+                conflictingClassGroups: {
+                    fooKey: ['otherKey'],
+                    otherKey: ['fooKey', 'fooKey2'],
+                },
+            }
+        )
+    ).toEqual({
+        cacheSize: 20,
+        prefixes: ['my-prefix', 'my-prefix-2'],
+        classGroups: {
+            fooKey: [{ fooKey: ['one', 'two'] }, { fooKey: ['bar', 'baz'] }],
+            bla: [{ bli: ['blub', 'blublub'] }],
+            fooKey2: [{ fooKey: ['qux', 'quux'] }],
+            otherKey: ['nother', 'group'],
+        },
+        conflictingClassGroups: {
+            fooKey: ['otherKey'],
+            otherKey: ['fooKey', 'fooKey2'],
+        },
+    })
 })
