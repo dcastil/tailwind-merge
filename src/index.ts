@@ -1,4 +1,4 @@
-import { createTailwindMerge } from './tailwind-merge'
+import { createTailwindMerge } from './create-tailwind-merge'
 import { getDefaultConfig } from './default-config'
 
 export const twMerge = createTailwindMerge(getDefaultConfig)
