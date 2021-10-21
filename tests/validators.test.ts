@@ -46,8 +46,12 @@ describe('validators', () => {
         expect(isInteger('1')).toBe(true)
         expect(isInteger('123')).toBe(true)
         expect(isInteger('8312')).toBe(true)
+        expect(isInteger('[8312]')).toBe(true)
+        expect(isInteger('[2]')).toBe(true)
 
-        expect(isInteger('[8312]')).toBe(false)
+        expect(isInteger('[8312px]')).toBe(false)
+        expect(isInteger('[8312%]')).toBe(false)
+        expect(isInteger('[8312rem]')).toBe(false)
         expect(isInteger('8312.2')).toBe(false)
         expect(isInteger('1.2')).toBe(false)
         expect(isInteger('one')).toBe(false)
