@@ -226,7 +226,7 @@ But don't merge configs like that. Use [`mergeConfigs()`](#mergeconfigs) instead
 ### `mergeConfigs`
 
 ```ts
-function mergeConfigs(baseConfig: Config, configToMerge: Config): Config
+function mergeConfigs(baseConfig: Config, configExtension: Partial<Config>): Config
 ```
 
 Helper function to merge multiple config objects. Objects are merged, arrays are concatenated, scalar values are overriden and `undefined` does nothing. The function assumes that both parameters are tailwind-merge config objects and shouldn't be used as a generic merge function.

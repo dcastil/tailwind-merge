@@ -131,7 +131,6 @@ test('mergeConfigs has correct inputs and outputs', () => {
                 conflictingClassGroups: {},
             },
             {
-                cacheSize: 20,
                 prefixes: ['my-prefix-2'],
                 classGroups: {
                     fooKey: [{ fooKey: ['bar', 'baz'] }],
@@ -145,7 +144,7 @@ test('mergeConfigs has correct inputs and outputs', () => {
             }
         )
     ).toEqual({
-        cacheSize: 20,
+        cacheSize: 50,
         prefixes: ['my-prefix', 'my-prefix-2'],
         classGroups: {
             fooKey: [{ fooKey: ['one', 'two'] }, { fooKey: ['bar', 'baz'] }],
