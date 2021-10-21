@@ -62,3 +62,34 @@ test('extendTailwindMerge works corectly with multiple configs', () => {
     expect(tailwindMerge('p-10 p-20')).toBe('p-20')
     expect(tailwindMerge('hover:focus:p-10 focus:hover:p-20')).toBe('focus:hover:p-20')
 })
+
+test('extendTailwindMerge works corectly with function config', () => {
+    const tailwindMerge = extendTailwindMerge((config) => ({
+        ...config,
+        cacheSize: 20,
+        classGroups: {
+            ...config.classGroups,
+            fooKey: [{ fooKey: ['bar', 'baz'] }],
+            fooKey2: [{ fooKey: ['qux', 'quux'] }, 'other-2'],
+            otherKey: ['nother', 'group'],
+        },
+        conflictingClassGroups: {
+            ...config.conflictingClassGroups,
+            fooKey: ['otherKey'],
+            otherKey: ['fooKey', 'fooKey2'],
+        },
+    }))
+
+    expect(tailwindMerge('')).toBe('')
+    expect(tailwindMerge('my-prefix:fooKey-bar my-prefix:fooKey-baz')).toBe('my-prefix:fooKey-baz')
+    expect(tailwindMerge('other-prefix:fooKey-bar other-prefix:fooKey-baz')).toBe(
+        'other-prefix:fooKey-baz'
+    )
+    expect(tailwindMerge('group fooKey-bar')).toBe('fooKey-bar')
+    expect(tailwindMerge('fooKey-bar group')).toBe('group')
+    expect(tailwindMerge('group other-2')).toBe('group other-2')
+    expect(tailwindMerge('other-2 group')).toBe('group')
+
+    expect(tailwindMerge('p-10 p-20')).toBe('p-20')
+    expect(tailwindMerge('hover:focus:p-10 focus:hover:p-20')).toBe('focus:hover:p-20')
+})
