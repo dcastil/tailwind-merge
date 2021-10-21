@@ -8,15 +8,14 @@ const PREFIX_SEPARATOR_REGEX = /:(?![^[]*\])/
 const PREFIX_SEPARATOR = ':'
 
 export function mergeClassList(classList: string, configUtils: ConfigUtils) {
-    const { isPrefixValid, getClassGroupId, comparePrefixes, getConflictingClassGroupIds } =
-        configUtils
+    const { getClassGroupId, getConflictingClassGroupIds } = configUtils
 
     /**
      * Set of classGroupIds in following format:
      * `{importantModifier}{variantPrefixes}{classGroupId}`
-     * @example ':standaloneClasses.1'
-     * @example 'hover:focus:dynamicClasses.bg.2'
-     * @example '!md:dynamicClasses.bg.0'
+     * @example ':float'
+     * @example 'hover:focus:bg-color'
+     * @example '!md:pr'
      */
     const classGroupsInConflict = new Set<string>()
 
@@ -34,8 +33,7 @@ export function mergeClassList(classList: string, configUtils: ConfigUtils) {
                     ? classNameWithImportantModifier.substring(1)
                     : classNameWithImportantModifier
 
-                const arePrefixesValid = prefixes.every(isPrefixValid)
-                const classGroupId = arePrefixesValid ? getClassGroupId(className) : undefined
+                const classGroupId = getClassGroupId(className)
 
                 if (!classGroupId) {
                     return {
@@ -45,9 +43,7 @@ export function mergeClassList(classList: string, configUtils: ConfigUtils) {
                 }
 
                 const variantPrefix =
-                    prefixes.length === 0
-                        ? ''
-                        : prefixes.sort(comparePrefixes).concat('').join(PREFIX_SEPARATOR)
+                    prefixes.length === 0 ? '' : prefixes.sort().concat('').join(PREFIX_SEPARATOR)
 
                 const fullPrefix = hasImportantModifier
                     ? IMPORTANT_MODIFIER + variantPrefix
