@@ -13,7 +13,7 @@ export function mergeClassList(classList: string, configUtils: ConfigUtils) {
     /**
      * Set of classGroupIds in following format:
      * `{importantModifier}{variantPrefixes}{classGroupId}`
-     * @example ':float'
+     * @example 'float'
      * @example 'hover:focus:bg-color'
      * @example '!md:pr'
      */
