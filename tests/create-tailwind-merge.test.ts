@@ -24,6 +24,16 @@ test('createTailwindMerge() works with single config function', () => {
     expect(tailwindMerge('fooKey-bar group')).toBe('group')
     expect(tailwindMerge('group other-2')).toBe('group other-2')
     expect(tailwindMerge('other-2 group')).toBe('group')
+
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const noRun = () => {
+        createTailwindMerge(
+            // @ts-expect-error
+            (config: any) => {
+                return config
+            }
+        )
+    }
 })
 
 test('createTailwindMerge() works with multiple config functions', () => {
