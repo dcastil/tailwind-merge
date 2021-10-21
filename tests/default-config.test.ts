@@ -1,5 +1,4 @@
-import { getDefaultConfig } from '../src'
-import { Config } from '../src/types'
+import { getDefaultConfig, Config } from '../src'
 
 test('default config has correct types', () => {
     const defaultConfig = getDefaultConfig()
