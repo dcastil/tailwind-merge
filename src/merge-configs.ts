@@ -2,11 +2,11 @@ import { Config } from './types'
 
 /**
  * @param baseConfig Config where other config will be merged into. This object will be mutated.
- * @param configToMerge Config to merge into the `baseConfig`.
+ * @param configExtension Partial config to merge into the `baseConfig`.
  */
-export function mergeConfigs(baseConfig: Config, configToMerge: Config) {
-    for (const key in configToMerge) {
-        mergePropertyRecursively(baseConfig as any, key, configToMerge[key as keyof Config])
+export function mergeConfigs(baseConfig: Config, configExtension: Partial<Config>) {
+    for (const key in configExtension) {
+        mergePropertyRecursively(baseConfig as any, key, configExtension[key as keyof Config])
     }
 
     return baseConfig

@@ -1,7 +1,7 @@
-import { createTailwindMerge } from '../src'
+import { extendTailwindMerge } from '../src'
 
-test('createTailwindMerge works with single config function', () => {
-    const tailwindMerge = createTailwindMerge(() => ({
+test('extendTailwindMerge works corectly with single config', () => {
+    const tailwindMerge = extendTailwindMerge({
         cacheSize: 20,
         prefixes: ['my-prefix'],
         classGroups: {
@@ -13,7 +13,7 @@ test('createTailwindMerge works with single config function', () => {
             fooKey: ['otherKey'],
             otherKey: ['fooKey', 'fooKey2'],
         },
-    }))
+    })
 
     expect(tailwindMerge('')).toBe('')
     expect(tailwindMerge('my-prefix:fooKey-bar my-prefix:fooKey-baz')).toBe('my-prefix:fooKey-baz')
@@ -25,22 +25,14 @@ test('createTailwindMerge works with single config function', () => {
     expect(tailwindMerge('group other-2')).toBe('group other-2')
     expect(tailwindMerge('other-2 group')).toBe('group')
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const noRun = () => {
-        createTailwindMerge(
-            // @ts-expect-error
-            (config: any) => {
-                return config
-            }
-        )
-    }
+    expect(tailwindMerge('p-10 p-20')).toBe('p-20')
+    expect(tailwindMerge('hover:focus:p-10 focus:hover:p-20')).toBe('focus:hover:p-20')
 })
 
-test('createTailwindMerge works with multiple config functions', () => {
-    const tailwindMerge = createTailwindMerge(
-        () => ({
+test('extendTailwindMerge works corectly with multiple configs', () => {
+    const tailwindMerge = extendTailwindMerge(
+        {
             cacheSize: 20,
-            prefixes: ['my-prefix'],
             classGroups: {
                 fooKey: [{ fooKey: ['bar', 'baz'] }],
                 fooKey2: [{ fooKey: ['qux', 'quux'] }, 'other-2'],
@@ -50,18 +42,10 @@ test('createTailwindMerge works with multiple config functions', () => {
                 fooKey: ['otherKey'],
                 otherKey: ['fooKey', 'fooKey2'],
             },
-        }),
+        },
         (config) => ({
             ...config,
-            prefixes: [...config.prefixes, 'second'],
-            classGroups: {
-                ...config.classGroups,
-                helloFromSecondConfig: ['hello-there'],
-            },
-            conflictingClassGroups: {
-                ...config.conflictingClassGroups,
-                fooKey: [...(config.conflictingClassGroups.fooKey ?? []), 'helloFromSecondConfig'],
-            },
+            prefixes: [...config.prefixes, 'my-prefix'],
         })
     )
 
@@ -75,7 +59,6 @@ test('createTailwindMerge works with multiple config functions', () => {
     expect(tailwindMerge('group other-2')).toBe('group other-2')
     expect(tailwindMerge('other-2 group')).toBe('group')
 
-    expect(tailwindMerge('second:group second:nother')).toBe('second:nother')
-    expect(tailwindMerge('fooKey-bar hello-there')).toBe('fooKey-bar hello-there')
-    expect(tailwindMerge('hello-there fooKey-bar')).toBe('fooKey-bar')
+    expect(tailwindMerge('p-10 p-20')).toBe('p-20')
+    expect(tailwindMerge('hover:focus:p-10 focus:hover:p-20')).toBe('focus:hover:p-20')
 })

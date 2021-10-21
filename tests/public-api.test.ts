@@ -5,6 +5,7 @@ import {
     getDefaultConfig,
     Config,
     mergeConfigs,
+    extendTailwindMerge,
 } from '../src'
 
 test('has correct export types', () => {
@@ -19,6 +20,7 @@ test('has correct export types', () => {
         isAny: expect.any(Function),
     })
     expect(mergeConfigs).toStrictEqual(expect.any(Function))
+    expect(extendTailwindMerge).toStrictEqual(expect.any(Function))
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const noRun = () => {
@@ -130,32 +132,11 @@ test('mergeConfigs has correct inputs and outputs', () => {
                 },
                 conflictingClassGroups: {},
             },
-            {
-                cacheSize: 20,
-                prefixes: ['my-prefix-2'],
-                classGroups: {
-                    fooKey: [{ fooKey: ['bar', 'baz'] }],
-                    fooKey2: [{ fooKey: ['qux', 'quux'] }],
-                    otherKey: ['nother', 'group'],
-                },
-                conflictingClassGroups: {
-                    fooKey: ['otherKey'],
-                    otherKey: ['fooKey', 'fooKey2'],
-                },
-            }
+            {}
         )
-    ).toEqual({
-        cacheSize: 20,
-        prefixes: ['my-prefix', 'my-prefix-2'],
-        classGroups: {
-            fooKey: [{ fooKey: ['one', 'two'] }, { fooKey: ['bar', 'baz'] }],
-            bla: [{ bli: ['blub', 'blublub'] }],
-            fooKey2: [{ fooKey: ['qux', 'quux'] }],
-            otherKey: ['nother', 'group'],
-        },
-        conflictingClassGroups: {
-            fooKey: ['otherKey'],
-            otherKey: ['fooKey', 'fooKey2'],
-        },
-    })
+    ).toStrictEqual(expect.any(Object))
+})
+
+test('extendTailwindMerge has correct inputs and outputs', () => {
+    expect(extendTailwindMerge({})).toStrictEqual(expect.any(Function))
 })

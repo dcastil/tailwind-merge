@@ -67,7 +67,7 @@ tailwind-merge makes sure to override conflicting classes and keeps everything e
 
 ### Optimized for speed
 
--   Results get cached by default, so you don't need to worry about wasteful re-renders. The library uses a [LRU cache](<https://en.wikipedia.org/wiki/Cache_replacement_policies#Least_recently_used_(LRU)>) which stores up to 500 different results. The cache size can be modified or opt-out of by using [`createTailwindMerge()`](#createtailwindmerge).
+-   Results get cached by default, so you don't need to worry about wasteful re-renders. The library uses a [LRU cache](<https://en.wikipedia.org/wiki/Cache_replacement_policies#Least_recently_used_(LRU)>) which stores up to 500 different results. The cache size can be modified or opt-out of by using [`extendTailwindMerge()`](#extendtailwindmerge).
 -   Expensive computations happen upfront so that `twMerge()` calls without a cache hit stay fast.
 -   These computations are called lazily on the first call to `twMerge()` to prevent it from impacting app startup performance if it isn't used initially.
 
@@ -148,7 +148,7 @@ Default function to use if you're using the default Tailwind config or are close
 -   Only using default color names or color names which don't clash with Tailwind class names
 -   Only deviating by number values from number-based Tailwind classes
 
-If some of these points don't apply to you, it makes sense to test whether `twMerge()` still works as intended with your custom classes. Otherwise, you can create your own custom merge function with [`createTailwindMerge()`](#createtailwindmerge).
+If some of these points don't apply to you, it makes sense to test whether `twMerge()` still works as intended with your custom classes. Otherwise, you can create your own custom merge function with [`extendTailwindMerge()`](#extendtailwindmerge).
 
 ### `getDefaultConfig`
 
@@ -162,15 +162,59 @@ Function which returns the default config used by tailwind-merge. In fact, `twMe
 const twMerge = createTailwindMerge(getDefaultConfig)
 ```
 
-### `createTailwindMerge`
+### `extendTailwindMerge`
 
 ```ts
-function createTailwindMerge(
-    ...createConfig: [() => Config, ...((config: Config) => Config)[]]
+function extendTailwindMerge(
+    configExtension: Partial<Config>,
+    ...createConfig: Array<(config: Config) => Config>
 ): TailwindMerge
 ```
 
 Function to create merge function with custom config.
+
+You provide it a `configExtension` object which gets [merged](#mergeconfigs) with the default config.
+
+```ts
+const customTwMerge = extendTailwindMerge({
+    cacheSize: 0, // ← Disabling cache
+    prefixes: [
+        'my-custom-prefix', // ← Adding custom prefix
+    ],
+    // ↓ Here you define class groups
+    classGroups: {
+        // ↓ The `foo` key here is the class group ID
+        //   ↓ Creates group of classes which have conflicting styles
+        //     Classes here: foo, foo-2, bar-baz, bar-baz-1, bar-baz-2
+        foo: ['foo', 'foo-2', { 'bar-baz': ['', '1', '2'] }],
+        //   ↓ Functions can also be used to match classes.
+        //     Classes here: qux-auto, qux-1000, qux-1001, …
+        bar: [{ qux: ['auto', (value) => Number(value) >= 1000] }],
+    },
+    // ↓ Here you can define additional conflicts across different groups
+    conflictingClassGroups: {
+        // ↓ ID of class group which creates a conflict with …
+        //     ↓ … classes from groups with these IDs
+        foo: ['bar'],
+    },
+})
+```
+
+Additionally you can pass multiple `createConfig` functions (more to that in [`createTailwindMerge()`](#createtailwindmerge)) which is convenient if you want to combine your config with third-party plugins.
+
+```ts
+const customTwMerge = extendTailwindMerge({ … }, withSomePlugin)
+```
+
+### `createTailwindMerge`
+
+```ts
+function createTailwindMerge(
+    ...createConfig: [() => Config, ...Array<(config: Config) => Config>]
+): TailwindMerge
+```
+
+Function to create merge function with custom config. Here you get more control over the config than in [`extendTailwindMerge()`](#extendtailwindmerge).
 
 You need to provide a function which resolves to the config tailwind-merge should use for the new merge function. You can either extend from the default config or create a new one from scratch.
 
@@ -181,34 +225,22 @@ const customTwMerge = createTailwindMerge(() => {
     const defaultConfig = getDefaultConfig()
 
     return {
-        cacheSize: 0, // ← Disabling cache
-        prefixes: [
-            ...defaultConfig.prefixes,
-            'my-custom-prefix', // ← Adding custom prefix
-        ],
-        // ↓ Here you define class groups
+        cacheSize: 0,
+        prefixes: [...defaultConfig.prefixes, 'my-custom-prefix'],
         classGroups: {
             ...defaultConfig.classGroups,
-            // ↓ The `foo` key here is the class group ID
-            //   ↓ Creates group of classes which have conflicting styles
-            //     Classes here: foo, foo-2, bar-baz, bar-baz-1, bar-baz-2
             foo: ['foo', 'foo-2', { 'bar-baz': ['', '1', '2'] }],
-            //   ↓ Functions can also be used to create a catch-all case.
-            //     Classes here: qux-auto, qux-1000, qux-1001, …
             bar: [{ qux: ['auto', (value) => Number(value) >= 1000] }],
         },
-        // ↓ Here you can define additional conflicts across different groups
         conflictingClassGroups: {
             ...defaultConfig.conflictingClassGroups,
-            // ↓ ID of class group which creates a conflict with …
-            //     ↓ … classes from groups with these IDs
             foo: ['bar'],
         },
     }
 })
 ```
 
-You can also use multiple `createConfig` functions which is convenient if you want to combine your config with third-party plugins. Just keep in mind that the first `createConfig` function does not get passed any arguments, whereas the subsequent functions get each passed the config from the previous function.
+Same as in [`extendTailwindMerge()`](#extendtailwindmerge) you can use multiple `createConfig` functions which is convenient if you want to combine your config with third-party plugins. Just keep in mind that the first `createConfig` function does not get passed any arguments, whereas the subsequent functions get each passed the config from the previous function.
 
 ```ts
 const customTwMerge = createTailwindMerge(getDefaultConfig, withSomePlugin, (config) => ({
@@ -226,7 +258,7 @@ But don't merge configs like that. Use [`mergeConfigs()`](#mergeconfigs) instead
 ### `mergeConfigs`
 
 ```ts
-function mergeConfigs(baseConfig: Config, configToMerge: Config): Config
+function mergeConfigs(baseConfig: Config, configExtension: Partial<Config>): Config
 ```
 
 Helper function to merge multiple config objects. Objects are merged, arrays are concatenated, scalar values are overriden and `undefined` does nothing. The function assumes that both parameters are tailwind-merge config objects and shouldn't be used as a generic merge function.
@@ -256,7 +288,7 @@ interface Validators {
 }
 ```
 
-An object containing all the validators used in tailwind-merge. They are useful if you want to use a custom config with [`createTailwindMerge()`](#createtailwindmerge). E.g. the `classGroup` for padding is defined as
+An object containing all the validators used in tailwind-merge. They are useful if you want to use a custom config with [`extendTailwindMerge()`](#extendtailwindmerge) or [`createTailwindMerge()`](#createtailwindmerge). E.g. the `classGroup` for padding is defined as
 
 ```ts
 const paddingClassGroup = [{ p: [validators.isLength] }]
@@ -276,7 +308,7 @@ Here is a brief summary for each validator:
 interface Config { … }
 ```
 
-TypeScript type for config object. Useful if you want to build a `createConfig` function but don't want to define it inline in [`createTailwindMerge()`](#createtailwindmerge).
+TypeScript type for config object. Useful if you want to build a `createConfig` function but don't want to define it inline in [`extendTailwindMerge()`](#extendtailwindmerge) or [`createTailwindMerge()`](#createtailwindmerge).
 
 ## Versioning
 
