@@ -125,7 +125,6 @@ test('mergeConfigs has correct inputs and outputs', () => {
         mergeConfigs(
             {
                 cacheSize: 50,
-                prefixes: ['my-prefix'],
                 classGroups: {
                     fooKey: [{ fooKey: ['one', 'two'] }],
                     bla: [{ bli: ['blub', 'blublub'] }],
