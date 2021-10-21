@@ -169,6 +169,7 @@ function extendTailwindMerge(
     configExtension: Partial<Config>,
     ...createConfig: Array<(config: Config) => Config>
 ): TailwindMerge
+function extendTailwindMerge(...createConfig: Array<(config: Config) => Config>): TailwindMerge
 ```
 
 Function to create merge function with custom config.
@@ -204,6 +205,12 @@ Additionally you can pass multiple `createConfig` functions (more to that in [`c
 
 ```ts
 const customTwMerge = extendTailwindMerge({ … }, withSomePlugin)
+```
+
+If you only use plugins, you can omit the `configExtension` object as well.
+
+```ts
+const customTwMerge = extendTailwindMerge(withSomePlugin)
 ```
 
 ### `createTailwindMerge`
