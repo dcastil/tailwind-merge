@@ -1,8 +1,9 @@
-import { twMerge, createTailwindMerge, validators } from '../src'
+import { twMerge, createTailwindMerge, validators, getDefaultConfig } from '../src'
 
 test('has correct export types', () => {
     expect(twMerge).toStrictEqual(expect.any(Function))
     expect(createTailwindMerge).toStrictEqual(expect.any(Function))
+    expect(getDefaultConfig).toStrictEqual(expect.any(Function))
     expect(validators).toEqual({
         isLength: expect.any(Function),
         isCustomLength: expect.any(Function),
@@ -42,7 +43,7 @@ test('twMerge() has correct inputs and outputs', () => {
 })
 
 test('createTailwindMerge() has correct inputs and outputs', () => {
-    expect(createTailwindMerge((c) => c())).toStrictEqual(expect.any(Function))
+    expect(createTailwindMerge(getDefaultConfig)).toStrictEqual(expect.any(Function))
     expect(
         createTailwindMerge(() => ({
             cacheSize: 0,
