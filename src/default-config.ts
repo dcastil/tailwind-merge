@@ -1,96 +1,97 @@
 import { isAny, isCustomLength, isCustomValue, isInteger, isLength } from './validators'
 
-const getSizesSimple = () => ['sm', 'md', 'lg', 'xl', '2xl'] as const
-const getSizesExtended = () => ['3xl', '4xl', '5xl', '6xl', '7xl'] as const
-const getOverscroll = () => ['auto', 'contain', 'none'] as const
-const getOverflow = () => ['auto', 'hidden', 'visible', 'scroll'] as const
-const getLength = () => [isLength] as const
-const getLengthWithAuto = () => ['auto', isLength] as const
-const getLengthWithEmpty = () => ['', isLength] as const
-const getInteger = () => [isInteger] as const
-const getIntegerWithAuto = () => ['auto', isInteger] as const
-const getAny = () => [isAny] as const
-const getPositions = () =>
-    [
-        'bottom',
-        'center',
-        'left',
-        'left-bottom',
-        'left-top',
-        'right',
-        'right-bottom',
-        'right-top',
-        'top',
-    ] as const
-const getRounded = () => ['none', '', ...getSizesSimple(), '3xl', 'full', isCustomLength] as const
-const getBorderStyles = () => ['solid', 'dashed', 'dotted', 'double', 'none'] as const
-const getBlendModes = () =>
-    [
-        {
-            blend: [
-                'normal',
-                'multiply',
-                'screen',
-                'overlay',
-                'darken',
-                'lighten',
-                'color-dodge',
-                'color-burn',
-                'hard-light',
-                'soft-light',
-                'difference',
-                'exclusion',
-                'hue',
-                'saturation',
-                'color',
-                'luminosity',
-            ],
-        },
-    ] as const
-const getAlign = () => ['start', 'end', 'center', 'between', 'around', 'evenly'] as const
-const getZeroAndEmpty = () => ['', '0'] as const
-const getPseudoVariants = () =>
-    [
-        // Positional
-        'first',
-        'last',
-        'only',
-        'odd',
-        'even',
-        'first-of-type',
-        'last-of-type',
-        'only-of-type',
-
-        // State
-        'visited',
-        'target',
-
-        // Forms
-        'default',
-        'checked',
-        'indeterminate',
-        'placeholder-shown',
-        'autofill',
-        'required',
-        'valid',
-        'invalid',
-        'in-range',
-        'out-of-range',
-        'read-only',
-
-        // Content
-        'empty',
-
-        // Interactive
-        'focus-within',
-        'hover',
-        'focus',
-        'focus-visible',
-        'active',
-        'disabled',
-    ] as const
-
 export function getDefaultConfig() {
+    const getSizesSimple = () => ['sm', 'md', 'lg', 'xl', '2xl'] as const
+    const getSizesExtended = () => ['3xl', '4xl', '5xl', '6xl', '7xl'] as const
+    const getOverscroll = () => ['auto', 'contain', 'none'] as const
+    const getOverflow = () => ['auto', 'hidden', 'visible', 'scroll'] as const
+    const getLength = () => [isLength] as const
+    const getLengthWithAuto = () => ['auto', isLength] as const
+    const getLengthWithEmpty = () => ['', isLength] as const
+    const getInteger = () => [isInteger] as const
+    const getIntegerWithAuto = () => ['auto', isInteger] as const
+    const getAny = () => [isAny] as const
+    const getPositions = () =>
+        [
+            'bottom',
+            'center',
+            'left',
+            'left-bottom',
+            'left-top',
+            'right',
+            'right-bottom',
+            'right-top',
+            'top',
+        ] as const
+    const getRounded = () =>
+        ['none', '', ...getSizesSimple(), '3xl', 'full', isCustomLength] as const
+    const getBorderStyles = () => ['solid', 'dashed', 'dotted', 'double', 'none'] as const
+    const getBlendModes = () =>
+        [
+            {
+                blend: [
+                    'normal',
+                    'multiply',
+                    'screen',
+                    'overlay',
+                    'darken',
+                    'lighten',
+                    'color-dodge',
+                    'color-burn',
+                    'hard-light',
+                    'soft-light',
+                    'difference',
+                    'exclusion',
+                    'hue',
+                    'saturation',
+                    'color',
+                    'luminosity',
+                ],
+            },
+        ] as const
+    const getAlign = () => ['start', 'end', 'center', 'between', 'around', 'evenly'] as const
+    const getZeroAndEmpty = () => ['', '0'] as const
+    const getPseudoVariants = () =>
+        [
+            // Positional
+            'first',
+            'last',
+            'only',
+            'odd',
+            'even',
+            'first-of-type',
+            'last-of-type',
+            'only-of-type',
+
+            // State
+            'visited',
+            'target',
+
+            // Forms
+            'default',
+            'checked',
+            'indeterminate',
+            'placeholder-shown',
+            'autofill',
+            'required',
+            'valid',
+            'invalid',
+            'in-range',
+            'out-of-range',
+            'read-only',
+
+            // Content
+            'empty',
+
+            // Interactive
+            'focus-within',
+            'hover',
+            'focus',
+            'focus-visible',
+            'active',
+            'disabled',
+        ] as const
+
     return {
         cacheSize: 500,
         prefixes: [
