@@ -29,7 +29,7 @@ I want to keep the library on v0 until I feel confident enough that there aren't
 
 ## What is it for
 
-If you use Tailwind with a component-based UI renderer like [React](https://reactjs.org) or [Vue](https://vuejs.org), you're probably familiar with this situation:
+If you use Tailwind with a component-based UI renderer like [React](https://reactjs.org) or [Vue](https://vuejs.org), you're probably familiar with the situation that you want to change some styles of a component, but only in one place.
 
 ```jsx
 import React from 'react'
@@ -67,7 +67,7 @@ tailwind-merge makes sure to override conflicting classes and keeps everything e
 
 ### Optimized for speed
 
--   Results get cached by default, so you don't need to worry about wasteful rerenders. The library uses a [LRU cache](<https://en.wikipedia.org/wiki/Cache_replacement_policies#Least_recently_used_(LRU)>) which stores up to 500 different results. The cache size can be modified or opt-out of by using [`createTailwindMerge()`](#createtailwindmerge).
+-   Results get cached by default, so you don't need to worry about wasteful re-renders. The library uses a [LRU cache](<https://en.wikipedia.org/wiki/Cache_replacement_policies#Least_recently_used_(LRU)>) which stores up to 500 different results. The cache size can be modified or opt-out of by using [`createTailwindMerge()`](#createtailwindmerge).
 -   Expensive computations happen upfront so that `twMerge()` calls without a cache hit stay fast.
 -   These computations are called lazily on the first call to `twMerge()` to prevent it from impacting app startup performance if it isn't used initially.
 
