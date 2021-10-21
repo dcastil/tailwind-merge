@@ -156,7 +156,7 @@ If some of these points don't apply to you, it makes sense to test whether `twMe
 function getDefaultConfig(): Config
 ```
 
-Function which returns default config used by tailwind-merge. In fact, `twMerge` is just built like this:
+Function which returns the default config used by tailwind-merge. In fact, `twMerge` is just built like this:
 
 ```ts
 const twMerge = createTailwindMerge(getDefaultConfig)
