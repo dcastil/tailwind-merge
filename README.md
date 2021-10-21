@@ -211,7 +211,7 @@ const customTwMerge = createTailwindMerge(() => {
 You can also use multiple `createConfig` functions which is convenient if you want to combine your config with third-party plugins. Just keep in mind that the first `createConfig` function does not get passed any arguments, whereas the subsequent functions get each passed the config from the previous function.
 
 ```ts
-const customTwMerge = createTailwindConfig(getDefaultConfig, withSomePlugin, (config) => ({
+const customTwMerge = createTailwindMerge(getDefaultConfig, withSomePlugin, (config) => ({
     // ↓ Config returned by `withSomePlugin`
     ...config,
     classGroups: {
@@ -232,7 +232,7 @@ function mergeConfigs(baseConfig: Config, configToMerge: Config): Config
 Helper function to merge multiple config objects. Objects are merged, arrays are concatenated, scalar values are overriden and `undefined` does nothing. The function assumes that both parameters are tailwind-merge config objects and shouldn't be used as a generic merge function.
 
 ```ts
-const customTwMerge = createTailwindConfig(getDefaultConfig, (config) =>
+const customTwMerge = createTailwindMerge(getDefaultConfig, (config) =>
     mergeConfigs(config, {
         classGroups: {
             // ↓ Adding new class group
