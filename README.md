@@ -67,9 +67,9 @@ tailwind-merge makes sure to override conflicting classes and keeps everything e
 
 ### Optimized for speed
 
--   Results get cached by default, so you don't need to worry about wasteful re-renders. The library uses a [LRU cache](<https://en.wikipedia.org/wiki/Cache_replacement_policies#Least_recently_used_(LRU)>) which stores up to 500 different results. The cache size can be modified or opt-out of by using [`extendTailwindMerge()`](#extendtailwindmerge).
--   Expensive computations happen upfront so that `twMerge()` calls without a cache hit stay fast.
--   These computations are called lazily on the first call to `twMerge()` to prevent it from impacting app startup performance if it isn't used initially.
+-   Results get cached by default, so you don't need to worry about wasteful re-renders. The library uses a [LRU cache](<https://en.wikipedia.org/wiki/Cache_replacement_policies#Least_recently_used_(LRU)>) which stores up to 500 different results. The cache size can be modified or opt-out of by using [`extendTailwindMerge`](#extendtailwindmerge).
+-   Expensive computations happen upfront so that `twMerge` calls without a cache hit stay fast.
+-   These computations are called lazily on the first call to `twMerge` to prevent it from impacting app startup performance if it isn't used initially.
 
 ### Last conflicting class wins
 
@@ -148,7 +148,7 @@ Default function to use if you're using the default Tailwind config or are close
 -   Only using default color names or color names which don't clash with Tailwind class names
 -   Only deviating by number values from number-based Tailwind classes
 
-If some of these points don't apply to you, it makes sense to test whether `twMerge()` still works as intended with your custom classes. Otherwise, you can create your own custom merge function with [`extendTailwindMerge()`](#extendtailwindmerge).
+If some of these points don't apply to you, it makes sense to test whether `twMerge` still works as intended with your custom classes. Otherwise, you can create your own custom merge function with [`extendTailwindMerge`](#extendtailwindmerge).
 
 ### `getDefaultConfig`
 
@@ -201,7 +201,7 @@ const customTwMerge = extendTailwindMerge({
 })
 ```
 
-Additionally you can pass multiple `createConfig` functions (more to that in [`createTailwindMerge()`](#createtailwindmerge)) which is convenient if you want to combine your config with third-party plugins.
+Additionally you can pass multiple `createConfig` functions (more to that in [`createTailwindMerge`](#createtailwindmerge)) which is convenient if you want to combine your config with third-party plugins.
 
 ```ts
 const customTwMerge = extendTailwindMerge({ … }, withSomePlugin)
@@ -221,13 +221,13 @@ function createTailwindMerge(
 ): TailwindMerge
 ```
 
-Function to create merge function with custom config. Here you get more control over the config than in [`extendTailwindMerge()`](#extendtailwindmerge).
+Function to create merge function with custom config. Here you get more control over the config than in [`extendTailwindMerge`](#extendtailwindmerge).
 
 You need to provide a function which resolves to the config tailwind-merge should use for the new merge function. You can either extend from the default config or create a new one from scratch.
 
 ```ts
-// ↓ Callback passed to `createTailwindMerge()` is called when
-//   `customTwMerge()` gets called the first time.
+// ↓ Callback passed to `createTailwindMerge` is called when
+//   `customTwMerge` gets called the first time.
 const customTwMerge = createTailwindMerge(() => {
     const defaultConfig = getDefaultConfig()
 
@@ -247,7 +247,7 @@ const customTwMerge = createTailwindMerge(() => {
 })
 ```
 
-Same as in [`extendTailwindMerge()`](#extendtailwindmerge) you can use multiple `createConfig` functions which is convenient if you want to combine your config with third-party plugins. Just keep in mind that the first `createConfig` function does not get passed any arguments, whereas the subsequent functions get each passed the config from the previous function.
+Same as in [`extendTailwindMerge`](#extendtailwindmerge) you can use multiple `createConfig` functions which is convenient if you want to combine your config with third-party plugins. Just keep in mind that the first `createConfig` function does not get passed any arguments, whereas the subsequent functions get each passed the config from the previous function.
 
 ```ts
 const customTwMerge = createTailwindMerge(getDefaultConfig, withSomePlugin, (config) => ({
@@ -260,7 +260,7 @@ const customTwMerge = createTailwindMerge(getDefaultConfig, withSomePlugin, (con
 }))
 ```
 
-But don't merge configs like that. Use [`mergeConfigs()`](#mergeconfigs) instead.
+But don't merge configs like that. Use [`mergeConfigs`](#mergeconfigs) instead.
 
 ### `mergeConfigs`
 
@@ -295,19 +295,19 @@ interface Validators {
 }
 ```
 
-An object containing all the validators used in tailwind-merge. They are useful if you want to use a custom config with [`extendTailwindMerge()`](#extendtailwindmerge) or [`createTailwindMerge()`](#createtailwindmerge). E.g. the `classGroup` for padding is defined as
+An object containing all the validators used in tailwind-merge. They are useful if you want to use a custom config with [`extendTailwindMerge`](#extendtailwindmerge) or [`createTailwindMerge`](#createtailwindmerge). E.g. the `classGroup` for padding is defined as
 
 ```ts
 const paddingClassGroup = [{ p: [validators.isLength] }]
 ```
 
-Here is a brief summary for each validator:
+A brief summary for each validator:
 
--   `isLength()` checks whether a class part is a number (`3`, `1.5`), a fraction (`3/4`), a custom length (`[3%]`, `[4px]`, `[length:var(--my-var)]`), or one of the strings `px`, `full` or `screen`.
--   `isCustomLength()` checks for custom length values (`[3%]`, `[4px]`, `[length:var(--my-var)]`).
--   `isInteger()` checks for integer values (`3`) and custom integer values (`[3]`).
--   `isCustomValue()` checks whether the class part is enclosed in brackets (`[something]`)
--   `isAny()` always returns true. Be careful with this validator as it might match unwanted classes. I use it primarily to match colors or when I'm ceertain there are no other class groups in a namespace.
+-   `isLength` checks whether a class part is a number (`3`, `1.5`), a fraction (`3/4`), a custom length (`[3%]`, `[4px]`, `[length:var(--my-var)]`), or one of the strings `px`, `full` or `screen`.
+-   `isCustomLength` checks for custom length values (`[3%]`, `[4px]`, `[length:var(--my-var)]`).
+-   `isInteger` checks for integer values (`3`) and custom integer values (`[3]`).
+-   `isCustomValue` checks whether the class part is enclosed in brackets (`[something]`)
+-   `isAny` always returns true. Be careful with this validator as it might match unwanted classes. I use it primarily to match colors or when I'm ceertain there are no other class groups in a namespace.
 
 ### `Config`
 
@@ -315,7 +315,7 @@ Here is a brief summary for each validator:
 interface Config { … }
 ```
 
-TypeScript type for config object. Useful if you want to build a `createConfig` function but don't want to define it inline in [`extendTailwindMerge()`](#extendtailwindmerge) or [`createTailwindMerge()`](#createtailwindmerge).
+TypeScript type for config object. Useful if you want to build a `createConfig` function but don't want to define it inline in [`extendTailwindMerge`](#extendtailwindmerge) or [`createTailwindMerge`](#createtailwindmerge).
 
 ## Writing plugins
 
@@ -323,7 +323,7 @@ This library supports classes of the core Tailwind library out of the box, but n
 
 -   Create a package called `tailwind-merge-magic-plugin` with tailwind-merge as peer dependency which exports a function `withMagic` and replace "magic" with your plugin name.
 -   This function would be ideally a `createConfig` function which takes a config object as argument and returns the modified config object.
--   Use the [`validators`](#validators) and [`mergeConfigs()`](#mergeconfigs) from tailwind-merge to extend the config with magic.
+-   Use the [`validators`](#validators) and [`mergeConfigs`](#mergeconfigs) from tailwind-merge to extend the config with magic.
 
 Here is an example of how a plugin could look like:
 
@@ -333,7 +333,7 @@ import { mergeConfigs, validators, Config } from 'tailwind-merge'
 export function withMagic(config: Config): Config {
     return mergeConfigs(config, {
         classGroups: {
-            magic: [{ magic: ['1', '2'] }],
+            magic: [{ magic: [validators.isLength, 'wow'] }],
         },
     })
 }
@@ -356,7 +356,7 @@ This package follows the [SemVer](https://semver.org) versioning rules. More spe
 
 -   Minor version gets incremented when additional features are added which don't break any existing API. However, a minor version update might still alter which styles are applied if you use Tailwind features not yet supported by tailwind-merge. E.g. a new Tailwind prefix `magic` gets added to this package which changes the result of `twMerge('magic:px-1 magic:p-3')` from `magic:px-1 magic:p-3` to `magic:p-3`.
 
--   Major version gets incremented when breaking changes are introduced to the package API. E.g. the return type of `twMerge()` changes.
+-   Major version gets incremented when breaking changes are introduced to the package API. E.g. the return type of `twMerge` changes.
 
 -   `alpha` releases might introduce breaking changes on any update. Whereas `beta` releases only introduce new features or bug fixes.
 
