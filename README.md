@@ -144,9 +144,9 @@ function twMerge(...classLists: Array<string | undefined | null | false>): strin
 
 Default function to use if you're using the default Tailwind config or are close enough to the default config. You can use this function if all of the following points apply to your Tailwind config:
 
--   Only using color names which don't clash with Tailwind class names
+-   Only using color names which don't clash with other Tailwind class names
 -   Only deviating by number values from number-based Tailwind classes
--   Only using font-family classes which don't clash with default Tailwind font-weight classes
+-   Only using font-family classes which don't clash with default font-weight classes
 -   Sticking to default Tailwind config for everything else
 
 If some of these points don't apply to you, it makes sense to test whether `twMerge` still works as intended with your custom classes. Otherwise, you can create your own custom merge function with [`extendTailwindMerge`](#extendtailwindmerge).
