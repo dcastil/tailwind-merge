@@ -157,11 +157,7 @@ If some of these points don't apply to you, it makes sense to test whether `twMe
 function getDefaultConfig(): Config
 ```
 
-Function which returns the default config used by tailwind-merge. In fact, `twMerge` is just built like this:
-
-```ts
-const twMerge = createTailwindMerge(getDefaultConfig)
-```
+Function which returns the default config used by tailwind-merge. The tailwind-merge config is different from the Tailwind config. It is optimized for small bundle size and fast runtime performance because it is expected to run in the browser.
 
 ### `extendTailwindMerge`
 
@@ -173,7 +169,7 @@ function extendTailwindMerge(
 function extendTailwindMerge(...createConfig: Array<(config: Config) => Config>): TailwindMerge
 ```
 
-Function to create merge function with custom config.
+Function to create merge function with custom config which extends the default config. Use this if you use the default Tailwind config and just extend it in some places.
 
 You provide it a `configExtension` object which gets [merged](#mergeconfigs) with the default config.
 
