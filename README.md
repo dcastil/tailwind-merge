@@ -221,7 +221,7 @@ function createTailwindMerge(
 ): TailwindMerge
 ```
 
-Function to create merge function with custom config. Here you get more control over the config than in [`extendTailwindMerge`](#extendtailwindmerge).
+Function to create merge function with custom config. Use this function instead of [`extendTailwindMerge`](#extendtailwindmerge) if you don't need the default config or want more control over the config.
 
 You need to provide a function which resolves to the config tailwind-merge should use for the new merge function. You can either extend from the default config or create a new one from scratch.
 
