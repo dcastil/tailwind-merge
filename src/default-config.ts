@@ -283,12 +283,12 @@ export function getDefaultConfig() {
              * Grid Auto Columns
              * @see https://tailwindcss.com/docs/grid-auto-columns
              */
-            'auto-cols': [{ 'auto-cols': ['auto', 'min', 'max', 'fr'] }],
+            'auto-cols': [{ 'auto-cols': ['auto', 'min', 'max', 'fr', isCustomValue] }],
             /**
              * Grid Auto Rows
              * @see https://tailwindcss.com/docs/grid-auto-rows
              */
-            'auto-rows': [{ 'auto-rows': ['auto', 'min', 'max', 'fr'] }],
+            'auto-rows': [{ 'auto-rows': ['auto', 'min', 'max', 'fr', isCustomValue] }],
             /**
              * Gap
              * @see https://tailwindcss.com/docs/gap
@@ -467,6 +467,7 @@ export function getDefaultConfig() {
                         'max',
                         'prose',
                         { screen: getSizesSimple() },
+                        isCustomLength,
                     ],
                 },
             ],
@@ -1031,7 +1032,18 @@ export function getDefaultConfig() {
              * @see https://tailwindcss.com/docs/transition-property
              */
             transition: [
-                { transition: ['none', 'all', '', 'colors', 'opacity', 'shadow', 'transform'] },
+                {
+                    transition: [
+                        'none',
+                        'all',
+                        '',
+                        'colors',
+                        'opacity',
+                        'shadow',
+                        'transform',
+                        isCustomValue,
+                    ],
+                },
             ],
             /**
              * Transition Duration
@@ -1042,7 +1054,7 @@ export function getDefaultConfig() {
              * Transition Timing Function
              * @see https://tailwindcss.com/docs/transition-timing-function
              */
-            ease: [{ ease: ['linear', 'in', 'out', 'in-out'] }],
+            ease: [{ ease: ['linear', 'in', 'out', 'in-out', isCustomValue] }],
             /**
              * Transition Delay
              * @see https://tailwindcss.com/docs/transition-delay
@@ -1052,7 +1064,7 @@ export function getDefaultConfig() {
              * Animation
              * @see https://tailwindcss.com/docs/animation
              */
-            animate: [{ animate: ['none', 'spin', 'ping', 'pulse', 'bounce'] }],
+            animate: [{ animate: ['none', 'spin', 'ping', 'pulse', 'bounce', isCustomValue] }],
             // Transforms
             /**
              * Transform
@@ -1168,12 +1180,12 @@ export function getDefaultConfig() {
              * Fill
              * @see https://tailwindcss.com/docs/fill
              */
-            fill: ['fill-current'],
+            fill: [{ fill: ['current', isCustomValue] }],
             /**
              * Stroke
              * @see https://tailwindcss.com/docs/stroke
              */
-            stroke: [{ stroke: ['current'] }],
+            stroke: [{ stroke: ['current', isCustomValue] }],
             /**
              * Stroke Width
              * @see https://tailwindcss.com/docs/stroke-width
