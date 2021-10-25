@@ -316,7 +316,7 @@ TypeScript type for config object. Useful if you want to build a `createConfig` 
 
 ## Writing plugins
 
-This library supports classes of the core Tailwind library out of the box, but not classes of any plugins. But it's possible and hopefully easy to write third-party plugins for tailwind-merge. In case you want to write a plugin, I welcome you to follow these steps:
+This library supports classes of the core Tailwind library out of the box, but not classes of any plugins. But it's possible and hopefully easy to write third-party plugins for tailwind-merge. In case you want to write a plugin, I invite you to follow these steps:
 
 -   Create a package called `tailwind-merge-magic-plugin` with tailwind-merge as peer dependency which exports a function `withMagic` and replace "magic" with your plugin name.
 -   This function would be ideally a `createConfig` function which takes a config object as argument and returns the modified config object.
@@ -345,6 +345,8 @@ import { withMagic } from 'tailwind-merge-magic-plugin'
 
 const twMerge = extendTailwindMerge(withMagic)
 ```
+
+Also feel free to check out [tailwind-merge-rtl-plugin](https://github.com/vltansky/tailwind-merge-rtl-plugin) as a real example of a tailwind-merge plugin.
 
 ## Versioning
 
