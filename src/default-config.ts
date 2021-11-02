@@ -596,7 +596,7 @@ export function getDefaultConfig() {
              * List Style Type
              * @see https://tailwindcss.com/docs/list-style-type
              */
-            'list-style-type': [{ list: ['none', 'disc', 'decimal'] }],
+            'list-style-type': [{ list: ['none', 'disc', 'decimal', isCustomValue] }],
             /**
              * List Style Position
              * @see https://tailwindcss.com/docs/list-style-position
