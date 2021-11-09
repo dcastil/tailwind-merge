@@ -99,7 +99,7 @@ export function getDefaultConfig() {
             space: [spacing],
             translate: [spacing],
 
-            // Theme keys not in use because they would apply only to a single classGroup:
+            // Tailwind theme keys not in use because they would apply only to a single classGroup:
 
             // animation: ['none', 'spin', 'ping', 'pulse', 'bounce', isCustomValue],
             // backdropBlur: [blur],
