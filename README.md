@@ -132,6 +132,149 @@ twMerge('text-red text-secret-sauce') // → 'text-secret-sauce'
 twMerge('some-class', undefined, null, false) // → 'some-class'
 ```
 
+## Basic usage
+
+If you're using Tailwind CSS without any extra config, you can use [`twMerge`](#twmerge) right away. You can safely stop reading the documentation here.
+
+## Usage with custom Tailwind config
+
+If you're using a custom Tailwind config, you may need to configure tailwind-merge as well to merge classes properly.
+
+The default [`twMerge`](#twmerge) function is configured in a way that you can still use it if all of the following points apply to your Tailwind config:
+
+-   Only using color names which don't clash with other Tailwind class names
+-   Only deviating by number values from number-based Tailwind classes
+-   Only using font-family classes which don't clash with default font-weight classes
+-   Sticking to default Tailwind config for everything else
+
+If some of these points don't apply to you, you can test whether `twMerge` still works as intended with your custom classes. Otherwise you need create your own custom merge function by either extending the default tailwind-merge config or using a completely custom one.
+
+The tailwind-merge config is different from the Tailwind config because it's expected to be shipped and run in the browser as opposed to the Tailwind config which is meant to run at build-time. Be careful in case you're using your Tailwind config directly to configure tailwind-merge in your client-side code because that could result in an unnecessarily large bundle size.
+
+### Shape of tailwind-merge config
+
+The tailwind-merge config is an object with a few keys.
+
+```ts
+const tailwindMergeConfig = {
+    // ↓ Set how many values should be stored in cache.
+    cacheSize: 500,
+    theme: {
+        // Theme scales are defined here
+    },
+    classGroups: {
+        // Class groups are defined here
+    },
+    conflictingClassGroups: {
+        // Conflcits between class groups are defined here
+    },
+}
+```
+
+### Class groups
+
+The library uses a concept of _class groups_ which is an array of Tailwind classes which all modify the same CSS property. E.g. here is the position class group.
+
+```ts
+const positionClassGroup = ['static', 'fixed', 'absolute', 'relative', 'sticky']
+```
+
+tailwind-merge resolves conflicts between classes in a class group and only keeps the last one passed to the merge function call.
+
+```ts
+twMerge('static sticky relative') // → 'relative'
+```
+
+Tailwind classes often share the beginning of the class name, so elements in a class group can also be an object with values of the same shape as a class group (yes, the shape is recursive). In the object each key is joined with all the elements in the corresponding array with a dash (`-`) in between.
+
+E.g. here is the overflow class group which results in the classes `overflow-auto`, `overflow-hidden`, `overflow-visible` and `overflow-scroll`.
+
+```ts
+const overflowClassGroup = [{ overflow: ['auto', 'hidden', 'visible', 'scroll'] }]
+```
+
+Sometimes it isn't possible to enumerate all elements in a class group. Think of a Tailwind class which allows custom values. In this scenario you can use a validator function which takes a _class part_ and returns a boolean indicating whether a class is part of a class group.
+
+E.g. here is the fill class group.
+
+```ts
+const isCustomValue = (classPart: string) => /^\[.+\]$/.test(classPart)
+const fillClassGroup = [{ fill: ['current', isCustomValue] }]
+```
+
+Because the function is under the `fill` key, it will only get called for classes which start with `fill-`. Also, the function only gets passed the part of the class name which comes after `fill-`, this way you can use the same function in multiple class groups. tailwind-merge exports its own [validators](#validators), so you don't need to recreate them.
+
+You can use am empty string (`''`) as a class part if you want to indicate that the preceding part was the end. This is useful for defining elements which are marked as `DEFAULT` in the Tailwind config.
+
+```ts
+// ↓ Resolves to filter and filter-none
+const filterClassGroup = [{ filter: ['', 'none'] }]
+```
+
+Each class group is defined under its ID in the `classGroups` object in the config. This ID is only used internally and the only thing that matters is that it is unique among all class groups.
+
+### Conflicting class groups
+
+<!-- TODO: Add content -->
+
+### Theme
+
+In the Tailwind config you can modify theme scales. tailwind-merge follows the same keys for the theme scales, but doesn't support all of them. tailwind-merge only supports theme scales which are used in multiple class groups to save bundle size (more info to that in [PR 55](https://github.com/dcastil/tailwind-merge/pull/55)). At the moment these are:
+
+-   `colors`
+-   `spacing`
+-   `blur`
+-   `brightness`
+-   `borderColor`
+-   `borderRadius`
+-   `borderWidth`
+-   `contrast`
+-   `grayscale`
+-   `hueRotate`
+-   `invert`
+-   `gap`
+-   `gradientColorStops`
+-   `inset`
+-   `margin`
+-   `opacity`
+-   `padding`
+-   `saturate`
+-   `scale`
+-   `sepia`
+-   `skew`
+-   `space`
+-   `translate`
+
+If you modified one of these theme scales in your Tailwind config, you can add all your keys right here and tailwind-merge will take care of the rest. If you modified other theme scales, you need to figure out the class group to modify in the [default config](#getdefaultconfig).
+
+### Extending the tailwind-merge config
+
+If you only need to extend the default tailwind-merge config, [`extendTailwindMerge`](#extendtailwindmerge) is the easiest way to extend the config. You provide it a `configExtension` object which gets [merged](#mergeconfigs) with the default config. Therefore all keys here are optional.
+
+```ts
+import { extendTailwindMerge, fromTheme } from 'tailwind-merge'
+
+const customTwMerge = extendTailwindMerge({
+    // ↓ Add values to existing theme scale or create a new one
+    theme: {
+        spacing: ['sm', 'md', 'lg'],
+    },
+    // ↓ Add values to existing class groups or define new ones
+    classGroups: {
+        foo: ['foo', 'foo-2', { 'bar-baz': ['', '1', '2'] }],
+        bar: [{ qux: ['auto', (value) => Number(value) >= 1000] }],
+    },
+    // ↓ Here you can define additional conflicts across different groups
+    conflictingClassGroups: {
+        foo: ['bar'],
+    },
+})
+```
+
+### Using completely custom tailwind-merge config
+
+<!-- TODO: Add content -->
+
 ## API reference
 
 Reference to all exports of tailwind-merge.
@@ -142,14 +285,9 @@ Reference to all exports of tailwind-merge.
 function twMerge(...classLists: Array<string | undefined | null | false>): string
 ```
 
-Default function to use if you're using the default Tailwind config or are close enough to the default config. You can use this function if all of the following points apply to your Tailwind config:
+Default function to use if you're using the default Tailwind config or are close enough to the default config. Check out [basic usage](#basic-usage) for more info.
 
--   Only using color names which don't clash with other Tailwind class names
--   Only deviating by number values from number-based Tailwind classes
--   Only using font-family classes which don't clash with default font-weight classes
--   Sticking to default Tailwind config for everything else
-
-If some of these points don't apply to you, it makes sense to test whether `twMerge` still works as intended with your custom classes. Otherwise, you can create your own custom merge function with [`extendTailwindMerge`](#extendtailwindmerge).
+If `twMerge` doesn't work for you, you can create your own custom merge function with [`extendTailwindMerge`](#extendtailwindmerge).
 
 ### `getDefaultConfig`
 
@@ -158,6 +296,30 @@ function getDefaultConfig(): Config
 ```
 
 Function which returns the default config used by tailwind-merge. The tailwind-merge config is different from the Tailwind config. It is optimized for small bundle size and fast runtime performance because it is expected to run in the browser.
+
+### `fromTheme`
+
+```ts
+function fromTheme(key: string): ThemeGetter
+```
+
+Function to retrieve values from a theme scale, to be used in class groups.
+
+`fromTheme` doesn't return the values from the theme scale but rather another function which is used by tailwind-merge internally to retrieve the theme values. tailwind-merge can differentiate the theme getter function from a validator because it has a `isThemeGetter` property set to `true`.
+
+It can be used like this:
+
+```ts
+extendTailwindMerge({
+    theme: {
+        'my-scale': ['foo', 'bar']
+    },
+    classGroups: {
+        'my-group': [{ 'my-group': [fromTheme('my-scale'), fromTheme('spacing')] }]
+        'my-group-x': [{ 'my-group-x': [fromTheme('my-scale')] }]
+    }
+})
+```
 
 ### `extendTailwindMerge`
 
@@ -176,9 +338,11 @@ You provide it a `configExtension` object which gets [merged](#mergeconfigs) wit
 ```ts
 const customTwMerge = extendTailwindMerge({
     cacheSize: 0, // ← Disabling cache
-    prefixes: [
-        'my-custom-prefix', // ← Adding custom prefix
-    ],
+    // ↓ Add values to existing theme scale or create a new one
+    //   Not all theme keys form the Tailwind config are supported by default.
+    theme: {
+        spacing: ['sm', 'md', 'lg'],
+    },
     // ↓ Here you define class groups
     classGroups: {
         // ↓ The `foo` key here is the class group ID
@@ -230,7 +394,6 @@ const customTwMerge = createTailwindMerge(() => {
 
     return {
         cacheSize: 0,
-        prefixes: [...defaultConfig.prefixes, 'my-custom-prefix'],
         classGroups: {
             ...defaultConfig.classGroups,
             foo: ['foo', 'foo-2', { 'bar-baz': ['', '1', '2'] }],
