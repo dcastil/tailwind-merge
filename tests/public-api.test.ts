@@ -63,7 +63,7 @@ test('createTailwindMerge() has correct inputs and outputs', () => {
     expect(
         createTailwindMerge(() => ({
             cacheSize: 0,
-            prefixes: [],
+            theme: {},
             classGroups: {},
             conflictingClassGroups: {},
         }))
@@ -71,7 +71,7 @@ test('createTailwindMerge() has correct inputs and outputs', () => {
 
     const tailwindMerge = createTailwindMerge(() => ({
         cacheSize: 20,
-        prefixes: ['my-prefix'],
+        theme: {},
         classGroups: {
             fooKey: [{ fooKey: ['bar', 'baz'] }],
             fooKey2: [{ fooKey: ['qux', 'quux'] }],
@@ -125,6 +125,7 @@ test('mergeConfigs has correct inputs and outputs', () => {
         mergeConfigs(
             {
                 cacheSize: 50,
+                theme: {},
                 classGroups: {
                     fooKey: [{ fooKey: ['one', 'two'] }],
                     bla: [{ bli: ['blub', 'blublub'] }],

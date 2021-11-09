@@ -1,4 +1,4 @@
-import { ClassGroupId, Config, ClassGroup, ClassValidator } from './types'
+import { ClassGroupId, Config, ClassGroup, ClassValidator, ThemeObject, ThemeGetter } from './types'
 
 export interface ClassPartObject {
     nextPart: Record<string, ClassPartObject>
@@ -68,13 +68,14 @@ function getGroupRecursive(
  * Exported for testing only
  */
 export function createClassMap(config: Config) {
+    const { theme } = config
     const classMap: ClassPartObject = {
         nextPart: {},
         validators: [],
     }
 
     Object.entries(config.classGroups).forEach(([classGroupId, classGroup]) => {
-        processClassesRecursively(classGroup, classMap, classGroupId)
+        processClassesRecursively(classGroup, classMap, classGroupId, theme)
     })
 
     return classMap
@@ -83,23 +84,44 @@ export function createClassMap(config: Config) {
 function processClassesRecursively(
     classGroup: ClassGroup,
     classPartObject: ClassPartObject,
-    classGroupId: ClassGroupId
+    classGroupId: ClassGroupId,
+    theme: ThemeObject
 ) {
     classGroup.forEach((classDefinition) => {
         if (typeof classDefinition === 'string') {
             const classPartObjectToEdit =
                 classDefinition === '' ? classPartObject : getPart(classPartObject, classDefinition)
             classPartObjectToEdit.classGroupId = classGroupId
-        } else if (typeof classDefinition === 'function') {
+            return
+        }
+
+        if (typeof classDefinition === 'function') {
+            if (isThemeGetter(classDefinition)) {
+                processClassesRecursively(
+                    classDefinition(theme),
+                    classPartObject,
+                    classGroupId,
+                    theme
+                )
+                return
+            }
+
             classPartObject.validators.push({
                 validator: classDefinition,
                 classGroupId,
             })
-        } else {
-            Object.entries(classDefinition).forEach(([key, classGroup]) => {
-                processClassesRecursively(classGroup, getPart(classPartObject, key), classGroupId)
-            })
+
+            return
         }
+
+        Object.entries(classDefinition).forEach(([key, classGroup]) => {
+            processClassesRecursively(
+                classGroup,
+                getPart(classPartObject, key),
+                classGroupId,
+                theme
+            )
+        })
     })
 }
 
@@ -118,4 +140,8 @@ function getPart(classPartObject: ClassPartObject, path: string) {
     })
 
     return currentClassPartObject
+}
+
+function isThemeGetter(func: ClassValidator | ThemeGetter): func is ThemeGetter {
+    return (func as ThemeGetter).isThemeGetter
 }

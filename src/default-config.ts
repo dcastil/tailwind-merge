@@ -1,3 +1,4 @@
+import { fromTheme } from './from-theme'
 import { isAny, isCustomLength, isCustomValue, isInteger, isLength } from './validators'
 
 export function getDefaultConfig() {
@@ -166,7 +167,7 @@ export function getDefaultConfig() {
              * Top / Right / Bottom / Left
              * @see https://tailwindcss.com/docs/top-right-bottom-left
              */
-            inset: [{ inset: getLengthWithAuto() }],
+            inset: [{ inset: ['auto', fromTheme('spacing')] }],
             /**
              * Right / Left
              * @see https://tailwindcss.com/docs/top-right-bottom-left

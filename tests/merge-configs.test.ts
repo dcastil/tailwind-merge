@@ -5,6 +5,9 @@ test('mergeConfigs has correct behavior', () => {
         mergeConfigs(
             {
                 cacheSize: 50,
+                theme: {
+                    hi: ['ho'],
+                },
                 classGroups: {
                     fooKey: [{ fooKey: ['one', 'two'] }],
                     bla: [{ bli: ['blub', 'blublub'] }],
@@ -25,6 +28,9 @@ test('mergeConfigs has correct behavior', () => {
         )
     ).toEqual({
         cacheSize: 50,
+        theme: {
+            hi: ['ho'],
+        },
         classGroups: {
             fooKey: [{ fooKey: ['one', 'two'] }, { fooKey: ['bar', 'baz'] }],
             bla: [{ bli: ['blub', 'blublub'] }],
