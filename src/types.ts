@@ -5,6 +5,7 @@ export interface Config {
      * - No cache is used for values <= 0
      */
     cacheSize: number
+    theme: Record<ThemeKey, ClassGroup>
     /**
      * Object with groups of classes.
      * @example
@@ -31,3 +32,4 @@ export type ClassValidator = (classPart: string) => boolean
 type ClassObject = Record<string, readonly ClassDefinition[]>
 
 export type ClassGroupId = string
+type ThemeKey = string

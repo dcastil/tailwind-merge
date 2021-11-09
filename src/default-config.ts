@@ -54,6 +54,10 @@ export function getDefaultConfig() {
 
     return {
         cacheSize: 500,
+        theme: {
+            colors: [isAny],
+            spacing: [isLength],
+        },
         classGroups: {
             // Layout
             /**
