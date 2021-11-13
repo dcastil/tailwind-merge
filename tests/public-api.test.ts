@@ -6,6 +6,7 @@ import {
     Config,
     mergeConfigs,
     extendTailwindMerge,
+    fromTheme,
 } from '../src'
 
 test('has correct export types', () => {
@@ -63,7 +64,7 @@ test('createTailwindMerge() has correct inputs and outputs', () => {
     expect(
         createTailwindMerge(() => ({
             cacheSize: 0,
-            prefixes: [],
+            theme: {},
             classGroups: {},
             conflictingClassGroups: {},
         }))
@@ -71,7 +72,7 @@ test('createTailwindMerge() has correct inputs and outputs', () => {
 
     const tailwindMerge = createTailwindMerge(() => ({
         cacheSize: 20,
-        prefixes: ['my-prefix'],
+        theme: {},
         classGroups: {
             fooKey: [{ fooKey: ['bar', 'baz'] }],
             fooKey2: [{ fooKey: ['qux', 'quux'] }],
@@ -125,6 +126,7 @@ test('mergeConfigs has correct inputs and outputs', () => {
         mergeConfigs(
             {
                 cacheSize: 50,
+                theme: {},
                 classGroups: {
                     fooKey: [{ fooKey: ['one', 'two'] }],
                     bla: [{ bli: ['blub', 'blublub'] }],
@@ -138,4 +140,10 @@ test('mergeConfigs has correct inputs and outputs', () => {
 
 test('extendTailwindMerge has correct inputs and outputs', () => {
     expect(extendTailwindMerge({})).toStrictEqual(expect.any(Function))
+})
+
+test('fromTheme has correct inputs and outputs', () => {
+    expect(fromTheme('foo')).toStrictEqual(expect.any(Function))
+    expect(fromTheme('foo').isThemeGetter).toBe(true)
+    expect(fromTheme('foo')({ foo: ['hello'] })).toStrictEqual(['hello'])
 })

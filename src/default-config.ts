@@ -1,16 +1,38 @@
+import { fromTheme } from './from-theme'
 import { isAny, isCustomLength, isCustomValue, isInteger, isLength } from './validators'
 
 export function getDefaultConfig() {
+    const colors = fromTheme('colors')
+    const spacing = fromTheme('spacing')
+    const blur = fromTheme('blur')
+    const brightness = fromTheme('brightness')
+    const borderColor = fromTheme('borderColor')
+    const borderRadius = fromTheme('borderRadius')
+    const borderWidth = fromTheme('borderWidth')
+    const contrast = fromTheme('contrast')
+    const grayscale = fromTheme('grayscale')
+    const hueRotate = fromTheme('hueRotate')
+    const invert = fromTheme('invert')
+    const gap = fromTheme('gap')
+    const gradientColorStops = fromTheme('gradientColorStops')
+    const inset = fromTheme('inset')
+    const margin = fromTheme('margin')
+    const opacity = fromTheme('opacity')
+    const padding = fromTheme('padding')
+    const saturate = fromTheme('saturate')
+    const scale = fromTheme('scale')
+    const sepia = fromTheme('sepia')
+    const skew = fromTheme('skew')
+    const space = fromTheme('space')
+    const translate = fromTheme('translate')
+
     const getSizesSimple = () => ['sm', 'md', 'lg', 'xl', '2xl'] as const
     const getSizesExtended = () => ['3xl', '4xl', '5xl', '6xl', '7xl'] as const
     const getOverscroll = () => ['auto', 'contain', 'none'] as const
     const getOverflow = () => ['auto', 'hidden', 'visible', 'scroll'] as const
-    const getLength = () => [isLength] as const
-    const getLengthWithAuto = () => ['auto', isLength] as const
+    const getSpacingWithAuto = () => ['auto', spacing] as const
     const getLengthWithEmpty = () => ['', isLength] as const
-    const getInteger = () => [isInteger] as const
     const getIntegerWithAuto = () => ['auto', isInteger] as const
-    const getAny = () => [isAny] as const
     const getPositions = () =>
         [
             'bottom',
@@ -23,8 +45,6 @@ export function getDefaultConfig() {
             'right-top',
             'top',
         ] as const
-    const getRounded = () =>
-        ['none', '', ...getSizesSimple(), '3xl', 'full', isCustomLength] as const
     const getBorderStyles = () => ['solid', 'dashed', 'dotted', 'double', 'none'] as const
     const getBlendModes = () =>
         [
@@ -54,6 +74,175 @@ export function getDefaultConfig() {
 
     return {
         cacheSize: 500,
+        theme: {
+            colors: [isAny],
+            spacing: [isLength],
+            blur: ['none', '', ...getSizesSimple(), '3xl', isCustomLength],
+            brightness: [isInteger],
+            borderColor: [colors],
+            borderRadius: ['none', '', ...getSizesSimple(), '3xl', 'full', isCustomLength],
+            borderWidth: getLengthWithEmpty(),
+            contrast: [isInteger],
+            grayscale: getZeroAndEmpty(),
+            hueRotate: [isInteger],
+            invert: getZeroAndEmpty(),
+            gap: [spacing],
+            gradientColorStops: [colors],
+            inset: getSpacingWithAuto(),
+            margin: getSpacingWithAuto(),
+            opacity: [isInteger],
+            padding: [spacing],
+            saturate: [isInteger],
+            scale: [isInteger],
+            sepia: getZeroAndEmpty(),
+            skew: [isInteger],
+            space: [spacing],
+            translate: [spacing],
+
+            // Tailwind theme keys not in use because they would apply only to a single classGroup:
+
+            // animation: ['none', 'spin', 'ping', 'pulse', 'bounce', isCustomValue],
+            // backdropBlur: [blur],
+            // backdropBrightness: [brightness],
+            // backdropContrast: [contrast],
+            // backdropGrayscale: [grayscale],
+            // backdropHueRotate: [hueRotate],
+            // backdropInvert: [invert],
+            // backdropOpacity: [opacity],
+            // backdropSaturate: [saturate],
+            // backdropSepia: [sepia],
+            // backgroundColor: [colors],
+            // backgroundImage: [
+            //     'none',
+            //     { 'gradient-to': ['t', 'tr', 'r', 'br', 'b', 'bl', 'l', 'tl'] },
+            // ],
+            // backgroundOpacity: [opacity],
+            // backgroundPosition: getPositions(),
+            // backgroundSize: ['auto', 'cover', 'contain'],
+            // borderOpacity: [opacity],
+            // boxShadow: ['', ...getSizesSimple(), 'inner', 'none'],
+            // caretColor: [colors],
+            // container: ['container'],
+            // content: [isCustomValue],
+            // cursor: [
+            //     'auto',
+            //     'default',
+            //     'pointer',
+            //     'wait',
+            //     'text',
+            //     'move',
+            //     'help',
+            //     'not-allowed',
+            //     isCustomValue,
+            // ],
+            // divideColor: [borderColor],
+            // divideOpacity: [borderOpacity],
+            // divideWidth: [borderWidth],
+            // dropShadow: ['', ...getSizesSimple(), 'none'],
+            // fill: ['current', isCustomValue],
+            // flex: ['1', 'auto', 'initial', 'none', isCustomValue],
+            // flexGrow: getZeroAndEmpty(),
+            // flexShrink: getZeroAndEmpty(),
+            // fontFamily: [isAny],
+            // fontSize: [
+            //     'xs',
+            //     ...getSizesSimple(),
+            //     'base',
+            //     ...getSizesExtended(),
+            //     '8xl',
+            //     '9xl',
+            //     isCustomLength,
+            // ],
+            // fontWeight: [
+            //     'thin',
+            //     'extralight',
+            //     'light',
+            //     'normal',
+            //     'medium',
+            //     'semibold',
+            //     'bold',
+            //     'extrabold',
+            //     'black',
+            // ],
+            // gridAutoColumns: ['auto', 'min', 'max', 'fr', isCustomValue],
+            // gridAutoRows: ['auto', 'min', 'max', 'fr', isCustomValue],
+            // gridColumn: ['auto', { span: [isInteger] }],
+            // gridColumnEnd: getIntegerWithAuto(),
+            // gridColumnStart: getIntegerWithAuto(),
+            // gridRow: ['auto', { span: [isInteger] }],
+            // gridRowStart: getIntegerWithAuto(),
+            // gridRowEnd: getIntegerWithAuto(),
+            // gridTemplateColumns: [isAny],
+            // gridTemplateRows: [isAny],
+            // height: getSpacingWithAuto(),
+            // letterSpacing: [
+            //     'tighter',
+            //     'tight',
+            //     'normal',
+            //     'wide',
+            //     'wider',
+            //     'widest',
+            //     isCustomLength,
+            // ],
+            // lineHeight: ['none', 'tight', 'snug', 'normal', 'relaxed', 'loose', isLength],
+            // listStyleType: ['none', 'disc', 'decimal', isCustomValue],
+            // maxHeight: [spacing],
+            // maxWidth: [
+            //     '0',
+            //     'none',
+            //     ...getSizesSimple(),
+            //     ...getSizesExtended(),
+            //     'full',
+            //     'min',
+            //     'max',
+            //     'prose',
+            //     { screen: getSizesSimple() },
+            //     isCustomLength,
+            // ],
+            // minHeight: ['full', 'screen', isLength],
+            // minWidth: ['full', 'min', 'max', isLength],
+            // objectPosition: getPositions(),
+            // order: ['first', 'last', 'none', isInteger],
+            // outline: ['none', 'white', 'black'],
+            // placeholderColor: [colors],
+            // placeholderOpacity: [opacity],
+            // ringColor: [colors],
+            // ringOffsetColor: [colors],
+            // ringOffsetWidth: [isLength],
+            // ringOpacity: [opacity],
+            // ringWidth: getLengthWithEmpty(),
+            // rotate: [isInteger],
+            // stroke: ['current', isCustomValue],
+            // strokeWidth: [isLength],
+            // textColor: [colors],
+            // textOpacity: [opacity],
+            // transformOrigin: [
+            //     'center',
+            //     'top',
+            //     'top-right',
+            //     'right',
+            //     'bottom-right',
+            //     'bottom',
+            //     'bottom-left',
+            //     'left',
+            //     'top-left',
+            // ],
+            // transitionDelay: [isInteger],
+            // transitionDuration: [isInteger],
+            // transitionProperty: [
+            //     'none',
+            //     'all',
+            //     '',
+            //     'colors',
+            //     'opacity',
+            //     'shadow',
+            //     'transform',
+            //     isCustomValue,
+            // ],
+            // transitionTimingFunction: ['linear', 'in', 'out', 'in-out', isCustomValue],
+            // width: ['auto', 'min', 'max', spacing],
+            // zIndex: [isLength],
+        },
         classGroups: {
             // Layout
             /**
@@ -162,37 +351,37 @@ export function getDefaultConfig() {
              * Top / Right / Bottom / Left
              * @see https://tailwindcss.com/docs/top-right-bottom-left
              */
-            inset: [{ inset: getLengthWithAuto() }],
+            inset: [{ inset: [inset] }],
             /**
              * Right / Left
              * @see https://tailwindcss.com/docs/top-right-bottom-left
              */
-            'inset-x': [{ 'inset-x': getLengthWithAuto() }],
+            'inset-x': [{ 'inset-x': [inset] }],
             /**
              * Top / Bottom
              * @see https://tailwindcss.com/docs/top-right-bottom-left
              */
-            'inset-y': [{ 'inset-y': getLengthWithAuto() }],
+            'inset-y': [{ 'inset-y': [inset] }],
             /**
              * Top
              * @see https://tailwindcss.com/docs/top-right-bottom-left
              */
-            top: [{ top: getLengthWithAuto() }],
+            top: [{ top: [inset] }],
             /**
              * Right
              * @see https://tailwindcss.com/docs/top-right-bottom-left
              */
-            right: [{ right: getLengthWithAuto() }],
+            right: [{ right: [inset] }],
             /**
              * Bottom
              * @see https://tailwindcss.com/docs/top-right-bottom-left
              */
-            bottom: [{ bottom: getLengthWithAuto() }],
+            bottom: [{ bottom: [inset] }],
             /**
              * Left
              * @see https://tailwindcss.com/docs/top-right-bottom-left
              */
-            left: [{ left: getLengthWithAuto() }],
+            left: [{ left: [inset] }],
             /**
              * Visibility
              * @see https://tailwindcss.com/docs/visibility
@@ -202,7 +391,7 @@ export function getDefaultConfig() {
              * Z-Index
              * @see https://tailwindcss.com/docs/z-index
              */
-            z: [{ z: getLength() }],
+            z: [{ z: [isLength] }],
             // Flexbox and Grid
             /**
              * Flex Direction
@@ -223,12 +412,12 @@ export function getDefaultConfig() {
              * Flex Grow
              * @see https://tailwindcss.com/docs/flex-grow
              */
-            'flex-grow': [{ 'flex-grow': ['', isInteger] }],
+            'flex-grow': [{ 'flex-grow': getZeroAndEmpty() }],
             /**
              * Flex Shrink
              * @see https://tailwindcss.com/docs/flex-shrink
              */
-            'flex-shrink': [{ 'flex-shrink': ['', isInteger] }],
+            'flex-shrink': [{ 'flex-shrink': getZeroAndEmpty() }],
             /**
              * Order
              * @see https://tailwindcss.com/docs/order
@@ -238,12 +427,12 @@ export function getDefaultConfig() {
              * Grid Template Columns
              * @see https://tailwindcss.com/docs/grid-template-columns
              */
-            'grid-cols': [{ 'grid-cols': getAny() }],
+            'grid-cols': [{ 'grid-cols': [isAny] }],
             /**
              * Grid Column Start / End
              * @see https://tailwindcss.com/docs/grid-column
              */
-            'col-start-end': [{ col: ['auto', { span: getInteger() }] }],
+            'col-start-end': [{ col: ['auto', { span: [isInteger] }] }],
             /**
              * Grid Column Start
              * @see https://tailwindcss.com/docs/grid-column
@@ -258,12 +447,12 @@ export function getDefaultConfig() {
              * Grid Template Rows
              * @see https://tailwindcss.com/docs/grid-template-rows
              */
-            'grid-rows': [{ 'grid-rows': getAny() }],
+            'grid-rows': [{ 'grid-rows': [isAny] }],
             /**
              * Grid Row Start / End
              * @see https://tailwindcss.com/docs/grid-row
              */
-            'row-start-end': [{ row: ['auto', { span: getInteger() }] }],
+            'row-start-end': [{ row: ['auto', { span: [isInteger] }] }],
             /**
              * Grid Row Start
              * @see https://tailwindcss.com/docs/grid-row
@@ -293,17 +482,17 @@ export function getDefaultConfig() {
              * Gap
              * @see https://tailwindcss.com/docs/gap
              */
-            gap: [{ gap: getLength() }],
+            gap: [{ gap: [gap] }],
             /**
              * Gap X
              * @see https://tailwindcss.com/docs/gap
              */
-            'gap-x': [{ 'gap-x': getLength() }],
+            'gap-x': [{ 'gap-x': [gap] }],
             /**
              * Gap Y
              * @see https://tailwindcss.com/docs/gap
              */
-            'gap-y': [{ 'gap-y': getLength() }],
+            'gap-y': [{ 'gap-y': [gap] }],
             /**
              * Justify Content
              * @see https://tailwindcss.com/docs/justify-content
@@ -354,77 +543,77 @@ export function getDefaultConfig() {
              * Padding
              * @see https://tailwindcss.com/docs/padding
              */
-            p: [{ p: getLength() }],
+            p: [{ p: [padding] }],
             /**
              * Padding X
              * @see https://tailwindcss.com/docs/padding
              */
-            px: [{ px: getLength() }],
+            px: [{ px: [padding] }],
             /**
              * Padding Y
              * @see https://tailwindcss.com/docs/padding
              */
-            py: [{ py: getLength() }],
+            py: [{ py: [padding] }],
             /**
              * Padding Top
              * @see https://tailwindcss.com/docs/padding
              */
-            pt: [{ pt: getLength() }],
+            pt: [{ pt: [padding] }],
             /**
              * Padding Right
              * @see https://tailwindcss.com/docs/padding
              */
-            pr: [{ pr: getLength() }],
+            pr: [{ pr: [padding] }],
             /**
              * Padding Bottom
              * @see https://tailwindcss.com/docs/padding
              */
-            pb: [{ pb: getLength() }],
+            pb: [{ pb: [padding] }],
             /**
              * Padding Left
              * @see https://tailwindcss.com/docs/padding
              */
-            pl: [{ pl: getLength() }],
+            pl: [{ pl: [padding] }],
             /**
              * Margin
              * @see https://tailwindcss.com/docs/margin
              */
-            m: [{ m: getLengthWithAuto() }],
+            m: [{ m: [margin] }],
             /**
              * Margin X
              * @see https://tailwindcss.com/docs/margin
              */
-            mx: [{ mx: getLengthWithAuto() }],
+            mx: [{ mx: [margin] }],
             /**
              * Margin Y
              * @see https://tailwindcss.com/docs/margin
              */
-            my: [{ my: getLengthWithAuto() }],
+            my: [{ my: [margin] }],
             /**
              * Margin Top
              * @see https://tailwindcss.com/docs/margin
              */
-            mt: [{ mt: getLengthWithAuto() }],
+            mt: [{ mt: [margin] }],
             /**
              * Margin Right
              * @see https://tailwindcss.com/docs/margin
              */
-            mr: [{ mr: getLengthWithAuto() }],
+            mr: [{ mr: [margin] }],
             /**
              * Margin Bottom
              * @see https://tailwindcss.com/docs/margin
              */
-            mb: [{ mb: getLengthWithAuto() }],
+            mb: [{ mb: [margin] }],
             /**
              * Margin Left
              * @see https://tailwindcss.com/docs/margin
              */
-            ml: [{ ml: getLengthWithAuto() }],
+            ml: [{ ml: [margin] }],
             /**
              * Space Between X
              * @see https://tailwindcss.com/docs/space
              */
-            'space-x': [{ 'space-x': getLength() }],
+            'space-x': [{ 'space-x': [space] }],
             /**
              * Space Between X Reverse
              * @see https://tailwindcss.com/docs/space
@@ -434,7 +623,7 @@ export function getDefaultConfig() {
              * Space Between Y
              * @see https://tailwindcss.com/docs/space
              */
-            'space-y': [{ 'space-y': getLength() }],
+            'space-y': [{ 'space-y': [space] }],
             /**
              * Space Between Y Reverse
              * @see https://tailwindcss.com/docs/space
@@ -445,7 +634,7 @@ export function getDefaultConfig() {
              * Width
              * @see https://tailwindcss.com/docs/width
              */
-            w: [{ w: ['auto', 'min', 'max', isLength] }],
+            w: [{ w: ['auto', 'min', 'max', spacing] }],
             /**
              * Min-Width
              * @see https://tailwindcss.com/docs/min-width
@@ -475,7 +664,7 @@ export function getDefaultConfig() {
              * Height
              * @see https://tailwindcss.com/docs/height
              */
-            h: [{ h: getLengthWithAuto() }],
+            h: [{ h: getSpacingWithAuto() }],
             /**
              * Min-Height
              * @see https://tailwindcss.com/docs/min-height
@@ -485,13 +674,13 @@ export function getDefaultConfig() {
              * Max-Height
              * @see https://tailwindcss.com/docs/max-height
              */
-            'max-h': [{ 'max-h': getLength() }],
+            'max-h': [{ 'max-h': [spacing] }],
             // Typography
             /**
              * Font Family
              * @see https://tailwindcss.com/docs/font-family
              */
-            'font-family': [{ font: getAny() }],
+            'font-family': [{ font: [isAny] }],
             /**
              * Font Size
              * @see https://tailwindcss.com/docs/font-size
@@ -606,12 +795,12 @@ export function getDefaultConfig() {
              * Placeholder Color
              * @see https://tailwindcss.com/docs/placeholder-color
              */
-            'placeholder-color': [{ placeholder: getAny() }],
+            'placeholder-color': [{ placeholder: [colors] }],
             /**
              * Placeholder Opacity
              * @see https://tailwindcss.com/docs/placeholder-opacity
              */
-            'placeholder-opacity': [{ 'placeholder-opacity': getInteger() }],
+            'placeholder-opacity': [{ 'placeholder-opacity': [opacity] }],
             /**
              * Text Alignment
              * @see https://tailwindcss.com/docs/text-align
@@ -621,12 +810,12 @@ export function getDefaultConfig() {
              * Text Color
              * @see https://tailwindcss.com/docs/text-color
              */
-            'text-color': [{ text: getAny() }],
+            'text-color': [{ text: [colors] }],
             /**
              * Text Opacity
              * @see https://tailwindcss.com/docs/text-opacity
              */
-            'text-opacity': [{ 'text-opacity': getInteger() }],
+            'text-opacity': [{ 'text-opacity': [opacity] }],
             /**
              * Text Decoration
              * @see https://tailwindcss.com/docs/text-decoration
@@ -674,7 +863,7 @@ export function getDefaultConfig() {
              * Background Opacity
              * @see https://tailwindcss.com/docs/background-opacity
              */
-            'bg-opacity': [{ 'bg-opacity': getInteger() }],
+            'bg-opacity': [{ 'bg-opacity': [opacity] }],
             /**
              * Background Origin
              * @see https://tailwindcss.com/docs/background-origin
@@ -711,98 +900,98 @@ export function getDefaultConfig() {
              * Background Color
              * @see https://tailwindcss.com/docs/background-color
              */
-            'bg-color': [{ bg: getAny() }],
+            'bg-color': [{ bg: [colors] }],
             /**
              * Gradient Color Stops From
              * @see https://tailwindcss.com/docs/gradient-color-stops
              */
-            'gradient-from': [{ from: getAny() }],
+            'gradient-from': [{ from: [gradientColorStops] }],
             /**
              * Gradient Color Stops Via
              * @see https://tailwindcss.com/docs/gradient-color-stops
              */
-            'gradient-via': [{ via: getAny() }],
+            'gradient-via': [{ via: [gradientColorStops] }],
             /**
              * Gradient Color Stops To
              * @see https://tailwindcss.com/docs/gradient-color-stops
              */
-            'gradient-to': [{ to: getAny() }],
+            'gradient-to': [{ to: [gradientColorStops] }],
             // Borders
             /**
              * Border Radius
              * @see https://tailwindcss.com/docs/border-radius
              */
-            rounded: [{ rounded: getRounded() }],
+            rounded: [{ rounded: [borderRadius] }],
             /**
              * Border Radius Top
              * @see https://tailwindcss.com/docs/border-radius
              */
-            'rounded-t': [{ 'rounded-t': getRounded() }],
+            'rounded-t': [{ 'rounded-t': [borderRadius] }],
             /**
              * Border Radius Right
              * @see https://tailwindcss.com/docs/border-radius
              */
-            'rounded-r': [{ 'rounded-r': getRounded() }],
+            'rounded-r': [{ 'rounded-r': [borderRadius] }],
             /**
              * Border Radius Bottom
              * @see https://tailwindcss.com/docs/border-radius
              */
-            'rounded-b': [{ 'rounded-b': getRounded() }],
+            'rounded-b': [{ 'rounded-b': [borderRadius] }],
             /**
              * Border Radius Left
              * @see https://tailwindcss.com/docs/border-radius
              */
-            'rounded-l': [{ 'rounded-l': getRounded() }],
+            'rounded-l': [{ 'rounded-l': [borderRadius] }],
             /**
              * Border Radius Top Left
              * @see https://tailwindcss.com/docs/border-radius
              */
-            'rounded-tl': [{ 'rounded-tl': getRounded() }],
+            'rounded-tl': [{ 'rounded-tl': [borderRadius] }],
             /**
              * Border Radius Top Right
              * @see https://tailwindcss.com/docs/border-radius
              */
-            'rounded-tr': [{ 'rounded-tr': getRounded() }],
+            'rounded-tr': [{ 'rounded-tr': [borderRadius] }],
             /**
              * Border Radius Bottom Right
              * @see https://tailwindcss.com/docs/border-radius
              */
-            'rounded-br': [{ 'rounded-br': getRounded() }],
+            'rounded-br': [{ 'rounded-br': [borderRadius] }],
             /**
              * Border Radius Bottom Left
              * @see https://tailwindcss.com/docs/border-radius
              */
-            'rounded-bl': [{ 'rounded-bl': getRounded() }],
+            'rounded-bl': [{ 'rounded-bl': [borderRadius] }],
             /**
              * Border Width
              * @see https://tailwindcss.com/docs/border-width
              */
-            'border-w': [{ border: getLengthWithEmpty() }],
+            'border-w': [{ border: [borderWidth] }],
             /**
              * Border Width Top
              * @see https://tailwindcss.com/docs/border-width
              */
-            'border-w-t': [{ 'border-t': getLengthWithEmpty() }],
+            'border-w-t': [{ 'border-t': [borderWidth] }],
             /**
              * Border Width Right
              * @see https://tailwindcss.com/docs/border-width
              */
-            'border-w-r': [{ 'border-r': getLengthWithEmpty() }],
+            'border-w-r': [{ 'border-r': [borderWidth] }],
             /**
              * Border Width Bottom
              * @see https://tailwindcss.com/docs/border-width
              */
-            'border-w-b': [{ 'border-b': getLengthWithEmpty() }],
+            'border-w-b': [{ 'border-b': [borderWidth] }],
             /**
              * Border Width Left
              * @see https://tailwindcss.com/docs/border-width
              */
-            'border-w-l': [{ 'border-l': getLengthWithEmpty() }],
+            'border-w-l': [{ 'border-l': [borderWidth] }],
             /**
              * Border Opacity
              * @see https://tailwindcss.com/docs/border-opacity
              */
-            'border-opacity': [{ 'border-opacity': getInteger() }],
+            'border-opacity': [{ 'border-opacity': [opacity] }],
             /**
              * Border Style
              * @see https://tailwindcss.com/docs/border-style
@@ -812,7 +1001,7 @@ export function getDefaultConfig() {
              * Divide Width X
              * @see https://tailwindcss.com/docs/divide-width
              */
-            'divide-x': [{ 'divide-x': getLengthWithEmpty() }],
+            'divide-x': [{ 'divide-x': [borderWidth] }],
             /**
              * Divide Width X Reverse
              * @see https://tailwindcss.com/docs/divide-width
@@ -822,7 +1011,7 @@ export function getDefaultConfig() {
              * Divide Width Y
              * @see https://tailwindcss.com/docs/divide-width
              */
-            'divide-y': [{ 'divide-y': getLengthWithEmpty() }],
+            'divide-y': [{ 'divide-y': [borderWidth] }],
             /**
              * Divide Width Y Reverse
              * @see https://tailwindcss.com/docs/divide-width
@@ -832,7 +1021,7 @@ export function getDefaultConfig() {
              * Divide Opacity
              * @see https://tailwindcss.com/docs/divide-opacity
              */
-            'divide-opacity': [{ 'divide-opacity': getInteger() }],
+            'divide-opacity': [{ 'divide-opacity': [opacity] }],
             /**
              * Divide Style
              * @see https://tailwindcss.com/docs/divide-style
@@ -842,32 +1031,32 @@ export function getDefaultConfig() {
              * Border Color
              * @see https://tailwindcss.com/docs/border-color
              */
-            'border-color': [{ border: getAny() }],
+            'border-color': [{ border: [borderColor] }],
             /**
              * Border Color Top
              * @see https://tailwindcss.com/docs/border-color
              */
-            'border-color-t': [{ 'border-t': getAny() }],
+            'border-color-t': [{ 'border-t': [borderColor] }],
             /**
              * Border Color Right
              * @see https://tailwindcss.com/docs/border-color
              */
-            'border-color-r': [{ 'border-r': getAny() }],
+            'border-color-r': [{ 'border-r': [borderColor] }],
             /**
              * Border Color Bottom
              * @see https://tailwindcss.com/docs/border-color
              */
-            'border-color-b': [{ 'border-b': getAny() }],
+            'border-color-b': [{ 'border-b': [borderColor] }],
             /**
              * Border Color Left
              * @see https://tailwindcss.com/docs/border-color
              */
-            'border-color-l': [{ 'border-l': getAny() }],
+            'border-color-l': [{ 'border-l': [borderColor] }],
             /**
              * Divide Color
              * @see https://tailwindcss.com/docs/divide-color
              */
-            'divide-color': [{ divide: getAny() }],
+            'divide-color': [{ divide: [borderColor] }],
             /**
              * Ring Width
              * @see https://tailwindcss.com/docs/ring-width
@@ -882,22 +1071,22 @@ export function getDefaultConfig() {
              * Ring Color
              * @see https://tailwindcss.com/docs/ring-color
              */
-            'ring-color': [{ ring: getAny() }],
+            'ring-color': [{ ring: [colors] }],
             /**
              * Ring Opacity
              * @see https://tailwindcss.com/docs/ring-opacity
              */
-            'ring-opacity': [{ 'ring-opacity': getInteger() }],
+            'ring-opacity': [{ 'ring-opacity': [opacity] }],
             /**
              * Ring Offset Width
              * @see https://tailwindcss.com/docs/ring-offset-width
              */
-            'ring-offset-w': [{ 'ring-offset': getLength() }],
+            'ring-offset-w': [{ 'ring-offset': [isLength] }],
             /**
              * Ring Offset Color
              * @see https://tailwindcss.com/docs/ring-offset-color
              */
-            'ring-offset-color': [{ 'ring-offset': getAny() }],
+            'ring-offset-color': [{ 'ring-offset': [colors] }],
             // Effects
             /**
              * Box Shadow
@@ -908,7 +1097,7 @@ export function getDefaultConfig() {
              * Opacity
              * @see https://tailwindcss.com/docs/opacity
              */
-            opacity: [{ opacity: getInteger() }],
+            opacity: [{ opacity: [opacity] }],
             /**
              * Mix Beldn Mode
              * @see https://tailwindcss.com/docs/mix-blend-mode
@@ -924,17 +1113,17 @@ export function getDefaultConfig() {
              * Blur
              * @see https://tailwindcss.com/docs/blur
              */
-            blur: [{ blur: ['none', '', ...getSizesSimple(), '3xl', isCustomLength] }],
+            blur: [{ blur: [blur] }],
             /**
              * Brightness
              * @see https://tailwindcss.com/docs/brightness
              */
-            brightness: [{ brightness: getInteger() }],
+            brightness: [{ brightness: [brightness] }],
             /**
              * Contrast
              * @see https://tailwindcss.com/docs/contrast
              */
-            contrast: [{ contrast: getInteger() }],
+            contrast: [{ contrast: [contrast] }],
             /**
              * Drop Shadow
              * @see https://tailwindcss.com/docs/drop-shadow
@@ -944,27 +1133,27 @@ export function getDefaultConfig() {
              * Grayscale
              * @see https://tailwindcss.com/docs/grayscale
              */
-            grayscale: [{ grayscale: getZeroAndEmpty() }],
+            grayscale: [{ grayscale: [grayscale] }],
             /**
              * Hue Rotate
              * @see https://tailwindcss.com/docs/hue-rotate
              */
-            'hue-rotate': [{ 'hue-rotate': getInteger() }],
+            'hue-rotate': [{ 'hue-rotate': [hueRotate] }],
             /**
              * Invert
              * @see https://tailwindcss.com/docs/invert
              */
-            invert: [{ invert: getZeroAndEmpty() }],
+            invert: [{ invert: [invert] }],
             /**
              * Saturate
              * @see https://tailwindcss.com/docs/saturate
              */
-            saturate: [{ saturate: getInteger() }],
+            saturate: [{ saturate: [saturate] }],
             /**
              * Sepia
              * @see https://tailwindcss.com/docs/sepia
              */
-            sepia: [{ sepia: getZeroAndEmpty() }],
+            sepia: [{ sepia: [sepia] }],
             /**
              * Backdrop Filter
              * @see https://tailwindcss.com/docs/backdrop-filter
@@ -974,47 +1163,47 @@ export function getDefaultConfig() {
              * Backdrop Blur
              * @see https://tailwindcss.com/docs/backdrop-blur
              */
-            'backdrop-blur': [{ 'backdrop-blur': ['none', '', ...getSizesSimple(), '3xl'] }],
+            'backdrop-blur': [{ 'backdrop-blur': [blur] }],
             /**
              * Backdrop Brightness
              * @see https://tailwindcss.com/docs/backdrop-brightness
              */
-            'backdrop-brightness': [{ 'backdrop-brightness': getInteger() }],
+            'backdrop-brightness': [{ 'backdrop-brightness': [brightness] }],
             /**
              * Backdrop Contrast
              * @see https://tailwindcss.com/docs/backdrop-contrast
              */
-            'backdrop-contrast': [{ 'backdrop-contrast': getInteger() }],
+            'backdrop-contrast': [{ 'backdrop-contrast': [contrast] }],
             /**
              * Backdrop Grayscale
              * @see https://tailwindcss.com/docs/backdrop-grayscale
              */
-            'backdrop-grayscale': [{ 'backdrop-grayscale': getZeroAndEmpty() }],
+            'backdrop-grayscale': [{ 'backdrop-grayscale': [grayscale] }],
             /**
              * Backdrop Hue Rotate
              * @see https://tailwindcss.com/docs/backdrop-hue-rotate
              */
-            'backdrop-hue-rotate': [{ 'backdrop-hue-rotate': getInteger() }],
+            'backdrop-hue-rotate': [{ 'backdrop-hue-rotate': [hueRotate] }],
             /**
              * Backdrop Invert
              * @see https://tailwindcss.com/docs/backdrop-invert
              */
-            'backdrop-invert': [{ 'backdrop-invert': getZeroAndEmpty() }],
+            'backdrop-invert': [{ 'backdrop-invert': [invert] }],
             /**
              * Backdrop Opacity
              * @see https://tailwindcss.com/docs/backdrop-opacity
              */
-            'backdrop-opacity': [{ 'backdrop-opacity': getInteger() }],
+            'backdrop-opacity': [{ 'backdrop-opacity': [opacity] }],
             /**
              * Backdrop Saturate
              * @see https://tailwindcss.com/docs/backdrop-saturate
              */
-            'backdrop-saturate': [{ 'backdrop-saturate': getInteger() }],
+            'backdrop-saturate': [{ 'backdrop-saturate': [saturate] }],
             /**
              * Backdrop Sepia
              * @see https://tailwindcss.com/docs/backdrop-sepia
              */
-            'backdrop-sepia': [{ 'backdrop-sepia': getZeroAndEmpty() }],
+            'backdrop-sepia': [{ 'backdrop-sepia': [sepia] }],
             // Tables
             /**
              * Border Collapse
@@ -1049,7 +1238,7 @@ export function getDefaultConfig() {
              * Transition Duration
              * @see https://tailwindcss.com/docs/transition-duration
              */
-            duration: [{ duration: getInteger() }],
+            duration: [{ duration: [isInteger] }],
             /**
              * Transition Timing Function
              * @see https://tailwindcss.com/docs/transition-timing-function
@@ -1059,7 +1248,7 @@ export function getDefaultConfig() {
              * Transition Delay
              * @see https://tailwindcss.com/docs/transition-delay
              */
-            delay: [{ delay: getInteger() }],
+            delay: [{ delay: [isInteger] }],
             /**
              * Animation
              * @see https://tailwindcss.com/docs/animation
@@ -1094,42 +1283,42 @@ export function getDefaultConfig() {
              * Scale
              * @see https://tailwindcss.com/docs/scale
              */
-            scale: [{ scale: getInteger() }],
+            scale: [{ scale: [scale] }],
             /**
              * Scale X
              * @see https://tailwindcss.com/docs/scale
              */
-            'scale-x': [{ 'scale-x': getInteger() }],
+            'scale-x': [{ 'scale-x': [scale] }],
             /**
              * Scale Y
              * @see https://tailwindcss.com/docs/scale
              */
-            'scale-y': [{ 'scale-y': getInteger() }],
+            'scale-y': [{ 'scale-y': [scale] }],
             /**
              * Rotate
              * @see https://tailwindcss.com/docs/rotate
              */
-            rotate: [{ rotate: getInteger() }],
+            rotate: [{ rotate: [isInteger] }],
             /**
              * Translate X
              * @see https://tailwindcss.com/docs/translate
              */
-            'translate-x': [{ 'translate-x': getLength() }],
+            'translate-x': [{ 'translate-x': [translate] }],
             /**
              * Translate Y
              * @see https://tailwindcss.com/docs/translate
              */
-            'translate-y': [{ 'translate-y': getLength() }],
+            'translate-y': [{ 'translate-y': [translate] }],
             /**
              * Skew X
              * @see https://tailwindcss.com/docs/skew
              */
-            'skew-x': [{ 'skew-x': getInteger() }],
+            'skew-x': [{ 'skew-x': [skew] }],
             /**
              * Skew Y
              * @see https://tailwindcss.com/docs/skew
              */
-            'skew-y': [{ 'skew-y': getInteger() }],
+            'skew-y': [{ 'skew-y': [skew] }],
             // Interactivity
             /**
              * Appearance
@@ -1190,7 +1379,7 @@ export function getDefaultConfig() {
              * Stroke Width
              * @see https://tailwindcss.com/docs/stroke-width
              */
-            'stroke-w': [{ stroke: getLength() }],
+            'stroke-w': [{ stroke: [isLength] }],
             // Accessibility
             /**
              * Screen Readers
@@ -1207,7 +1396,7 @@ export function getDefaultConfig() {
              * Caret Color
              * @see https://tailwindcss.com/docs/just-in-time-mode#caret-color-utilities
              */
-            'caret-color': [{ caret: getAny() }],
+            'caret-color': [{ caret: [colors] }],
         },
         conflictingClassGroups: {
             overflow: ['overflow-x', 'overflow-y'],

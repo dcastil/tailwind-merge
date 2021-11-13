@@ -6,6 +6,11 @@ export interface Config {
      */
     cacheSize: number
     /**
+     * Theme scales used in classGroups.
+     * The keys are the same as in the Tailwind config but the values are sometimes defined more broadly.
+     */
+    theme: ThemeObject
+    /**
      * Object with groups of classes.
      * @example
      * {
@@ -25,9 +30,13 @@ export interface Config {
     conflictingClassGroups: Record<ClassGroupId, readonly ClassGroupId[]>
 }
 
-export type ClassGroup = readonly ClassDefinition[]
-type ClassDefinition = string | ClassValidator | ClassObject
-export type ClassValidator = (classPart: string) => boolean
-type ClassObject = Record<string, readonly ClassDefinition[]>
-
+export type ThemeObject = Record<string, ClassGroup>
 export type ClassGroupId = string
+export type ClassGroup = readonly ClassDefinition[]
+type ClassDefinition = string | ClassValidator | ThemeGetter | ClassObject
+export type ClassValidator = (classPart: string) => boolean
+export interface ThemeGetter {
+    (theme: ThemeObject): ClassGroup
+    isThemeGetter: true
+}
+type ClassObject = Record<string, readonly ClassDefinition[]>
