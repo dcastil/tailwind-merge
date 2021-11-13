@@ -215,7 +215,27 @@ Each class group is defined under its ID in the `classGroups` object in the conf
 
 ### Conflicting class groups
 
-<!-- TODO: Add content -->
+Sometimes there are conflicts across Tailwind classes which are more complex than "remove all those other classes when a class from this group is present in the class list string".
+
+One example is the combination of the classes `px-3` (setting `padding-left` and `padding-right`) and `pr-4` (setting `padding-right`).
+
+If they are passed to `twMerge` as `pr-4 px-3`, I think you most likely intend to apply `padding-left` and `padding-right` from the `px-3` class and want `pr-4` to be removed, indicating that both these classes should belong to a single class group.
+
+But if they are passed to `twMerge` as `px-3 pr-4`, I assume you want to set the `padding-right` from `pr-4` but still want to apply the `padding-left` from `px-3`, so `px-3` shouldn't be removed when inserting the classes in this order, indicating they shouldn't be in the same class group.
+
+To summarize, `px-3` should stand in conflict with `pr-4`, but `pr-4` should not stand in conflict with `px-3`. to achieve this we need to define asymetric conflicts across class groups.
+
+This is what the `conflictingClassGroups` object in the tailwind-merge config is for. You define a key in it which is the ID of a class group which _creates_ a conflict and the value is an array of IDs of class group which _receive_ a conflict.
+
+```ts
+const conflictingClassGroups = {
+    px: ['pr', 'pl'],
+}
+```
+
+If a class group _creates_ a conflict, it means that if it appears in a class list string passed to `twMerge`, all preceding class groups in the string which _rceive_ the conflict will be removed.
+
+When we think of our example, the `px` class group creates a conflict which is received by the class groups `pr` and `pl`. This way `px-3` removes a preceding `pr-4`, but not the other way around.
 
 ### Theme
 
@@ -252,7 +272,7 @@ If you modified one of these theme scales in your Tailwind config, you can add a
 If you only need to extend the default tailwind-merge config, [`extendTailwindMerge`](#extendtailwindmerge) is the easiest way to extend the config. You provide it a `configExtension` object which gets [merged](#mergeconfigs) with the default config. Therefore all keys here are optional.
 
 ```ts
-import { extendTailwindMerge, fromTheme } from 'tailwind-merge'
+import { extendTailwindMerge } from 'tailwind-merge'
 
 const customTwMerge = extendTailwindMerge({
     // ↓ Add values to existing theme scale or create a new one
@@ -264,7 +284,7 @@ const customTwMerge = extendTailwindMerge({
         foo: ['foo', 'foo-2', { 'bar-baz': ['', '1', '2'] }],
         bar: [{ qux: ['auto', (value) => Number(value) >= 1000] }],
     },
-    // ↓ Here you can define additional conflicts across different groups
+    // ↓ Here you can define additional conflicts across class groups
     conflictingClassGroups: {
         foo: ['bar'],
     },
@@ -273,7 +293,45 @@ const customTwMerge = extendTailwindMerge({
 
 ### Using completely custom tailwind-merge config
 
-<!-- TODO: Add content -->
+If you need to modify the tailwind-merge config and need more control than [`extendTailwindMerge`](#extendtailwindmerge) gives you or don't want to use the default config (and tree-shake it out of your bundle), you can use [`createTailwindMerge`](#createtailwindmerge).
+
+The function takes a callback which returns the config you want to use and returns a custom `twMerge` function.
+
+```ts
+import { createTailwindMerge } from 'tailwind-merge'
+
+const customTwMerge = createTailwindMerge(() => ({
+    theme: {},
+    classGroups: {
+        foo: ['foo', 'foo-2', { 'bar-baz': ['', '1', '2'] }],
+        bar: [{ qux: ['auto', (value) => Number(value) >= 1000] }],
+    },
+    conflictingClassGroups: {
+        foo: ['bar'],
+    },
+}))
+```
+
+The callback passed to `createTailwindMerge` will be called when `customTwMerge` is called the first time, so you don't need to worry about the computations in it affecting app startup performance in case you aren't using tailwind-merge at app startup.
+
+### Using third-party tailwind-merge plugins
+
+You can use both [`extendTailwindMerge`](#extendtailwindmerge) and [`createTailwindMerge`](#createtailwindmerge) with third-party plugins. Just add them as arguments after your config.
+
+```ts
+import { extendTailwindMerge, createTailwindMerge } from 'tailwind-merge'
+import { withMagic } from 'tailwind-merge-magic-plugin'
+import { withMoreMagic } from 'tailwind-merge-more-magic-plugin'
+
+// With your own config
+const twMerge1 = extendTailwindMerge({ … }, withMagic, withMoreMagic)
+
+// Only using plugin with default config
+const twMerge2 = extendTailwindMerge(withMagic, withMoreMagic)
+
+// Using `createTailwindMerge`
+const twMerge3 = createTailwindMerge(() => ({  … }), withMagic, withMoreMagic)
+```
 
 ## API reference
 
