@@ -6,6 +6,7 @@ import {
     Config,
     mergeConfigs,
     extendTailwindMerge,
+    fromTheme,
 } from '../src'
 
 test('has correct export types', () => {
@@ -139,4 +140,10 @@ test('mergeConfigs has correct inputs and outputs', () => {
 
 test('extendTailwindMerge has correct inputs and outputs', () => {
     expect(extendTailwindMerge({})).toStrictEqual(expect.any(Function))
+})
+
+test('fromTheme has correct inputs and outputs', () => {
+    expect(fromTheme('foo')).toStrictEqual(expect.any(Function))
+    expect(fromTheme('foo').isThemeGetter).toBe(true)
+    expect(fromTheme('foo')({ foo: ['hello'] })).toStrictEqual(['hello'])
 })
