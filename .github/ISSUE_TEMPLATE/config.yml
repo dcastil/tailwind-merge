@@ -2,7 +2,7 @@ blank_issues_enabled: true
 contact_links:
     - name: Question
       url: https://github.com/dcastil/tailwind-merge/discussions/new?category=q-a
-      about: Ask any questions using the discussion forum.
+      about: Ask anything that is on your mind in the discussion forum.
     - name: Feature Request
       url: https://github.com/dcastil/tailwind-merge/discussions/new?category=ideas
       about: Suggest any ideas you have using the discussion forum.
