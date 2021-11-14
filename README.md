@@ -25,7 +25,7 @@ twMerge('px-2 py-1 bg-red hover:bg-dark-red', 'p-3 bg-[#B91C1C]')
 
 This library is in an early pre-v1 development stage and might have some bugs and inconveniences here and there. I use the library in production and intend it to be sufficient for production use, as long as you're fine with some potential breaking changes in minor releases until v1 (lock the version range to patch releases with `~` in your `package.json` to prevent accidental breaking changes).
 
-I want to keep the library on v0 until I feel confident enough that there aren't any major bugs or flaws in its API and implementation. If you find a bug or something you don't like, please [submit an issue](https://github.com/dcastil/tailwind-merge/issues/new) or a pull request. I'm happy about any kind of feedback!
+I want to keep the library on v0 until I feel confident enough that there aren't any major bugs or flaws in its API and implementation. If you find a bug or something you don't like, please [submit an issue](https://github.com/dcastil/tailwind-merge/issues/new/choose) or a pull request. I'm happy about any kind of feedback!
 
 ## What is it for
 
