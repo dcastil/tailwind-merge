@@ -757,6 +757,7 @@ export function getDefaultConfig() {
                         'text-bottom',
                         'sub',
                         'super',
+                        isCustomLength,
                     ],
                 },
             ],
