@@ -76,6 +76,8 @@ export function getDefaultConfig() {
         ] as const
     const getAlign = () => ['start', 'end', 'center', 'between', 'around', 'evenly'] as const
     const getZeroAndEmpty = () => ['', '0'] as const
+    const getBreaks = () =>
+        ['auto', 'avoid', 'all', 'avoid-page', 'page', 'left', 'right', 'column'] as const
 
     return {
         cacheSize: 500,
@@ -121,6 +123,21 @@ export function getDefaultConfig() {
              * @see https://tailwindcss.com/docs/columns
              */
             columns: [{ columns: [isTshirtSize] }],
+            /**
+             * Break After
+             * @see https://tailwindcss.com/docs/break-after
+             */
+            'break-after': [{ 'break-after': getBreaks() }],
+            /**
+             * Break Before
+             * @see https://tailwindcss.com/docs/break-before
+             */
+            'break-before': [{ 'break-before': getBreaks() }],
+            /**
+             * Break Inside
+             * @see https://tailwindcss.com/docs/break-inside
+             */
+            'break-inside': [{ 'break-before': ['auto', 'avoid', 'avoid-page', 'avoid-column'] }],
             /**
              * Box Decoration Break
              * @see https://tailwindcss.com/docs/box-decoration-break

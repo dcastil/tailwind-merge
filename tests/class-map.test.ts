@@ -66,7 +66,7 @@ test('class map has correct class groups at first part', () => {
         ],
         bottom: ['bottom'],
         box: ['box'],
-        break: ['break'],
+        break: ['break', 'break-after', 'break-before', 'break-inside'],
         brightness: ['brightness'],
         capitalize: ['text-transform'],
         caret: ['caret-color'],
