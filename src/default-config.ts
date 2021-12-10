@@ -922,7 +922,7 @@ export function getDefaultConfig() {
              * Border Style
              * @see https://tailwindcss.com/docs/border-style
              */
-            'border-style': [{ border: getLineStyles() }],
+            'border-style': [{ border: [...getLineStyles(), 'hidden'] }],
             /**
              * Divide Width X
              * @see https://tailwindcss.com/docs/divide-width
