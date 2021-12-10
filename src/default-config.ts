@@ -884,6 +884,16 @@ export function getDefaultConfig() {
              */
             'border-w': [{ border: [borderWidth] }],
             /**
+             * Border Width X
+             * @see https://tailwindcss.com/docs/border-width
+             */
+            'border-w-x': [{ 'border-x': [borderWidth] }],
+            /**
+             * Border Width Y
+             * @see https://tailwindcss.com/docs/border-width
+             */
+            'border-w-y': [{ 'border-y': [borderWidth] }],
+            /**
              * Border Width Top
              * @see https://tailwindcss.com/docs/border-width
              */
@@ -948,6 +958,16 @@ export function getDefaultConfig() {
              * @see https://tailwindcss.com/docs/border-color
              */
             'border-color': [{ border: [borderColor] }],
+            /**
+             * Border Color X
+             * @see https://tailwindcss.com/docs/border-color
+             */
+            'border-color-x': [{ 'border-x': [borderColor] }],
+            /**
+             * Border Color Y
+             * @see https://tailwindcss.com/docs/border-color
+             */
+            'border-color-y': [{ 'border-y': [borderColor] }],
             /**
              * Border Color Top
              * @see https://tailwindcss.com/docs/border-color
@@ -1488,12 +1508,16 @@ export function getDefaultConfig() {
             'rounded-b': ['rounded-br', 'rounded-bl'],
             'rounded-l': ['rounded-tl', 'rounded-bl'],
             'border-w': ['border-w-t', 'border-w-r', 'border-w-b', 'border-w-l'],
+            'border-w-x': ['border-w-r', 'border-w-l'],
+            'border-w-y': ['border-w-t', 'border-w-b'],
             'border-color': [
                 'border-color-t',
                 'border-color-r',
                 'border-color-b',
                 'border-color-l',
             ],
+            'border-color-x': ['border-color-r', 'border-color-l'],
+            'border-color-y': ['border-color-t', 'border-color-b'],
             'scroll-m': [
                 'scroll-mx',
                 'scroll-my',
