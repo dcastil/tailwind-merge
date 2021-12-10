@@ -1,6 +1,6 @@
 import { validators } from '../src'
 
-const { isLength, isCustomLength, isInteger, isCustomValue, isAny } = validators
+const { isLength, isCustomLength, isInteger, isCustomValue, isAny, isTshirtSize } = validators
 
 describe('validators', () => {
     test('isLength', () => {
@@ -80,5 +80,25 @@ describe('validators', () => {
         expect(isAny('')).toBe(true)
         // @ts-expect-error
         expect(isAny('something')).toBe(true)
+    })
+
+    test('isTshirtSize', () => {
+        expect(isTshirtSize('xs')).toBe(true)
+        expect(isTshirtSize('sm')).toBe(true)
+        expect(isTshirtSize('md')).toBe(true)
+        expect(isTshirtSize('lg')).toBe(true)
+        expect(isTshirtSize('xl')).toBe(true)
+        expect(isTshirtSize('2xl')).toBe(true)
+        expect(isTshirtSize('10xl')).toBe(true)
+        expect(isTshirtSize('2xs')).toBe(true)
+        expect(isTshirtSize('2lg')).toBe(true)
+
+        expect(isTshirtSize('')).toBe(false)
+        expect(isTshirtSize('hello')).toBe(false)
+        expect(isTshirtSize('1')).toBe(false)
+        expect(isTshirtSize('xl3')).toBe(false)
+        expect(isTshirtSize('2xl3')).toBe(false)
+        expect(isTshirtSize('-xl')).toBe(false)
+        expect(isTshirtSize('[sm]')).toBe(false)
     })
 })

@@ -19,6 +19,7 @@ test('has correct export types', () => {
         isInteger: expect.any(Function),
         isCustomValue: expect.any(Function),
         isAny: expect.any(Function),
+        isTshirtSize: expect.any(Function),
     })
     expect(mergeConfigs).toStrictEqual(expect.any(Function))
     expect(extendTailwindMerge).toStrictEqual(expect.any(Function))
@@ -119,6 +120,7 @@ test('validators have correct inputs and outputs', () => {
     expect(validators.isInteger('')).toEqual(expect.any(Boolean))
     expect(validators.isCustomValue('')).toEqual(expect.any(Boolean))
     expect(validators.isAny()).toEqual(expect.any(Boolean))
+    expect(validators.isTshirtSize('')).toEqual(expect.any(Boolean))
 })
 
 test('mergeConfigs has correct inputs and outputs', () => {
