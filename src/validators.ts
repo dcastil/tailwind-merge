@@ -1,41 +1,74 @@
-const customValueRegex = /^\[(.+)\]$/
+const arbitraryValueRegex = /^\[(.+)\]$/
 const fractionRegex = /^\d+\/\d+$/
 const stringLengths = new Set(['px', 'full', 'screen'])
+const tshirtUnitRegex = /^(\d+)?(xs|sm|md|lg|xl)$/
 const lengthUnitRegex = /\d+(%|px|em|rem|vh|vw|pt|pc|in|cm|mm|cap|ch|ex|lh|rlh|vi|vb|vmin|vmax)/
 
 export function isLength(classPart: string) {
     return (
-        isCustomLength(classPart) ||
         !Number.isNaN(Number(classPart)) ||
         stringLengths.has(classPart) ||
-        fractionRegex.test(classPart)
+        fractionRegex.test(classPart) ||
+        isArbitraryLength(classPart)
     )
 }
 
-export function isCustomLength(classPart: string) {
-    const customValue = customValueRegex.exec(classPart)?.[1]
+export function isArbitraryLength(classPart: string) {
+    const arbitraryValue = arbitraryValueRegex.exec(classPart)?.[1]
 
-    if (customValue) {
-        return customValue.startsWith('length:') || lengthUnitRegex.test(customValue)
+    if (arbitraryValue) {
+        return arbitraryValue.startsWith('length:') || lengthUnitRegex.test(arbitraryValue)
     }
 
     return false
 }
 
-export function isInteger(classPart: string) {
-    const customValue = customValueRegex.exec(classPart)?.[1]
+export function isArbitrarySize(classPart: string) {
+    const arbitraryValue = arbitraryValueRegex.exec(classPart)?.[1]
 
-    if (customValue) {
-        return Number.isInteger(Number(customValue))
+    return arbitraryValue ? arbitraryValue.startsWith('size:') : false
+}
+
+export function isArbitraryPosition(classPart: string) {
+    const arbitraryValue = arbitraryValueRegex.exec(classPart)?.[1]
+
+    return arbitraryValue ? arbitraryValue.startsWith('position:') : false
+}
+
+export function isArbitraryUrl(classPart: string) {
+    const arbitraryValue = arbitraryValueRegex.exec(classPart)?.[1]
+
+    return arbitraryValue
+        ? arbitraryValue.startsWith('url(') || arbitraryValue.startsWith('url:')
+        : false
+}
+
+export function isArbitraryWeight(classPart: string) {
+    const arbitraryValue = arbitraryValueRegex.exec(classPart)?.[1]
+
+    return arbitraryValue
+        ? !Number.isNaN(Number(arbitraryValue)) || arbitraryValue.startsWith('weight:')
+        : false
+}
+
+export function isInteger(classPart: string) {
+    const arbitraryValue = arbitraryValueRegex.exec(classPart)?.[1]
+
+    if (arbitraryValue) {
+        return Number.isInteger(Number(arbitraryValue))
     }
 
     return Number.isInteger(Number(classPart))
 }
 
-export function isCustomValue(classPart: string) {
-    return customValueRegex.test(classPart)
+export function isArbitraryValue(classPart: string) {
+    return arbitraryValueRegex.test(classPart)
 }
 
 export function isAny() {
     return true
+}
+
+export function isTshirtSize(classPart: string) {
+    return tshirtUnitRegex.test(classPart)
 }

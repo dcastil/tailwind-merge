@@ -1,6 +1,17 @@
 import { validators } from '../src'
 
-const { isLength, isCustomLength, isInteger, isCustomValue, isAny } = validators
+const {
+    isLength,
+    isArbitraryLength,
+    isInteger,
+    isArbitraryValue,
+    isAny,
+    isTshirtSize,
+    isArbitrarySize,
+    isArbitraryPosition,
+    isArbitraryUrl,
+    isArbitraryWeight,
+} = validators
 
 describe('validators', () => {
     test('isLength', () => {
@@ -17,7 +28,7 @@ describe('validators', () => {
         expect(isLength('[481px]')).toBe(true)
         expect(isLength('[19.1rem]')).toBe(true)
         expect(isLength('[50vw]')).toBe(true)
-        expect(isLength('[length:var(--custom)]')).toBe(true)
+        expect(isLength('[length:var(--arbitrary)]')).toBe(true)
 
         expect(isLength('1d5')).toBe(false)
         expect(isLength('[1]')).toBe(false)
@@ -26,20 +37,20 @@ describe('validators', () => {
         expect(isLength('one')).toBe(false)
     })
 
-    test('isCustomLength', () => {
-        expect(isCustomLength('[3.7%]')).toBe(true)
-        expect(isCustomLength('[481px]')).toBe(true)
-        expect(isCustomLength('[19.1rem]')).toBe(true)
-        expect(isCustomLength('[50vw]')).toBe(true)
-        expect(isCustomLength('[length:var(--custom)]')).toBe(true)
+    test('isArbitraryLength', () => {
+        expect(isArbitraryLength('[3.7%]')).toBe(true)
+        expect(isArbitraryLength('[481px]')).toBe(true)
+        expect(isArbitraryLength('[19.1rem]')).toBe(true)
+        expect(isArbitraryLength('[50vw]')).toBe(true)
+        expect(isArbitraryLength('[length:var(--arbitrary)]')).toBe(true)
 
-        expect(isCustomLength('1')).toBe(false)
-        expect(isCustomLength('3px')).toBe(false)
-        expect(isCustomLength('1d5')).toBe(false)
-        expect(isCustomLength('[1]')).toBe(false)
-        expect(isCustomLength('[12px')).toBe(false)
-        expect(isCustomLength('12px]')).toBe(false)
-        expect(isCustomLength('one')).toBe(false)
+        expect(isArbitraryLength('1')).toBe(false)
+        expect(isArbitraryLength('3px')).toBe(false)
+        expect(isArbitraryLength('1d5')).toBe(false)
+        expect(isArbitraryLength('[1]')).toBe(false)
+        expect(isArbitraryLength('[12px')).toBe(false)
+        expect(isArbitraryLength('12px]')).toBe(false)
+        expect(isArbitraryLength('one')).toBe(false)
     })
 
     test('isInteger', () => {
@@ -60,18 +71,18 @@ describe('validators', () => {
         expect(isInteger('1px')).toBe(false)
     })
 
-    test('isCustomValue', () => {
-        expect(isCustomValue('[1]')).toBe(true)
-        expect(isCustomValue('[bla]')).toBe(true)
-        expect(isCustomValue('[not-a-custom-value?]')).toBe(true)
-        expect(isCustomValue('[auto,auto,minmax(0,1fr),calc(100vw-50%)]')).toBe(true)
+    test('isArbitraryValue', () => {
+        expect(isArbitraryValue('[1]')).toBe(true)
+        expect(isArbitraryValue('[bla]')).toBe(true)
+        expect(isArbitraryValue('[not-an-arbitrary-value?]')).toBe(true)
+        expect(isArbitraryValue('[auto,auto,minmax(0,1fr),calc(100vw-50%)]')).toBe(true)
 
-        expect(isCustomValue('[]')).toBe(false)
-        expect(isCustomValue('[1')).toBe(false)
-        expect(isCustomValue('1]')).toBe(false)
-        expect(isCustomValue('1')).toBe(false)
-        expect(isCustomValue('one')).toBe(false)
-        expect(isCustomValue('o[n]e')).toBe(false)
+        expect(isArbitraryValue('[]')).toBe(false)
+        expect(isArbitraryValue('[1')).toBe(false)
+        expect(isArbitraryValue('1]')).toBe(false)
+        expect(isArbitraryValue('1')).toBe(false)
+        expect(isArbitraryValue('one')).toBe(false)
+        expect(isArbitraryValue('o[n]e')).toBe(false)
     })
 
     test('isAny', () => {
@@ -80,5 +91,67 @@ describe('validators', () => {
         expect(isAny('')).toBe(true)
         // @ts-expect-error
         expect(isAny('something')).toBe(true)
+    })
+
+    test('isTshirtSize', () => {
+        expect(isTshirtSize('xs')).toBe(true)
+        expect(isTshirtSize('sm')).toBe(true)
+        expect(isTshirtSize('md')).toBe(true)
+        expect(isTshirtSize('lg')).toBe(true)
+        expect(isTshirtSize('xl')).toBe(true)
+        expect(isTshirtSize('2xl')).toBe(true)
+        expect(isTshirtSize('10xl')).toBe(true)
+        expect(isTshirtSize('2xs')).toBe(true)
+        expect(isTshirtSize('2lg')).toBe(true)
+
+        expect(isTshirtSize('')).toBe(false)
+        expect(isTshirtSize('hello')).toBe(false)
+        expect(isTshirtSize('1')).toBe(false)
+        expect(isTshirtSize('xl3')).toBe(false)
+        expect(isTshirtSize('2xl3')).toBe(false)
+        expect(isTshirtSize('-xl')).toBe(false)
+        expect(isTshirtSize('[sm]')).toBe(false)
+    })
+
+    test('isArbitrarySize', () => {
+        expect(isArbitrarySize('[size:2px]')).toBe(true)
+        expect(isArbitrarySize('[size:bla]')).toBe(true)
+
+        expect(isArbitrarySize('[2px]')).toBe(false)
+        expect(isArbitrarySize('[bla]')).toBe(false)
+        expect(isArbitrarySize('size:2px')).toBe(false)
+    })
+
+    test('isArbitraryPosition', () => {
+        expect(isArbitraryPosition('[position:2px]')).toBe(true)
+        expect(isArbitraryPosition('[position:bla]')).toBe(true)
+
+        expect(isArbitraryPosition('[2px]')).toBe(false)
+        expect(isArbitraryPosition('[bla]')).toBe(false)
+        expect(isArbitraryPosition('position:2px')).toBe(false)
+    })
+
+    test('isArbitraryUrl', () => {
+        expect(isArbitraryUrl('[url:var(--my-url)]')).toBe(true)
+        expect(isArbitraryUrl('[url(something)]')).toBe(true)
+        expect(isArbitraryUrl('[url:bla]')).toBe(true)
+
+        expect(isArbitraryUrl('[var(--my-url)]')).toBe(false)
+        expect(isArbitraryUrl('[bla]')).toBe(false)
+        expect(isArbitraryUrl('url:2px')).toBe(false)
+        expect(isArbitraryUrl('url(2px)')).toBe(false)
+    })
+
+    test('isArbitraryWeight', () => {
+        expect(isArbitraryWeight('[weight:black]')).toBe(true)
+        expect(isArbitraryWeight('[weight:bla]')).toBe(true)
+        expect(isArbitraryWeight('[weight:230]')).toBe(true)
+        expect(isArbitraryWeight('[450]')).toBe(true)
+
+        expect(isArbitraryWeight('[2px]')).toBe(false)
+        expect(isArbitraryWeight('[bla]')).toBe(false)
+        expect(isArbitraryWeight('[black]')).toBe(false)
+        expect(isArbitraryWeight('black')).toBe(false)
+        expect(isArbitraryWeight('450')).toBe(false)
     })
 })
