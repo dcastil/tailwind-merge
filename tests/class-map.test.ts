@@ -78,7 +78,12 @@ test('class map has correct class groups at first part', () => {
         contents: ['display'],
         contrast: ['contrast'],
         cursor: ['cursor'],
-        decoration: ['decoration'],
+        decoration: [
+            'decoration',
+            'text-decoration-color',
+            'text-decoration-style',
+            'text-decoration-thickness',
+        ],
         delay: ['delay'],
         diagonal: ['fvn-fraction'],
         divide: [

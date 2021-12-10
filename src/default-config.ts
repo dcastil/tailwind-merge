@@ -50,7 +50,7 @@ export function getDefaultConfig() {
             'right-top',
             'top',
         ] as const
-    const getBorderStyles = () => ['solid', 'dashed', 'dotted', 'double', 'none'] as const
+    const getLineStyles = () => ['solid', 'dashed', 'dotted', 'double', 'none'] as const
     const getBlendModes = () =>
         [
             {
@@ -697,6 +697,21 @@ export function getDefaultConfig() {
              */
             'text-decoration': ['underline', 'line-through', 'no-underline'],
             /**
+             * Text Decoration Style
+             * @see https://tailwindcss.com/docs/text-decoration-style
+             */
+            'text-decoration-style': [{ decoration: [...getLineStyles(), 'wavy'] }],
+            /**
+             * Text Decoration Thickness
+             * @see https://tailwindcss.com/docs/text-decoration-thickness
+             */
+            'text-decoration-thickness': [{ decoration: ['auto', 'from-font', isLength] }],
+            /**
+             * Text Decoration Color
+             * @see https://tailwindcss.com/docs/text-decoration-color
+             */
+            'text-decoration-color': [{ decoration: [fromTheme('colors')] }],
+            /**
              * Text Transform
              * @see https://tailwindcss.com/docs/text-transform
              */
@@ -876,7 +891,7 @@ export function getDefaultConfig() {
              * Border Style
              * @see https://tailwindcss.com/docs/border-style
              */
-            'border-style': [{ border: getBorderStyles() }],
+            'border-style': [{ border: getLineStyles() }],
             /**
              * Divide Width X
              * @see https://tailwindcss.com/docs/divide-width
@@ -906,7 +921,7 @@ export function getDefaultConfig() {
              * Divide Style
              * @see https://tailwindcss.com/docs/divide-style
              */
-            'divide-style': [{ divide: getBorderStyles() }],
+            'divide-style': [{ divide: getLineStyles() }],
             /**
              * Border Color
              * @see https://tailwindcss.com/docs/border-color
