@@ -730,8 +730,19 @@ export function getDefaultConfig() {
              * Vertical Alignment
              * @see https://tailwindcss.com/docs/vertical-align
              */
-            'vertival-alignment': [
-                { align: ['baseline', 'top', 'middle', 'bottom', 'text-top', 'text-bottom'] },
+            'vertical-align': [
+                {
+                    align: [
+                        'baseline',
+                        'top',
+                        'middle',
+                        'bottom',
+                        'text-top',
+                        'text-bottom',
+                        'sub',
+                        'super',
+                    ],
+                },
             ],
             /**
              * Whitespace
