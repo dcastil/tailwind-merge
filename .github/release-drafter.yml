@@ -13,7 +13,7 @@ categories:
       label: 'needs changelog edit'
     - title: 'Breaking Changes'
       label: 'breaking'
-    - title: 'Features'
+    - title: 'New Features'
       label: 'feature'
     - title: 'Bug Fixes'
       label: 'bugfix'
