@@ -509,6 +509,7 @@ interface Validators {
     isCustomLength(classPart: string): boolean
     isInteger(classPart: string): boolean
     isCustomValue(classPart: string): boolean
+    isTshirtSize(classPart: string): boolean
     isAny(classPart: string): boolean
 }
 ```
@@ -525,6 +526,7 @@ A brief summary for each validator:
 -   `isCustomLength` checks for custom length values (`[3%]`, `[4px]`, `[length:var(--my-var)]`).
 -   `isInteger` checks for integer values (`3`) and custom integer values (`[3]`).
 -   `isCustomValue` checks whether the class part is enclosed in brackets (`[something]`)
+-   `isTshirtSize`checks whether class part is a T-shirt size (`sm`, `xl`), optionally with a preceding number (`2xl`)
 -   `isAny` always returns true. Be careful with this validator as it might match unwanted classes. I use it primarily to match colors or when I'm ceertain there are no other class groups in a namespace.
 
 ### `Config`
