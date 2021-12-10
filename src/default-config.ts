@@ -1245,10 +1245,25 @@ export function getDefaultConfig() {
                 },
             ],
             /**
-             * Outline
-             * @see https://tailwindcss.com/docs/outline
+             * Outline Width
+             * @see https://tailwindcss.com/docs/outline-width
              */
-            outline: [{ outline: ['none', 'white', 'black'] }],
+            'outline-w': [{ outline: [isLength] }],
+            /**
+             * Outline Style
+             * @see https://tailwindcss.com/docs/outline-style
+             */
+            'outline-style': [{ outline: ['', ...getLineStyles(), 'hidden'] }],
+            /**
+             * Outline Offset
+             * @see https://tailwindcss.com/docs/outline-offset
+             */
+            'outline-offset': [{ 'outline-offset': [isLength] }],
+            /**
+             * Outline Color
+             * @see https://tailwindcss.com/docs/outline-color
+             */
+            'outline-color': [{ outline: [fromTheme('colors')] }],
             /**
              * Pointer Events
              * @see https://tailwindcss.com/docs/pointer-events

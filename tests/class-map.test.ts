@@ -147,7 +147,7 @@ test('class map has correct class groups at first part', () => {
         order: ['order'],
         ordinal: ['fvn-ordinal'],
         origin: ['transform-origin'],
-        outline: ['outline'],
+        outline: ['outline-color', 'outline-offset', 'outline-style', 'outline-w'],
         overflow: ['overflow', 'overflow-x', 'overflow-y', 'text-overflow'],
         overscroll: ['overscroll', 'overscroll-x', 'overscroll-y'],
         p: ['p'],
