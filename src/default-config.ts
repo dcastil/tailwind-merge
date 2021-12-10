@@ -285,7 +285,7 @@ export function getDefaultConfig() {
              * Flex Basis
              * @see https://tailwindcss.com/docs/flex-basis
              */
-            'flex-basis': [{ basis: [spacing] }],
+            basis: [{ basis: [spacing] }],
             /**
              * Flex Direction
              * @see https://tailwindcss.com/docs/flex-direction
@@ -305,12 +305,12 @@ export function getDefaultConfig() {
              * Flex Grow
              * @see https://tailwindcss.com/docs/flex-grow
              */
-            'flex-grow': [{ 'flex-grow': getZeroAndEmpty() }],
+            grow: [{ grow: getZeroAndEmpty() }],
             /**
              * Flex Shrink
              * @see https://tailwindcss.com/docs/flex-shrink
              */
-            'flex-shrink': [{ 'flex-shrink': getZeroAndEmpty() }],
+            shrink: [{ shrink: getZeroAndEmpty() }],
             /**
              * Order
              * @see https://tailwindcss.com/docs/order
@@ -1450,7 +1450,7 @@ export function getDefaultConfig() {
             inset: ['inset-x', 'inset-y', 'top', 'right', 'bottom', 'left'],
             'inset-x': ['right', 'left'],
             'inset-y': ['top', 'bottom'],
-            flex: ['flex-basis', 'flex-grow', 'flex-shrink'],
+            flex: ['basis', 'grow', 'shrink'],
             'col-start-end': ['col-start', 'col-end'],
             'row-start-end': ['row-start', 'row-end'],
             gap: ['gap-x', 'gap-y'],
