@@ -17,6 +17,7 @@ test('class map has correct class groups at first part', () => {
     expect(classMap.validators).toHaveLength(0)
     expect(classGroupsByFirstPart).toEqual({
         absolute: ['position'],
+        aspect: ['aspect'],
         align: ['vertival-alignment'],
         animate: ['animate'],
         antialiased: ['font-smoothing'],
@@ -182,7 +183,7 @@ test('class map has correct class groups at first part', () => {
         select: ['select'],
         self: ['align-self'],
         sepia: ['sepia'],
-        shadow: ['shadow'],
+        shadow: ['shadow', 'shadow-color'],
         skew: ['skew-x', 'skew-y'],
         slashed: ['fvn-slashed-zero'],
         space: ['space-x', 'space-x-reverse', 'space-y', 'space-y-reverse'],

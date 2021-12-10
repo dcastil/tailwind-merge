@@ -246,6 +246,11 @@ export function getDefaultConfig() {
         classGroups: {
             // Layout
             /**
+             * Aspect Ratio
+             * @see https://tailwindcss.com/docs/aspect-ratio
+             */
+            aspect: [{ aspect: ['auto', 'square', 'video', isCustomValue] }],
+            /**
              * Container
              * @see https://tailwindcss.com/docs/container
              */
@@ -1093,6 +1098,11 @@ export function getDefaultConfig() {
              * @see https://tailwindcss.com/docs/box-shadow
              */
             shadow: [{ shadow: ['', ...getSizesSimple(), 'inner', 'none'] }],
+            /**
+             * Box Shadow Color
+             * @see https://tailwindcss.com/docs/box-shadow-color
+             */
+            'shadow-color': [{ shadow: [isAny] }],
             /**
              * Opacity
              * @see https://tailwindcss.com/docs/opacity
