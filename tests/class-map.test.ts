@@ -243,6 +243,7 @@ test('class map has correct class groups at first part', () => {
         visible: ['visibility'],
         w: ['w'],
         whitespace: ['whitespace'],
+        will: ['will-change'],
         z: ['z'],
     })
 })

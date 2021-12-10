@@ -1431,6 +1431,13 @@ export function getDefaultConfig() {
              * @see https://tailwindcss.com/docs/user-select
              */
             select: [{ select: ['none', 'text', 'all', 'auto'] }],
+            /**
+             * Will Change
+             * @see https://tailwindcss.com/docs/will-change
+             */
+            'will-change': [
+                { 'will-change': ['auto', 'scroll', 'contents', 'transform', isCustomValue] },
+            ],
             // SVG
             /**
              * Fill
