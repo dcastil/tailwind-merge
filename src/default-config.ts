@@ -532,7 +532,7 @@ export function getDefaultConfig() {
              * Min-Width
              * @see https://tailwindcss.com/docs/min-width
              */
-            'min-w': [{ 'min-w': ['full', 'min', 'max', isLength] }],
+            'min-w': [{ 'min-w': ['min', 'max', 'fit', isLength] }],
             /**
              * Max-Width
              * @see https://tailwindcss.com/docs/max-width
@@ -545,6 +545,7 @@ export function getDefaultConfig() {
                         'full',
                         'min',
                         'max',
+                        'fit',
                         'prose',
                         { screen: [isTshirtSize] },
                         isTshirtSize,
@@ -561,12 +562,12 @@ export function getDefaultConfig() {
              * Min-Height
              * @see https://tailwindcss.com/docs/min-height
              */
-            'min-h': [{ 'min-h': ['full', 'screen', isLength] }],
+            'min-h': [{ 'min-h': ['min', 'max', 'fit', isLength] }],
             /**
              * Max-Height
              * @see https://tailwindcss.com/docs/max-height
              */
-            'max-h': [{ 'max-h': [spacing] }],
+            'max-h': [{ 'max-h': [spacing, 'min', 'max', 'fit'] }],
             // Typography
             /**
              * Font Family
