@@ -1386,8 +1386,23 @@ export function getDefaultConfig() {
              */
             'snap-strictness': [{ snap: ['mandatory', 'proximity'] }],
             /**
-             * Select
-             * @see https://tailwindcss.com/docs/select
+             * Touch Action
+             * @see https://tailwindcss.com/docs/touch-action
+             */
+            touch: [
+                {
+                    touch: [
+                        'auto',
+                        'none',
+                        'pinch-zoom',
+                        'manipulation',
+                        { pan: ['x', 'left', 'right', 'y', 'up', 'down'] },
+                    ],
+                },
+            ],
+            /**
+             * User Select
+             * @see https://tailwindcss.com/docs/user-select
              */
             select: [{ select: ['none', 'text', 'all', 'auto'] }],
             // SVG

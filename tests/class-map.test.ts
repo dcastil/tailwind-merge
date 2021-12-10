@@ -224,6 +224,7 @@ test('class map has correct class groups at first part', () => {
         text: ['font-size', 'text-alignment', 'text-color', 'text-opacity'],
         to: ['gradient-to'],
         top: ['top'],
+        touch: ['touch'],
         tracking: ['tracking'],
         transform: ['transform'],
         transition: ['transition'],
