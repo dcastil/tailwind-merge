@@ -146,7 +146,7 @@ export function getDefaultConfig() {
              * Box Decoration Break
              * @see https://tailwindcss.com/docs/box-decoration-break
              */
-            decoration: [{ decoration: ['slice', 'clone'] }],
+            'box-decoration': [{ 'box-decoration': ['slice', 'clone'] }],
             /**
              * Box Sizing
              * @see https://tailwindcss.com/docs/box-sizing

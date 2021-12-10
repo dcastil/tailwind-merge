@@ -71,7 +71,7 @@ test('class map has correct class groups at first part', () => {
             'border-w-y',
         ],
         bottom: ['bottom'],
-        box: ['box'],
+        box: ['box', 'box-decoration'],
         break: ['break', 'break-after', 'break-before', 'break-inside'],
         brightness: ['brightness'],
         capitalize: ['text-transform'],
@@ -84,12 +84,7 @@ test('class map has correct class groups at first part', () => {
         contents: ['display'],
         contrast: ['contrast'],
         cursor: ['cursor'],
-        decoration: [
-            'decoration',
-            'text-decoration-color',
-            'text-decoration-style',
-            'text-decoration-thickness',
-        ],
+        decoration: ['text-decoration-color', 'text-decoration-style', 'text-decoration-thickness'],
         delay: ['delay'],
         diagonal: ['fvn-fraction'],
         divide: [
