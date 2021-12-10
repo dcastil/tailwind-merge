@@ -710,7 +710,7 @@ export function getDefaultConfig() {
              * Text Decoration Color
              * @see https://tailwindcss.com/docs/text-decoration-color
              */
-            'text-decoration-color': [{ decoration: [fromTheme('colors')] }],
+            'text-decoration-color': [{ decoration: [colors] }],
             /**
              * Text Transform
              * @see https://tailwindcss.com/docs/text-transform
@@ -725,7 +725,7 @@ export function getDefaultConfig() {
              * Text Indent
              * @see https://tailwindcss.com/docs/text-indent
              */
-            indent: [{ indent: [fromTheme('spacing')] }],
+            indent: [{ indent: [spacing] }],
             /**
              * Vertical Alignment
              * @see https://tailwindcss.com/docs/vertical-align
@@ -1232,6 +1232,11 @@ export function getDefaultConfig() {
             'skew-y': [{ 'skew-y': [skew] }],
             // Interactivity
             /**
+             * Accent Color
+             * @see https://tailwindcss.com/docs/accent-color
+             */
+            accent: [{ accent: ['auto', colors] }],
+            /**
              * Appearance
              * @see https://tailwindcss.com/docs/appearance
              */
@@ -1274,7 +1279,7 @@ export function getDefaultConfig() {
              * Outline Color
              * @see https://tailwindcss.com/docs/outline-color
              */
-            'outline-color': [{ outline: [fromTheme('colors')] }],
+            'outline-color': [{ outline: [colors] }],
             /**
              * Pointer Events
              * @see https://tailwindcss.com/docs/pointer-events

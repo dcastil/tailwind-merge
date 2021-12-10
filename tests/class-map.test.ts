@@ -17,6 +17,7 @@ test('class map has correct class groups at first part', () => {
     expect(classMap.validators).toHaveLength(0)
     expect(classGroupsByFirstPart).toEqual({
         absolute: ['position'],
+        accent: ['accent'],
         aspect: ['aspect'],
         align: ['vertical-align'],
         animate: ['animate'],
