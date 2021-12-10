@@ -24,7 +24,7 @@ export function createClassUtils(config: Config) {
             classParts.shift()
         }
 
-        return getGroupRecursive(classParts, classMap)
+        return getGroupRecursive(classParts, classMap) || getGroupIdForArbitraryProperty(className)
     }
 
     function getConflictingClassGroupIds(classGroupId: ClassGroupId) {
@@ -62,6 +62,23 @@ function getGroupRecursive(
     const classRest = classParts.join(CLASS_PART_SEPARATOR)
 
     return classPartObject.validators.find(({ validator }) => validator(classRest))?.classGroupId
+}
+
+const arbitraryPropertyRegex = /^\[(.+)\]$/
+
+function getGroupIdForArbitraryProperty(className: string) {
+    if (arbitraryPropertyRegex.test(className)) {
+        const arbitraryPropertyClassName = arbitraryPropertyRegex.exec(className)![1]
+        const property = arbitraryPropertyClassName?.substring(
+            0,
+            arbitraryPropertyClassName.indexOf(':')
+        )
+
+        if (property) {
+            // I use two dots here because one dot is used as prefix for class groups in plugins
+            return 'arbitrary..' + property
+        }
+    }
 }
 
 /**
