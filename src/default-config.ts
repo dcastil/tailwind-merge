@@ -34,7 +34,7 @@ export function getDefaultConfig() {
     const translate = fromTheme('translate')
 
     const getOverscroll = () => ['auto', 'contain', 'none'] as const
-    const getOverflow = () => ['auto', 'hidden', 'visible', 'scroll'] as const
+    const getOverflow = () => ['auto', 'hidden', 'clip', 'visible', 'scroll'] as const
     const getSpacingWithAuto = () => ['auto', spacing] as const
     const getLengthWithEmpty = () => ['', isLength] as const
     const getIntegerWithAuto = () => ['auto', isInteger] as const
