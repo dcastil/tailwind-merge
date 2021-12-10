@@ -94,7 +94,7 @@ twMerge('hover:p-2 hover:p-4') // → 'hover:p-4'
 twMerge('hover:focus:p-2 focus:hover:p-4') // → 'focus:hover:p-4'
 ```
 
-### Supports custom values
+### Supports arbitrary values
 
 ```ts
 twMerge('bg-black bg-[color:var(--mystery-var)]') // → 'bg-[color:var(--mystery-var)]'
@@ -187,13 +187,13 @@ E.g. here is the overflow class group which results in the classes `overflow-aut
 const overflowClassGroup = [{ overflow: ['auto', 'hidden', 'visible', 'scroll'] }]
 ```
 
-Sometimes it isn't possible to enumerate all elements in a class group. Think of a Tailwind class which allows custom values. In this scenario you can use a validator function which takes a _class part_ and returns a boolean indicating whether a class is part of a class group.
+Sometimes it isn't possible to enumerate all elements in a class group. Think of a Tailwind class which allows arbitrary values. In this scenario you can use a validator function which takes a _class part_ and returns a boolean indicating whether a class is part of a class group.
 
 E.g. here is the fill class group.
 
 ```ts
-const isCustomValue = (classPart: string) => /^\[.+\]$/.test(classPart)
-const fillClassGroup = [{ fill: ['current', isCustomValue] }]
+const isArbitraryValue = (classPart: string) => /^\[.+\]$/.test(classPart)
+const fillClassGroup = [{ fill: ['current', isArbitraryValue] }]
 ```
 
 Because the function is under the `fill` key, it will only get called for classes which start with `fill-`. Also, the function only gets passed the part of the class name which comes after `fill-`, this way you can use the same function in multiple class groups. tailwind-merge exports its own [validators](#validators), so you don't need to recreate them.
@@ -500,14 +500,14 @@ const customTwMerge = createTailwindMerge(getDefaultConfig, (config) =>
 ```ts
 interface Validators {
     isLength(classPart: string): boolean
-    isCustomLength(classPart: string): boolean
+    isArbitraryLength(classPart: string): boolean
     isInteger(classPart: string): boolean
-    isCustomValue(classPart: string): boolean
+    isArbitraryValue(classPart: string): boolean
     isTshirtSize(classPart: string): boolean
-    isCustomSize(classPart: string): boolean
-    isCustomPosition(classPart: string): boolean
-    isCustomUrl(classPart: string): boolean
-    isCustomWeight(classPart: string): boolean
+    isArbitrarySize(classPart: string): boolean
+    isArbitraryPosition(classPart: string): boolean
+    isArbitraryUrl(classPart: string): boolean
+    isArbitraryWeight(classPart: string): boolean
     isAny(classPart: string): boolean
 }
 ```
@@ -520,15 +520,15 @@ const paddingClassGroup = [{ p: [validators.isLength] }]
 
 A brief summary for each validator:
 
--   `isLength` checks whether a class part is a number (`3`, `1.5`), a fraction (`3/4`), a custom length (`[3%]`, `[4px]`, `[length:var(--my-var)]`), or one of the strings `px`, `full` or `screen`.
--   `isCustomLength` checks for custom length values (`[3%]`, `[4px]`, `[length:var(--my-var)]`).
--   `isInteger` checks for integer values (`3`) and custom integer values (`[3]`).
--   `isCustomValue` checks whether the class part is enclosed in brackets (`[something]`)
+-   `isLength` checks whether a class part is a number (`3`, `1.5`), a fraction (`3/4`), a arbitrary length (`[3%]`, `[4px]`, `[length:var(--my-var)]`), or one of the strings `px`, `full` or `screen`.
+-   `isArbitraryLength` checks for arbitrary length values (`[3%]`, `[4px]`, `[length:var(--my-var)]`).
+-   `isInteger` checks for integer values (`3`) and arbitrary integer values (`[3]`).
+-   `isArbitraryValue` checks whether the class part is enclosed in brackets (`[something]`)
 -   `isTshirtSize`checks whether class part is a T-shirt size (`sm`, `xl`), optionally with a preceding number (`2xl`).
--   `isCustomSize` checks whether class part is custom value which starts with with `size:` (`[size:200px_100px]`) which is necessary for background-size classNames.
--   `isCustomPosition` checks whether class part is custom value which starts with with `position:` (`[position:200px_100px]`) which is necessary for background-position classNames.
--   `isCustomUrl` checks whether class part is custom value which starts with `url:` or `url(` (`[url('/path-to-image.png')]`, `url:var(--maybe-a-url-at-runtime)]`) which is necessary for background-image classNames.
--   `isCustomWeight` checks whether class part is custom value whcih starts with `weight:` or is a number (`[weight:var(--value)]`, `[450]`) which is necessary for font-weight classNames.
+-   `isArbitrarySize` checks whether class part is arbitrary value which starts with with `size:` (`[size:200px_100px]`) which is necessary for background-size classNames.
+-   `isArbitraryPosition` checks whether class part is arbitrary value which starts with with `position:` (`[position:200px_100px]`) which is necessary for background-position classNames.
+-   `isArbitraryUrl` checks whether class part is arbitrary value which starts with `url:` or `url(` (`[url('/path-to-image.png')]`, `url:var(--maybe-a-url-at-runtime)]`) which is necessary for background-image classNames.
+-   `isArbitraryWeight` checks whether class part is arbitrary value whcih starts with `weight:` or is a number (`[weight:var(--value)]`, `[450]`) which is necessary for font-weight classNames.
 -   `isAny` always returns true. Be careful with this validator as it might match unwanted classes. I use it primarily to match colors or when I'm ceertain there are no other class groups in a namespace.
 
 ### `Config`

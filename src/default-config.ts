@@ -1,12 +1,12 @@
 import { fromTheme } from './from-theme'
 import {
     isAny,
-    isCustomLength,
-    isCustomPosition,
-    isCustomSize,
-    isCustomUrl,
-    isCustomValue,
-    isCustomWeight,
+    isArbitraryLength,
+    isArbitraryPosition,
+    isArbitrarySize,
+    isArbitraryUrl,
+    isArbitraryValue,
+    isArbitraryWeight,
     isInteger,
     isLength,
     isTshirtSize,
@@ -88,10 +88,10 @@ export function getDefaultConfig() {
         theme: {
             colors: [isAny],
             spacing: [isLength],
-            blur: ['none', '', isTshirtSize, isCustomLength],
+            blur: ['none', '', isTshirtSize, isArbitraryLength],
             brightness: [isInteger],
             borderColor: [colors],
-            borderRadius: ['none', '', 'full', isTshirtSize, isCustomLength],
+            borderRadius: ['none', '', 'full', isTshirtSize, isArbitraryLength],
             borderWidth: getLengthWithEmpty(),
             contrast: [isInteger],
             grayscale: getZeroAndEmpty(),
@@ -116,7 +116,7 @@ export function getDefaultConfig() {
              * Aspect Ratio
              * @see https://tailwindcss.com/docs/aspect-ratio
              */
-            aspect: [{ aspect: ['auto', 'square', 'video', isCustomValue] }],
+            aspect: [{ aspect: ['auto', 'square', 'video', isArbitraryValue] }],
             /**
              * Container
              * @see https://tailwindcss.com/docs/container
@@ -304,7 +304,7 @@ export function getDefaultConfig() {
              * Flex
              * @see https://tailwindcss.com/docs/flex
              */
-            flex: [{ flex: ['1', 'auto', 'initial', 'none', isCustomValue] }],
+            flex: [{ flex: ['1', 'auto', 'initial', 'none', isArbitraryValue] }],
             /**
              * Flex Grow
              * @see https://tailwindcss.com/docs/flex-grow
@@ -369,12 +369,12 @@ export function getDefaultConfig() {
              * Grid Auto Columns
              * @see https://tailwindcss.com/docs/grid-auto-columns
              */
-            'auto-cols': [{ 'auto-cols': ['auto', 'min', 'max', 'fr', isCustomValue] }],
+            'auto-cols': [{ 'auto-cols': ['auto', 'min', 'max', 'fr', isArbitraryValue] }],
             /**
              * Grid Auto Rows
              * @see https://tailwindcss.com/docs/grid-auto-rows
              */
-            'auto-rows': [{ 'auto-rows': ['auto', 'min', 'max', 'fr', isCustomValue] }],
+            'auto-rows': [{ 'auto-rows': ['auto', 'min', 'max', 'fr', isArbitraryValue] }],
             /**
              * Gap
              * @see https://tailwindcss.com/docs/gap
@@ -553,7 +553,7 @@ export function getDefaultConfig() {
                         'prose',
                         { screen: [isTshirtSize] },
                         isTshirtSize,
-                        isCustomLength,
+                        isArbitraryLength,
                     ],
                 },
             ],
@@ -577,7 +577,7 @@ export function getDefaultConfig() {
              * Font Size
              * @see https://tailwindcss.com/docs/font-size
              */
-            'font-size': [{ text: ['base', isTshirtSize, isCustomLength] }],
+            'font-size': [{ text: ['base', isTshirtSize, isArbitraryLength] }],
             /**
              * Font Smoothing
              * @see https://tailwindcss.com/docs/font-smoothing
@@ -604,7 +604,7 @@ export function getDefaultConfig() {
                         'bold',
                         'extrabold',
                         'black',
-                        isCustomWeight,
+                        isArbitraryWeight,
                     ],
                 },
             ],
@@ -656,7 +656,7 @@ export function getDefaultConfig() {
                         'wide',
                         'wider',
                         'widest',
-                        isCustomLength,
+                        isArbitraryLength,
                     ],
                 },
             ],
@@ -671,7 +671,7 @@ export function getDefaultConfig() {
              * List Style Type
              * @see https://tailwindcss.com/docs/list-style-type
              */
-            'list-style-type': [{ list: ['none', 'disc', 'decimal', isCustomValue] }],
+            'list-style-type': [{ list: ['none', 'disc', 'decimal', isArbitraryValue] }],
             /**
              * List Style Position
              * @see https://tailwindcss.com/docs/list-style-position
@@ -757,7 +757,7 @@ export function getDefaultConfig() {
                         'text-bottom',
                         'sub',
                         'super',
-                        isCustomLength,
+                        isArbitraryLength,
                     ],
                 },
             ],
@@ -796,7 +796,7 @@ export function getDefaultConfig() {
              * Background Position
              * @see https://tailwindcss.com/docs/background-position
              */
-            'bg-position': [{ bg: [...getPositions(), isCustomPosition] }],
+            'bg-position': [{ bg: [...getPositions(), isArbitraryPosition] }],
             /**
              * Background Repeat
              * @see https://tailwindcss.com/docs/background-repeat
@@ -806,7 +806,7 @@ export function getDefaultConfig() {
              * Background Size
              * @see https://tailwindcss.com/docs/background-size
              */
-            'bg-size': [{ bg: ['auto', 'cover', 'contain', isCustomSize] }],
+            'bg-size': [{ bg: ['auto', 'cover', 'contain', isArbitrarySize] }],
             /**
              * Background Image
              * @see https://tailwindcss.com/docs/background-image
@@ -816,7 +816,7 @@ export function getDefaultConfig() {
                     bg: [
                         'none',
                         { 'gradient-to': ['t', 'tr', 'r', 'br', 'b', 'bl', 'l', 'tl'] },
-                        isCustomUrl,
+                        isArbitraryUrl,
                     ],
                 },
             ],
@@ -1184,7 +1184,7 @@ export function getDefaultConfig() {
                         'opacity',
                         'shadow',
                         'transform',
-                        isCustomValue,
+                        isArbitraryValue,
                     ],
                 },
             ],
@@ -1197,7 +1197,7 @@ export function getDefaultConfig() {
              * Transition Timing Function
              * @see https://tailwindcss.com/docs/transition-timing-function
              */
-            ease: [{ ease: ['linear', 'in', 'out', 'in-out', isCustomValue] }],
+            ease: [{ ease: ['linear', 'in', 'out', 'in-out', isArbitraryValue] }],
             /**
              * Transition Delay
              * @see https://tailwindcss.com/docs/transition-delay
@@ -1207,7 +1207,7 @@ export function getDefaultConfig() {
              * Animation
              * @see https://tailwindcss.com/docs/animation
              */
-            animate: [{ animate: ['none', 'spin', 'ping', 'pulse', 'bounce', isCustomValue] }],
+            animate: [{ animate: ['none', 'spin', 'ping', 'pulse', 'bounce', isArbitraryValue] }],
             // Transforms
             /**
              * Transform
@@ -1327,7 +1327,7 @@ export function getDefaultConfig() {
                         'nwse-resize',
                         'zoom-in',
                         'zoom-out',
-                        isCustomValue,
+                        isArbitraryValue,
                     ],
                 },
             ],
@@ -1476,7 +1476,7 @@ export function getDefaultConfig() {
              * @see https://tailwindcss.com/docs/will-change
              */
             'will-change': [
-                { 'will-change': ['auto', 'scroll', 'contents', 'transform', isCustomValue] },
+                { 'will-change': ['auto', 'scroll', 'contents', 'transform', isArbitraryValue] },
             ],
             // SVG
             /**
@@ -1505,7 +1505,7 @@ export function getDefaultConfig() {
              * Content
              * @see https://tailwindcss.com/docs/just-in-time-mode#content-utilities
              */
-            content: [{ content: [isCustomValue] }],
+            content: [{ content: [isArbitraryValue] }],
             /**
              * Caret Color
              * @see https://tailwindcss.com/docs/just-in-time-mode#caret-color-utilities

@@ -15,14 +15,14 @@ test('has correct export types', () => {
     expect(getDefaultConfig).toStrictEqual(expect.any(Function))
     expect(validators).toEqual({
         isLength: expect.any(Function),
-        isCustomLength: expect.any(Function),
+        isArbitraryLength: expect.any(Function),
         isInteger: expect.any(Function),
-        isCustomValue: expect.any(Function),
+        isArbitraryValue: expect.any(Function),
         isTshirtSize: expect.any(Function),
-        isCustomSize: expect.any(Function),
-        isCustomPosition: expect.any(Function),
-        isCustomUrl: expect.any(Function),
-        isCustomWeight: expect.any(Function),
+        isArbitrarySize: expect.any(Function),
+        isArbitraryPosition: expect.any(Function),
+        isArbitraryUrl: expect.any(Function),
+        isArbitraryWeight: expect.any(Function),
         isAny: expect.any(Function),
     })
     expect(mergeConfigs).toStrictEqual(expect.any(Function))
@@ -120,15 +120,15 @@ test('createTailwindMerge() has correct inputs and outputs', () => {
 
 test('validators have correct inputs and outputs', () => {
     expect(validators.isLength('')).toEqual(expect.any(Boolean))
-    expect(validators.isCustomLength('')).toEqual(expect.any(Boolean))
+    expect(validators.isArbitraryLength('')).toEqual(expect.any(Boolean))
     expect(validators.isInteger('')).toEqual(expect.any(Boolean))
-    expect(validators.isCustomValue('')).toEqual(expect.any(Boolean))
+    expect(validators.isArbitraryValue('')).toEqual(expect.any(Boolean))
     expect(validators.isAny()).toEqual(expect.any(Boolean))
     expect(validators.isTshirtSize('')).toEqual(expect.any(Boolean))
-    expect(validators.isCustomSize('')).toEqual(expect.any(Boolean))
-    expect(validators.isCustomPosition('')).toEqual(expect.any(Boolean))
-    expect(validators.isCustomUrl('')).toEqual(expect.any(Boolean))
-    expect(validators.isCustomWeight('')).toEqual(expect.any(Boolean))
+    expect(validators.isArbitrarySize('')).toEqual(expect.any(Boolean))
+    expect(validators.isArbitraryPosition('')).toEqual(expect.any(Boolean))
+    expect(validators.isArbitraryUrl('')).toEqual(expect.any(Boolean))
+    expect(validators.isArbitraryWeight('')).toEqual(expect.any(Boolean))
 })
 
 test('mergeConfigs has correct inputs and outputs', () => {

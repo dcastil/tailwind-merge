@@ -1,4 +1,4 @@
-const customValueRegex = /^\[(.+)\]$/
+const arbitraryValueRegex = /^\[(.+)\]$/
 const fractionRegex = /^\d+\/\d+$/
 const stringLengths = new Set(['px', 'full', 'screen'])
 const tshirtUnitRegex = /^(\d+)?(xs|sm|md|lg|xl)$/
@@ -9,58 +9,60 @@ export function isLength(classPart: string) {
         !Number.isNaN(Number(classPart)) ||
         stringLengths.has(classPart) ||
         fractionRegex.test(classPart) ||
-        isCustomLength(classPart)
+        isArbitraryLength(classPart)
     )
 }
 
-export function isCustomLength(classPart: string) {
-    const customValue = customValueRegex.exec(classPart)?.[1]
+export function isArbitraryLength(classPart: string) {
+    const arbitraryValue = arbitraryValueRegex.exec(classPart)?.[1]
 
-    if (customValue) {
-        return customValue.startsWith('length:') || lengthUnitRegex.test(customValue)
+    if (arbitraryValue) {
+        return arbitraryValue.startsWith('length:') || lengthUnitRegex.test(arbitraryValue)
     }
 
     return false
 }
 
-export function isCustomSize(classPart: string) {
-    const customValue = customValueRegex.exec(classPart)?.[1]
+export function isArbitrarySize(classPart: string) {
+    const arbitraryValue = arbitraryValueRegex.exec(classPart)?.[1]
 
-    return customValue ? customValue.startsWith('size:') : false
+    return arbitraryValue ? arbitraryValue.startsWith('size:') : false
 }
 
-export function isCustomPosition(classPart: string) {
-    const customValue = customValueRegex.exec(classPart)?.[1]
+export function isArbitraryPosition(classPart: string) {
+    const arbitraryValue = arbitraryValueRegex.exec(classPart)?.[1]
 
-    return customValue ? customValue.startsWith('position:') : false
+    return arbitraryValue ? arbitraryValue.startsWith('position:') : false
 }
 
-export function isCustomUrl(classPart: string) {
-    const customValue = customValueRegex.exec(classPart)?.[1]
+export function isArbitraryUrl(classPart: string) {
+    const arbitraryValue = arbitraryValueRegex.exec(classPart)?.[1]
 
-    return customValue ? customValue.startsWith('url(') || customValue.startsWith('url:') : false
+    return arbitraryValue
+        ? arbitraryValue.startsWith('url(') || arbitraryValue.startsWith('url:')
+        : false
 }
 
-export function isCustomWeight(classPart: string) {
-    const customValue = customValueRegex.exec(classPart)?.[1]
+export function isArbitraryWeight(classPart: string) {
+    const arbitraryValue = arbitraryValueRegex.exec(classPart)?.[1]
 
-    return customValue
-        ? !Number.isNaN(Number(customValue)) || customValue.startsWith('weight:')
+    return arbitraryValue
+        ? !Number.isNaN(Number(arbitraryValue)) || arbitraryValue.startsWith('weight:')
         : false
 }
 
 export function isInteger(classPart: string) {
-    const customValue = customValueRegex.exec(classPart)?.[1]
+    const arbitraryValue = arbitraryValueRegex.exec(classPart)?.[1]
 
-    if (customValue) {
-        return Number.isInteger(Number(customValue))
+    if (arbitraryValue) {
+        return Number.isInteger(Number(arbitraryValue))
     }
 
     return Number.isInteger(Number(classPart))
 }
 
-export function isCustomValue(classPart: string) {
-    return customValueRegex.test(classPart)
+export function isArbitraryValue(classPart: string) {
+    return arbitraryValueRegex.test(classPart)
 }
 
 export function isAny() {

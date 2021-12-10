@@ -2,7 +2,7 @@ import { ConfigUtils } from './config-utils'
 
 const SPLIT_CLASSES_REGEX = /\s+/
 const IMPORTANT_MODIFIER = '!'
-// Regex is needed so we don't match against colons in labels for custom values like `text-[color:var(--mystery-var)]`
+// Regex is needed so we don't match against colons in labels for arbitrary values like `text-[color:var(--mystery-var)]`
 // I'd prefer to use a negative lookbehind for all supported labels, but lookbheinds don't have good browser support yet. More info: https://caniuse.com/js-regexp-lookbehind
 const PREFIX_SEPARATOR_REGEX = /:(?![^[]*\])/
 const PREFIX_SEPARATOR = ':'
