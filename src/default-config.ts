@@ -1435,12 +1435,12 @@ export function getDefaultConfig() {
              * Fill
              * @see https://tailwindcss.com/docs/fill
              */
-            fill: [{ fill: ['current', isCustomValue] }],
+            fill: [{ fill: [colors] }],
             /**
              * Stroke
              * @see https://tailwindcss.com/docs/stroke
              */
-            stroke: [{ stroke: ['current', isCustomValue] }],
+            stroke: [{ stroke: [colors] }],
             /**
              * Stroke Width
              * @see https://tailwindcss.com/docs/stroke-width
