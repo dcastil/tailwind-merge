@@ -707,6 +707,11 @@ export function getDefaultConfig() {
              */
             'text-overflow': ['truncate', 'overflow-ellipsis', 'overflow-clip'],
             /**
+             * Text Indent
+             * @see https://tailwindcss.com/docs/text-indent
+             */
+            indent: [{ indent: [fromTheme('spacing')] }],
+            /**
              * Vertical Alignment
              * @see https://tailwindcss.com/docs/vertical-align
              */

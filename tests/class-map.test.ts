@@ -107,6 +107,7 @@ test('class map has correct class groups at first part', () => {
         h: ['h'],
         hidden: ['display'],
         hue: ['hue-rotate'],
+        indent: ['indent'],
         inline: ['display'],
         inset: ['inset', 'inset-x', 'inset-y'],
         invert: ['invert'],
