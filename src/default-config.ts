@@ -282,6 +282,11 @@ export function getDefaultConfig() {
             z: [{ z: [isLength] }],
             // Flexbox and Grid
             /**
+             * Flex Basis
+             * @see https://tailwindcss.com/docs/flex-basis
+             */
+            'flex-basis': [{ basis: [spacing] }],
+            /**
              * Flex Direction
              * @see https://tailwindcss.com/docs/flex-direction
              */
@@ -1445,7 +1450,7 @@ export function getDefaultConfig() {
             inset: ['inset-x', 'inset-y', 'top', 'right', 'bottom', 'left'],
             'inset-x': ['right', 'left'],
             'inset-y': ['top', 'bottom'],
-            flex: ['flex-grow', 'flex-shrink'],
+            flex: ['flex-basis', 'flex-grow', 'flex-shrink'],
             'col-start-end': ['col-start', 'col-end'],
             'row-start-end': ['row-start', 'row-end'],
             gap: ['gap-x', 'gap-y'],
