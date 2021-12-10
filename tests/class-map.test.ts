@@ -189,6 +189,7 @@ test('class map has correct class groups at first part', () => {
         saturate: ['saturate'],
         scale: ['scale', 'scale-x', 'scale-y'],
         scroll: [
+            'scroll-behavior',
             'scroll-m',
             'scroll-mb',
             'scroll-ml',

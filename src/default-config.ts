@@ -717,6 +717,11 @@ export function getDefaultConfig() {
              */
             'text-transform': ['uppercase', 'lowercase', 'capitalize', 'normal-case'],
             /**
+             * Scroll Behavior
+             * @see https://github.com/tailwindlabs/tailwindcss.com/issues/1016
+             */
+            'scroll-behavior': [{ scroll: ['smooth', 'auto'] }],
+            /**
              * Text Overflow
              * @see https://tailwindcss.com/docs/text-overflow
              */
