@@ -730,7 +730,7 @@ export function getDefaultConfig() {
              * Text Overflow
              * @see https://tailwindcss.com/docs/text-overflow
              */
-            'text-overflow': ['truncate', 'overflow-ellipsis', 'overflow-clip'],
+            'text-overflow': ['truncate', 'text-ellipsis', 'text-clip'],
             /**
              * Text Indent
              * @see https://tailwindcss.com/docs/text-indent
