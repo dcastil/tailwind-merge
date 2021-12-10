@@ -101,6 +101,19 @@ twMerge('bg-black bg-[color:var(--mystery-var)]') // → 'bg-[color:var(--myster
 twMerge('grid-cols-[1fr,auto] grid-cols-2') // → 'grid-cols-2'
 ```
 
+### Supports arbitrary properties
+
+```ts
+twMerge('[mask-type:luminance] [mask-type:alpha]') // → '[mask-type:alpha]'
+twMerge('[--scroll-offset:56px] lg:[--scroll-offset:44px]')
+// → '[--scroll-offset:56px] lg:[--scroll-offset:44px]'
+
+// Don't do this!
+twMerge('[padding:1rem] p-8') // → '[padding:1rem] p-8'
+```
+
+Watch out for mixing arbitrary properties which could be expressed as Tailwind classes. tailwind-merge does not resolve conflicts between arbitrary properties and their matching Tailwind classes to keep the bundle size small.
+
 ### Supports important modifier
 
 ```ts
