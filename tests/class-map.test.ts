@@ -72,6 +72,7 @@ test('class map has correct class groups at first part', () => {
         caret: ['caret-color'],
         clear: ['clear'],
         col: ['col-end', 'col-start', 'col-start-end'],
+        columns: ['columns'],
         container: ['container'],
         content: ['align-content', 'content'],
         contents: ['display'],

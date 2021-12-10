@@ -1,5 +1,12 @@
 import { fromTheme } from './from-theme'
-import { isAny, isCustomLength, isCustomValue, isInteger, isLength } from './validators'
+import {
+    isAny,
+    isCustomLength,
+    isCustomValue,
+    isInteger,
+    isLength,
+    isTshirtSize,
+} from './validators'
 
 export function getDefaultConfig() {
     const colors = fromTheme('colors')
@@ -26,8 +33,6 @@ export function getDefaultConfig() {
     const space = fromTheme('space')
     const translate = fromTheme('translate')
 
-    const getSizesSimple = () => ['sm', 'md', 'lg', 'xl', '2xl'] as const
-    const getSizesExtended = () => ['3xl', '4xl', '5xl', '6xl', '7xl'] as const
     const getOverscroll = () => ['auto', 'contain', 'none'] as const
     const getOverflow = () => ['auto', 'hidden', 'visible', 'scroll'] as const
     const getSpacingWithAuto = () => ['auto', spacing] as const
@@ -77,10 +82,10 @@ export function getDefaultConfig() {
         theme: {
             colors: [isAny],
             spacing: [isLength],
-            blur: ['none', '', ...getSizesSimple(), '3xl', isCustomLength],
+            blur: ['none', '', isTshirtSize, isCustomLength],
             brightness: [isInteger],
             borderColor: [colors],
-            borderRadius: ['none', '', ...getSizesSimple(), '3xl', 'full', isCustomLength],
+            borderRadius: ['none', '', 'full', isTshirtSize, isCustomLength],
             borderWidth: getLengthWithEmpty(),
             contrast: [isInteger],
             grayscale: getZeroAndEmpty(),
@@ -255,6 +260,11 @@ export function getDefaultConfig() {
              * @see https://tailwindcss.com/docs/container
              */
             container: ['container'],
+            /**
+             * Columns
+             * @see https://tailwindcss.com/docs/columns
+             */
+            columns: [{ columns: [isTshirtSize] }],
             /**
              * Box Decoration Break
              * @see https://tailwindcss.com/docs/box-decoration-break
@@ -654,13 +664,12 @@ export function getDefaultConfig() {
                     'max-w': [
                         '0',
                         'none',
-                        ...getSizesSimple(),
-                        ...getSizesExtended(),
                         'full',
                         'min',
                         'max',
                         'prose',
-                        { screen: getSizesSimple() },
+                        { screen: [isTshirtSize] },
+                        isTshirtSize,
                         isCustomLength,
                     ],
                 },
@@ -690,19 +699,7 @@ export function getDefaultConfig() {
              * Font Size
              * @see https://tailwindcss.com/docs/font-size
              */
-            'font-size': [
-                {
-                    text: [
-                        'xs',
-                        ...getSizesSimple(),
-                        'base',
-                        ...getSizesExtended(),
-                        '8xl',
-                        '9xl',
-                        isCustomLength,
-                    ],
-                },
-            ],
+            'font-size': [{ text: ['base', isTshirtSize, isCustomLength] }],
             /**
              * Font Smoothing
              * @see https://tailwindcss.com/docs/font-smoothing
@@ -1097,7 +1094,7 @@ export function getDefaultConfig() {
              * Box Shadow
              * @see https://tailwindcss.com/docs/box-shadow
              */
-            shadow: [{ shadow: ['', ...getSizesSimple(), 'inner', 'none'] }],
+            shadow: [{ shadow: ['', 'inner', 'none', isTshirtSize] }],
             /**
              * Box Shadow Color
              * @see https://tailwindcss.com/docs/box-shadow-color
@@ -1138,7 +1135,7 @@ export function getDefaultConfig() {
              * Drop Shadow
              * @see https://tailwindcss.com/docs/drop-shadow
              */
-            'drop-shadow': [{ 'drop-shadow': ['', ...getSizesSimple(), 'none'] }],
+            'drop-shadow': [{ 'drop-shadow': ['', 'none', isTshirtSize] }],
             /**
              * Grayscale
              * @see https://tailwindcss.com/docs/grayscale

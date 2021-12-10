@@ -1,14 +1,15 @@
 const customValueRegex = /^\[(.+)\]$/
 const fractionRegex = /^\d+\/\d+$/
 const stringLengths = new Set(['px', 'full', 'screen'])
+const tshirtUnitRegex = /^(\d+)?(xs|sm|md|lg|xl)$/
 const lengthUnitRegex = /\d+(%|px|em|rem|vh|vw|pt|pc|in|cm|mm|cap|ch|ex|lh|rlh|vi|vb|vmin|vmax)/
 
 export function isLength(classPart: string) {
     return (
-        isCustomLength(classPart) ||
         !Number.isNaN(Number(classPart)) ||
         stringLengths.has(classPart) ||
-        fractionRegex.test(classPart)
+        fractionRegex.test(classPart) ||
+        isCustomLength(classPart)
     )
 }
 
@@ -38,4 +39,8 @@ export function isCustomValue(classPart: string) {
 
 export function isAny() {
     return true
+}
+
+export function isTshirtSize(classPart: string) {
+    return tshirtUnitRegex.test(classPart)
 }
