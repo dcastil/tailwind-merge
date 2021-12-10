@@ -504,6 +504,10 @@ interface Validators {
     isInteger(classPart: string): boolean
     isCustomValue(classPart: string): boolean
     isTshirtSize(classPart: string): boolean
+    isCustomSize(classPart: string): boolean
+    isCustomPosition(classPart: string): boolean
+    isCustomUrl(classPart: string): boolean
+    isCustomWeight(classPart: string): boolean
     isAny(classPart: string): boolean
 }
 ```
@@ -520,7 +524,11 @@ A brief summary for each validator:
 -   `isCustomLength` checks for custom length values (`[3%]`, `[4px]`, `[length:var(--my-var)]`).
 -   `isInteger` checks for integer values (`3`) and custom integer values (`[3]`).
 -   `isCustomValue` checks whether the class part is enclosed in brackets (`[something]`)
--   `isTshirtSize`checks whether class part is a T-shirt size (`sm`, `xl`), optionally with a preceding number (`2xl`)
+-   `isTshirtSize`checks whether class part is a T-shirt size (`sm`, `xl`), optionally with a preceding number (`2xl`).
+-   `isCustomSize` checks whether class part is custom value which starts with with `size:` (`[size:200px_100px]`) which is necessary for background-size classNames.
+-   `isCustomPosition` checks whether class part is custom value which starts with with `position:` (`[position:200px_100px]`) which is necessary for background-position classNames.
+-   `isCustomUrl` checks whether class part is custom value which starts with `url:` or `url(` (`[url('/path-to-image.png')]`, `url:var(--maybe-a-url-at-runtime)]`) which is necessary for background-image classNames.
+-   `isCustomWeight` checks whether class part is custom value whcih starts with `weight:` or is a number (`[weight:var(--value)]`, `[450]`) which is necessary for font-weight classNames.
 -   `isAny` always returns true. Be careful with this validator as it might match unwanted classes. I use it primarily to match colors or when I'm ceertain there are no other class groups in a namespace.
 
 ### `Config`

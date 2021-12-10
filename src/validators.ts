@@ -23,6 +23,32 @@ export function isCustomLength(classPart: string) {
     return false
 }
 
+export function isCustomSize(classPart: string) {
+    const customValue = customValueRegex.exec(classPart)?.[1]
+
+    return customValue ? customValue.startsWith('size:') : false
+}
+
+export function isCustomPosition(classPart: string) {
+    const customValue = customValueRegex.exec(classPart)?.[1]
+
+    return customValue ? customValue.startsWith('position:') : false
+}
+
+export function isCustomUrl(classPart: string) {
+    const customValue = customValueRegex.exec(classPart)?.[1]
+
+    return customValue ? customValue.startsWith('url(') || customValue.startsWith('url:') : false
+}
+
+export function isCustomWeight(classPart: string) {
+    const customValue = customValueRegex.exec(classPart)?.[1]
+
+    return customValue
+        ? !Number.isNaN(Number(customValue)) || customValue.startsWith('weight:')
+        : false
+}
+
 export function isInteger(classPart: string) {
     const customValue = customValueRegex.exec(classPart)?.[1]
 

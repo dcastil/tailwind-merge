@@ -2,7 +2,11 @@ import { fromTheme } from './from-theme'
 import {
     isAny,
     isCustomLength,
+    isCustomPosition,
+    isCustomSize,
+    isCustomUrl,
     isCustomValue,
+    isCustomWeight,
     isInteger,
     isLength,
     isTshirtSize,
@@ -570,11 +574,6 @@ export function getDefaultConfig() {
             'max-h': [{ 'max-h': [spacing, 'min', 'max', 'fit'] }],
             // Typography
             /**
-             * Font Family
-             * @see https://tailwindcss.com/docs/font-family
-             */
-            'font-family': [{ font: [isAny] }],
-            /**
              * Font Size
              * @see https://tailwindcss.com/docs/font-size
              */
@@ -605,9 +604,15 @@ export function getDefaultConfig() {
                         'bold',
                         'extrabold',
                         'black',
+                        isCustomWeight,
                     ],
                 },
             ],
+            /**
+             * Font Family
+             * @see https://tailwindcss.com/docs/font-family
+             */
+            'font-family': [{ font: [isAny] }],
             /**
              * Font Variant Numeric
              * @see https://tailwindcss.com/docs/font-variant-numeric
@@ -790,7 +795,7 @@ export function getDefaultConfig() {
              * Background Position
              * @see https://tailwindcss.com/docs/background-position
              */
-            'bg-position': [{ bg: getPositions() }],
+            'bg-position': [{ bg: [...getPositions(), isCustomPosition] }],
             /**
              * Background Repeat
              * @see https://tailwindcss.com/docs/background-repeat
@@ -800,13 +805,19 @@ export function getDefaultConfig() {
              * Background Size
              * @see https://tailwindcss.com/docs/background-size
              */
-            'bg-size': [{ bg: ['auto', 'cover', 'contain'] }],
+            'bg-size': [{ bg: ['auto', 'cover', 'contain', isCustomSize] }],
             /**
              * Background Image
              * @see https://tailwindcss.com/docs/background-image
              */
             'bg-image': [
-                { bg: ['none', { 'gradient-to': ['t', 'tr', 'r', 'br', 'b', 'bl', 'l', 'tl'] }] },
+                {
+                    bg: [
+                        'none',
+                        { 'gradient-to': ['t', 'tr', 'r', 'br', 'b', 'bl', 'l', 'tl'] },
+                        isCustomUrl,
+                    ],
+                },
             ],
             /**
              * Background Blend Mode

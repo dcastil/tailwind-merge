@@ -1,6 +1,17 @@
 import { validators } from '../src'
 
-const { isLength, isCustomLength, isInteger, isCustomValue, isAny, isTshirtSize } = validators
+const {
+    isLength,
+    isCustomLength,
+    isInteger,
+    isCustomValue,
+    isAny,
+    isTshirtSize,
+    isCustomSize,
+    isCustomPosition,
+    isCustomUrl,
+    isCustomWeight,
+} = validators
 
 describe('validators', () => {
     test('isLength', () => {
@@ -100,5 +111,47 @@ describe('validators', () => {
         expect(isTshirtSize('2xl3')).toBe(false)
         expect(isTshirtSize('-xl')).toBe(false)
         expect(isTshirtSize('[sm]')).toBe(false)
+    })
+
+    test('isCustomSize', () => {
+        expect(isCustomSize('[size:2px]')).toBe(true)
+        expect(isCustomSize('[size:bla]')).toBe(true)
+
+        expect(isCustomSize('[2px]')).toBe(false)
+        expect(isCustomSize('[bla]')).toBe(false)
+        expect(isCustomSize('size:2px')).toBe(false)
+    })
+
+    test('isCustomPosition', () => {
+        expect(isCustomPosition('[position:2px]')).toBe(true)
+        expect(isCustomPosition('[position:bla]')).toBe(true)
+
+        expect(isCustomPosition('[2px]')).toBe(false)
+        expect(isCustomPosition('[bla]')).toBe(false)
+        expect(isCustomPosition('position:2px')).toBe(false)
+    })
+
+    test('isCustomUrl', () => {
+        expect(isCustomUrl('[url:var(--my-url)]')).toBe(true)
+        expect(isCustomUrl('[url(something)]')).toBe(true)
+        expect(isCustomUrl('[url:bla]')).toBe(true)
+
+        expect(isCustomUrl('[var(--my-url)]')).toBe(false)
+        expect(isCustomUrl('[bla]')).toBe(false)
+        expect(isCustomUrl('url:2px')).toBe(false)
+        expect(isCustomUrl('url(2px)')).toBe(false)
+    })
+
+    test('isCustomWeight', () => {
+        expect(isCustomWeight('[weight:black]')).toBe(true)
+        expect(isCustomWeight('[weight:bla]')).toBe(true)
+        expect(isCustomWeight('[weight:230]')).toBe(true)
+        expect(isCustomWeight('[450]')).toBe(true)
+
+        expect(isCustomWeight('[2px]')).toBe(false)
+        expect(isCustomWeight('[bla]')).toBe(false)
+        expect(isCustomWeight('[black]')).toBe(false)
+        expect(isCustomWeight('black')).toBe(false)
+        expect(isCustomWeight('450')).toBe(false)
     })
 })
