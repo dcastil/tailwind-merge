@@ -1291,6 +1291,96 @@ export function getDefaultConfig() {
              */
             resize: [{ resize: ['none', 'y', 'x', ''] }],
             /**
+             * Scroll Margin
+             * @see https://tailwindcss.com/docs/scroll-margin
+             */
+            'scroll-m': [{ 'scroll-m': [spacing] }],
+            /**
+             * Scroll Margin X
+             * @see https://tailwindcss.com/docs/scroll-margin
+             */
+            'scroll-mx': [{ 'scroll-mx': [spacing] }],
+            /**
+             * Scroll Margin Y
+             * @see https://tailwindcss.com/docs/scroll-margin
+             */
+            'scroll-my': [{ 'scroll-my': [spacing] }],
+            /**
+             * Scroll Margin Top
+             * @see https://tailwindcss.com/docs/scroll-margin
+             */
+            'scroll-mt': [{ 'scroll-mt': [spacing] }],
+            /**
+             * Scroll Margin Right
+             * @see https://tailwindcss.com/docs/scroll-margin
+             */
+            'scroll-mr': [{ 'scroll-mr': [spacing] }],
+            /**
+             * Scroll Margin Bottom
+             * @see https://tailwindcss.com/docs/scroll-margin
+             */
+            'scroll-mb': [{ 'scroll-mb': [spacing] }],
+            /**
+             * Scroll Margin Left
+             * @see https://tailwindcss.com/docs/scroll-margin
+             */
+            'scroll-ml': [{ 'scroll-ml': [spacing] }],
+            /**
+             * Scroll Padding
+             * @see https://tailwindcss.com/docs/scroll-padding
+             */
+            'scroll-p': [{ 'scroll-p': [spacing] }],
+            /**
+             * Scroll Padding X
+             * @see https://tailwindcss.com/docs/scroll-padding
+             */
+            'scroll-px': [{ 'scroll-px': [spacing] }],
+            /**
+             * Scroll Padding Y
+             * @see https://tailwindcss.com/docs/scroll-padding
+             */
+            'scroll-py': [{ 'scroll-py': [spacing] }],
+            /**
+             * Scroll Padding Top
+             * @see https://tailwindcss.com/docs/scroll-padding
+             */
+            'scroll-pt': [{ 'scroll-pt': [spacing] }],
+            /**
+             * Scroll Padding Right
+             * @see https://tailwindcss.com/docs/scroll-padding
+             */
+            'scroll-pr': [{ 'scroll-pr': [spacing] }],
+            /**
+             * Scroll Padding Bottom
+             * @see https://tailwindcss.com/docs/scroll-padding
+             */
+            'scroll-pb': [{ 'scroll-pb': [spacing] }],
+            /**
+             * Scroll Padding Left
+             * @see https://tailwindcss.com/docs/scroll-padding
+             */
+            'scroll-pl': [{ 'scroll-pl': [spacing] }],
+            /**
+             * Scroll Snap Align
+             * @see https://tailwindcss.com/docs/scroll-snap-align
+             */
+            'snap-align': [{ snap: ['start', 'end', 'center', 'align-none'] }],
+            /**
+             * Scroll Snap Stop
+             * @see https://tailwindcss.com/docs/scroll-snap-stop
+             */
+            'snap-stop': [{ snap: ['normal', 'always'] }],
+            /**
+             * Scroll Snap Type
+             * @see https://tailwindcss.com/docs/scroll-snap-type
+             */
+            'snap-type': [{ snap: ['none', 'x', 'y', 'both'] }],
+            /**
+             * Scroll Snap Type Strictness
+             * @see https://tailwindcss.com/docs/scroll-snap-type
+             */
+            'snap-strictness': [{ snap: ['mandatory', 'proximity'] }],
+            /**
              * Select
              * @see https://tailwindcss.com/docs/select
              */
@@ -1379,6 +1469,26 @@ export function getDefaultConfig() {
                 'border-color-b',
                 'border-color-l',
             ],
+            'scroll-m': [
+                'scroll-mx',
+                'scroll-my',
+                'scroll-mt',
+                'scroll-mr',
+                'scroll-mb',
+                'scroll-ml',
+            ],
+            'scroll-mx': ['scroll-mr', 'scroll-ml'],
+            'scroll-my': ['scroll-mt', 'scroll-mb'],
+            'scroll-p': [
+                'scroll-px',
+                'scroll-py',
+                'scroll-pt',
+                'scroll-pr',
+                'scroll-pb',
+                'scroll-pl',
+            ],
+            'scroll-px': ['scroll-pr', 'scroll-pl'],
+            'scroll-py': ['scroll-pt', 'scroll-pb'],
         },
     } as const
 }
