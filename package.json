@@ -40,6 +40,7 @@
         "build": "dts build",
         "test": "dts test",
         "lint": "eslint --max-warnings 0 '**'",
+        "size": "size-limit",
         "preversion": "git checkout main && git pull",
         "version": "zx scripts/update-readme.js",
         "postversion": "git push --follow-tags && open https://github.com/dcastil/tailwind-merge/releases"
@@ -48,6 +49,7 @@
         "hashlru": "^2.3.0"
     },
     "devDependencies": {
+        "@size-limit/preset-small-lib": "^7.0.3",
         "@types/jest": "^27.0.3",
         "@typescript-eslint/eslint-plugin": "^5.4.0",
         "@typescript-eslint/parser": "^5.4.0",
@@ -58,8 +60,19 @@
         "fp-ts": "^2.11.5",
         "jest": "^27.3.1",
         "prettier": "^2.3.2",
+        "size-limit": "^7.0.4",
         "ts-jest": "^27.0.7",
         "typescript": "^4.5.2",
         "zx": "^4.0.0"
-    }
+    },
+    "size-limit": [
+        {
+            "path": "dist/tailwind-merge.cjs.production.min.js",
+            "limit": "10 KB"
+        },
+        {
+            "path": "dist/index.mjs",
+            "limit": "10 KB"
+        }
+    ]
 }
