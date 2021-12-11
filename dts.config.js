@@ -9,7 +9,7 @@ module.exports = {
 
             config.output = {
                 ...config.output,
-                dir: 'dist/',
+                dir: 'dist',
                 entryFileNames: '[name].mjs',
             }
 
