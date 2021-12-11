@@ -1,5 +1,5 @@
-import { ClassPartObject, createClassMap } from '../src/class-utils'
-import { getDefaultConfig } from '../src/default-config'
+import { getDefaultConfig } from '../src'
+import { ClassPartObject, createClassMap } from '../src/lib/class-utils'
 
 test('class map has correct class groups at first part', () => {
     const classMap = createClassMap(getDefaultConfig())

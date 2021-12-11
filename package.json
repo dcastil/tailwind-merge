@@ -22,15 +22,14 @@
         "dist",
         "src"
     ],
-    "type": "module",
     "source": "src/index.ts",
     "exports": {
-        "require": "./dist/index.cjs",
-        "import": "./dist/index.js",
-        "default": "./dist/index.js"
+        "require": "./dist/index.js",
+        "import": "./dist/index.mjs",
+        "default": "./dist/index.mjs"
     },
-    "module": "dist/index.module.js",
-    "main": "dist/index.cjs",
+    "module": "dist/index.mjs",
+    "main": "dist/index.js",
     "types": "./dist/types/index.d.ts",
     "repository": {
         "type": "git",
@@ -38,11 +37,10 @@
     },
     "sideEffects": false,
     "scripts": {
-        "build": "rm -rf dist/* && microbundle --strict --no-compress --format modern,esm,cjs",
-        "build:min": "rm -rf dist/* && microbundle --strict --format modern",
-        "test": "jest",
-        "type-check": "tsc --build",
+        "build": "dts build",
+        "test": "dts test",
         "lint": "eslint --max-warnings 0 '**'",
+        "size": "size-limit",
         "preversion": "git checkout main && git pull",
         "version": "zx scripts/update-readme.js",
         "postversion": "git push --follow-tags && open https://github.com/dcastil/tailwind-merge/releases"
@@ -51,18 +49,30 @@
         "hashlru": "^2.3.0"
     },
     "devDependencies": {
+        "@size-limit/preset-small-lib": "^7.0.3",
         "@types/jest": "^27.0.3",
         "@typescript-eslint/eslint-plugin": "^5.4.0",
         "@typescript-eslint/parser": "^5.4.0",
+        "dts-cli": "^0.20.0",
         "eslint": "^8.3.0",
         "eslint-plugin-import": "^2.25.3",
         "eslint-plugin-jest": "^25.3.0",
         "fp-ts": "^2.11.5",
         "jest": "^27.3.1",
-        "microbundle": "^0.14.2",
         "prettier": "^2.3.2",
+        "size-limit": "^7.0.4",
         "ts-jest": "^27.0.7",
         "typescript": "^4.5.2",
         "zx": "^4.0.0"
-    }
+    },
+    "size-limit": [
+        {
+            "path": "dist/tailwind-merge.cjs.production.min.js",
+            "limit": "10 KB"
+        },
+        {
+            "path": "dist/index.mjs",
+            "limit": "10 KB"
+        }
+    ]
 }
