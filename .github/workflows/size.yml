@@ -6,7 +6,7 @@ jobs:
     size:
         runs-on: ubuntu-latest
         permissions:
-            pull-requests: read
+            pull-requests: write
         env:
             CI_JOB_NUMBER: 1
         steps:
