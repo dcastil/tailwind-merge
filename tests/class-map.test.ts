@@ -1,4 +1,4 @@
-import { ClassPartObject, createClassMap } from '../src/class-utils'
+import { ClassPartObject, createClassMap } from '../src/lib/class-utils'
 import { getDefaultConfig } from '../src/default-config'
 
 test('class map has correct class groups at first part', () => {
