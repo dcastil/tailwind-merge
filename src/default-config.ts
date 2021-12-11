@@ -728,11 +728,6 @@ export function getDefaultConfig() {
              */
             'text-transform': ['uppercase', 'lowercase', 'capitalize', 'normal-case'],
             /**
-             * Scroll Behavior
-             * @see https://github.com/tailwindlabs/tailwindcss.com/issues/1016
-             */
-            'scroll-behavior': [{ scroll: ['smooth', 'auto'] }],
-            /**
              * Text Overflow
              * @see https://tailwindcss.com/docs/text-overflow
              */
@@ -1361,6 +1356,11 @@ export function getDefaultConfig() {
              * @see https://tailwindcss.com/docs/resize
              */
             resize: [{ resize: ['none', 'y', 'x', ''] }],
+            /**
+             * Scroll Behavior
+             * @see https://tailwindcss.com/docs/scroll-behavior
+             */
+            'scroll-behavior': [{ scroll: ['auto', 'smooth'] }],
             /**
              * Scroll Margin
              * @see https://tailwindcss.com/docs/scroll-margin
