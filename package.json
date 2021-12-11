@@ -39,7 +39,6 @@
     "scripts": {
         "build": "dts build",
         "test": "dts test",
-        "type-check": "tsc --build",
         "lint": "eslint --max-warnings 0 '**'",
         "preversion": "git checkout main && git pull",
         "version": "zx scripts/update-readme.js",
