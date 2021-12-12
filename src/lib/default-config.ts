@@ -79,7 +79,7 @@ export function getDefaultConfig() {
             },
         ] as const
     const getAlign = () => ['start', 'end', 'center', 'between', 'around', 'evenly'] as const
-    const getZeroAndEmpty = () => ['', '0'] as const
+    const getZeroAndEmpty = () => ['', '0', isArbitraryValue] as const
     const getBreaks = () =>
         ['auto', 'avoid', 'all', 'avoid-page', 'page', 'left', 'right', 'column'] as const
 
@@ -1051,7 +1051,7 @@ export function getDefaultConfig() {
              * Mix Beldn Mode
              * @see https://tailwindcss.com/docs/mix-blend-mode
              */
-            'mix-blend': [{ 'mix-blend': getBlendModes() }],
+            'mix-blend': [{ mix: getBlendModes() }],
             // Filters
             /**
              * Filter
@@ -1485,15 +1485,15 @@ export function getDefaultConfig() {
              */
             fill: [{ fill: [colors] }],
             /**
-             * Stroke
-             * @see https://tailwindcss.com/docs/stroke
-             */
-            stroke: [{ stroke: [colors] }],
-            /**
              * Stroke Width
              * @see https://tailwindcss.com/docs/stroke-width
              */
             'stroke-w': [{ stroke: [isLength] }],
+            /**
+             * Stroke
+             * @see https://tailwindcss.com/docs/stroke
+             */
+            stroke: [{ stroke: [colors] }],
             // Accessibility
             /**
              * Screen Readers
