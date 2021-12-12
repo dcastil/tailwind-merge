@@ -7,41 +7,17 @@ import {
     isArbitraryUrl,
     isArbitraryValue,
     isArbitraryWeight,
-    isInteger,
     isLength,
     isTshirtSize,
 } from './validators'
 
+// TODO: Create new package entry point for this config
+// TODO: Check in class-map test that `classGroupsByFirstPart` is same for both normal and minimal config. Also check that order of keys is the same.
+// TODO: Check bundle size of package with minimal config to figure out whether it's even worth it
+// TODO: Check runtime performance with minimal config, indeally in a real project using tailwind-merge
 export function getDefaultConfigMinimal() {
-    const colors = fromTheme('colors')
-    const spacing = fromTheme('spacing')
-    const blur = fromTheme('blur')
-    const brightness = fromTheme('brightness')
-    const borderColor = fromTheme('borderColor')
-    const borderRadius = fromTheme('borderRadius')
     const borderWidth = fromTheme('borderWidth')
-    const contrast = fromTheme('contrast')
-    const grayscale = fromTheme('grayscale')
-    const hueRotate = fromTheme('hueRotate')
-    const invert = fromTheme('invert')
-    const gap = fromTheme('gap')
-    const gradientColorStops = fromTheme('gradientColorStops')
-    const inset = fromTheme('inset')
-    const margin = fromTheme('margin')
-    const opacity = fromTheme('opacity')
-    const padding = fromTheme('padding')
-    const saturate = fromTheme('saturate')
-    const scale = fromTheme('scale')
-    const sepia = fromTheme('sepia')
-    const skew = fromTheme('skew')
-    const space = fromTheme('space')
-    const translate = fromTheme('translate')
 
-    const getOverscroll = () => ['auto', 'contain', 'none'] as const
-    const getOverflow = () => ['auto', 'hidden', 'clip', 'visible', 'scroll'] as const
-    const getSpacingWithAuto = () => ['auto', spacing] as const
-    const getLengthWithEmpty = () => ['', isLength] as const
-    const getIntegerWithAuto = () => ['auto', isInteger] as const
     const getPositions = () =>
         [
             'bottom',
@@ -55,60 +31,11 @@ export function getDefaultConfigMinimal() {
             'top',
         ] as const
     const getLineStyles = () => ['solid', 'dashed', 'dotted', 'double', 'none'] as const
-    const getBlendModes = () =>
-        [
-            {
-                blend: [
-                    'normal',
-                    'multiply',
-                    'screen',
-                    'overlay',
-                    'darken',
-                    'lighten',
-                    'color-dodge',
-                    'color-burn',
-                    'hard-light',
-                    'soft-light',
-                    'difference',
-                    'exclusion',
-                    'hue',
-                    'saturation',
-                    'color',
-                    'luminosity',
-                ],
-            },
-        ] as const
-    const getAlign = () => ['start', 'end', 'center', 'between', 'around', 'evenly'] as const
-    const getZeroAndEmpty = () => ['', '0'] as const
-    const getBreaks = () =>
-        ['auto', 'avoid', 'all', 'avoid-page', 'page', 'left', 'right', 'column'] as const
 
     return {
         cacheSize: 500,
         theme: {
-            colors: [isAny],
-            spacing: [isLength],
-            blur: ['none', '', isTshirtSize, isArbitraryLength],
-            brightness: [isInteger],
-            borderColor: [colors],
-            borderRadius: ['none', '', 'full', isTshirtSize, isArbitraryLength],
-            borderWidth: getLengthWithEmpty(),
-            contrast: [isInteger],
-            grayscale: getZeroAndEmpty(),
-            hueRotate: [isInteger],
-            invert: getZeroAndEmpty(),
-            gap: [spacing],
-            gradientColorStops: [colors],
-            inset: getSpacingWithAuto(),
-            margin: getSpacingWithAuto(),
-            opacity: [isInteger],
-            padding: [spacing],
-            saturate: [isInteger],
-            scale: [isInteger],
-            sepia: getZeroAndEmpty(),
-            skew: [isInteger],
-            space: [spacing],
-            translate: [spacing],
+            borderWidth: ['', isLength],
         },
         classGroups: {
             // Layout
@@ -116,7 +43,7 @@ export function getDefaultConfigMinimal() {
              * Aspect Ratio
              * @see https://tailwindcss.com/docs/aspect-ratio
              */
-            aspect: [{ aspect: ['auto', 'square', 'video', isArbitraryValue] }],
+            aspect: getIsAnyForKey('aspect'),
             /**
              * Container
              * @see https://tailwindcss.com/docs/container
@@ -126,17 +53,17 @@ export function getDefaultConfigMinimal() {
              * Columns
              * @see https://tailwindcss.com/docs/columns
              */
-            columns: [{ columns: [isTshirtSize] }],
+            columns: getIsAnyForKey('columns'),
             /**
              * Break After
              * @see https://tailwindcss.com/docs/break-after
              */
-            'break-after': [{ 'break-after': getBreaks() }],
+            'break-after': getIsAnyForKey('break-after'),
             /**
              * Break Before
              * @see https://tailwindcss.com/docs/break-before
              */
-            'break-before': [{ 'break-before': getBreaks() }],
+            'break-before': getIsAnyForKey('break-before'),
             /**
              * Break Inside
              * @see https://tailwindcss.com/docs/break-inside
@@ -146,7 +73,7 @@ export function getDefaultConfigMinimal() {
              * Box Decoration Break
              * @see https://tailwindcss.com/docs/box-decoration-break
              */
-            'box-decoration': [{ 'box-decoration': ['slice', 'clone'] }],
+            'box-decoration': getIsAnyForKey('box-decoration'),
             /**
              * Box Sizing
              * @see https://tailwindcss.com/docs/box-sizing
@@ -183,12 +110,12 @@ export function getDefaultConfigMinimal() {
              * Floats
              * @see https://tailwindcss.com/docs/float
              */
-            float: [{ float: ['right', 'left', 'none'] }],
+            float: getIsAnyForKey('float'),
             /**
              * Clear
              * @see https://tailwindcss.com/docs/clear
              */
-            clear: [{ clear: ['left', 'right', 'both', 'none'] }],
+            clear: getIsAnyForKey('clear'),
             /**
              * Isolation
              * @see https://tailwindcss.com/docs/isolation
@@ -208,32 +135,32 @@ export function getDefaultConfigMinimal() {
              * Overflow
              * @see https://tailwindcss.com/docs/overflow
              */
-            overflow: [{ overflow: getOverflow() }],
+            overflow: getIsAnyForKey('overflow'),
             /**
              * Overflow X
              * @see https://tailwindcss.com/docs/overflow
              */
-            'overflow-x': [{ 'overflow-x': getOverflow() }],
+            'overflow-x': getIsAnyForKey('overflow-x'),
             /**
              * Overflow Y
              * @see https://tailwindcss.com/docs/overflow
              */
-            'overflow-y': [{ 'overflow-y': getOverflow() }],
+            'overflow-y': getIsAnyForKey('overflow-y'),
             /**
              * Overscroll Behavior
              * @see https://tailwindcss.com/docs/overscroll-behavior
              */
-            overscroll: [{ overscroll: getOverscroll() }],
+            overscroll: getIsAnyForKey('overscroll'),
             /**
              * Overscroll Behavior X
              * @see https://tailwindcss.com/docs/overscroll-behavior
              */
-            'overscroll-x': [{ 'overscroll-x': getOverscroll() }],
+            'overscroll-x': getIsAnyForKey('overrscroll-x'),
             /**
              * Overscroll Behavior Y
              * @see https://tailwindcss.com/docs/overscroll-behavior
              */
-            'overscroll-y': [{ 'overscroll-y': getOverscroll() }],
+            'overscroll-y': getIsAnyForKey('overscroll-y'),
             /**
              * Position
              * @see https://tailwindcss.com/docs/position
@@ -243,37 +170,37 @@ export function getDefaultConfigMinimal() {
              * Top / Right / Bottom / Left
              * @see https://tailwindcss.com/docs/top-right-bottom-left
              */
-            inset: [{ inset: [inset] }],
+            inset: getIsAnyForKey('inset'),
             /**
              * Right / Left
              * @see https://tailwindcss.com/docs/top-right-bottom-left
              */
-            'inset-x': [{ 'inset-x': [inset] }],
+            'inset-x': getIsAnyForKey('inset-x'),
             /**
              * Top / Bottom
              * @see https://tailwindcss.com/docs/top-right-bottom-left
              */
-            'inset-y': [{ 'inset-y': [inset] }],
+            'inset-y': getIsAnyForKey('inset-y'),
             /**
              * Top
              * @see https://tailwindcss.com/docs/top-right-bottom-left
              */
-            top: [{ top: [inset] }],
+            top: getIsAnyForKey('top'),
             /**
              * Right
              * @see https://tailwindcss.com/docs/top-right-bottom-left
              */
-            right: [{ right: [inset] }],
+            right: getIsAnyForKey('right'),
             /**
              * Bottom
              * @see https://tailwindcss.com/docs/top-right-bottom-left
              */
-            bottom: [{ bottom: [inset] }],
+            bottom: getIsAnyForKey('bottom'),
             /**
              * Left
              * @see https://tailwindcss.com/docs/top-right-bottom-left
              */
-            left: [{ left: [inset] }],
+            left: getIsAnyForKey('left'),
             /**
              * Visibility
              * @see https://tailwindcss.com/docs/visibility
@@ -283,13 +210,13 @@ export function getDefaultConfigMinimal() {
              * Z-Index
              * @see https://tailwindcss.com/docs/z-index
              */
-            z: [{ z: [isLength] }],
+            z: getIsAnyForKey('z'),
             // Flexbox and Grid
             /**
              * Flex Basis
              * @see https://tailwindcss.com/docs/flex-basis
              */
-            basis: [{ basis: [spacing] }],
+            basis: getIsAnyForKey('basis'),
             /**
              * Flex Direction
              * @see https://tailwindcss.com/docs/flex-direction
@@ -309,208 +236,210 @@ export function getDefaultConfigMinimal() {
              * Flex Grow
              * @see https://tailwindcss.com/docs/flex-grow
              */
-            grow: [{ grow: getZeroAndEmpty() }],
+            grow: getIsAnyAndEmptyForKey('grow'),
             /**
              * Flex Shrink
              * @see https://tailwindcss.com/docs/flex-shrink
              */
-            shrink: [{ shrink: getZeroAndEmpty() }],
+            shrink: getIsAnyAndEmptyForKey('shrink'),
             /**
              * Order
              * @see https://tailwindcss.com/docs/order
              */
-            order: [{ order: ['first', 'last', 'none', isInteger] }],
+            order: getIsAnyForKey('order'),
             /**
              * Grid Template Columns
              * @see https://tailwindcss.com/docs/grid-template-columns
              */
-            'grid-cols': [{ 'grid-cols': [isAny] }],
+            'grid-cols': getIsAnyForKey('grid-cols'),
             /**
              * Grid Column Start / End
              * @see https://tailwindcss.com/docs/grid-column
              */
-            'col-start-end': [{ col: ['auto', { span: [isInteger] }] }],
+            'col-start-end': [{ col: ['auto', ...getIsAnyForKey('span')] }],
             /**
              * Grid Column Start
              * @see https://tailwindcss.com/docs/grid-column
              */
-            'col-start': [{ 'col-start': getIntegerWithAuto() }],
+            'col-start': getIsAnyForKey('col-start'),
             /**
              * Grid Column End
              * @see https://tailwindcss.com/docs/grid-column
              */
-            'col-end': [{ 'col-end': getIntegerWithAuto() }],
+            'col-end': getIsAnyForKey('col-end'),
             /**
              * Grid Template Rows
              * @see https://tailwindcss.com/docs/grid-template-rows
              */
-            'grid-rows': [{ 'grid-rows': [isAny] }],
+            'grid-rows': getIsAnyForKey('grid-rows'),
             /**
              * Grid Row Start / End
              * @see https://tailwindcss.com/docs/grid-row
              */
-            'row-start-end': [{ row: ['auto', { span: [isInteger] }] }],
+            'row-start-end': getIsAnyForKey('row'),
             /**
              * Grid Row Start
              * @see https://tailwindcss.com/docs/grid-row
              */
-            'row-start': [{ 'row-start': getIntegerWithAuto() }],
+            'row-start': getIsAnyForKey('row-start'),
             /**
              * Grid Row End
              * @see https://tailwindcss.com/docs/grid-row
              */
-            'row-end': [{ 'row-end': getIntegerWithAuto() }],
+            'row-end': getIsAnyForKey('row-end'),
             /**
              * Grid Auto Flow
              * @see https://tailwindcss.com/docs/grid-auto-flow
              */
-            'grid-flow': [{ 'grid-flow': ['row', 'col', 'row-dense', 'col-dense'] }],
+            'grid-flow': getIsAnyForKey('grid-flow'),
             /**
              * Grid Auto Columns
              * @see https://tailwindcss.com/docs/grid-auto-columns
              */
-            'auto-cols': [{ 'auto-cols': ['auto', 'min', 'max', 'fr', isArbitraryValue] }],
+            'auto-cols': getIsAnyForKey('auto-cols'),
             /**
              * Grid Auto Rows
              * @see https://tailwindcss.com/docs/grid-auto-rows
              */
-            'auto-rows': [{ 'auto-rows': ['auto', 'min', 'max', 'fr', isArbitraryValue] }],
+            'auto-rows': getIsAnyForKey('auto-rows'),
             /**
              * Gap
              * @see https://tailwindcss.com/docs/gap
              */
-            gap: [{ gap: [gap] }],
+            gap: getIsAnyForKey('gap'),
             /**
              * Gap X
              * @see https://tailwindcss.com/docs/gap
              */
-            'gap-x': [{ 'gap-x': [gap] }],
+            'gap-x': getIsAnyForKey('gap-x'),
             /**
              * Gap Y
              * @see https://tailwindcss.com/docs/gap
              */
-            'gap-y': [{ 'gap-y': [gap] }],
+            'gap-y': getIsAnyForKey('gap-y'),
             /**
              * Justify Content
              * @see https://tailwindcss.com/docs/justify-content
              */
-            'justify-content': [{ justify: getAlign() }],
+            'justify-content': getIsAnyForKey('justify'),
             /**
              * Justify Items
              * @see https://tailwindcss.com/docs/justify-items
              */
-            'justify-items': [{ 'justify-items': ['start', 'end', 'center', 'stretch'] }],
+            'justify-items': getIsAnyForKey('justify-items'),
             /**
              * Justify Self
              * @see https://tailwindcss.com/docs/justify-self
              */
-            'justify-self': [{ 'justify-self': ['auto', 'start', 'end', 'center', 'stretch'] }],
+            'justify-self': getIsAnyForKey('justify-self'),
             /**
              * Align Content
              * @see https://tailwindcss.com/docs/align-content
              */
-            'align-content': [{ content: getAlign() }],
+            'align-content': [
+                { content: ['start', 'end', 'center', 'between', 'around', 'evenly'] },
+            ],
             /**
              * Align Items
              * @see https://tailwindcss.com/docs/align-items
              */
-            'align-items': [{ items: ['start', 'end', 'center', 'baseline', 'stretch'] }],
+            'align-items': getIsAnyForKey('items'),
             /**
              * Align Self
              * @see https://tailwindcss.com/docs/align-self
              */
-            'align-self': [{ self: ['auto', 'start', 'end', 'center', 'stretch', 'baseline'] }],
+            'align-self': getIsAnyForKey('self'),
             /**
              * Place Content
              * @see https://tailwindcss.com/docs/place-content
              */
-            'place-content': [{ 'place-content': [...getAlign(), 'stretch'] }],
+            'place-content': getIsAnyForKey('place-content'),
             /**
              * Place Items
              * @see https://tailwindcss.com/docs/place-items
              */
-            'place-items': [{ 'place-items': ['start', 'end', 'center', 'stretch'] }],
+            'place-items': getIsAnyForKey('place-items'),
             /**
              * Place Self
              * @see https://tailwindcss.com/docs/place-self
              */
-            'place-self': [{ 'place-self': ['auto', 'start', 'end', 'center', 'stretch'] }],
+            'place-self': getIsAnyForKey('place-self'),
             // Spacing
             /**
              * Padding
              * @see https://tailwindcss.com/docs/padding
              */
-            p: [{ p: [padding] }],
+            p: getIsAnyForKey('p'),
             /**
              * Padding X
              * @see https://tailwindcss.com/docs/padding
              */
-            px: [{ px: [padding] }],
+            px: getIsAnyForKey('px'),
             /**
              * Padding Y
              * @see https://tailwindcss.com/docs/padding
              */
-            py: [{ py: [padding] }],
+            py: getIsAnyForKey('py'),
             /**
              * Padding Top
              * @see https://tailwindcss.com/docs/padding
              */
-            pt: [{ pt: [padding] }],
+            pt: getIsAnyForKey('pt'),
             /**
              * Padding Right
              * @see https://tailwindcss.com/docs/padding
              */
-            pr: [{ pr: [padding] }],
+            pr: getIsAnyForKey('pr'),
             /**
              * Padding Bottom
              * @see https://tailwindcss.com/docs/padding
              */
-            pb: [{ pb: [padding] }],
+            pb: getIsAnyForKey('pb'),
             /**
              * Padding Left
              * @see https://tailwindcss.com/docs/padding
              */
-            pl: [{ pl: [padding] }],
+            pl: getIsAnyForKey('pl'),
             /**
              * Margin
              * @see https://tailwindcss.com/docs/margin
              */
-            m: [{ m: [margin] }],
+            m: getIsAnyForKey('m'),
             /**
              * Margin X
              * @see https://tailwindcss.com/docs/margin
              */
-            mx: [{ mx: [margin] }],
+            mx: getIsAnyForKey('mx'),
             /**
              * Margin Y
              * @see https://tailwindcss.com/docs/margin
              */
-            my: [{ my: [margin] }],
+            my: getIsAnyForKey('my'),
             /**
              * Margin Top
              * @see https://tailwindcss.com/docs/margin
              */
-            mt: [{ mt: [margin] }],
+            mt: getIsAnyForKey('mt'),
             /**
              * Margin Right
              * @see https://tailwindcss.com/docs/margin
              */
-            mr: [{ mr: [margin] }],
+            mr: getIsAnyForKey('mr'),
             /**
              * Margin Bottom
              * @see https://tailwindcss.com/docs/margin
              */
-            mb: [{ mb: [margin] }],
+            mb: getIsAnyForKey('mb'),
             /**
              * Margin Left
              * @see https://tailwindcss.com/docs/margin
              */
-            ml: [{ ml: [margin] }],
+            ml: getIsAnyForKey('ml'),
             /**
              * Space Between X
              * @see https://tailwindcss.com/docs/space
              */
-            'space-x': [{ 'space-x': [space] }],
+            'space-x': getIsAnyForKey('space-x'),
             /**
              * Space Between X Reverse
              * @see https://tailwindcss.com/docs/space
@@ -520,7 +449,7 @@ export function getDefaultConfigMinimal() {
              * Space Between Y
              * @see https://tailwindcss.com/docs/space
              */
-            'space-y': [{ 'space-y': [space] }],
+            'space-y': getIsAnyForKey('space-y'),
             /**
              * Space Between Y Reverse
              * @see https://tailwindcss.com/docs/space
@@ -531,47 +460,32 @@ export function getDefaultConfigMinimal() {
              * Width
              * @see https://tailwindcss.com/docs/width
              */
-            w: [{ w: ['auto', 'min', 'max', spacing] }],
+            w: getIsAnyForKey('w'),
             /**
              * Min-Width
              * @see https://tailwindcss.com/docs/min-width
              */
-            'min-w': [{ 'min-w': ['min', 'max', 'fit', isLength] }],
+            'min-w': getIsAnyForKey('min-w'),
             /**
              * Max-Width
              * @see https://tailwindcss.com/docs/max-width
              */
-            'max-w': [
-                {
-                    'max-w': [
-                        '0',
-                        'none',
-                        'full',
-                        'min',
-                        'max',
-                        'fit',
-                        'prose',
-                        { screen: [isTshirtSize] },
-                        isTshirtSize,
-                        isArbitraryLength,
-                    ],
-                },
-            ],
+            'max-w': getIsAnyForKey('max-w'),
             /**
              * Height
              * @see https://tailwindcss.com/docs/height
              */
-            h: [{ h: getSpacingWithAuto() }],
+            h: getIsAnyForKey('h'),
             /**
              * Min-Height
              * @see https://tailwindcss.com/docs/min-height
              */
-            'min-h': [{ 'min-h': ['min', 'max', 'fit', isLength] }],
+            'min-h': getIsAnyForKey('min-h'),
             /**
              * Max-Height
              * @see https://tailwindcss.com/docs/max-height
              */
-            'max-h': [{ 'max-h': [spacing, 'min', 'max', 'fit'] }],
+            'max-h': getIsAnyForKey('max-h'),
             // Typography
             /**
              * Font Size
@@ -612,7 +526,7 @@ export function getDefaultConfigMinimal() {
              * Font Family
              * @see https://tailwindcss.com/docs/font-family
              */
-            'font-family': [{ font: [isAny] }],
+            'font-family': getIsAnyForKey('font'),
             /**
              * Font Variant Numeric
              * @see https://tailwindcss.com/docs/font-variant-numeric
@@ -647,26 +561,12 @@ export function getDefaultConfigMinimal() {
              * Letter Spacing
              * @see https://tailwindcss.com/docs/letter-spacing
              */
-            tracking: [
-                {
-                    tracking: [
-                        'tighter',
-                        'tight',
-                        'normal',
-                        'wide',
-                        'wider',
-                        'widest',
-                        isArbitraryLength,
-                    ],
-                },
-            ],
+            tracking: getIsAnyForKey('tracking'),
             /**
              * Line Height
              * @see https://tailwindcss.com/docs/line-height
              */
-            leading: [
-                { leading: ['none', 'tight', 'snug', 'normal', 'relaxed', 'loose', isLength] },
-            ],
+            leading: getIsAnyForKey('leading'),
             /**
              * List Style Type
              * @see https://tailwindcss.com/docs/list-style-type
@@ -681,12 +581,12 @@ export function getDefaultConfigMinimal() {
              * Placeholder Color
              * @see https://tailwindcss.com/docs/placeholder-color
              */
-            'placeholder-color': [{ placeholder: [colors] }],
+            'placeholder-color': getIsAnyForKey('placeholder'),
             /**
              * Placeholder Opacity
              * @see https://tailwindcss.com/docs/placeholder-opacity
              */
-            'placeholder-opacity': [{ 'placeholder-opacity': [opacity] }],
+            'placeholder-opacity': getIsAnyForKey('placeholder-opacity'),
             /**
              * Text Alignment
              * @see https://tailwindcss.com/docs/text-align
@@ -696,12 +596,12 @@ export function getDefaultConfigMinimal() {
              * Text Color
              * @see https://tailwindcss.com/docs/text-color
              */
-            'text-color': [{ text: [colors] }],
+            'text-color': getIsAnyForKey('text'),
             /**
              * Text Opacity
              * @see https://tailwindcss.com/docs/text-opacity
              */
-            'text-opacity': [{ 'text-opacity': [opacity] }],
+            'text-opacity': getIsAnyForKey('text-opacity'),
             /**
              * Text Decoration
              * @see https://tailwindcss.com/docs/text-decoration
@@ -721,7 +621,7 @@ export function getDefaultConfigMinimal() {
              * Text Decoration Color
              * @see https://tailwindcss.com/docs/text-decoration-color
              */
-            'text-decoration-color': [{ decoration: [colors] }],
+            'text-decoration-color': getIsAnyForKey('decoration'),
             /**
              * Text Transform
              * @see https://tailwindcss.com/docs/text-transform
@@ -736,31 +636,17 @@ export function getDefaultConfigMinimal() {
              * Text Indent
              * @see https://tailwindcss.com/docs/text-indent
              */
-            indent: [{ indent: [spacing] }],
+            indent: getIsAnyForKey('indent'),
             /**
              * Vertical Alignment
              * @see https://tailwindcss.com/docs/vertical-align
              */
-            'vertical-align': [
-                {
-                    align: [
-                        'baseline',
-                        'top',
-                        'middle',
-                        'bottom',
-                        'text-top',
-                        'text-bottom',
-                        'sub',
-                        'super',
-                        isArbitraryLength,
-                    ],
-                },
-            ],
+            'vertical-align': getIsAnyForKey('align'),
             /**
              * Whitespace
              * @see https://tailwindcss.com/docs/whitespace
              */
-            whitespace: [{ whitespace: ['normal', 'nowrap', 'pre', 'pre-line', 'pre-wrap'] }],
+            whitespace: getIsAnyForKey('whitespace'),
             /**
              * Word Break
              * @see https://tailwindcss.com/docs/word-break
@@ -776,17 +662,17 @@ export function getDefaultConfigMinimal() {
              * Background Clip
              * @see https://tailwindcss.com/docs/background-clip
              */
-            'bg-clip': [{ 'bg-clip': ['border', 'padding', 'content', 'text'] }],
+            'bg-clip': getIsAnyForKey('bg-clip'),
             /**
              * Background Opacity
              * @see https://tailwindcss.com/docs/background-opacity
              */
-            'bg-opacity': [{ 'bg-opacity': [opacity] }],
+            'bg-opacity': getIsAnyForKey('bg-opacity'),
             /**
              * Background Origin
              * @see https://tailwindcss.com/docs/background-origin
              */
-            'bg-origin': [{ 'bg-origin': ['border', 'padding', 'content'] }],
+            'bg-origin': getIsAnyForKey('bg-origin'),
             /**
              * Background Position
              * @see https://tailwindcss.com/docs/background-position
@@ -796,7 +682,7 @@ export function getDefaultConfigMinimal() {
              * Background Repeat
              * @see https://tailwindcss.com/docs/background-repeat
              */
-            'bg-repeeat': [{ bg: ['no-repeat', { repeat: ['', 'x', 'y', 'round', 'space'] }] }],
+            'bg-repeeat': [{ bg: ['no-repeat', ...getIsAnyForKey('repeat')] }],
             /**
              * Background Size
              * @see https://tailwindcss.com/docs/background-size
@@ -806,86 +692,78 @@ export function getDefaultConfigMinimal() {
              * Background Image
              * @see https://tailwindcss.com/docs/background-image
              */
-            'bg-image': [
-                {
-                    bg: [
-                        'none',
-                        { 'gradient-to': ['t', 'tr', 'r', 'br', 'b', 'bl', 'l', 'tl'] },
-                        isArbitraryUrl,
-                    ],
-                },
-            ],
+            'bg-image': [{ bg: ['none', getIsAnyForKey('gradient-to'), isArbitraryUrl] }],
             /**
              * Background Blend Mode
              * @see https://tailwindcss.com/docs/background-blend-mode
              */
-            'bg-blend': [{ bg: getBlendModes() }],
+            'bg-blend': getIsAnyForKey('bg-blend'),
             /**
              * Background Color
              * @see https://tailwindcss.com/docs/background-color
              */
-            'bg-color': [{ bg: [colors] }],
+            'bg-color': getIsAnyForKey('bg'),
             /**
              * Gradient Color Stops From
              * @see https://tailwindcss.com/docs/gradient-color-stops
              */
-            'gradient-from': [{ from: [gradientColorStops] }],
+            'gradient-from': getIsAnyForKey('from'),
             /**
              * Gradient Color Stops Via
              * @see https://tailwindcss.com/docs/gradient-color-stops
              */
-            'gradient-via': [{ via: [gradientColorStops] }],
+            'gradient-via': getIsAnyForKey('via'),
             /**
              * Gradient Color Stops To
              * @see https://tailwindcss.com/docs/gradient-color-stops
              */
-            'gradient-to': [{ to: [gradientColorStops] }],
+            'gradient-to': getIsAnyForKey('to'),
             // Borders
             /**
              * Border Radius
              * @see https://tailwindcss.com/docs/border-radius
              */
-            rounded: [{ rounded: [borderRadius] }],
+            rounded: getIsAnyAndEmptyForKey('rounded'),
             /**
              * Border Radius Top
              * @see https://tailwindcss.com/docs/border-radius
              */
-            'rounded-t': [{ 'rounded-t': [borderRadius] }],
+            'rounded-t': getIsAnyAndEmptyForKey('rounded-t'),
             /**
              * Border Radius Right
              * @see https://tailwindcss.com/docs/border-radius
              */
-            'rounded-r': [{ 'rounded-r': [borderRadius] }],
+            'rounded-r': getIsAnyAndEmptyForKey('rounded-r'),
             /**
              * Border Radius Bottom
              * @see https://tailwindcss.com/docs/border-radius
              */
-            'rounded-b': [{ 'rounded-b': [borderRadius] }],
+            'rounded-b': getIsAnyAndEmptyForKey('rounded-b'),
             /**
              * Border Radius Left
              * @see https://tailwindcss.com/docs/border-radius
              */
-            'rounded-l': [{ 'rounded-l': [borderRadius] }],
+            'rounded-l': getIsAnyAndEmptyForKey('rounded-l'),
             /**
              * Border Radius Top Left
              * @see https://tailwindcss.com/docs/border-radius
              */
-            'rounded-tl': [{ 'rounded-tl': [borderRadius] }],
+            'rounded-tl': getIsAnyAndEmptyForKey('rounded-tl'),
             /**
              * Border Radius Top Right
              * @see https://tailwindcss.com/docs/border-radius
              */
-            'rounded-tr': [{ 'rounded-tr': [borderRadius] }],
+            'rounded-tr': getIsAnyAndEmptyForKey('rounded-tr'),
             /**
              * Border Radius Bottom Right
              * @see https://tailwindcss.com/docs/border-radius
              */
-            'rounded-br': [{ 'rounded-br': [borderRadius] }],
+            'rounded-br': getIsAnyAndEmptyForKey('rounded-br'),
             /**
              * Border Radius Bottom Left
              * @see https://tailwindcss.com/docs/border-radius
              */
-            'rounded-bl': [{ 'rounded-bl': [borderRadius] }],
+            'rounded-bl': getIsAnyAndEmptyForKey('rounded-bl'),
             /**
              * Border Width
              * @see https://tailwindcss.com/docs/border-width
@@ -925,7 +803,7 @@ export function getDefaultConfigMinimal() {
              * Border Opacity
              * @see https://tailwindcss.com/docs/border-opacity
              */
-            'border-opacity': [{ 'border-opacity': [opacity] }],
+            'border-opacity': getIsAnyForKey('border-opacity'),
             /**
              * Border Style
              * @see https://tailwindcss.com/docs/border-style
@@ -935,7 +813,7 @@ export function getDefaultConfigMinimal() {
              * Divide Width X
              * @see https://tailwindcss.com/docs/divide-width
              */
-            'divide-x': [{ 'divide-x': [borderWidth] }],
+            'divide-x': getIsAnyForKey('divide-x'),
             /**
              * Divide Width X Reverse
              * @see https://tailwindcss.com/docs/divide-width
@@ -945,7 +823,7 @@ export function getDefaultConfigMinimal() {
              * Divide Width Y
              * @see https://tailwindcss.com/docs/divide-width
              */
-            'divide-y': [{ 'divide-y': [borderWidth] }],
+            'divide-y': getIsAnyForKey('divide-y'),
             /**
              * Divide Width Y Reverse
              * @see https://tailwindcss.com/docs/divide-width
@@ -955,7 +833,7 @@ export function getDefaultConfigMinimal() {
              * Divide Opacity
              * @see https://tailwindcss.com/docs/divide-opacity
              */
-            'divide-opacity': [{ 'divide-opacity': [opacity] }],
+            'divide-opacity': getIsAnyForKey('divide-opacity'),
             /**
              * Divide Style
              * @see https://tailwindcss.com/docs/divide-style
@@ -965,47 +843,47 @@ export function getDefaultConfigMinimal() {
              * Border Color
              * @see https://tailwindcss.com/docs/border-color
              */
-            'border-color': [{ border: [borderColor] }],
+            'border-color': getIsAnyForKey('border'),
             /**
              * Border Color X
              * @see https://tailwindcss.com/docs/border-color
              */
-            'border-color-x': [{ 'border-x': [borderColor] }],
+            'border-color-x': getIsAnyForKey('border-x'),
             /**
              * Border Color Y
              * @see https://tailwindcss.com/docs/border-color
              */
-            'border-color-y': [{ 'border-y': [borderColor] }],
+            'border-color-y': getIsAnyForKey('border-y'),
             /**
              * Border Color Top
              * @see https://tailwindcss.com/docs/border-color
              */
-            'border-color-t': [{ 'border-t': [borderColor] }],
+            'border-color-t': getIsAnyForKey('border-t'),
             /**
              * Border Color Right
              * @see https://tailwindcss.com/docs/border-color
              */
-            'border-color-r': [{ 'border-r': [borderColor] }],
+            'border-color-r': getIsAnyForKey('border-r'),
             /**
              * Border Color Bottom
              * @see https://tailwindcss.com/docs/border-color
              */
-            'border-color-b': [{ 'border-b': [borderColor] }],
+            'border-color-b': getIsAnyForKey('border-b'),
             /**
              * Border Color Left
              * @see https://tailwindcss.com/docs/border-color
              */
-            'border-color-l': [{ 'border-l': [borderColor] }],
+            'border-color-l': getIsAnyForKey('border-l'),
             /**
              * Divide Color
              * @see https://tailwindcss.com/docs/divide-color
              */
-            'divide-color': [{ divide: [borderColor] }],
+            'divide-color': getIsAnyForKey('divide'),
             /**
              * Ring Width
              * @see https://tailwindcss.com/docs/ring-width
              */
-            'ring-w': [{ ring: getLengthWithEmpty() }],
+            'ring-w': [{ ring: ['', isLength] }],
             /**
              * Ring Width Inset
              * @see https://tailwindcss.com/docs/ring-width
@@ -1015,12 +893,12 @@ export function getDefaultConfigMinimal() {
              * Ring Color
              * @see https://tailwindcss.com/docs/ring-color
              */
-            'ring-color': [{ ring: [colors] }],
+            'ring-color': getIsAnyForKey('ring'),
             /**
              * Ring Opacity
              * @see https://tailwindcss.com/docs/ring-opacity
              */
-            'ring-opacity': [{ 'ring-opacity': [opacity] }],
+            'ring-opacity': getIsAnyForKey('ring-opacity'),
             /**
              * Ring Offset Width
              * @see https://tailwindcss.com/docs/ring-offset-width
@@ -1030,7 +908,7 @@ export function getDefaultConfigMinimal() {
              * Ring Offset Color
              * @see https://tailwindcss.com/docs/ring-offset-color
              */
-            'ring-offset-color': [{ 'ring-offset': [colors] }],
+            'ring-offset-color': getIsAnyForKey('ring-offset'),
             // Effects
             /**
              * Box Shadow
@@ -1041,118 +919,118 @@ export function getDefaultConfigMinimal() {
              * Box Shadow Color
              * @see https://tailwindcss.com/docs/box-shadow-color
              */
-            'shadow-color': [{ shadow: [isAny] }],
+            'shadow-color': getIsAnyForKey('shadow'),
             /**
              * Opacity
              * @see https://tailwindcss.com/docs/opacity
              */
-            opacity: [{ opacity: [opacity] }],
+            opacity: getIsAnyForKey('opacity'),
             /**
              * Mix Beldn Mode
              * @see https://tailwindcss.com/docs/mix-blend-mode
              */
-            'mix-blend': [{ 'mix-blend': getBlendModes() }],
+            'mix-blend': getIsAnyForKey('mix-blend'),
             // Filters
             /**
              * Filter
              * @see https://tailwindcss.com/docs/filter
              */
-            filter: [{ filter: ['', 'none'] }],
+            filter: getIsAnyForKey('filter'),
             /**
              * Blur
              * @see https://tailwindcss.com/docs/blur
              */
-            blur: [{ blur: [blur] }],
+            blur: getIsAnyAndEmptyForKey('blur'),
             /**
              * Brightness
              * @see https://tailwindcss.com/docs/brightness
              */
-            brightness: [{ brightness: [brightness] }],
+            brightness: getIsAnyForKey('brightness'),
             /**
              * Contrast
              * @see https://tailwindcss.com/docs/contrast
              */
-            contrast: [{ contrast: [contrast] }],
+            contrast: getIsAnyForKey('isAny'),
             /**
              * Drop Shadow
              * @see https://tailwindcss.com/docs/drop-shadow
              */
-            'drop-shadow': [{ 'drop-shadow': ['', 'none', isTshirtSize] }],
+            'drop-shadow': getIsAnyForKey('drop'),
             /**
              * Grayscale
              * @see https://tailwindcss.com/docs/grayscale
              */
-            grayscale: [{ grayscale: [grayscale] }],
+            grayscale: getIsAnyForKey('grayscale'),
             /**
              * Hue Rotate
              * @see https://tailwindcss.com/docs/hue-rotate
              */
-            'hue-rotate': [{ 'hue-rotate': [hueRotate] }],
+            'hue-rotate': getIsAnyForKey('hue'),
             /**
              * Invert
              * @see https://tailwindcss.com/docs/invert
              */
-            invert: [{ invert: [invert] }],
+            invert: getIsAnyForKey('invert'),
             /**
              * Saturate
              * @see https://tailwindcss.com/docs/saturate
              */
-            saturate: [{ saturate: [saturate] }],
+            saturate: getIsAnyForKey('saturate'),
             /**
              * Sepia
              * @see https://tailwindcss.com/docs/sepia
              */
-            sepia: [{ sepia: [sepia] }],
+            sepia: getIsAnyAndEmptyForKey('sepia'),
             /**
              * Backdrop Filter
              * @see https://tailwindcss.com/docs/backdrop-filter
              */
-            'backdrop-filter': [{ 'backdrop-filter': ['', 'none'] }],
+            'backdrop-filter': getIsAnyForKey('backdrop-filter'),
             /**
              * Backdrop Blur
              * @see https://tailwindcss.com/docs/backdrop-blur
              */
-            'backdrop-blur': [{ 'backdrop-blur': [blur] }],
+            'backdrop-blur': getIsAnyAndEmptyForKey('backdrop-blur'),
             /**
              * Backdrop Brightness
              * @see https://tailwindcss.com/docs/backdrop-brightness
              */
-            'backdrop-brightness': [{ 'backdrop-brightness': [brightness] }],
+            'backdrop-brightness': getIsAnyForKey('backdrop-brightness'),
             /**
              * Backdrop Contrast
              * @see https://tailwindcss.com/docs/backdrop-contrast
              */
-            'backdrop-contrast': [{ 'backdrop-contrast': [contrast] }],
+            'backdrop-contrast': getIsAnyForKey('backdrop-contrast'),
             /**
              * Backdrop Grayscale
              * @see https://tailwindcss.com/docs/backdrop-grayscale
              */
-            'backdrop-grayscale': [{ 'backdrop-grayscale': [grayscale] }],
+            'backdrop-grayscale': getIsAnyForKey('backdrop-grayscale'),
             /**
              * Backdrop Hue Rotate
              * @see https://tailwindcss.com/docs/backdrop-hue-rotate
              */
-            'backdrop-hue-rotate': [{ 'backdrop-hue-rotate': [hueRotate] }],
+            'backdrop-hue-rotate': getIsAnyForKey('backdrop-hue'),
             /**
              * Backdrop Invert
              * @see https://tailwindcss.com/docs/backdrop-invert
              */
-            'backdrop-invert': [{ 'backdrop-invert': [invert] }],
+            'backdrop-invert': getIsAnyForKey('backdrop-invert'),
             /**
              * Backdrop Opacity
              * @see https://tailwindcss.com/docs/backdrop-opacity
              */
-            'backdrop-opacity': [{ 'backdrop-opacity': [opacity] }],
+            'backdrop-opacity': getIsAnyForKey('backdrop-opacity'),
             /**
              * Backdrop Saturate
              * @see https://tailwindcss.com/docs/backdrop-saturate
              */
-            'backdrop-saturate': [{ 'backdrop-saturate': [saturate] }],
+            'backdrop-saturate': getIsAnyForKey('backdrop-saturate'),
             /**
              * Backdrop Sepia
              * @see https://tailwindcss.com/docs/backdrop-sepia
              */
-            'backdrop-sepia': [{ 'backdrop-sepia': [sepia] }],
+            'backdrop-sepia': getIsAnyForKey('backdrop-sepia'),
             // Tables
             /**
              * Border Collapse
@@ -1169,111 +1047,84 @@ export function getDefaultConfigMinimal() {
              * Tranisition Property
              * @see https://tailwindcss.com/docs/transition-property
              */
-            transition: [
-                {
-                    transition: [
-                        'none',
-                        'all',
-                        '',
-                        'colors',
-                        'opacity',
-                        'shadow',
-                        'transform',
-                        isArbitraryValue,
-                    ],
-                },
-            ],
+            transition: getIsAnyAndEmptyForKey('transition'),
             /**
              * Transition Duration
              * @see https://tailwindcss.com/docs/transition-duration
              */
-            duration: [{ duration: [isInteger] }],
+            duration: getIsAnyForKey('duration'),
             /**
              * Transition Timing Function
              * @see https://tailwindcss.com/docs/transition-timing-function
              */
-            ease: [{ ease: ['linear', 'in', 'out', 'in-out', isArbitraryValue] }],
+            ease: getIsAnyForKey('ease'),
             /**
              * Transition Delay
              * @see https://tailwindcss.com/docs/transition-delay
              */
-            delay: [{ delay: [isInteger] }],
+            delay: getIsAnyForKey('delay'),
             /**
              * Animation
              * @see https://tailwindcss.com/docs/animation
              */
-            animate: [{ animate: ['none', 'spin', 'ping', 'pulse', 'bounce', isArbitraryValue] }],
+            animate: getIsAnyForKey('animate'),
             // Transforms
             /**
              * Transform
              * @see https://tailwindcss.com/docs/transform
              */
-            transform: [{ transform: ['', 'gpu', 'none'] }],
+            transform: getIsAnyAndEmptyForKey('transform'),
             /**
              * Transform Origin
              * @see https://tailwindcss.com/docs/transform-origin
              */
-            'transform-origin': [
-                {
-                    origin: [
-                        'center',
-                        'top',
-                        'top-right',
-                        'right',
-                        'bottom-right',
-                        'bottom',
-                        'bottom-left',
-                        'left',
-                        'top-left',
-                    ],
-                },
-            ],
+            'transform-origin': getIsAnyForKey('origin'),
             /**
              * Scale
              * @see https://tailwindcss.com/docs/scale
              */
-            scale: [{ scale: [scale] }],
+            scale: getIsAnyForKey('scale'),
             /**
              * Scale X
              * @see https://tailwindcss.com/docs/scale
              */
-            'scale-x': [{ 'scale-x': [scale] }],
+            'scale-x': getIsAnyForKey('scale-x'),
             /**
              * Scale Y
              * @see https://tailwindcss.com/docs/scale
              */
-            'scale-y': [{ 'scale-y': [scale] }],
+            'scale-y': getIsAnyForKey('scale-y'),
             /**
              * Rotate
              * @see https://tailwindcss.com/docs/rotate
              */
-            rotate: [{ rotate: [isInteger] }],
+            rotate: getIsAnyForKey('rotate'),
             /**
              * Translate X
              * @see https://tailwindcss.com/docs/translate
              */
-            'translate-x': [{ 'translate-x': [translate] }],
+            'translate-x': getIsAnyForKey('translate-x'),
             /**
              * Translate Y
              * @see https://tailwindcss.com/docs/translate
              */
-            'translate-y': [{ 'translate-y': [translate] }],
+            'translate-y': getIsAnyForKey('translate-y'),
             /**
              * Skew X
              * @see https://tailwindcss.com/docs/skew
              */
-            'skew-x': [{ 'skew-x': [skew] }],
+            'skew-x': getIsAnyForKey('skew-x'),
             /**
              * Skew Y
              * @see https://tailwindcss.com/docs/skew
              */
-            'skew-y': [{ 'skew-y': [skew] }],
+            'skew-y': getIsAnyForKey('skew-y'),
             // Interactivity
             /**
              * Accent Color
              * @see https://tailwindcss.com/docs/accent-color
              */
-            accent: [{ accent: ['auto', colors] }],
+            accent: getIsAnyForKey('accent'),
             /**
              * Appearance
              * @see https://tailwindcss.com/docs/appearance
@@ -1283,49 +1134,7 @@ export function getDefaultConfigMinimal() {
              * Cursor
              * @see https://tailwindcss.com/docs/cursor
              */
-            cursor: [
-                {
-                    cursor: [
-                        'auto',
-                        'default',
-                        'pointer',
-                        'wait',
-                        'text',
-                        'move',
-                        'help',
-                        'not-allowed',
-                        'none',
-                        'context-menu',
-                        'progress',
-                        'cell',
-                        'crosshair',
-                        'vertical-text',
-                        'alias',
-                        'copy',
-                        'no-drop',
-                        'grab',
-                        'grabbing',
-                        'all-scroll',
-                        'col-resize',
-                        'row-resize',
-                        'n-resize',
-                        'e-resize',
-                        's-resize',
-                        'w-resize',
-                        'ne-resize',
-                        'nw-resize',
-                        'se-resize',
-                        'sw-resize',
-                        'ew-resize',
-                        'ns-resize',
-                        'nesw-resize',
-                        'nwse-resize',
-                        'zoom-in',
-                        'zoom-out',
-                        isArbitraryValue,
-                    ],
-                },
-            ],
+            cursor: getIsAnyForKey('cursor'),
             /**
              * Outline Width
              * @see https://tailwindcss.com/docs/outline-width
@@ -1340,22 +1149,22 @@ export function getDefaultConfigMinimal() {
              * Outline Offset
              * @see https://tailwindcss.com/docs/outline-offset
              */
-            'outline-offset': [{ 'outline-offset': [isLength] }],
+            'outline-offset': getIsAnyForKey('outline-offset'),
             /**
              * Outline Color
              * @see https://tailwindcss.com/docs/outline-color
              */
-            'outline-color': [{ outline: [colors] }],
+            'outline-color': getIsAnyForKey('outline'),
             /**
              * Pointer Events
              * @see https://tailwindcss.com/docs/pointer-events
              */
-            'pointer-events': [{ 'pointer-events': ['none', 'auto'] }],
+            'pointer-events': getIsAnyForKey('pointer'),
             /**
              * Resize
              * @see https://tailwindcss.com/docs/resize
              */
-            resize: [{ resize: ['none', 'y', 'x', ''] }],
+            resize: getIsAnyForKey('resize'),
             /**
              * Scroll Behavior
              * @see https://tailwindcss.com/docs/scroll-behavior
@@ -1365,72 +1174,72 @@ export function getDefaultConfigMinimal() {
              * Scroll Margin
              * @see https://tailwindcss.com/docs/scroll-margin
              */
-            'scroll-m': [{ 'scroll-m': [spacing] }],
+            'scroll-m': getIsAnyForKey('scroll-m'),
             /**
              * Scroll Margin X
              * @see https://tailwindcss.com/docs/scroll-margin
              */
-            'scroll-mx': [{ 'scroll-mx': [spacing] }],
+            'scroll-mx': getIsAnyForKey('scroll-mx'),
             /**
              * Scroll Margin Y
              * @see https://tailwindcss.com/docs/scroll-margin
              */
-            'scroll-my': [{ 'scroll-my': [spacing] }],
+            'scroll-my': getIsAnyForKey('scroll-my'),
             /**
              * Scroll Margin Top
              * @see https://tailwindcss.com/docs/scroll-margin
              */
-            'scroll-mt': [{ 'scroll-mt': [spacing] }],
+            'scroll-mt': getIsAnyForKey('scroll-mt'),
             /**
              * Scroll Margin Right
              * @see https://tailwindcss.com/docs/scroll-margin
              */
-            'scroll-mr': [{ 'scroll-mr': [spacing] }],
+            'scroll-mr': getIsAnyForKey('scroll-mr'),
             /**
              * Scroll Margin Bottom
              * @see https://tailwindcss.com/docs/scroll-margin
              */
-            'scroll-mb': [{ 'scroll-mb': [spacing] }],
+            'scroll-mb': getIsAnyForKey('scroll-mb'),
             /**
              * Scroll Margin Left
              * @see https://tailwindcss.com/docs/scroll-margin
              */
-            'scroll-ml': [{ 'scroll-ml': [spacing] }],
+            'scroll-ml': getIsAnyForKey('scroll-ml'),
             /**
              * Scroll Padding
              * @see https://tailwindcss.com/docs/scroll-padding
              */
-            'scroll-p': [{ 'scroll-p': [spacing] }],
+            'scroll-p': getIsAnyForKey('scroll-p'),
             /**
              * Scroll Padding X
              * @see https://tailwindcss.com/docs/scroll-padding
              */
-            'scroll-px': [{ 'scroll-px': [spacing] }],
+            'scroll-px': getIsAnyForKey('scroll-px'),
             /**
              * Scroll Padding Y
              * @see https://tailwindcss.com/docs/scroll-padding
              */
-            'scroll-py': [{ 'scroll-py': [spacing] }],
+            'scroll-py': getIsAnyForKey('scroll-py'),
             /**
              * Scroll Padding Top
              * @see https://tailwindcss.com/docs/scroll-padding
              */
-            'scroll-pt': [{ 'scroll-pt': [spacing] }],
+            'scroll-pt': getIsAnyForKey('scroll-pt'),
             /**
              * Scroll Padding Right
              * @see https://tailwindcss.com/docs/scroll-padding
              */
-            'scroll-pr': [{ 'scroll-pr': [spacing] }],
+            'scroll-pr': getIsAnyForKey('scroll-pr'),
             /**
              * Scroll Padding Bottom
              * @see https://tailwindcss.com/docs/scroll-padding
              */
-            'scroll-pb': [{ 'scroll-pb': [spacing] }],
+            'scroll-pb': getIsAnyForKey('scroll-pb'),
             /**
              * Scroll Padding Left
              * @see https://tailwindcss.com/docs/scroll-padding
              */
-            'scroll-pl': [{ 'scroll-pl': [spacing] }],
+            'scroll-pl': getIsAnyForKey('scroll-pl'),
             /**
              * Scroll Snap Align
              * @see https://tailwindcss.com/docs/scroll-snap-align
@@ -1455,45 +1264,33 @@ export function getDefaultConfigMinimal() {
              * Touch Action
              * @see https://tailwindcss.com/docs/touch-action
              */
-            touch: [
-                {
-                    touch: [
-                        'auto',
-                        'none',
-                        'pinch-zoom',
-                        'manipulation',
-                        { pan: ['x', 'left', 'right', 'y', 'up', 'down'] },
-                    ],
-                },
-            ],
+            touch: getIsAnyForKey('touch'),
             /**
              * User Select
              * @see https://tailwindcss.com/docs/user-select
              */
-            select: [{ select: ['none', 'text', 'all', 'auto'] }],
+            select: getIsAnyForKey('select'),
             /**
              * Will Change
              * @see https://tailwindcss.com/docs/will-change
              */
-            'will-change': [
-                { 'will-change': ['auto', 'scroll', 'contents', 'transform', isArbitraryValue] },
-            ],
+            'will-change': getIsAnyForKey('will'),
             // SVG
             /**
              * Fill
              * @see https://tailwindcss.com/docs/fill
              */
-            fill: [{ fill: [colors] }],
-            /**
-             * Stroke
-             * @see https://tailwindcss.com/docs/stroke
-             */
-            stroke: [{ stroke: [colors] }],
+            fill: getIsAnyForKey('fill'),
             /**
              * Stroke Width
              * @see https://tailwindcss.com/docs/stroke-width
              */
             'stroke-w': [{ stroke: [isLength] }],
+            /**
+             * Stroke
+             * @see https://tailwindcss.com/docs/stroke
+             */
+            stroke: getIsAnyForKey('stroke'),
             // Accessibility
             /**
              * Screen Readers
@@ -1510,7 +1307,7 @@ export function getDefaultConfigMinimal() {
              * Caret Color
              * @see https://tailwindcss.com/docs/just-in-time-mode#caret-color-utilities
              */
-            'caret-color': [{ caret: [colors] }],
+            'caret-color': getIsAnyForKey('caret'),
         },
         conflictingClassGroups: {
             overflow: ['overflow-x', 'overflow-y'],
@@ -1588,4 +1385,12 @@ export function getDefaultConfigMinimal() {
             'scroll-py': ['scroll-pt', 'scroll-pb'],
         },
     } as const
+}
+
+function getIsAnyForKey(key: string) {
+    return [{ [key]: [isAny] }]
+}
+
+function getIsAnyAndEmptyForKey(key: string) {
+    return [{ [key]: ['', isAny] }]
 }
