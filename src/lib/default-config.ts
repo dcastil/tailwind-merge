@@ -199,7 +199,7 @@ export function getDefaultConfig() {
              * Object Position
              * @see https://tailwindcss.com/docs/object-position
              */
-            'object-position': [{ object: getPositions() }],
+            'object-position': [{ object: [...getPositions(), isArbitraryValue] }],
             /**
              * Overflow
              * @see https://tailwindcss.com/docs/overflow
