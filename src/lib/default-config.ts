@@ -1481,15 +1481,15 @@ export function getDefaultConfig() {
              */
             fill: [{ fill: [colors] }],
             /**
-             * Stroke
-             * @see https://tailwindcss.com/docs/stroke
-             */
-            stroke: [{ stroke: [colors] }],
-            /**
              * Stroke Width
              * @see https://tailwindcss.com/docs/stroke-width
              */
             'stroke-w': [{ stroke: [isLength] }],
+            /**
+             * Stroke
+             * @see https://tailwindcss.com/docs/stroke
+             */
+            stroke: [{ stroke: [colors] }],
             // Accessibility
             /**
              * Screen Readers
