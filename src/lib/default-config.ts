@@ -702,7 +702,7 @@ export function getDefaultConfig() {
              * Text Decoration
              * @see https://tailwindcss.com/docs/text-decoration
              */
-            'text-decoration': ['underline', 'line-through', 'no-underline'],
+            'text-decoration': ['underline', 'overline', 'line-through', 'no-underline'],
             /**
              * Text Decoration Style
              * @see https://tailwindcss.com/docs/text-decoration-style
