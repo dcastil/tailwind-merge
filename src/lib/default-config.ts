@@ -767,6 +767,11 @@ export function getDefaultConfig() {
              * @see https://tailwindcss.com/docs/word-break
              */
             break: [{ break: ['normal', 'words', 'all'] }],
+            /**
+             * Content
+             * @see https://tailwindcss.com/docs/content
+             */
+            content: [{ content: ['none', isArbitraryValue] }],
             // Backgrounds
             /**
              * Background Attachment
@@ -1502,11 +1507,6 @@ export function getDefaultConfig() {
              */
             sr: ['sr-only', 'not-sr-only'],
             // Just-in-Time Mode
-            /**
-             * Content
-             * @see https://tailwindcss.com/docs/content
-             */
-            content: [{ content: ['none', isArbitraryValue] }],
             /**
              * Caret Color
              * @see https://tailwindcss.com/docs/just-in-time-mode#caret-color-utilities
