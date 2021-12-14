@@ -57,26 +57,22 @@ export function getDefaultConfig() {
     const getLineStyles = () => ['solid', 'dashed', 'dotted', 'double', 'none'] as const
     const getBlendModes = () =>
         [
-            {
-                blend: [
-                    'normal',
-                    'multiply',
-                    'screen',
-                    'overlay',
-                    'darken',
-                    'lighten',
-                    'color-dodge',
-                    'color-burn',
-                    'hard-light',
-                    'soft-light',
-                    'difference',
-                    'exclusion',
-                    'hue',
-                    'saturation',
-                    'color',
-                    'luminosity',
-                ],
-            },
+            'normal',
+            'multiply',
+            'screen',
+            'overlay',
+            'darken',
+            'lighten',
+            'color-dodge',
+            'color-burn',
+            'hard-light',
+            'soft-light',
+            'difference',
+            'exclusion',
+            'hue',
+            'saturation',
+            'color',
+            'luminosity',
         ] as const
     const getAlign = () => ['start', 'end', 'center', 'between', 'around', 'evenly'] as const
     const getZeroAndEmpty = () => ['', '0'] as const
@@ -819,7 +815,7 @@ export function getDefaultConfig() {
              * Background Blend Mode
              * @see https://tailwindcss.com/docs/background-blend-mode
              */
-            'bg-blend': [{ bg: getBlendModes() }],
+            'bg-blend': [{ 'bg-blend': getBlendModes() }],
             /**
              * Background Color
              * @see https://tailwindcss.com/docs/background-color
