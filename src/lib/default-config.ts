@@ -75,7 +75,7 @@ export function getDefaultConfig() {
             'luminosity',
         ] as const
     const getAlign = () => ['start', 'end', 'center', 'between', 'around', 'evenly'] as const
-    const getZeroAndEmpty = () => ['', '0'] as const
+    const getZeroAndEmpty = () => ['', '0', isArbitraryValue] as const
     const getBreaks = () =>
         ['auto', 'avoid', 'all', 'avoid-page', 'page', 'left', 'right', 'column'] as const
 
