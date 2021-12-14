@@ -714,6 +714,11 @@ export function getDefaultConfig() {
              */
             'text-decoration-thickness': [{ decoration: ['auto', 'from-font', isLength] }],
             /**
+             * Text Underline Offset
+             * @see https://tailwindcss.com/docs/text-underline-offset
+             */
+            'underline-offset': [{ 'underline-offset': ['auto', isLength] }],
+            /**
              * Text Decoration Color
              * @see https://tailwindcss.com/docs/text-decoration-color
              */
