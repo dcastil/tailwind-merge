@@ -1003,6 +1003,26 @@ export function getDefaultConfig() {
              */
             'divide-color': [{ divide: [borderColor] }],
             /**
+             * Outline Style
+             * @see https://tailwindcss.com/docs/outline-style
+             */
+            'outline-style': [{ outline: ['', ...getLineStyles(), 'hidden'] }],
+            /**
+             * Outline Offset
+             * @see https://tailwindcss.com/docs/outline-offset
+             */
+            'outline-offset': [{ 'outline-offset': [isLength] }],
+            /**
+             * Outline Width
+             * @see https://tailwindcss.com/docs/outline-width
+             */
+            'outline-w': [{ outline: [isLength] }],
+            /**
+             * Outline Color
+             * @see https://tailwindcss.com/docs/outline-color
+             */
+            'outline-color': [{ outline: [colors] }],
+            /**
              * Ring Width
              * @see https://tailwindcss.com/docs/ring-width
              */
@@ -1332,26 +1352,6 @@ export function getDefaultConfig() {
                     ],
                 },
             ],
-            /**
-             * Outline Width
-             * @see https://tailwindcss.com/docs/outline-width
-             */
-            'outline-w': [{ outline: [isLength] }],
-            /**
-             * Outline Style
-             * @see https://tailwindcss.com/docs/outline-style
-             */
-            'outline-style': [{ outline: ['', ...getLineStyles(), 'hidden'] }],
-            /**
-             * Outline Offset
-             * @see https://tailwindcss.com/docs/outline-offset
-             */
-            'outline-offset': [{ 'outline-offset': [isLength] }],
-            /**
-             * Outline Color
-             * @see https://tailwindcss.com/docs/outline-color
-             */
-            'outline-color': [{ outline: [colors] }],
             /**
              * Pointer Events
              * @see https://tailwindcss.com/docs/pointer-events
