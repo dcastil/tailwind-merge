@@ -822,11 +822,6 @@ export function getDefaultConfig() {
                 },
             ],
             /**
-             * Background Blend Mode
-             * @see https://tailwindcss.com/docs/background-blend-mode
-             */
-            'bg-blend': [{ 'bg-blend': getBlendModes() }],
-            /**
              * Background Color
              * @see https://tailwindcss.com/docs/background-color
              */
@@ -1058,6 +1053,11 @@ export function getDefaultConfig() {
              * @see https://tailwindcss.com/docs/mix-blend-mode
              */
             'mix-blend': [{ 'mix-blend': getBlendModes() }],
+            /**
+             * Background Blend Mode
+             * @see https://tailwindcss.com/docs/background-blend-mode
+             */
+            'bg-blend': [{ 'bg-blend': getBlendModes() }],
             // Filters
             /**
              * Filter
