@@ -802,7 +802,7 @@ export function getDefaultConfig() {
              * Background Repeat
              * @see https://tailwindcss.com/docs/background-repeat
              */
-            'bg-repeeat': [{ bg: ['no-repeat', { repeat: ['', 'x', 'y', 'round', 'space'] }] }],
+            'bg-repeat': [{ bg: ['no-repeat', { repeat: ['', 'x', 'y', 'round', 'space'] }] }],
             /**
              * Background Size
              * @see https://tailwindcss.com/docs/background-size
