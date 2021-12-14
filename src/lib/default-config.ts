@@ -137,7 +137,7 @@ export function getDefaultConfig() {
              * Break Inside
              * @see https://tailwindcss.com/docs/break-inside
              */
-            'break-inside': [{ 'break-before': ['auto', 'avoid', 'avoid-page', 'avoid-column'] }],
+            'break-inside': [{ 'break-inside': ['auto', 'avoid', 'avoid-page', 'avoid-column'] }],
             /**
              * Box Decoration Break
              * @see https://tailwindcss.com/docs/box-decoration-break
