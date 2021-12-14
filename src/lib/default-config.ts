@@ -1504,9 +1504,9 @@ export function getDefaultConfig() {
             // Just-in-Time Mode
             /**
              * Content
-             * @see https://tailwindcss.com/docs/just-in-time-mode#content-utilities
+             * @see https://tailwindcss.com/docs/content
              */
-            content: [{ content: [isArbitraryValue] }],
+            content: [{ content: ['none', isArbitraryValue] }],
             /**
              * Caret Color
              * @see https://tailwindcss.com/docs/just-in-time-mode#caret-color-utilities
