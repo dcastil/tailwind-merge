@@ -676,6 +676,7 @@ export function getDefaultConfig() {
             'list-style-position': [{ list: ['inside', 'outside'] }],
             /**
              * Placeholder Color
+             * @deprecated since Tailwind v3.0.0
              * @see https://tailwindcss.com/docs/placeholder-color
              */
             'placeholder-color': [{ placeholder: [colors] }],
@@ -786,6 +787,7 @@ export function getDefaultConfig() {
             'bg-clip': [{ 'bg-clip': ['border', 'padding', 'content', 'text'] }],
             /**
              * Background Opacity
+             * @deprecated since Tailwind v3.0.0
              * @see https://tailwindcss.com/docs/background-opacity
              */
             'bg-opacity': [{ 'bg-opacity': [opacity] }],
@@ -1082,6 +1084,7 @@ export function getDefaultConfig() {
             // Filters
             /**
              * Filter
+             * @deprecated since Tailwind v3.0.0
              * @see https://tailwindcss.com/docs/filter
              */
             filter: [{ filter: ['', 'none'] }],
@@ -1104,7 +1107,7 @@ export function getDefaultConfig() {
              * Drop Shadow
              * @see https://tailwindcss.com/docs/drop-shadow
              */
-            'drop-shadow': [{ 'drop-shadow': ['', 'none', isTshirtSize] }],
+            'drop-shadow': [{ 'drop-shadow': ['', 'none', isTshirtSize, isArbitraryValue] }],
             /**
              * Grayscale
              * @see https://tailwindcss.com/docs/grayscale
