@@ -1296,6 +1296,7 @@ export function getDefaultConfig() {
                         'bottom-left',
                         'left',
                         'top-left',
+                        isArbitraryValue,
                     ],
                 },
             ],
