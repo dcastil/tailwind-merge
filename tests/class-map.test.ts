@@ -46,7 +46,7 @@ test('class map has correct class groups at first part', () => {
             'bg-opacity',
             'bg-origin',
             'bg-position',
-            'bg-repeeat',
+            'bg-repeat',
             'bg-size',
         ],
         block: ['display'],
