@@ -3,6 +3,7 @@ import {
     isAny,
     isArbitraryLength,
     isArbitraryPosition,
+    isArbitraryShadow,
     isArbitrarySize,
     isArbitraryUrl,
     isArbitraryValue,
@@ -1057,7 +1058,7 @@ export function getDefaultConfig() {
              * Box Shadow
              * @see https://tailwindcss.com/docs/box-shadow
              */
-            shadow: [{ shadow: ['', 'inner', 'none', isTshirtSize] }],
+            shadow: [{ shadow: ['', 'inner', 'none', isTshirtSize, isArbitraryShadow] }],
             /**
              * Box Shadow Color
              * @see https://tailwindcss.com/docs/box-shadow-color
