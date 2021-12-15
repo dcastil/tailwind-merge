@@ -103,7 +103,7 @@ export function getDefaultConfig() {
             saturate: [isInteger],
             scale: [isInteger],
             sepia: getZeroAndEmpty(),
-            skew: [isInteger],
+            skew: [isInteger, isArbitraryValue],
             space: [spacing],
             translate: [spacing],
         },
