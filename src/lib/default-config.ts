@@ -676,7 +676,7 @@ export function getDefaultConfig() {
             'list-style-position': [{ list: ['inside', 'outside'] }],
             /**
              * Placeholder Color
-             * @deprecated since Tailwind v3.0.0
+             * @deprecated since Tailwind CSS v3.0.0
              * @see https://tailwindcss.com/docs/placeholder-color
              */
             'placeholder-color': [{ placeholder: [colors] }],
@@ -787,7 +787,7 @@ export function getDefaultConfig() {
             'bg-clip': [{ 'bg-clip': ['border', 'padding', 'content', 'text'] }],
             /**
              * Background Opacity
-             * @deprecated since Tailwind v3.0.0
+             * @deprecated since Tailwind CSS v3.0.0
              * @see https://tailwindcss.com/docs/background-opacity
              */
             'bg-opacity': [{ 'bg-opacity': [opacity] }],
@@ -1084,7 +1084,7 @@ export function getDefaultConfig() {
             // Filters
             /**
              * Filter
-             * @deprecated since Tailwind v3.0.0
+             * @deprecated since Tailwind CSS v3.0.0
              * @see https://tailwindcss.com/docs/filter
              */
             filter: [{ filter: ['', 'none'] }],
@@ -1135,6 +1135,7 @@ export function getDefaultConfig() {
             sepia: [{ sepia: [sepia] }],
             /**
              * Backdrop Filter
+             * @deprecated since Tailwind CSS v3.0.0
              * @see https://tailwindcss.com/docs/backdrop-filter
              */
             'backdrop-filter': [{ 'backdrop-filter': ['', 'none'] }],
@@ -1240,25 +1241,6 @@ export function getDefaultConfig() {
              */
             transform: [{ transform: ['', 'gpu', 'none'] }],
             /**
-             * Transform Origin
-             * @see https://tailwindcss.com/docs/transform-origin
-             */
-            'transform-origin': [
-                {
-                    origin: [
-                        'center',
-                        'top',
-                        'top-right',
-                        'right',
-                        'bottom-right',
-                        'bottom',
-                        'bottom-left',
-                        'left',
-                        'top-left',
-                    ],
-                },
-            ],
-            /**
              * Scale
              * @see https://tailwindcss.com/docs/scale
              */
@@ -1277,7 +1259,7 @@ export function getDefaultConfig() {
              * Rotate
              * @see https://tailwindcss.com/docs/rotate
              */
-            rotate: [{ rotate: [isInteger] }],
+            rotate: [{ rotate: [isInteger, isArbitraryValue] }],
             /**
              * Translate X
              * @see https://tailwindcss.com/docs/translate
@@ -1298,6 +1280,25 @@ export function getDefaultConfig() {
              * @see https://tailwindcss.com/docs/skew
              */
             'skew-y': [{ 'skew-y': [skew] }],
+            /**
+             * Transform Origin
+             * @see https://tailwindcss.com/docs/transform-origin
+             */
+            'transform-origin': [
+                {
+                    origin: [
+                        'center',
+                        'top',
+                        'top-right',
+                        'right',
+                        'bottom-right',
+                        'bottom',
+                        'bottom-left',
+                        'left',
+                        'top-left',
+                    ],
+                },
+            ],
             // Interactivity
             /**
              * Accent Color
