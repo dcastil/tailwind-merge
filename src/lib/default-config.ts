@@ -1359,6 +1359,11 @@ export function getDefaultConfig() {
                 },
             ],
             /**
+             * Caret Color
+             * @see https://tailwindcss.com/docs/just-in-time-mode#caret-color-utilities
+             */
+            'caret-color': [{ caret: [colors] }],
+            /**
              * Pointer Events
              * @see https://tailwindcss.com/docs/pointer-events
              */
@@ -1512,12 +1517,6 @@ export function getDefaultConfig() {
              * @see https://tailwindcss.com/docs/screen-readers
              */
             sr: ['sr-only', 'not-sr-only'],
-            // Just-in-Time Mode
-            /**
-             * Caret Color
-             * @see https://tailwindcss.com/docs/just-in-time-mode#caret-color-utilities
-             */
-            'caret-color': [{ caret: [colors] }],
         },
         conflictingClassGroups: {
             overflow: ['overflow-x', 'overflow-y'],
