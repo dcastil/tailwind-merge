@@ -4,7 +4,7 @@ const stringLengths = new Set(['px', 'full', 'screen'])
 const tshirtUnitRegex = /^(\d+)?(xs|sm|md|lg|xl)$/
 const lengthUnitRegex = /\d+(%|px|em|rem|vh|vw|pt|pc|in|cm|mm|cap|ch|ex|lh|rlh|vi|vb|vmin|vmax)/
 // Shadow always begins with x and y offset separated by underscore
-const shadowRegex = /^-?((\d+)?\.?(\d+)[a-z]+|0)_-?((\d+)?\.?(\d+)[a-z]+|0)_/
+const shadowRegex = /^-?((\d+)?\.?(\d+)[a-z]+|0)_-?((\d+)?\.?(\d+)[a-z]+|0)/
 
 export function isLength(classPart: string) {
     return (

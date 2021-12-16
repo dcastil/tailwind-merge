@@ -163,6 +163,7 @@ describe('validators', () => {
         expect(isArbitraryShadow('[-.5rem_0_#123456]')).toBe(true)
         expect(isArbitraryShadow('[0.5rem_-0_#123456]')).toBe(true)
         expect(isArbitraryShadow('[0.5rem_-0.005vh_#123456]')).toBe(true)
+        expect(isArbitraryShadow('[0.5rem_-0.005vh]')).toBe(true)
 
         expect(isArbitraryShadow('[rgba(5,5,5,5)]')).toBe(false)
         expect(isArbitraryShadow('[#00f]')).toBe(false)
