@@ -3,6 +3,7 @@ import {
     isAny,
     isArbitraryLength,
     isArbitraryPosition,
+    isArbitraryShadow,
     isArbitrarySize,
     isArbitraryUrl,
     isArbitraryValue,
@@ -75,7 +76,7 @@ export function getDefaultConfig() {
             'luminosity',
         ] as const
     const getAlign = () => ['start', 'end', 'center', 'between', 'around', 'evenly'] as const
-    const getZeroAndEmpty = () => ['', '0'] as const
+    const getZeroAndEmpty = () => ['', '0', isArbitraryValue] as const
     const getBreaks = () =>
         ['auto', 'avoid', 'all', 'avoid-page', 'page', 'left', 'right', 'column'] as const
 
@@ -102,7 +103,7 @@ export function getDefaultConfig() {
             saturate: [isInteger],
             scale: [isInteger],
             sepia: getZeroAndEmpty(),
-            skew: [isInteger],
+            skew: [isInteger, isArbitraryValue],
             space: [spacing],
             translate: [spacing],
         },
@@ -137,7 +138,7 @@ export function getDefaultConfig() {
              * Break Inside
              * @see https://tailwindcss.com/docs/break-inside
              */
-            'break-inside': [{ 'break-before': ['auto', 'avoid', 'avoid-page', 'avoid-column'] }],
+            'break-inside': [{ 'break-inside': ['auto', 'avoid', 'avoid-page', 'avoid-column'] }],
             /**
              * Box Decoration Break
              * @see https://tailwindcss.com/docs/box-decoration-break
@@ -199,7 +200,7 @@ export function getDefaultConfig() {
              * Object Position
              * @see https://tailwindcss.com/docs/object-position
              */
-            'object-position': [{ object: getPositions() }],
+            'object-position': [{ object: [...getPositions(), isArbitraryValue] }],
             /**
              * Overflow
              * @see https://tailwindcss.com/docs/overflow
@@ -675,6 +676,7 @@ export function getDefaultConfig() {
             'list-style-position': [{ list: ['inside', 'outside'] }],
             /**
              * Placeholder Color
+             * @deprecated since Tailwind CSS v3.0.0
              * @see https://tailwindcss.com/docs/placeholder-color
              */
             'placeholder-color': [{ placeholder: [colors] }],
@@ -702,7 +704,7 @@ export function getDefaultConfig() {
              * Text Decoration
              * @see https://tailwindcss.com/docs/text-decoration
              */
-            'text-decoration': ['underline', 'line-through', 'no-underline'],
+            'text-decoration': ['underline', 'overline', 'line-through', 'no-underline'],
             /**
              * Text Decoration Style
              * @see https://tailwindcss.com/docs/text-decoration-style
@@ -713,6 +715,11 @@ export function getDefaultConfig() {
              * @see https://tailwindcss.com/docs/text-decoration-thickness
              */
             'text-decoration-thickness': [{ decoration: ['auto', 'from-font', isLength] }],
+            /**
+             * Text Underline Offset
+             * @see https://tailwindcss.com/docs/text-underline-offset
+             */
+            'underline-offset': [{ 'underline-offset': ['auto', isLength] }],
             /**
              * Text Decoration Color
              * @see https://tailwindcss.com/docs/text-decoration-color
@@ -762,6 +769,11 @@ export function getDefaultConfig() {
              * @see https://tailwindcss.com/docs/word-break
              */
             break: [{ break: ['normal', 'words', 'all'] }],
+            /**
+             * Content
+             * @see https://tailwindcss.com/docs/content
+             */
+            content: [{ content: ['none', isArbitraryValue] }],
             // Backgrounds
             /**
              * Background Attachment
@@ -775,6 +787,7 @@ export function getDefaultConfig() {
             'bg-clip': [{ 'bg-clip': ['border', 'padding', 'content', 'text'] }],
             /**
              * Background Opacity
+             * @deprecated since Tailwind CSS v3.0.0
              * @see https://tailwindcss.com/docs/background-opacity
              */
             'bg-opacity': [{ 'bg-opacity': [opacity] }],
@@ -792,7 +805,7 @@ export function getDefaultConfig() {
              * Background Repeat
              * @see https://tailwindcss.com/docs/background-repeat
              */
-            'bg-repeeat': [{ bg: ['no-repeat', { repeat: ['', 'x', 'y', 'round', 'space'] }] }],
+            'bg-repeat': [{ bg: ['no-repeat', { repeat: ['', 'x', 'y', 'round', 'space'] }] }],
             /**
              * Background Size
              * @see https://tailwindcss.com/docs/background-size
@@ -811,11 +824,6 @@ export function getDefaultConfig() {
                     ],
                 },
             ],
-            /**
-             * Background Blend Mode
-             * @see https://tailwindcss.com/docs/background-blend-mode
-             */
-            'bg-blend': [{ 'bg-blend': getBlendModes() }],
             /**
              * Background Color
              * @see https://tailwindcss.com/docs/background-color
@@ -998,6 +1006,26 @@ export function getDefaultConfig() {
              */
             'divide-color': [{ divide: [borderColor] }],
             /**
+             * Outline Style
+             * @see https://tailwindcss.com/docs/outline-style
+             */
+            'outline-style': [{ outline: ['', ...getLineStyles(), 'hidden'] }],
+            /**
+             * Outline Offset
+             * @see https://tailwindcss.com/docs/outline-offset
+             */
+            'outline-offset': [{ 'outline-offset': [isLength] }],
+            /**
+             * Outline Width
+             * @see https://tailwindcss.com/docs/outline-width
+             */
+            'outline-w': [{ outline: [isLength] }],
+            /**
+             * Outline Color
+             * @see https://tailwindcss.com/docs/outline-color
+             */
+            'outline-color': [{ outline: [colors] }],
+            /**
              * Ring Width
              * @see https://tailwindcss.com/docs/ring-width
              */
@@ -1032,7 +1060,7 @@ export function getDefaultConfig() {
              * Box Shadow
              * @see https://tailwindcss.com/docs/box-shadow
              */
-            shadow: [{ shadow: ['', 'inner', 'none', isTshirtSize] }],
+            shadow: [{ shadow: ['', 'inner', 'none', isTshirtSize, isArbitraryShadow] }],
             /**
              * Box Shadow Color
              * @see https://tailwindcss.com/docs/box-shadow-color
@@ -1048,9 +1076,15 @@ export function getDefaultConfig() {
              * @see https://tailwindcss.com/docs/mix-blend-mode
              */
             'mix-blend': [{ 'mix-blend': getBlendModes() }],
+            /**
+             * Background Blend Mode
+             * @see https://tailwindcss.com/docs/background-blend-mode
+             */
+            'bg-blend': [{ 'bg-blend': getBlendModes() }],
             // Filters
             /**
              * Filter
+             * @deprecated since Tailwind CSS v3.0.0
              * @see https://tailwindcss.com/docs/filter
              */
             filter: [{ filter: ['', 'none'] }],
@@ -1073,7 +1107,7 @@ export function getDefaultConfig() {
              * Drop Shadow
              * @see https://tailwindcss.com/docs/drop-shadow
              */
-            'drop-shadow': [{ 'drop-shadow': ['', 'none', isTshirtSize] }],
+            'drop-shadow': [{ 'drop-shadow': ['', 'none', isTshirtSize, isArbitraryValue] }],
             /**
              * Grayscale
              * @see https://tailwindcss.com/docs/grayscale
@@ -1101,6 +1135,7 @@ export function getDefaultConfig() {
             sepia: [{ sepia: [sepia] }],
             /**
              * Backdrop Filter
+             * @deprecated since Tailwind CSS v3.0.0
              * @see https://tailwindcss.com/docs/backdrop-filter
              */
             'backdrop-filter': [{ 'backdrop-filter': ['', 'none'] }],
@@ -1206,25 +1241,6 @@ export function getDefaultConfig() {
              */
             transform: [{ transform: ['', 'gpu', 'none'] }],
             /**
-             * Transform Origin
-             * @see https://tailwindcss.com/docs/transform-origin
-             */
-            'transform-origin': [
-                {
-                    origin: [
-                        'center',
-                        'top',
-                        'top-right',
-                        'right',
-                        'bottom-right',
-                        'bottom',
-                        'bottom-left',
-                        'left',
-                        'top-left',
-                    ],
-                },
-            ],
-            /**
              * Scale
              * @see https://tailwindcss.com/docs/scale
              */
@@ -1243,7 +1259,7 @@ export function getDefaultConfig() {
              * Rotate
              * @see https://tailwindcss.com/docs/rotate
              */
-            rotate: [{ rotate: [isInteger] }],
+            rotate: [{ rotate: [isInteger, isArbitraryValue] }],
             /**
              * Translate X
              * @see https://tailwindcss.com/docs/translate
@@ -1264,6 +1280,26 @@ export function getDefaultConfig() {
              * @see https://tailwindcss.com/docs/skew
              */
             'skew-y': [{ 'skew-y': [skew] }],
+            /**
+             * Transform Origin
+             * @see https://tailwindcss.com/docs/transform-origin
+             */
+            'transform-origin': [
+                {
+                    origin: [
+                        'center',
+                        'top',
+                        'top-right',
+                        'right',
+                        'bottom-right',
+                        'bottom',
+                        'bottom-left',
+                        'left',
+                        'top-left',
+                        isArbitraryValue,
+                    ],
+                },
+            ],
             // Interactivity
             /**
              * Accent Color
@@ -1323,25 +1359,10 @@ export function getDefaultConfig() {
                 },
             ],
             /**
-             * Outline Width
-             * @see https://tailwindcss.com/docs/outline-width
+             * Caret Color
+             * @see https://tailwindcss.com/docs/just-in-time-mode#caret-color-utilities
              */
-            'outline-w': [{ outline: [isLength] }],
-            /**
-             * Outline Style
-             * @see https://tailwindcss.com/docs/outline-style
-             */
-            'outline-style': [{ outline: ['', ...getLineStyles(), 'hidden'] }],
-            /**
-             * Outline Offset
-             * @see https://tailwindcss.com/docs/outline-offset
-             */
-            'outline-offset': [{ 'outline-offset': [isLength] }],
-            /**
-             * Outline Color
-             * @see https://tailwindcss.com/docs/outline-color
-             */
-            'outline-color': [{ outline: [colors] }],
+            'caret-color': [{ caret: [colors] }],
             /**
              * Pointer Events
              * @see https://tailwindcss.com/docs/pointer-events
@@ -1496,17 +1517,6 @@ export function getDefaultConfig() {
              * @see https://tailwindcss.com/docs/screen-readers
              */
             sr: ['sr-only', 'not-sr-only'],
-            // Just-in-Time Mode
-            /**
-             * Content
-             * @see https://tailwindcss.com/docs/just-in-time-mode#content-utilities
-             */
-            content: [{ content: [isArbitraryValue] }],
-            /**
-             * Caret Color
-             * @see https://tailwindcss.com/docs/just-in-time-mode#caret-color-utilities
-             */
-            'caret-color': [{ caret: [colors] }],
         },
         conflictingClassGroups: {
             overflow: ['overflow-x', 'overflow-y'],

@@ -11,6 +11,7 @@ const {
     isArbitraryPosition,
     isArbitraryUrl,
     isArbitraryWeight,
+    isArbitraryShadow,
 } = validators
 
 describe('validators', () => {
@@ -153,5 +154,18 @@ describe('validators', () => {
         expect(isArbitraryWeight('[black]')).toBe(false)
         expect(isArbitraryWeight('black')).toBe(false)
         expect(isArbitraryWeight('450')).toBe(false)
+    })
+
+    test('isArbitraryShadow', () => {
+        expect(isArbitraryShadow('[0_35px_60px_-15px_rgba(0,0,0,0.3)]')).toBe(true)
+        expect(isArbitraryShadow('[0_0_#00f]')).toBe(true)
+        expect(isArbitraryShadow('[.5rem_0_rgba(5,5,5,5)]')).toBe(true)
+        expect(isArbitraryShadow('[-.5rem_0_#123456]')).toBe(true)
+        expect(isArbitraryShadow('[0.5rem_-0_#123456]')).toBe(true)
+        expect(isArbitraryShadow('[0.5rem_-0.005vh_#123456]')).toBe(true)
+
+        expect(isArbitraryShadow('[rgba(5,5,5,5)]')).toBe(false)
+        expect(isArbitraryShadow('[#00f]')).toBe(false)
+        expect(isArbitraryShadow('[something-else]')).toBe(false)
     })
 })

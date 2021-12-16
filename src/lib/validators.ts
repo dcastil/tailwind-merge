@@ -3,6 +3,8 @@ const fractionRegex = /^\d+\/\d+$/
 const stringLengths = new Set(['px', 'full', 'screen'])
 const tshirtUnitRegex = /^(\d+)?(xs|sm|md|lg|xl)$/
 const lengthUnitRegex = /\d+(%|px|em|rem|vh|vw|pt|pc|in|cm|mm|cap|ch|ex|lh|rlh|vi|vb|vmin|vmax)/
+// Shadow always begins with x and y offset separated by underscore
+const shadowRegex = /^-?((\d+)?\.?(\d+)[a-z]+|0)_-?((\d+)?\.?(\d+)[a-z]+|0)_/
 
 export function isLength(classPart: string) {
     return (
@@ -71,4 +73,14 @@ export function isAny() {
 
 export function isTshirtSize(classPart: string) {
     return tshirtUnitRegex.test(classPart)
+}
+
+export function isArbitraryShadow(classPart: string) {
+    const arbitraryValue = arbitraryValueRegex.exec(classPart)?.[1]
+
+    if (arbitraryValue) {
+        return shadowRegex.test(arbitraryValue)
+    }
+
+    return false
 }
