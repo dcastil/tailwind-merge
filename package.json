@@ -30,7 +30,7 @@
     },
     "module": "dist/index.mjs",
     "main": "dist/index.js",
-    "types": "./dist/types/index.d.ts",
+    "types": "./dist/index.d.ts",
     "repository": {
         "type": "git",
         "url": "https://github.com/dcastil/tailwind-merge.git"
