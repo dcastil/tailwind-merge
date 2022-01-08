@@ -6,6 +6,11 @@ export interface Config {
      */
     cacheSize: number
     /**
+     * Prefix added to Tailwind-generated classes
+     * @see https://tailwindcss.com/docs/configuration#prefix
+     */
+    prefix?: string
+    /**
      * Theme scales used in classGroups.
      * The keys are the same as in the Tailwind config but the values are sometimes defined more broadly.
      */
