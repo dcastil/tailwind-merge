@@ -15,9 +15,11 @@ test('extendTailwindMerge works corectly with single config', () => {
     })
 
     expect(tailwindMerge('')).toBe('')
-    expect(tailwindMerge('my-prefix:fooKey-bar my-prefix:fooKey-baz')).toBe('my-prefix:fooKey-baz')
-    expect(tailwindMerge('other-prefix:fooKey-bar other-prefix:fooKey-baz')).toBe(
-        'other-prefix:fooKey-baz'
+    expect(tailwindMerge('my-modifier:fooKey-bar my-modifier:fooKey-baz')).toBe(
+        'my-modifier:fooKey-baz'
+    )
+    expect(tailwindMerge('other-modifier:fooKey-bar other-modifier:fooKey-baz')).toBe(
+        'other-modifier:fooKey-baz'
     )
     expect(tailwindMerge('group fooKey-bar')).toBe('fooKey-bar')
     expect(tailwindMerge('fooKey-bar group')).toBe('group')
@@ -52,8 +54,12 @@ test('extendTailwindMerge works corectly with multiple configs', () => {
     )
 
     expect(tailwindMerge('')).toBe('')
-    expect(tailwindMerge('my-prefix:fooKey-bar my-prefix:fooKey-baz')).toBe('my-prefix:fooKey-baz')
-    expect(tailwindMerge('other-prefix:hi-there other-prefix:hello')).toBe('other-prefix:hello')
+    expect(tailwindMerge('my-modifier:fooKey-bar my-modifier:fooKey-baz')).toBe(
+        'my-modifier:fooKey-baz'
+    )
+    expect(tailwindMerge('other-modifier:hi-there other-modifier:hello')).toBe(
+        'other-modifier:hello'
+    )
     expect(tailwindMerge('group fooKey-bar')).toBe('fooKey-bar')
     expect(tailwindMerge('fooKey-bar group')).toBe('group')
     expect(tailwindMerge('group other-2')).toBe('group other-2')
@@ -81,9 +87,11 @@ test('extendTailwindMerge works corectly with function config', () => {
     }))
 
     expect(tailwindMerge('')).toBe('')
-    expect(tailwindMerge('my-prefix:fooKey-bar my-prefix:fooKey-baz')).toBe('my-prefix:fooKey-baz')
-    expect(tailwindMerge('other-prefix:fooKey-bar other-prefix:fooKey-baz')).toBe(
-        'other-prefix:fooKey-baz'
+    expect(tailwindMerge('my-modifier:fooKey-bar my-modifier:fooKey-baz')).toBe(
+        'my-modifier:fooKey-baz'
+    )
+    expect(tailwindMerge('other-modifier:fooKey-bar other-modifier:fooKey-baz')).toBe(
+        'other-modifier:fooKey-baz'
     )
     expect(tailwindMerge('group fooKey-bar')).toBe('fooKey-bar')
     expect(tailwindMerge('fooKey-bar group')).toBe('group')

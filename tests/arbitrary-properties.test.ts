@@ -7,7 +7,7 @@ test('handles arbitrary property conflicts correctly', () => {
     ).toBe('[paint-order:normal] [--my-var:4px]')
 })
 
-test('handles arbitrary property conflicts with prefixes correctly', () => {
+test('handles arbitrary property conflicts with modifiers correctly', () => {
     expect(twMerge('[paint-order:markers] hover:[paint-order:normal]')).toBe(
         '[paint-order:markers] hover:[paint-order:normal]'
     )

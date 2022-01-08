@@ -4,15 +4,15 @@ const SPLIT_CLASSES_REGEX = /\s+/
 const IMPORTANT_MODIFIER = '!'
 // Regex is needed so we don't match against colons in labels for arbitrary values like `text-[color:var(--mystery-var)]`
 // I'd prefer to use a negative lookbehind for all supported labels, but lookbheinds don't have good browser support yet. More info: https://caniuse.com/js-regexp-lookbehind
-const PREFIX_SEPARATOR_REGEX = /:(?![^[]*\])/
-const PREFIX_SEPARATOR = ':'
+const MODIFIER_SEPARATOR_REGEX = /:(?![^[]*\])/
+const MODIFIER_SEPARATOR = ':'
 
 export function mergeClassList(classList: string, configUtils: ConfigUtils) {
     const { getClassGroupId, getConflictingClassGroupIds } = configUtils
 
     /**
      * Set of classGroupIds in following format:
-     * `{importantModifier}{variantPrefixes}{classGroupId}`
+     * `{importantModifier}{variantModifiers}{classGroupId}`
      * @example 'float'
      * @example 'hover:focus:bg-color'
      * @example '!md:pr'
@@ -24,8 +24,8 @@ export function mergeClassList(classList: string, configUtils: ConfigUtils) {
             .trim()
             .split(SPLIT_CLASSES_REGEX)
             .map((originalClassName) => {
-                const prefixes = originalClassName.split(PREFIX_SEPARATOR_REGEX)
-                const classNameWithImportantModifier = prefixes.pop()!
+                const modifiers = originalClassName.split(MODIFIER_SEPARATOR_REGEX)
+                const classNameWithImportantModifier = modifiers.pop()!
 
                 const hasImportantModifier =
                     classNameWithImportantModifier.startsWith(IMPORTANT_MODIFIER)
@@ -42,16 +42,18 @@ export function mergeClassList(classList: string, configUtils: ConfigUtils) {
                     }
                 }
 
-                const variantPrefix =
-                    prefixes.length === 0 ? '' : prefixes.sort().concat('').join(PREFIX_SEPARATOR)
+                const variantModifier =
+                    modifiers.length === 0
+                        ? ''
+                        : modifiers.sort().concat('').join(MODIFIER_SEPARATOR)
 
-                const fullPrefix = hasImportantModifier
-                    ? IMPORTANT_MODIFIER + variantPrefix
-                    : variantPrefix
+                const fullModifier = hasImportantModifier
+                    ? IMPORTANT_MODIFIER + variantModifier
+                    : variantModifier
 
                 return {
                     isTailwindClass: true as const,
-                    prefix: fullPrefix,
+                    modifier: fullModifier,
                     classGroupId,
                     originalClassName,
                 }
@@ -63,9 +65,9 @@ export function mergeClassList(classList: string, configUtils: ConfigUtils) {
                     return true
                 }
 
-                const { prefix, classGroupId } = parsed
+                const { modifier, classGroupId } = parsed
 
-                const classId = `${prefix}:${classGroupId}`
+                const classId = `${modifier}:${classGroupId}`
 
                 if (classGroupsInConflict.has(classId)) {
                     return false
@@ -74,7 +76,7 @@ export function mergeClassList(classList: string, configUtils: ConfigUtils) {
                 classGroupsInConflict.add(classId)
 
                 getConflictingClassGroupIds(classGroupId).forEach((group) =>
-                    classGroupsInConflict.add(`${prefix}:${group}`)
+                    classGroupsInConflict.add(`${modifier}:${group}`)
                 )
 
                 return true
