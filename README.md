@@ -55,7 +55,7 @@ function MyGenericInput(props) {
 }
 ```
 
-tailwind-merge makes sure to override conflicting classes and keeps everything else untouched. In the case of the `MySlightlyModifiedInput`, the input now only renders the classes `border rounded p-3`.
+tailwind-merge overrides conflicting classes and keeps everything else untouched. In the case of the `MySlightlyModifiedInput`, the input now only renders the classes `border rounded p-3`.
 
 ## Features
 
@@ -166,8 +166,11 @@ The tailwind-merge config is an object with a few keys.
 const tailwindMergeConfig = {
     // ↓ Set how many values should be stored in cache.
     cacheSize: 500,
+    // ↓ Optional prefix from TaiLwind config
+    prefix: 'tw-',
     theme: {
         // Theme scales are defined here
+        // This is not the theme object from your Tailwind config
     },
     classGroups: {
         // Class groups are defined here
@@ -308,6 +311,7 @@ The function takes a callback which returns the config you want to use and retur
 import { createTailwindMerge } from 'tailwind-merge'
 
 const customTwMerge = createTailwindMerge(() => ({
+    cacheSize: 500,
     theme: {},
     classGroups: {
         foo: ['foo', 'foo-2', { 'bar-baz': ['', '1', '2'] }],
