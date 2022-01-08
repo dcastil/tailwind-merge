@@ -10,7 +10,7 @@ test('handles arbitrary length conflicts correctly', () => {
     expect(twMerge('m-[2px] m-[length:var(--mystery-var)]')).toBe('m-[length:var(--mystery-var)]')
 })
 
-test('handles arbitrary length conflicts with labels and prefixes correctly', () => {
+test('handles arbitrary length conflicts with labels and modifiers correctly', () => {
     expect(twMerge('hover:m-[2px] hover:m-[length:var(--c)]')).toBe('hover:m-[length:var(--c)]')
     expect(twMerge('hover:focus:m-[2px] focus:hover:m-[length:var(--c)]')).toBe(
         'focus:hover:m-[length:var(--c)]'

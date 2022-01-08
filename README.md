@@ -86,7 +86,7 @@ twMerge('bottom-auto inset-y-6') // → 'inset-y-6'
 twMerge('inline block') // → 'block'
 ```
 
-### Supports prefixes and stacked prefixes
+### Supports modifiers and stacked modifiers
 
 ```ts
 twMerge('p-2 hover:p-4') // → 'p-2 hover:p-4'
