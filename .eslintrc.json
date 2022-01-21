@@ -1,7 +1,15 @@
 {
     "extends": ["plugin:@typescript-eslint/base", "plugin:import/typescript"],
     "plugins": ["import"],
-    "ignorePatterns": ["dist/**", "node_modules/**", "*.json", "*.lock", "*.md", "*.svg"],
+    "ignorePatterns": [
+        "coverage/**",
+        "dist/**",
+        "node_modules/**",
+        "*.json",
+        "*.lock",
+        "*.md",
+        "*.svg"
+    ],
     "rules": {
         "@typescript-eslint/consistent-type-assertions": "warn",
         "@typescript-eslint/no-array-constructor": "warn",
