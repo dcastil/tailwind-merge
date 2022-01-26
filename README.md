@@ -147,14 +147,14 @@ If you're using Tailwind CSS without any extra config, you can use [`twMerge`](#
 
 If you're using a custom Tailwind config, you may need to configure tailwind-merge as well to merge classes properly.
 
-The default [`twMerge`](#twmerge) function is configured in a way that you can still use it if all of the following points apply to your Tailwind config:
+The default [`twMerge`](#twmerge) function is configured in a way that you can still use it if all the following points apply to your Tailwind config:
 
 -   Only using color names which don't clash with other Tailwind class names
 -   Only deviating by number values from number-based Tailwind classes
 -   Only using font-family classes which don't clash with default font-weight classes
 -   Sticking to default Tailwind config for everything else
 
-If some of these points don't apply to you, you can test whether `twMerge` still works as intended with your custom classes. Otherwise you need create your own custom merge function by either extending the default tailwind-merge config or using a completely custom one.
+If some of these points don't apply to you, you can test whether `twMerge` still works as intended with your custom classes. Otherwise, you need create your own custom merge function by either extending the default tailwind-merge config or using a completely custom one.
 
 The tailwind-merge config is different from the Tailwind config because it's expected to be shipped and run in the browser as opposed to the Tailwind config which is meant to run at build-time. Be careful in case you're using your Tailwind config directly to configure tailwind-merge in your client-side code because that could result in an unnecessarily large bundle size.
 
@@ -221,7 +221,7 @@ You can use am empty string (`''`) as a class part if you want to indicate that 
 const filterClassGroup = [{ filter: ['', 'none'] }]
 ```
 
-Each class group is defined under its ID in the `classGroups` object in the config. This ID is only used internally and the only thing that matters is that it is unique among all class groups.
+Each class group is defined under its ID in the `classGroups` object in the config. This ID is only used internally, and the only thing that matters is that it is unique among all class groups.
 
 ### Conflicting class groups
 
@@ -233,7 +233,7 @@ If they are passed to `twMerge` as `pr-4 px-3`, I think you most likely intend t
 
 But if they are passed to `twMerge` as `px-3 pr-4`, I assume you want to set the `padding-right` from `pr-4` but still want to apply the `padding-left` from `px-3`, so `px-3` shouldn't be removed when inserting the classes in this order, indicating they shouldn't be in the same class group.
 
-To summarize, `px-3` should stand in conflict with `pr-4`, but `pr-4` should not stand in conflict with `px-3`. to achieve this we need to define asymetric conflicts across class groups.
+To summarize, `px-3` should stand in conflict with `pr-4`, but `pr-4` should not stand in conflict with `px-3`. To achieve this, we need to define asymmetric conflicts across class groups.
 
 This is what the `conflictingClassGroups` object in the tailwind-merge config is for. You define a key in it which is the ID of a class group which _creates_ a conflict and the value is an array of IDs of class group which _receive_ a conflict.
 
@@ -243,7 +243,7 @@ const conflictingClassGroups = {
 }
 ```
 
-If a class group _creates_ a conflict, it means that if it appears in a class list string passed to `twMerge`, all preceding class groups in the string which _rceive_ the conflict will be removed.
+If a class group _creates_ a conflict, it means that if it appears in a class list string passed to `twMerge`, all preceding class groups in the string which _receive_ the conflict will be removed.
 
 When we think of our example, the `px` class group creates a conflict which is received by the class groups `pr` and `pl`. This way `px-3` removes a preceding `pr-4`, but not the other way around.
 
@@ -279,7 +279,7 @@ If you modified one of these theme scales in your Tailwind config, you can add a
 
 ### Extending the tailwind-merge config
 
-If you only need to extend the default tailwind-merge config, [`extendTailwindMerge`](#extendtailwindmerge) is the easiest way to extend the config. You provide it a `configExtension` object which gets [merged](#mergeconfigs) with the default config. Therefore all keys here are optional.
+If you only need to extend the default tailwind-merge config, [`extendTailwindMerge`](#extendtailwindmerge) is the easiest way to extend the config. You provide it a `configExtension` object which gets [merged](#mergeconfigs) with the default config. Therefore, all keys here are optional.
 
 ```ts
 import { extendTailwindMerge } from 'tailwind-merge'
@@ -374,7 +374,7 @@ function fromTheme(key: string): ThemeGetter
 
 Function to retrieve values from a theme scale, to be used in class groups.
 
-`fromTheme` doesn't return the values from the theme scale but rather another function which is used by tailwind-merge internally to retrieve the theme values. tailwind-merge can differentiate the theme getter function from a validator because it has a `isThemeGetter` property set to `true`.
+`fromTheme` doesn't return the values from the theme scale, but rather another function which is used by tailwind-merge internally to retrieve the theme values. tailwind-merge can differentiate the theme getter function from a validator because it has a `isThemeGetter` property set to `true`.
 
 It can be used like this:
 
@@ -431,7 +431,7 @@ const customTwMerge = extendTailwindMerge({
 })
 ```
 
-Additionally you can pass multiple `createConfig` functions (more to that in [`createTailwindMerge`](#createtailwindmerge)) which is convenient if you want to combine your config with third-party plugins.
+Additionally, you can pass multiple `createConfig` functions (more to that in [`createTailwindMerge`](#createtailwindmerge)) which is convenient if you want to combine your config with third-party plugins.
 
 ```ts
 const customTwMerge = extendTailwindMerge({ … }, withSomePlugin)
@@ -497,7 +497,7 @@ But don't merge configs like that. Use [`mergeConfigs`](#mergeconfigs) instead.
 function mergeConfigs(baseConfig: Config, configExtension: Partial<Config>): Config
 ```
 
-Helper function to merge multiple config objects. Objects are merged, arrays are concatenated, scalar values are overriden and `undefined` does nothing. The function assumes that both parameters are tailwind-merge config objects and shouldn't be used as a generic merge function.
+Helper function to merge multiple config objects. Objects are merged, arrays are concatenated, scalar values are overridden and `undefined` does nothing. The function assumes that both parameters are tailwind-merge config objects and shouldn't be used as a generic merge function.
 
 ```ts
 const customTwMerge = createTailwindMerge(getDefaultConfig, (config) =>
@@ -543,12 +543,12 @@ A brief summary for each validator:
 -   `isInteger` checks for integer values (`3`) and arbitrary integer values (`[3]`).
 -   `isArbitraryValue` checks whether the class part is enclosed in brackets (`[something]`)
 -   `isTshirtSize`checks whether class part is a T-shirt size (`sm`, `xl`), optionally with a preceding number (`2xl`).
--   `isArbitrarySize` checks whether class part is arbitrary value which starts with with `size:` (`[size:200px_100px]`) which is necessary for background-size classNames.
--   `isArbitraryPosition` checks whether class part is arbitrary value which starts with with `position:` (`[position:200px_100px]`) which is necessary for background-position classNames.
--   `isArbitraryUrl` checks whether class part is arbitrary value which starts with `url:` or `url(` (`[url('/path-to-image.png')]`, `url:var(--maybe-a-url-at-runtime)]`) which is necessary for background-image classNames.
--   `isArbitraryWeight` checks whether class part is arbitrary value whcih starts with `weight:` or is a number (`[weight:var(--value)]`, `[450]`) which is necessary for font-weight classNames.
--   `isArbitraryShadow` checks whether class part is arbitrary value which starts with the same pattern as a shadow value (`[0_35px_60px_-15px_rgba(0,0,0,0.3)]`), namely with two lengths separated by a underscore.
--   `isAny` always returns true. Be careful with this validator as it might match unwanted classes. I use it primarily to match colors or when I'm ceertain there are no other class groups in a namespace.
+-   `isArbitrarySize` checks whether class part is an arbitrary value which starts with `size:` (`[size:200px_100px]`) which is necessary for background-size classNames.
+-   `isArbitraryPosition` checks whether class part is an arbitrary value which starts with `position:` (`[position:200px_100px]`) which is necessary for background-position classNames.
+-   `isArbitraryUrl` checks whether class part is an arbitrary value which starts with `url:` or `url(` (`[url('/path-to-image.png')]`, `url:var(--maybe-a-url-at-runtime)]`) which is necessary for background-image classNames.
+-   `isArbitraryWeight` checks whether class part is an arbitrary value which starts with `weight:` or is a number (`[weight:var(--value)]`, `[450]`) which is necessary for font-weight classNames.
+-   `isArbitraryShadow` checks whether class part is an arbitrary value which starts with the same pattern as a shadow value (`[0_35px_60px_-15px_rgba(0,0,0,0.3)]`), namely with two lengths separated by a underscore.
+-   `isAny` always returns true. Be careful with this validator as it might match unwanted classes. I use it primarily to match colors or when I'm certain there are no other class groups in a namespace.
 
 ### `Config`
 
@@ -590,13 +590,13 @@ import { withMagic } from 'tailwind-merge-magic-plugin'
 const twMerge = extendTailwindMerge(withMagic)
 ```
 
-Also feel free to check out [tailwind-merge-rtl-plugin](https://github.com/vltansky/tailwind-merge-rtl-plugin) as a real example of a tailwind-merge plugin.
+Also, feel free to check out [tailwind-merge-rtl-plugin](https://github.com/vltansky/tailwind-merge-rtl-plugin) as a real example of a tailwind-merge plugin.
 
 ## Versioning
 
 This package follows the [SemVer](https://semver.org) versioning rules. More specifically:
 
--   Patch version gets incremented when unintended behaviour is fixed which doesn't break any existing API. Note that bug fixes can still alter which styles are applied. E.g. a bug gets fixed in which the conflicting classes `inline` and `block` weren't merged correctly so that both would end up in the result.
+-   Patch version gets incremented when unintended behavior is fixed, which doesn't break any existing API. Note that bug fixes can still alter which styles are applied. E.g. a bug gets fixed in which the conflicting classes `inline` and `block` weren't merged correctly so that both would end up in the result.
 
 -   Minor version gets incremented when additional features are added which don't break any existing API. However, a minor version update might still alter which styles are applied if you use Tailwind features not yet supported by tailwind-merge. E.g. a new Tailwind prefix `magic` gets added to this package which changes the result of `twMerge('magic:px-1 magic:p-3')` from `magic:px-1 magic:p-3` to `magic:p-3`.
 
