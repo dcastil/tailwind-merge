@@ -144,9 +144,9 @@ describe('validators', () => {
     })
 
     test('isArbitraryWeight', () => {
-        expect(isArbitraryWeight('[weight:black]')).toBe(true)
-        expect(isArbitraryWeight('[weight:bla]')).toBe(true)
-        expect(isArbitraryWeight('[weight:230]')).toBe(true)
+        expect(isArbitraryWeight('[number:black]')).toBe(true)
+        expect(isArbitraryWeight('[number:bla]')).toBe(true)
+        expect(isArbitraryWeight('[number:230]')).toBe(true)
         expect(isArbitraryWeight('[450]')).toBe(true)
 
         expect(isArbitraryWeight('[2px]')).toBe(false)
