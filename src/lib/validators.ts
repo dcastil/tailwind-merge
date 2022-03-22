@@ -49,7 +49,7 @@ export function isArbitraryWeight(classPart: string) {
     const arbitraryValue = arbitraryValueRegex.exec(classPart)?.[1]
 
     return arbitraryValue
-        ? !Number.isNaN(Number(arbitraryValue)) || arbitraryValue.startsWith('weight:')
+        ? !Number.isNaN(Number(arbitraryValue)) || arbitraryValue.startsWith('number:')
         : false
 }
 
