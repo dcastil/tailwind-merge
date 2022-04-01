@@ -1,6 +1,6 @@
 import { extendTailwindMerge } from '../src'
 
-test('extendTailwindMerge works corectly with single config', () => {
+test('extendTailwindMerge works correctly with single config', () => {
     const tailwindMerge = extendTailwindMerge({
         cacheSize: 20,
         classGroups: {
@@ -69,7 +69,7 @@ test('extendTailwindMerge works corectly with multiple configs', () => {
     expect(tailwindMerge('hover:focus:p-10 focus:hover:p-20')).toBe('focus:hover:p-20')
 })
 
-test('extendTailwindMerge works corectly with function config', () => {
+test('extendTailwindMerge works correctly with function config', () => {
     const tailwindMerge = extendTailwindMerge((config) => ({
         ...config,
         cacheSize: 20,
