@@ -2,7 +2,7 @@
 require('zx/globals')
 const { pipe } = require('fp-ts/lib/function')
 
-const { applyVersionedLogoImage } = require('./helpers/apply-versioned-logo-image')
+const { applyVersionedText } = require('./helpers/apply-versioned-text')
 
 async function run() {
     const ROOT_PATH = `${__dirname}/..`
@@ -15,7 +15,7 @@ async function run() {
     ])
 
     const nextReadme = pipe(readme, (readme) => {
-        const { hasPartsToUpdate, updatedText } = applyVersionedLogoImage(readme, packageJson)
+        const { hasPartsToUpdate, updatedText } = applyVersionedText(readme, packageJson)
 
         if (!hasPartsToUpdate) {
             throw Error(
