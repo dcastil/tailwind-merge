@@ -17,12 +17,19 @@ jobs:
 
         steps:
             - name: Checkout repository
-              uses: actions/checkout@v2
+              uses: actions/checkout@v3
+            - name: Use node_modules cache
+              uses: actions/cache@v3
+              with:
+                  path: node_modules
+                  key: yarn-node-16-lock-${{ hashFiles('yarn.json') }}
+                  restore-keys: |
+                      yarn-node-16-lock-
             - name: Initialize CodeQL
-              uses: github/codeql-action/init@v1
+              uses: github/codeql-action/init@v2
               with:
                   languages: javascript
             - run: yarn install --frozen-lockfile
             - run: yarn build
             - name: Perform CodeQL Analysis
-              uses: github/codeql-action/analyze@v1
+              uses: github/codeql-action/analyze@v2
