@@ -13,7 +13,13 @@ jobs:
               uses: actions/setup-node@v3
               with:
                   node-version: 14
-                  cache: yarn
+            - name: Use node_modules cache
+              uses: actions/cache@v3
+              with:
+                  path: node_modules
+                  key: yarn-node-16-lock-${{ hashFiles('yarn.json') }}
+                  restore-keys: |
+                      yarn-node-16-lock-
             - run: yarn install --frozen-lockfile
             - run: yarn lint
             - run: yarn test --ci --coverage --maxWorkers=2
