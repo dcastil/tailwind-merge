@@ -5,9 +5,9 @@
         "group:allNonMajor",
         ":label(dependencies)",
         ":assignee(dcastil)",
-        ":enableVulnerabilityAlertsWithLabel(security)"
+        ":enableVulnerabilityAlertsWithLabel(security)",
+        "schedule:monthly"
     ],
-    "schedule": ["every 1 month on Saturday at 9:00"],
     "timezone": "Europe/Berlin",
     "prHourlyLimit": 10,
     "rangeStrategy": "bump"
