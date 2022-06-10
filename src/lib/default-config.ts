@@ -689,7 +689,7 @@ export function getDefaultConfig() {
              * Text Alignment
              * @see https://tailwindcss.com/docs/text-align
              */
-            'text-alignment': [{ text: ['left', 'center', 'right', 'justify'] }],
+            'text-alignment': [{ text: ['left', 'center', 'right', 'justify', 'start', 'end'] }],
             /**
              * Text Color
              * @see https://tailwindcss.com/docs/text-color
