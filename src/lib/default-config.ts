@@ -75,6 +75,7 @@ export function getDefaultConfig() {
             'saturation',
             'color',
             'luminosity',
+            'plus-lighter',
         ] as const
     const getAlign = () => ['start', 'end', 'center', 'between', 'around', 'evenly'] as const
     const getZeroAndEmpty = () => ['', '0', isArbitraryValue] as const
