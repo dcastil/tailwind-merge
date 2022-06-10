@@ -176,7 +176,7 @@ const tailwindMergeConfig = {
         // Class groups are defined here
     },
     conflictingClassGroups: {
-        // Conflcits between class groups are defined here
+        // Conflicts between class groups are defined here
     },
 }
 ```
@@ -214,7 +214,7 @@ const fillClassGroup = [{ fill: ['current', isArbitraryValue] }]
 
 Because the function is under the `fill` key, it will only get called for classes which start with `fill-`. Also, the function only gets passed the part of the class name which comes after `fill-`, this way you can use the same function in multiple class groups. tailwind-merge exports its own [validators](#validators), so you don't need to recreate them.
 
-You can use am empty string (`''`) as a class part if you want to indicate that the preceding part was the end. This is useful for defining elements which are marked as `DEFAULT` in the Tailwind config.
+You can use an empty string (`''`) as a class part if you want to indicate that the preceding part was the end. This is useful for defining elements which are marked as `DEFAULT` in the Tailwind config.
 
 ```ts
 // ↓ Resolves to filter and filter-none
