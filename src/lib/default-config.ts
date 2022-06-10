@@ -363,7 +363,7 @@ export function getDefaultConfig() {
              * Grid Auto Flow
              * @see https://tailwindcss.com/docs/grid-auto-flow
              */
-            'grid-flow': [{ 'grid-flow': ['row', 'col', 'row-dense', 'col-dense'] }],
+            'grid-flow': [{ 'grid-flow': ['row', 'col', 'dense', 'row-dense', 'col-dense'] }],
             /**
              * Grid Auto Columns
              * @see https://tailwindcss.com/docs/grid-auto-columns
