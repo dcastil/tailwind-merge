@@ -2,9 +2,6 @@ import { ConfigUtils } from './config-utils'
 
 const SPLIT_CLASSES_REGEX = /\s+/
 const IMPORTANT_MODIFIER = '!'
-// Regex is needed, so we don't match against colons in labels for arbitrary values like `text-[color:var(--mystery-var)]`
-// I'd prefer to use a negative lookbehind for all supported labels, but lookbehinds don't have good browser support yet. More info: https://caniuse.com/js-regexp-lookbehind
-const MODIFIER_SEPARATOR_REGEX = /:(?![^[]*\])/
 const MODIFIER_SEPARATOR = ':'
 
 export function mergeClassList(classList: string, configUtils: ConfigUtils) {
@@ -24,16 +21,10 @@ export function mergeClassList(classList: string, configUtils: ConfigUtils) {
             .trim()
             .split(SPLIT_CLASSES_REGEX)
             .map((originalClassName) => {
-                const modifiers = originalClassName.split(MODIFIER_SEPARATOR_REGEX)
-                const classNameWithImportantModifier = modifiers.pop()!
+                const { modifiers, hasImportantModifier, baseClassName } =
+                    splitModifiers(originalClassName)
 
-                const hasImportantModifier =
-                    classNameWithImportantModifier.startsWith(IMPORTANT_MODIFIER)
-                const className = hasImportantModifier
-                    ? classNameWithImportantModifier.substring(1)
-                    : classNameWithImportantModifier
-
-                const classGroupId = getClassGroupId(className)
+                const classGroupId = getClassGroupId(baseClassName)
 
                 if (!classGroupId) {
                     return {
@@ -85,4 +76,38 @@ export function mergeClassList(classList: string, configUtils: ConfigUtils) {
             .map((parsed) => parsed.originalClassName)
             .join(' ')
     )
+}
+
+function splitModifiers(className: string) {
+    const modifiers = []
+
+    let bracketDepth = 0
+    let modifierStart = 0
+
+    for (const match of className.matchAll(/[:[\]]/g)) {
+        if (match[0] === ':') {
+            if (bracketDepth === 0) {
+                const nextModifierStart = match.index! + 1
+                modifiers.push(className.substring(modifierStart, nextModifierStart))
+                modifierStart = nextModifierStart
+            }
+        } else if (match[0] === '[') {
+            bracketDepth++
+        } else if (match[0] === ']') {
+            bracketDepth--
+        }
+    }
+
+    const baseClassNameWithImportantModifier =
+        modifiers.length === 0 ? className : className.substring(modifierStart)
+    const hasImportantModifier = baseClassNameWithImportantModifier.startsWith(IMPORTANT_MODIFIER)
+    const baseClassName = hasImportantModifier
+        ? baseClassNameWithImportantModifier.substring(1)
+        : baseClassNameWithImportantModifier
+
+    return {
+        modifiers,
+        hasImportantModifier,
+        baseClassName,
+    }
 }
