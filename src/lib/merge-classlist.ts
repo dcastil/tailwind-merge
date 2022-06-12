@@ -15,7 +15,7 @@ export function mergeClassList(classList: string, configUtils: ConfigUtils) {
      * `{importantModifier}{variantModifiers}{classGroupId}`
      * @example 'float'
      * @example 'hover:focus:bg-color'
-     * @example '!md:pr'
+     * @example 'md:!pr'
      */
     const classGroupsInConflict = new Set<string>()
 
@@ -48,7 +48,7 @@ export function mergeClassList(classList: string, configUtils: ConfigUtils) {
                         : modifiers.sort().concat('').join(MODIFIER_SEPARATOR)
 
                 const fullModifier = hasImportantModifier
-                    ? IMPORTANT_MODIFIER + variantModifier
+                    ? variantModifier + IMPORTANT_MODIFIER
                     : variantModifier
 
                 return {
@@ -67,7 +67,7 @@ export function mergeClassList(classList: string, configUtils: ConfigUtils) {
 
                 const { modifier, classGroupId } = parsed
 
-                const classId = `${modifier}:${classGroupId}`
+                const classId = `${modifier}${classGroupId}`
 
                 if (classGroupsInConflict.has(classId)) {
                     return false
@@ -76,7 +76,7 @@ export function mergeClassList(classList: string, configUtils: ConfigUtils) {
                 classGroupsInConflict.add(classId)
 
                 getConflictingClassGroupIds(classGroupId).forEach((group) =>
-                    classGroupsInConflict.add(`${modifier}:${group}`)
+                    classGroupsInConflict.add(`${modifier}${group}`)
                 )
 
                 return true
