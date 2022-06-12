@@ -2,7 +2,6 @@ import { ConfigUtils } from './config-utils'
 
 const SPLIT_CLASSES_REGEX = /\s+/
 const IMPORTANT_MODIFIER = '!'
-const MODIFIER_SEPARATOR = ':'
 
 export function mergeClassList(classList: string, configUtils: ConfigUtils) {
     const { getClassGroupId, getConflictingClassGroupIds } = configUtils
@@ -33,18 +32,15 @@ export function mergeClassList(classList: string, configUtils: ConfigUtils) {
                     }
                 }
 
-                const variantModifier =
-                    modifiers.length === 0
-                        ? ''
-                        : modifiers.sort().concat('').join(MODIFIER_SEPARATOR)
+                const variantModifier = sortModifiers(modifiers).join('')
 
-                const fullModifier = hasImportantModifier
+                const modifierId = hasImportantModifier
                     ? variantModifier + IMPORTANT_MODIFIER
                     : variantModifier
 
                 return {
                     isTailwindClass: true as const,
-                    modifier: fullModifier,
+                    modifierId,
                     classGroupId,
                     originalClassName,
                 }
@@ -56,9 +52,9 @@ export function mergeClassList(classList: string, configUtils: ConfigUtils) {
                     return true
                 }
 
-                const { modifier, classGroupId } = parsed
+                const { modifierId, classGroupId } = parsed
 
-                const classId = `${modifier}${classGroupId}`
+                const classId = `${modifierId}${classGroupId}`
 
                 if (classGroupsInConflict.has(classId)) {
                     return false
@@ -67,7 +63,7 @@ export function mergeClassList(classList: string, configUtils: ConfigUtils) {
                 classGroupsInConflict.add(classId)
 
                 getConflictingClassGroupIds(classGroupId).forEach((group) =>
-                    classGroupsInConflict.add(`${modifier}${group}`)
+                    classGroupsInConflict.add(`${modifierId}${group}`)
                 )
 
                 return true
@@ -110,4 +106,33 @@ function splitModifiers(className: string) {
         hasImportantModifier,
         baseClassName,
     }
+}
+
+/**
+ * Sorts modifiers according to following schema:
+ * - Predefined modifiers are sorted alphabetically
+ * - When an arbitrary variant appears, it's important to preserve which modifiers are before and after it
+ */
+function sortModifiers(modifiers: string[]) {
+    if (modifiers.length <= 1) {
+        return modifiers
+    }
+
+    const sortedModifiers = []
+    let unsortedModifiers: string[] = []
+
+    modifiers.forEach((modifier) => {
+        const isArbitraryVariant = modifier[0] === '['
+
+        if (isArbitraryVariant) {
+            sortedModifiers.push(...unsortedModifiers.sort(), modifier)
+            unsortedModifiers = []
+        } else {
+            unsortedModifiers.push(modifier)
+        }
+    })
+
+    sortedModifiers.push(...unsortedModifiers.sort())
+
+    return sortedModifiers
 }
