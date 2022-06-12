@@ -72,3 +72,12 @@ test('multiple arbitrary variants', () => {
         'hover:dark:[&>*]:focus:[&_div]:disabled:underline dark:hover:[&>*]:disabled:focus:[&_div]:line-through'
     )
 })
+
+test('arbitrary variants with arbitrary properties', () => {
+    expect(twMerge('[&>*]:[color:red] [&>*]:[color:blue]')).toBe('[&>*]:[color:blue]')
+    expect(
+        twMerge(
+            '[&[data-foo][data-bar]:not([data-baz])]:nod:noa:[color:red] [&[data-foo][data-bar]:not([data-baz])]:noa:nod:[color:blue]'
+        )
+    ).toBe('[&[data-foo][data-bar]:not([data-baz])]:noa:nod:[color:blue]')
+})
