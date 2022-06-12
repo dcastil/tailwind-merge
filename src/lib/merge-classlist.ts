@@ -54,7 +54,7 @@ export function mergeClassList(classList: string, configUtils: ConfigUtils) {
 
                 const { modifierId, classGroupId } = parsed
 
-                const classId = `${modifierId}${classGroupId}`
+                const classId = modifierId + classGroupId
 
                 if (classGroupsInConflict.has(classId)) {
                     return false
@@ -63,7 +63,7 @@ export function mergeClassList(classList: string, configUtils: ConfigUtils) {
                 classGroupsInConflict.add(classId)
 
                 getConflictingClassGroupIds(classGroupId).forEach((group) =>
-                    classGroupsInConflict.add(`${modifierId}${group}`)
+                    classGroupsInConflict.add(modifierId + group)
                 )
 
                 return true
