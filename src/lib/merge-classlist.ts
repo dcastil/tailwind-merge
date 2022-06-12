@@ -111,7 +111,7 @@ function splitModifiers(className: string) {
 /**
  * Sorts modifiers according to following schema:
  * - Predefined modifiers are sorted alphabetically
- * - When an arbitrary variant appears, it's important to preserve which modifiers are before and after it
+ * - When an arbitrary variant appears, it must be preserved which modifiers are before and after it
  */
 function sortModifiers(modifiers: string[]) {
     if (modifiers.length <= 1) {
