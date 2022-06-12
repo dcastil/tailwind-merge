@@ -2,10 +2,6 @@ import { ConfigUtils } from './config-utils'
 
 const SPLIT_CLASSES_REGEX = /\s+/
 const IMPORTANT_MODIFIER = '!'
-// Regex is needed, so we don't match against colons in labels for arbitrary values like `text-[color:var(--mystery-var)]`
-// I'd prefer to use a negative lookbehind for all supported labels, but lookbehinds don't have good browser support yet. More info: https://caniuse.com/js-regexp-lookbehind
-const MODIFIER_SEPARATOR_REGEX = /:(?![^[]*\])/
-const MODIFIER_SEPARATOR = ':'
 
 export function mergeClassList(classList: string, configUtils: ConfigUtils) {
     const { getClassGroupId, getConflictingClassGroupIds } = configUtils
@@ -15,7 +11,7 @@ export function mergeClassList(classList: string, configUtils: ConfigUtils) {
      * `{importantModifier}{variantModifiers}{classGroupId}`
      * @example 'float'
      * @example 'hover:focus:bg-color'
-     * @example '!md:pr'
+     * @example 'md:!pr'
      */
     const classGroupsInConflict = new Set<string>()
 
@@ -24,16 +20,10 @@ export function mergeClassList(classList: string, configUtils: ConfigUtils) {
             .trim()
             .split(SPLIT_CLASSES_REGEX)
             .map((originalClassName) => {
-                const modifiers = originalClassName.split(MODIFIER_SEPARATOR_REGEX)
-                const classNameWithImportantModifier = modifiers.pop()!
+                const { modifiers, hasImportantModifier, baseClassName } =
+                    splitModifiers(originalClassName)
 
-                const hasImportantModifier =
-                    classNameWithImportantModifier.startsWith(IMPORTANT_MODIFIER)
-                const className = hasImportantModifier
-                    ? classNameWithImportantModifier.substring(1)
-                    : classNameWithImportantModifier
-
-                const classGroupId = getClassGroupId(className)
+                const classGroupId = getClassGroupId(baseClassName)
 
                 if (!classGroupId) {
                     return {
@@ -42,18 +32,15 @@ export function mergeClassList(classList: string, configUtils: ConfigUtils) {
                     }
                 }
 
-                const variantModifier =
-                    modifiers.length === 0
-                        ? ''
-                        : modifiers.sort().concat('').join(MODIFIER_SEPARATOR)
+                const variantModifier = sortModifiers(modifiers).join('')
 
-                const fullModifier = hasImportantModifier
-                    ? IMPORTANT_MODIFIER + variantModifier
+                const modifierId = hasImportantModifier
+                    ? variantModifier + IMPORTANT_MODIFIER
                     : variantModifier
 
                 return {
                     isTailwindClass: true as const,
-                    modifier: fullModifier,
+                    modifierId,
                     classGroupId,
                     originalClassName,
                 }
@@ -65,9 +52,9 @@ export function mergeClassList(classList: string, configUtils: ConfigUtils) {
                     return true
                 }
 
-                const { modifier, classGroupId } = parsed
+                const { modifierId, classGroupId } = parsed
 
-                const classId = `${modifier}:${classGroupId}`
+                const classId = `${modifierId}${classGroupId}`
 
                 if (classGroupsInConflict.has(classId)) {
                     return false
@@ -76,7 +63,7 @@ export function mergeClassList(classList: string, configUtils: ConfigUtils) {
                 classGroupsInConflict.add(classId)
 
                 getConflictingClassGroupIds(classGroupId).forEach((group) =>
-                    classGroupsInConflict.add(`${modifier}:${group}`)
+                    classGroupsInConflict.add(`${modifierId}${group}`)
                 )
 
                 return true
@@ -85,4 +72,67 @@ export function mergeClassList(classList: string, configUtils: ConfigUtils) {
             .map((parsed) => parsed.originalClassName)
             .join(' ')
     )
+}
+
+function splitModifiers(className: string) {
+    const modifiers = []
+
+    let bracketDepth = 0
+    let modifierStart = 0
+
+    for (const match of className.matchAll(/[:[\]]/g)) {
+        if (match[0] === ':') {
+            if (bracketDepth === 0) {
+                const nextModifierStart = match.index! + 1
+                modifiers.push(className.substring(modifierStart, nextModifierStart))
+                modifierStart = nextModifierStart
+            }
+        } else if (match[0] === '[') {
+            bracketDepth++
+        } else if (match[0] === ']') {
+            bracketDepth--
+        }
+    }
+
+    const baseClassNameWithImportantModifier =
+        modifiers.length === 0 ? className : className.substring(modifierStart)
+    const hasImportantModifier = baseClassNameWithImportantModifier.startsWith(IMPORTANT_MODIFIER)
+    const baseClassName = hasImportantModifier
+        ? baseClassNameWithImportantModifier.substring(1)
+        : baseClassNameWithImportantModifier
+
+    return {
+        modifiers,
+        hasImportantModifier,
+        baseClassName,
+    }
+}
+
+/**
+ * Sorts modifiers according to following schema:
+ * - Predefined modifiers are sorted alphabetically
+ * - When an arbitrary variant appears, it's important to preserve which modifiers are before and after it
+ */
+function sortModifiers(modifiers: string[]) {
+    if (modifiers.length <= 1) {
+        return modifiers
+    }
+
+    const sortedModifiers = []
+    let unsortedModifiers: string[] = []
+
+    modifiers.forEach((modifier) => {
+        const isArbitraryVariant = modifier[0] === '['
+
+        if (isArbitraryVariant) {
+            sortedModifiers.push(...unsortedModifiers.sort(), modifier)
+            unsortedModifiers = []
+        } else {
+            unsortedModifiers.push(modifier)
+        }
+    })
+
+    sortedModifiers.push(...unsortedModifiers.sort())
+
+    return sortedModifiers
 }

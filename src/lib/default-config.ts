@@ -20,6 +20,7 @@ export function getDefaultConfig() {
     const brightness = fromTheme('brightness')
     const borderColor = fromTheme('borderColor')
     const borderRadius = fromTheme('borderRadius')
+    const borderSpacing = fromTheme('borderSpacing')
     const borderWidth = fromTheme('borderWidth')
     const contrast = fromTheme('contrast')
     const grayscale = fromTheme('grayscale')
@@ -74,6 +75,7 @@ export function getDefaultConfig() {
             'saturation',
             'color',
             'luminosity',
+            'plus-lighter',
         ] as const
     const getAlign = () => ['start', 'end', 'center', 'between', 'around', 'evenly'] as const
     const getZeroAndEmpty = () => ['', '0', isArbitraryValue] as const
@@ -89,6 +91,7 @@ export function getDefaultConfig() {
             brightness: [isInteger],
             borderColor: [colors],
             borderRadius: ['none', '', 'full', isTshirtSize, isArbitraryLength],
+            borderSpacing: [spacing],
             borderWidth: getLengthWithEmpty(),
             contrast: [isInteger],
             grayscale: getZeroAndEmpty(),
@@ -361,7 +364,7 @@ export function getDefaultConfig() {
              * Grid Auto Flow
              * @see https://tailwindcss.com/docs/grid-auto-flow
              */
-            'grid-flow': [{ 'grid-flow': ['row', 'col', 'row-dense', 'col-dense'] }],
+            'grid-flow': [{ 'grid-flow': ['row', 'col', 'dense', 'row-dense', 'col-dense'] }],
             /**
              * Grid Auto Columns
              * @see https://tailwindcss.com/docs/grid-auto-columns
@@ -689,7 +692,7 @@ export function getDefaultConfig() {
              * Text Alignment
              * @see https://tailwindcss.com/docs/text-align
              */
-            'text-alignment': [{ text: ['left', 'center', 'right', 'justify'] }],
+            'text-alignment': [{ text: ['left', 'center', 'right', 'justify', 'start', 'end'] }],
             /**
              * Text Color
              * @see https://tailwindcss.com/docs/text-color
@@ -1191,6 +1194,21 @@ export function getDefaultConfig() {
              */
             'border-collapse': [{ border: ['collapse', 'separate'] }],
             /**
+             * Border Spacing
+             * @see https://tailwindcss.com/docs/border-spacing
+             */
+            'border-spacing': [{ 'border-spacing': [borderSpacing] }],
+            /**
+             * Border Spacing X
+             * @see https://tailwindcss.com/docs/border-spacing
+             */
+            'border-spacing-x': [{ 'border-spacing-x': [borderSpacing] }],
+            /**
+             * Border Spacing Y
+             * @see https://tailwindcss.com/docs/border-spacing
+             */
+            'border-spacing-y': [{ 'border-spacing-y': [borderSpacing] }],
+            /**
              * Table Layout
              * @see https://tailwindcss.com/docs/table-layout
              */
@@ -1561,6 +1579,7 @@ export function getDefaultConfig() {
             'rounded-r': ['rounded-tr', 'rounded-br'],
             'rounded-b': ['rounded-br', 'rounded-bl'],
             'rounded-l': ['rounded-tl', 'rounded-bl'],
+            'border-spacing': ['border-spacing-x', 'border-spacing-y'],
             'border-w': ['border-w-t', 'border-w-r', 'border-w-b', 'border-w-l'],
             'border-w-x': ['border-w-r', 'border-w-l'],
             'border-w-y': ['border-w-t', 'border-w-b'],

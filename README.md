@@ -16,7 +16,7 @@ twMerge('px-2 py-1 bg-red hover:bg-dark-red', 'p-3 bg-[#B91C1C]')
 // → 'hover:bg-dark-red p-3 bg-[#B91C1C]'
 ```
 
--   Supports Tailwind v3.0 (if you use Tailwind v2, use [tailwind-merge v0.9.0](https://github.com/dcastil/tailwind-merge/tree/v0.9.0))
+-   Supports Tailwind v3.0 up to v3.1 (if you use Tailwind v2, use [tailwind-merge v0.9.0](https://github.com/dcastil/tailwind-merge/tree/v0.9.0))
 -   Works in Node >=12 and all modern browsers
 -   Fully typed
 -   [Check bundle size on Bundlephobia](https://bundlephobia.com/package/tailwind-merge)
@@ -113,6 +113,19 @@ twMerge('[padding:1rem] p-8') // → '[padding:1rem] p-8'
 ```
 
 Watch out for mixing arbitrary properties which could be expressed as Tailwind classes. tailwind-merge does not resolve conflicts between arbitrary properties and their matching Tailwind classes to keep the bundle size small.
+
+### Supports arbitrary variants
+
+```ts
+twMerge('[&:nth-child(3)]:py-0 [&:nth-child(3)]:py-4') // → '[&:nth-child(3)]:py-4'
+twMerge('dark:hover:[&:nth-child(3)]:py-0 hover:dark:[&:nth-child(3)]:py-4')
+// → 'hover:dark:[&:nth-child(3)]:py-4'
+
+// Don't do this!
+twMerge('[&:focus]:ring focus:ring-4') // → '[&:focus]:ring focus:ring-4'
+```
+
+Similarly to arbitrary properties, tailwind-merge does not resolve conflicts between arbitrary variants and their matching predefined modifiers for bundle size reasons.
 
 ### Supports important modifier
 
