@@ -1,5 +1,4 @@
 // File can only be executed with zx
-require('zx/globals')
 const { pipe } = require('fp-ts/lib/function')
 
 const { applyVersionedText } = require('./helpers/apply-versioned-text')
