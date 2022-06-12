@@ -3,10 +3,10 @@ import fs from 'fs'
 import { twMerge } from '../src'
 
 const twMergeExampleRegex =
-    /twMerge\((?<arguments>[\w\s\-:[\]#(),!\n'"]+?)\)(?!.*(?<!\/\/.*)')\s*\n?\s*\/\/\s*→\s*['"](?<result>.+)['"]/g
+    /twMerge\((?<arguments>[\w\s\-:[\]#(),!&\n'"]+?)\)(?!.*(?<!\/\/.*)')\s*\n?\s*\/\/\s*→\s*['"](?<result>.+)['"]/g
 
 test('readme examples', () => {
-    expect.assertions(21)
+    expect.assertions(24)
 
     return fs.promises
         .readFile(`${__dirname}/../README.md`, { encoding: 'utf-8' })
