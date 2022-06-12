@@ -120,9 +120,12 @@ Watch out for mixing arbitrary properties which could be expressed as Tailwind c
 twMerge('[&:nth-child(3)]:py-0 [&:nth-child(3)]:py-4') // → '[&:nth-child(3)]:py-4'
 twMerge('dark:hover:[&:nth-child(3)]:py-0 hover:dark:[&:nth-child(3)]:py-4')
 // → 'hover:dark:[&:nth-child(3)]:py-4'
+
+// Don't do this!
+twMerge('[&:focus]:ring focus:ring-4') // → '[&:focus]:ring focus:ring-4'
 ```
 
-Similarly to arbitrary properties, tailwind-merge does not resolve conflicts between arbitrary variants and their matching predefined modifiers, like `[&:focus]:ring` and `focus:ring`.
+Similarly to arbitrary properties, tailwind-merge does not resolve conflicts between arbitrary variants and their matching predefined modifiers for bundle size reasons.
 
 ### Supports important modifier
 
