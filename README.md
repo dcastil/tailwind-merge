@@ -270,6 +270,7 @@ In the Tailwind config you can modify theme scales. tailwind-merge follows the s
 -   `brightness`
 -   `borderColor`
 -   `borderRadius`
+-   `borderSpacing`
 -   `borderWidth`
 -   `contrast`
 -   `grayscale`
