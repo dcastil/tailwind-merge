@@ -620,7 +620,7 @@ This package follows the [SemVer](https://semver.org) versioning rules. More spe
 
 -   Releases with major version 0 might introduce breaking changes on a minor version update.
 
--   A non-production-ready version of every commit on the main branch is released under the `dev` tag for testing purposes. It has the format `0.0.0-dev.<git SHA>`.
+-   A non-production-ready version of every commit pushed to the main branch is released under the `dev` tag for testing purposes. It has the format `0.0.0-dev.<git SHA>`.
 
 -   A changelog is documented in [GitHub Releases](https://github.com/dcastil/tailwind-merge/releases).
 
