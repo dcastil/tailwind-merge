@@ -1,15 +1,12 @@
-name: CI
+name: npm Publish dev
 
 on:
     push:
         branches:
-            - '**'
-    pull_request:
-        branches:
-            - '**'
+            - main
 
 jobs:
-    build:
+    publish:
         runs-on: ubuntu-latest
         steps:
             - uses: actions/checkout@v3
@@ -25,11 +22,15 @@ jobs:
                   restore-keys: |
                       yarn-node-16-lock-
             - run: yarn install --frozen-lockfile
-            - run: yarn lint
-            - run: yarn test --ci --coverage --maxWorkers=2
             - run: yarn build
             - uses: actions/upload-artifact@v3
               with:
                   name: build-output
                   path: dist
                   if-no-files-found: error
+            - run: yarn size
+            - run: yarn version --no-git-tag-version --new-version 0.0.0-dev.${{ github.sha }}
+            - uses: JS-DevTools/npm-publish@v1
+              with:
+                  token: ${{ secrets.NPM_TOKEN }}
+                  tag: dev
