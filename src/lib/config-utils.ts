@@ -6,7 +6,7 @@ export type ConfigUtils = ReturnType<typeof createConfigUtils>
 
 export function createConfigUtils(config: Config) {
     return {
-        cache: getLruCache<string>(config.cacheSize),
+        cache: getLruCache<string, string>(config.cacheSize),
         ...createClassUtils(config),
     }
 }

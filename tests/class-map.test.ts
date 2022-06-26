@@ -5,12 +5,10 @@ test('class map has correct class groups at first part', () => {
     const classMap = createClassMap(getDefaultConfig())
 
     const classGroupsByFirstPart = Object.fromEntries(
-        Object.keys(classMap.nextPart)
-            .sort()
-            .map((key) => [
-                key,
-                Array.from(getClassGroupsInClassPart(classMap.nextPart[key]!)).sort(),
-            ])
+        Array.from(classMap.nextPart.entries()).map(([key, value]) => [
+            key,
+            Array.from(getClassGroupsInClassPart(value)).sort(),
+        ])
     )
 
     expect(classMap.classGroupId).toBeUndefined()
@@ -258,7 +256,7 @@ function getClassGroupsInClassPart(classPart: ClassPartObject): Set<string> {
 
     validators.forEach((validator) => classGroups.add(validator.classGroupId))
 
-    Object.values(nextPart).forEach((nextClassPart) => {
+    nextPart.forEach((nextClassPart) => {
         getClassGroupsInClassPart(nextClassPart).forEach((classGroup) => {
             classGroups.add(classGroup)
         })

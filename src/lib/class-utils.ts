@@ -1,7 +1,7 @@
 import { ClassGroupId, Config, ClassGroup, ClassValidator, ThemeObject, ThemeGetter } from './types'
 
 export interface ClassPartObject {
-    nextPart: Record<string, ClassPartObject>
+    nextPart: Map<string, ClassPartObject>
     validators: ClassValidatorObject[]
     classGroupId?: ClassGroupId
 }
@@ -46,7 +46,7 @@ function getGroupRecursive(
     }
 
     const currentClassPart = classParts[0]!
-    const nextClassPartObject = classPartObject.nextPart[currentClassPart]
+    const nextClassPartObject = classPartObject.nextPart.get(currentClassPart)
     const classGroupFromNextClassPart = nextClassPartObject
         ? getGroupRecursive(classParts.slice(1), nextClassPartObject)
         : undefined
@@ -87,7 +87,7 @@ function getGroupIdForArbitraryProperty(className: string) {
 export function createClassMap(config: Config) {
     const { theme, prefix } = config
     const classMap: ClassPartObject = {
-        nextPart: {},
+        nextPart: new Map<string, ClassPartObject>(),
         validators: [],
     }
 
@@ -151,14 +151,14 @@ function getPart(classPartObject: ClassPartObject, path: string) {
     let currentClassPartObject = classPartObject
 
     path.split(CLASS_PART_SEPARATOR).forEach((pathPart) => {
-        if (currentClassPartObject.nextPart[pathPart] === undefined) {
-            currentClassPartObject.nextPart[pathPart] = {
-                nextPart: {},
+        if (!currentClassPartObject.nextPart.has(pathPart)) {
+            currentClassPartObject.nextPart.set(pathPart, {
+                nextPart: new Map(),
                 validators: [],
-            }
+            })
         }
 
-        currentClassPartObject = currentClassPartObject.nextPart[pathPart]!
+        currentClassPartObject = currentClassPartObject.nextPart.get(pathPart)!
     })
 
     return currentClassPartObject
