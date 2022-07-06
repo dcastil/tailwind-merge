@@ -47,7 +47,7 @@
     },
     "devDependencies": {
         "@size-limit/preset-small-lib": "^7.0.8",
-        "@types/jest": "^27.5.2",
+        "@types/jest": "^28.1.4",
         "@typescript-eslint/eslint-plugin": "^5.30.5",
         "@typescript-eslint/parser": "^5.30.5",
         "dts-cli": "^1.5.2",
@@ -57,7 +57,7 @@
         "fp-ts": "^2.12.1",
         "prettier": "^2.7.1",
         "size-limit": "^7.0.8",
-        "ts-jest": "^27.1.5",
+        "ts-jest": "^28.0.5",
         "typescript": "^4.7.4",
         "zx": "^6.2.5"
     },
