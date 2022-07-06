@@ -4118,10 +4118,10 @@ globby@^11.1.0:
     merge2 "^1.4.1"
     slash "^3.0.0"
 
-globby@^13.1.1:
-  version "13.1.1"
-  resolved "https://registry.yarnpkg.com/globby/-/globby-13.1.1.tgz#7c44a93869b0b7612e38f22ed532bfe37b25ea6f"
-  integrity sha512-XMzoDZbGZ37tufiv7g0N4F/zp3zkwdFtVbV3EHsVl1KQr4RPLfNoT068/97RPshz2J5xYNEjLKKBKaGHifBd3Q==
+globby@^13.1.2:
+  version "13.1.2"
+  resolved "https://registry.yarnpkg.com/globby/-/globby-13.1.2.tgz#29047105582427ab6eca4f905200667b056da515"
+  integrity sha512-LKSDZXToac40u8Q1PQtZihbNdTYSNMuWe+K5l+oa6KgDzSvVrHXlJy40hUP522RjAIoNLJYBJi7ow+rbFpIhHQ==
   dependencies:
     dir-glob "^3.0.1"
     fast-glob "^3.2.11"
@@ -5500,7 +5500,7 @@ node-domexception@^1.0.0:
   resolved "https://registry.yarnpkg.com/node-domexception/-/node-domexception-1.0.0.tgz#6888db46a1f71c0b76b3f7555016b63fe64766e5"
   integrity sha512-/jKZoMpw0F8GRwl4/eLROPA3cfcXtLApP0QzLmUT/HuPCZWyB7IY9ZrMeKw2O/nFIqPQB3PVM9aYm0F312AXDQ==
 
-node-fetch@^3.2.5:
+node-fetch@^3.2.6:
   version "3.2.6"
   resolved "https://registry.yarnpkg.com/node-fetch/-/node-fetch-3.2.6.tgz#6d4627181697a9d9674aae0d61548e0d629b31b9"
   integrity sha512-LAy/HZnLADOVkVPubaxHDft29booGglPFDr2Hw0J1AercRh01UiVFm++KMDnJeH9sHgNB4hsXPii7Sgym/sTbw==
@@ -7048,10 +7048,10 @@ yn@3.1.1:
   resolved "https://registry.yarnpkg.com/yn/-/yn-3.1.1.tgz#1e87401a09d767c1d5eab26a6e4c185182d2eb50"
   integrity sha512-Ux4ygGWsu2c7isFWe8Yu1YluJmqVhxqK2cLXNQA5AcC3QfbGNpM7fu0Y8b/z16pXLnFxZYvWhd3fhBY9DLmC6Q==
 
-zx@^6.2.5:
-  version "6.2.5"
-  resolved "https://registry.yarnpkg.com/zx/-/zx-6.2.5.tgz#9a5cd2ad68275601224731aa19797004f7f9be89"
-  integrity sha512-aTEZSL8sp1IhMUhxlXRTPH6MwzcuTBA3G4LLuH68NIj8kENfcaVGV7cn8LQXXHwG1M9LDI6ST6Qcw0EOrhRAVA==
+zx@^7.0.7:
+  version "7.0.7"
+  resolved "https://registry.yarnpkg.com/zx/-/zx-7.0.7.tgz#e812b3bfecd49304fd6a415deeae16335edf7d5e"
+  integrity sha512-cWF5cWqqrTVxgEPmQ8w/LvUXOK3rJTdgC+Tt1nz113+YncNIO0X6UXgCY72UfE8Az/lwOubbEJARXpQ+7RiM9g==
   dependencies:
     "@types/fs-extra" "^9.0.13"
     "@types/minimist" "^1.2.2"
@@ -7060,10 +7060,9 @@ zx@^6.2.5:
     "@types/which" "^2.0.1"
     chalk "^5.0.1"
     fs-extra "^10.1.0"
-    globby "^13.1.1"
-    ignore "^5.2.0"
+    globby "^13.1.2"
     minimist "^1.2.6"
-    node-fetch "^3.2.5"
+    node-fetch "^3.2.6"
     ps-tree "^1.2.0"
     which "^2.0.2"
     yaml "^2.1.1"
