@@ -531,7 +531,7 @@ export function getDefaultConfig() {
              * Width
              * @see https://tailwindcss.com/docs/width
              */
-            w: [{ w: ['auto', 'min', 'max', spacing] }],
+            w: [{ w: ['auto', 'min', 'max', 'fit', spacing] }],
             /**
              * Min-Width
              * @see https://tailwindcss.com/docs/min-width
