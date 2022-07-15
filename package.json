@@ -10,7 +10,8 @@
         "className",
         "classList",
         "merge",
-        "conflict"
+        "conflict",
+        "override"
     ],
     "homepage": "https://github.com/dcastil/tailwind-merge",
     "bugs": {
