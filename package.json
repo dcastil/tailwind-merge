@@ -25,6 +25,7 @@
     ],
     "source": "src/index.ts",
     "exports": {
+        "types": "./dist/index.d.ts",
         "require": "./dist/index.js",
         "import": "./dist/tailwind-merge.mjs",
         "default": "./dist/tailwind-merge.mjs"
