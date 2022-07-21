@@ -1,7 +1,8 @@
 import { twMerge } from '../src'
 
-test('handles arbitrary length conflicts correctly', () => {
+test('handles simple conflicts with arbitrary values correctly', () => {
     expect(twMerge('m-[2px] m-[10px]')).toBe('m-[10px]')
+    expect(twMerge('z-20 z-[99]')).toBe('z-[99]')
     expect(twMerge('my-[2px] m-[10rem]')).toBe('m-[10rem]')
     expect(twMerge('cursor-pointer cursor-[grab]')).toBe('cursor-[grab]')
     expect(twMerge('m-[2px] m-[calc(100%-var(--arbitrary))]')).toBe(
