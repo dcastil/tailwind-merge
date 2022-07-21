@@ -43,9 +43,9 @@
         "test": "dts test",
         "lint": "eslint --max-warnings 0 '**'",
         "size": "size-limit",
-        "preversion": "if [ -n \"$DANYS_MACHINES\" ]; then git checkout main && git pull; fi",
+        "preversion": "if [ -n \"$DANYS_MACHINE\" ]; then git checkout main && git pull; fi",
         "version": "zx scripts/update-readme.js",
-        "postversion": "if [ -n \"$DANYS_MACHINES\" ]; then git push --follow-tags && open https://github.com/dcastil/tailwind-merge/releases; fi"
+        "postversion": "if [ -n \"$DANYS_MACHINE\" ]; then git push --follow-tags && open https://github.com/dcastil/tailwind-merge/releases; fi"
     },
     "devDependencies": {
         "@size-limit/preset-small-lib": "^7.0.8",
