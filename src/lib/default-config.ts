@@ -283,7 +283,7 @@ export function getDefaultConfig() {
              * Z-Index
              * @see https://tailwindcss.com/docs/z-index
              */
-            z: [{ z: [isLength] }],
+            z: [{ z: [isInteger] }],
             // Flexbox and Grid
             /**
              * Flex Basis
