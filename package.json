@@ -48,7 +48,7 @@
         "postversion": "if [ -n \"$DANYS_MACHINE\" ]; then git push --follow-tags && open https://github.com/dcastil/tailwind-merge/releases; fi"
     },
     "devDependencies": {
-        "@size-limit/preset-small-lib": "^7.0.8",
+        "@size-limit/preset-small-lib": "^8.0.0",
         "@types/jest": "^28.1.4",
         "@typescript-eslint/eslint-plugin": "^5.30.5",
         "@typescript-eslint/parser": "^5.30.5",
