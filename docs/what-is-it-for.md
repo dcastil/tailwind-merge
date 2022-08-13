@@ -33,3 +33,9 @@ function MyGenericInput(props) {
 ```
 
 tailwind-merge overrides conflicting classes and keeps everything else untouched. In the case of the `MySlightlyModifiedInput`, the input now only renders the classes `border rounded p-3`.
+
+---
+
+Next: [Features](./features.md)
+
+Previous: [Overview](../README.md)

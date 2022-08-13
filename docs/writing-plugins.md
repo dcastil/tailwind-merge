@@ -31,3 +31,9 @@ const twMerge = extendTailwindMerge(withMagic)
 ```
 
 Also, feel free to check out [tailwind-merge-rtl-plugin](https://www.npmjs.com/package/tailwind-merge-rtl-plugin) as a real example of a tailwind-merge plugin.
+
+---
+
+Next: [Versioning](./versioning.md)
+
+Previous: [API reference](./api-reference.md)

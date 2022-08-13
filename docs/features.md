@@ -99,3 +99,9 @@ twMerge('some-class', undefined, null, false, 0) // → 'some-class'
 twMerge('some-class', [undefined, ['another-class', false]], ['third-class'])
 // → 'some-class another-class third-class'
 ```
+
+---
+
+Next: [Configuring tailwind-merge](./configuring-tailwind-merge.md)
+
+Previous: [What is it for](./what-is-it-for.md)

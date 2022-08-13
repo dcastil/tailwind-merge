@@ -205,3 +205,9 @@ const twMerge2 = extendTailwindMerge(withMagic, withMoreMagic)
 // Using `createTailwindMerge`
 const twMerge3 = createTailwindMerge(() => ({  … }), withMagic, withMoreMagic)
 ```
+
+---
+
+Next: [API reference](./api-reference.md)
+
+Previous: [Features](./features.md)

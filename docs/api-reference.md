@@ -234,3 +234,9 @@ interface Config { … }
 ```
 
 TypeScript type for config object. Useful if you want to build a `createConfig` function but don't want to define it inline in [`extendTailwindMerge`](#extendtailwindmerge) or [`createTailwindMerge`](#createtailwindmerge).
+
+---
+
+Next: [Writing plugins](./writing-plugins.md)
+
+Previous: [Configuring tailwind-merge](./configuring-tailwind-merge.md)
