@@ -2,8 +2,7 @@ name: npm Publish dev
 
 on:
     push:
-        branches:
-            - main
+        branches: [main]
 
 jobs:
     publish:

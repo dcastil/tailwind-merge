@@ -2,8 +2,7 @@ name: Draft Release
 
 on:
     push:
-        branches:
-            - main
+        branches: [main]
     pull_request:
         types: [opened, reopened, synchronize]
 
