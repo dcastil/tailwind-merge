@@ -7,6 +7,4 @@
 
 ---
 
-Next: [Contributing](../.github/CONTRIBUTING.md)
-
-Previous: [Versioning](./versioning.md)
+Previous: [Contributing](./contributing.md)
