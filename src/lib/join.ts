@@ -11,7 +11,7 @@
 export type ClassNameValue = ClassNameArray | string | null | undefined | 0 | false
 type ClassNameArray = ClassNameValue[]
 
-export function join(...inputs: ClassNameValue[]): string
+export function join(...classLists: ClassNameValue[]): string
 export function join() {
     let index = 0
     let argument: ClassNameValue

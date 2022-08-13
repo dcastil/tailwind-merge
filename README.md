@@ -372,12 +372,35 @@ Reference to all exports of tailwind-merge.
 ### `twMerge`
 
 ```ts
-function twMerge(...classLists: Array<string | undefined | null | false>): string
+function twMerge(
+    ...classLists: Array<string | undefined | null | false | 0 | typeof classLists>
+): string
 ```
 
 Default function to use if you're using the default Tailwind config or are close enough to the default config. Check out [basic usage](#basic-usage) for more info.
 
 If `twMerge` doesn't work for you, you can create your own custom merge function with [`extendTailwindMerge`](#extendtailwindmerge).
+
+### `join`
+
+```ts
+function join(
+    ...classLists: Array<string | undefined | null | false | 0 | typeof classLists>
+): string
+```
+
+Function to join className strings conditionally without resolving conflicts.
+
+```ts
+join(
+    'border border-red-500',
+    hasBackground && 'bg-red-100',
+    hasLargeText && 'text-lg',
+    hasLargeSpacing && ['p-2', hasLargeText ? 'leading-8' : 'leading-7']
+)
+```
+
+It is used internally within `twMerge` and a direct subset of [`clsx`](https://www.npmjs.com/package/clsx). If you use `clsx` or [`classnames`](https://www.npmjs.com/package/classnames) to apply Tailwind classes conditionally and don't need support for object arguments, you can use `join` instead, it is a little faster and will save you a few hundred bytes in bundle size.
 
 ### `getDefaultConfig`
 
