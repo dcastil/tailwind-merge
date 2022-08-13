@@ -7,6 +7,7 @@ import {
     mergeConfigs,
     extendTailwindMerge,
     fromTheme,
+    join,
 } from '../src'
 
 test('has correct export types', () => {
@@ -28,6 +29,7 @@ test('has correct export types', () => {
     })
     expect(mergeConfigs).toStrictEqual(expect.any(Function))
     expect(extendTailwindMerge).toStrictEqual(expect.any(Function))
+    expect(join).toStrictEqual(expect.any(Function))
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const noRun = () => {
@@ -47,11 +49,13 @@ test('twMerge() has correct inputs and outputs', () => {
     expect(twMerge('hello world', undefined)).toStrictEqual(expect.any(String))
     expect(twMerge('hello world', undefined, null)).toStrictEqual(expect.any(String))
     expect(twMerge('hello world', undefined, null, false)).toStrictEqual(expect.any(String))
+    expect(twMerge('hello world', [undefined], [null, false])).toStrictEqual(expect.any(String))
+    expect(twMerge('hello world', [undefined], [null, [false, 'some-class'], []])).toStrictEqual(
+        expect.any(String)
+    )
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const noRun = () => {
-        // @ts-expect-error
-        twMerge(0)
         // @ts-expect-error
         twMerge(123)
         // @ts-expect-error
@@ -101,11 +105,15 @@ test('createTailwindMerge() has correct inputs and outputs', () => {
     expect(tailwindMerge('hello world', undefined)).toStrictEqual(expect.any(String))
     expect(tailwindMerge('hello world', undefined, null)).toStrictEqual(expect.any(String))
     expect(tailwindMerge('hello world', undefined, null, false)).toStrictEqual(expect.any(String))
+    expect(tailwindMerge('hello world', [undefined], [null, false])).toStrictEqual(
+        expect.any(String)
+    )
+    expect(
+        tailwindMerge('hello world', [undefined], [null, [false, 'some-class'], []])
+    ).toStrictEqual(expect.any(String))
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const noRun = () => {
-        // @ts-expect-error
-        tailwindMerge(0)
         // @ts-expect-error
         tailwindMerge(123)
         // @ts-expect-error
@@ -158,4 +166,12 @@ test('fromTheme has correct inputs and outputs', () => {
     expect(fromTheme('foo')).toStrictEqual(expect.any(Function))
     expect(fromTheme('foo').isThemeGetter).toBe(true)
     expect(fromTheme('foo')({ foo: ['hello'] })).toStrictEqual(['hello'])
+})
+
+test('join has correct inputs and outputs', () => {
+    expect(join()).toStrictEqual(expect.any(String))
+    expect(join('')).toStrictEqual(expect.any(String))
+    expect(join('', [false, null, undefined, 0, [], [false, [''], '']])).toStrictEqual(
+        expect.any(String)
+    )
 })
