@@ -40,6 +40,7 @@
     "scripts": {
         "build": "dts build",
         "test": "dts test",
+        "test:exports": "node scripts/test-built-package-exports.js && node scripts/test-built-package-exports.mjs",
         "lint": "eslint --max-warnings 0 '**'",
         "size": "size-limit",
         "preversion": "if [ -n \"$DANYS_MACHINE\" ]; then git checkout main && git pull; fi",

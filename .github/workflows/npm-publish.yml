@@ -29,6 +29,7 @@ jobs:
                   name: build-output
                   path: dist
                   if-no-files-found: error
+            - run: yarn test:exports
             - run: yarn size
             - uses: JS-DevTools/npm-publish@v1
               with:
