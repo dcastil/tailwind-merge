@@ -47,11 +47,13 @@ test('twMerge() has correct inputs and outputs', () => {
     expect(twMerge('hello world', undefined)).toStrictEqual(expect.any(String))
     expect(twMerge('hello world', undefined, null)).toStrictEqual(expect.any(String))
     expect(twMerge('hello world', undefined, null, false)).toStrictEqual(expect.any(String))
+    expect(twMerge('hello world', [undefined], [null, false])).toStrictEqual(expect.any(String))
+    expect(twMerge('hello world', [undefined], [null, [false, 'some-class'], []])).toStrictEqual(
+        expect.any(String)
+    )
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const noRun = () => {
-        // @ts-expect-error
-        twMerge(0)
         // @ts-expect-error
         twMerge(123)
         // @ts-expect-error
@@ -101,11 +103,15 @@ test('createTailwindMerge() has correct inputs and outputs', () => {
     expect(tailwindMerge('hello world', undefined)).toStrictEqual(expect.any(String))
     expect(tailwindMerge('hello world', undefined, null)).toStrictEqual(expect.any(String))
     expect(tailwindMerge('hello world', undefined, null, false)).toStrictEqual(expect.any(String))
+    expect(tailwindMerge('hello world', [undefined], [null, false])).toStrictEqual(
+        expect.any(String)
+    )
+    expect(
+        tailwindMerge('hello world', [undefined], [null, [false, 'some-class'], []])
+    ).toStrictEqual(expect.any(String))
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const noRun = () => {
-        // @ts-expect-error
-        tailwindMerge(0)
         // @ts-expect-error
         tailwindMerge(123)
         // @ts-expect-error
