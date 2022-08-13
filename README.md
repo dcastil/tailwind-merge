@@ -146,10 +146,17 @@ twMerge('p-5 p-2 my-non-tailwind-class p-4') // → 'my-non-tailwind-class p-4'
 twMerge('text-red text-secret-sauce') // → 'text-secret-sauce'
 ```
 
-### Ignores `undefined`, `null` and `false` values
+### Ignores falsy values
 
 ```ts
-twMerge('some-class', undefined, null, false) // → 'some-class'
+twMerge('some-class', undefined, null, false, 0) // → 'some-class'
+```
+
+### Supports arrays and nested arrays
+
+```ts
+twMerge('some-class', [undefined, ['another-class', false]], ['third-class'])
+// → 'some-class another-class third-class'
 ```
 
 ## Basic usage
