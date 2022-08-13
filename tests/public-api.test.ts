@@ -7,6 +7,7 @@ import {
     mergeConfigs,
     extendTailwindMerge,
     fromTheme,
+    join,
 } from '../src'
 
 test('has correct export types', () => {
@@ -28,6 +29,7 @@ test('has correct export types', () => {
     })
     expect(mergeConfigs).toStrictEqual(expect.any(Function))
     expect(extendTailwindMerge).toStrictEqual(expect.any(Function))
+    expect(join).toStrictEqual(expect.any(Function))
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const noRun = () => {
@@ -164,4 +166,12 @@ test('fromTheme has correct inputs and outputs', () => {
     expect(fromTheme('foo')).toStrictEqual(expect.any(Function))
     expect(fromTheme('foo').isThemeGetter).toBe(true)
     expect(fromTheme('foo')({ foo: ['hello'] })).toStrictEqual(['hello'])
+})
+
+test('join has correct inputs and outputs', () => {
+    expect(join()).toStrictEqual(expect.any(String))
+    expect(join('')).toStrictEqual(expect.any(String))
+    expect(join('', [false, null, undefined, 0, [], [false, [''], '']])).toStrictEqual(
+        expect.any(String)
+    )
 })
