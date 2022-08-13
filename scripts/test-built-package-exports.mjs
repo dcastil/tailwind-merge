@@ -1,5 +1,6 @@
 import assert from 'assert'
 
+// Not ideal, but there seems to be no way to point the import resolver to the package.json file if this isn't a npm package.
 import { twMerge } from '../dist/tailwind-merge.mjs'
 
 assert(twMerge() === '')
