@@ -1,12 +1,11 @@
 import { createConfigUtils } from './config-utils'
 import { Config } from './types'
 import { mergeClassList } from './merge-classlist'
+import { ClassNameValue, join } from './join'
 
 type CreateConfigFirst = () => Config
 type CreateConfigSubsequent = (config: Config) => Config
-type ClassLists = ClassListElement[]
-type ClassListElement = string | undefined | null | false
-type TailwindMerge = (...classLists: ClassLists) => string
+type TailwindMerge = (...classLists: ClassNameValue[]) => string
 type ConfigUtils = ReturnType<typeof createConfigUtils>
 
 export function createTailwindMerge(
@@ -47,17 +46,6 @@ export function createTailwindMerge(
     }
 
     return function callTailwindMerge() {
-        let classList = ''
-        let temp: ClassListElement
-
-        // Credits → https://github.com/lukeed/clsx/blob/v1.1.1/src/index.js
-        for (let index = 0; index < arguments.length; index += 1) {
-            if ((temp = arguments[index])) {
-                classList && (classList += ' ')
-                classList += temp
-            }
-        }
-
-        return functionToCall(classList)
+        return functionToCall(join.apply(null, arguments as any))
     }
 }
