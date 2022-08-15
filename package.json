@@ -57,6 +57,7 @@
         "eslint-plugin-import": "^2.26.0",
         "eslint-plugin-jest": "^26.7.0",
         "fp-ts": "^2.12.2",
+        "globby": "^11.1.0",
         "prettier": "^2.7.1",
         "size-limit": "^8.0.0",
         "ts-jest": "^28.0.7",
