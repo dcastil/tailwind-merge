@@ -1,0 +1,10 @@
+[
+    {
+        "path": "dist/tailwind-merge.mjs",
+        "limit": "10 KB"
+    },
+    {
+        "path": "dist/tailwind-merge.cjs.production.min.js",
+        "limit": "10 KB"
+    }
+]
