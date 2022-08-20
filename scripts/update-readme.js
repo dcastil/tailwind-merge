@@ -18,7 +18,7 @@ async function run() {
 
         if (!hasPartsToUpdate) {
             throw Error(
-                `${chalk.red('[ERROR]')} Could not find versioned logo image to update in README`
+                `${chalk.red('[ERROR]')} Could not find versioned logo image to update in README`,
             )
         }
 

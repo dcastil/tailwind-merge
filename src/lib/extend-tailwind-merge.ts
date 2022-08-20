@@ -13,6 +13,6 @@ export function extendTailwindMerge(
         ? createTailwindMerge(getDefaultConfig, configExtension, ...createConfig)
         : createTailwindMerge(
               () => mergeConfigs(getDefaultConfig(), configExtension),
-              ...createConfig
+              ...createConfig,
           )
 }

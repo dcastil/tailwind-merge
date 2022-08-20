@@ -21,7 +21,7 @@ export function createTailwindMerge(
 
         const config = restCreateConfig.reduce(
             (previousConfig, createConfigCurrent) => createConfigCurrent(previousConfig),
-            firstCreateConfig()
+            firstCreateConfig(),
         )
 
         configUtils = createConfigUtils(config)

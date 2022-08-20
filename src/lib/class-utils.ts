@@ -39,7 +39,7 @@ export function createClassUtils(config: Config) {
 
 function getGroupRecursive(
     classParts: string[],
-    classPartObject: ClassPartObject
+    classPartObject: ClassPartObject,
 ): ClassGroupId | undefined {
     if (classParts.length === 0) {
         return classPartObject.classGroupId
@@ -71,7 +71,7 @@ function getGroupIdForArbitraryProperty(className: string) {
         const arbitraryPropertyClassName = arbitraryPropertyRegex.exec(className)![1]
         const property = arbitraryPropertyClassName?.substring(
             0,
-            arbitraryPropertyClassName.indexOf(':')
+            arbitraryPropertyClassName.indexOf(':'),
         )
 
         if (property) {
@@ -93,7 +93,7 @@ export function createClassMap(config: Config) {
 
     const prefixedClassGroupEntries = getPrefixedClassGroupEntries(
         Object.entries(config.classGroups),
-        prefix
+        prefix,
     )
 
     prefixedClassGroupEntries.forEach(([classGroupId, classGroup]) => {
@@ -107,7 +107,7 @@ function processClassesRecursively(
     classGroup: ClassGroup,
     classPartObject: ClassPartObject,
     classGroupId: ClassGroupId,
-    theme: ThemeObject
+    theme: ThemeObject,
 ) {
     classGroup.forEach((classDefinition) => {
         if (typeof classDefinition === 'string') {
@@ -123,7 +123,7 @@ function processClassesRecursively(
                     classDefinition(theme),
                     classPartObject,
                     classGroupId,
-                    theme
+                    theme,
                 )
                 return
             }
@@ -141,7 +141,7 @@ function processClassesRecursively(
                 classGroup,
                 getPart(classPartObject, key),
                 classGroupId,
-                theme
+                theme,
             )
         })
     })
@@ -170,7 +170,7 @@ function isThemeGetter(func: ClassValidator | ThemeGetter): func is ThemeGetter 
 
 function getPrefixedClassGroupEntries(
     classGroupEntries: Array<[classGroupId: string, classGroup: ClassGroup]>,
-    prefix: string | undefined
+    prefix: string | undefined,
 ): Array<[classGroupId: string, classGroup: ClassGroup]> {
     if (!prefix) {
         return classGroupEntries
@@ -184,7 +184,7 @@ function getPrefixedClassGroupEntries(
 
             if (typeof classDefinition === 'object') {
                 return Object.fromEntries(
-                    Object.entries(classDefinition).map(([key, value]) => [prefix + key, value])
+                    Object.entries(classDefinition).map(([key, value]) => [prefix + key, value]),
                 )
             }
 

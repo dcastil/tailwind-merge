@@ -29,7 +29,7 @@ join(
     'border border-red-500',
     hasBackground && 'bg-red-100',
     hasLargeText && 'text-lg',
-    hasLargeSpacing && ['p-2', hasLargeText ? 'leading-8' : 'leading-7']
+    hasLargeSpacing && ['p-2', hasLargeText ? 'leading-8' : 'leading-7'],
 )
 ```
 
@@ -185,7 +185,7 @@ const customTwMerge = createTailwindMerge(getDefaultConfig, (config) =>
             // ↓ Adding value to existing class group
             animate: ['animate-magic'],
         },
-    })
+    }),
 )
 ```
 

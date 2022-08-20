@@ -8,7 +8,7 @@ test('class map has correct class groups at first part', () => {
         Array.from(classMap.nextPart.entries()).map(([key, value]) => [
             key,
             Array.from(getClassGroupsInClassPart(value)).sort(),
-        ])
+        ]),
     )
 
     expect(classMap.classGroupId).toBeUndefined()

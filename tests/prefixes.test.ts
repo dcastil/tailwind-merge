@@ -14,6 +14,6 @@ test('prefix working correctly', () => {
     expect(twMerge('!tw-right-0 !tw-inset-0')).toBe('!tw-inset-0')
 
     expect(twMerge('hover:focus:!tw-right-0 focus:hover:!tw-inset-0')).toBe(
-        'focus:hover:!tw-inset-0'
+        'focus:hover:!tw-inset-0',
     )
 })

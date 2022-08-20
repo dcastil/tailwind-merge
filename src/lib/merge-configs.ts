@@ -18,7 +18,7 @@ const overrideTypes = new Set(['string', 'number', 'boolean'])
 function mergePropertyRecursively(
     baseObject: Record<string, unknown>,
     mergeKey: string,
-    mergeValue: unknown
+    mergeValue: unknown,
 ) {
     if (
         !hasOwnProperty.call(baseObject, mergeKey) ||
@@ -44,7 +44,7 @@ function mergePropertyRecursively(
             mergePropertyRecursively(
                 baseObject[mergeKey] as Record<string, unknown>,
                 nextKey,
-                mergeValue[nextKey as keyof object]
+                mergeValue[nextKey as keyof object],
             )
         }
     }

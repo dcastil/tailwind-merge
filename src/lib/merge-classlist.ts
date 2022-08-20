@@ -63,7 +63,7 @@ export function mergeClassList(classList: string, configUtils: ConfigUtils) {
                 classGroupsInConflict.add(classId)
 
                 getConflictingClassGroupIds(classGroupId).forEach((group) =>
-                    classGroupsInConflict.add(modifierId + group)
+                    classGroupsInConflict.add(modifierId + group),
                 )
 
                 return true

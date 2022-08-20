@@ -6,7 +6,7 @@ test('handles simple conflicts with arbitrary values correctly', () => {
     expect(twMerge('my-[2px] m-[10rem]')).toBe('m-[10rem]')
     expect(twMerge('cursor-pointer cursor-[grab]')).toBe('cursor-[grab]')
     expect(twMerge('m-[2px] m-[calc(100%-var(--arbitrary))]')).toBe(
-        'm-[calc(100%-var(--arbitrary))]'
+        'm-[calc(100%-var(--arbitrary))]',
     )
     expect(twMerge('m-[2px] m-[length:var(--mystery-var)]')).toBe('m-[length:var(--mystery-var)]')
 })
@@ -14,7 +14,7 @@ test('handles simple conflicts with arbitrary values correctly', () => {
 test('handles arbitrary length conflicts with labels and modifiers correctly', () => {
     expect(twMerge('hover:m-[2px] hover:m-[length:var(--c)]')).toBe('hover:m-[length:var(--c)]')
     expect(twMerge('hover:focus:m-[2px] focus:hover:m-[length:var(--c)]')).toBe(
-        'focus:hover:m-[length:var(--c)]'
+        'focus:hover:m-[length:var(--c)]',
     )
 })
 

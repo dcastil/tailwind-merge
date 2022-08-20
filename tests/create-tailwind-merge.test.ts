@@ -17,10 +17,10 @@ test('createTailwindMerge works with single config function', () => {
 
     expect(tailwindMerge('')).toBe('')
     expect(tailwindMerge('my-modifier:fooKey-bar my-modifier:fooKey-baz')).toBe(
-        'my-modifier:fooKey-baz'
+        'my-modifier:fooKey-baz',
     )
     expect(tailwindMerge('other-modifier:fooKey-bar other-modifier:fooKey-baz')).toBe(
-        'other-modifier:fooKey-baz'
+        'other-modifier:fooKey-baz',
     )
     expect(tailwindMerge('group fooKey-bar')).toBe('fooKey-bar')
     expect(tailwindMerge('fooKey-bar group')).toBe('group')
@@ -33,7 +33,7 @@ test('createTailwindMerge works with single config function', () => {
             // @ts-expect-error
             (config: any) => {
                 return config
-            }
+            },
         )
     }
 })
@@ -63,15 +63,15 @@ test('createTailwindMerge works with multiple config functions', () => {
                 ...config.conflictingClassGroups,
                 fooKey: [...(config.conflictingClassGroups.fooKey ?? []), 'helloFromSecondConfig'],
             },
-        })
+        }),
     )
 
     expect(tailwindMerge('')).toBe('')
     expect(tailwindMerge('my-modifier:fooKey-bar my-modifier:fooKey-baz')).toBe(
-        'my-modifier:fooKey-baz'
+        'my-modifier:fooKey-baz',
     )
     expect(tailwindMerge('other-modifier:fooKey-bar other-modifier:fooKey-baz')).toBe(
-        'other-modifier:fooKey-baz'
+        'other-modifier:fooKey-baz',
     )
     expect(tailwindMerge('group fooKey-bar')).toBe('fooKey-bar')
     expect(tailwindMerge('fooKey-bar group')).toBe('group')

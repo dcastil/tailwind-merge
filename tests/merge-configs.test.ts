@@ -24,8 +24,8 @@ test('mergeConfigs has correct behavior', () => {
                     fooKey: ['otherKey'],
                     otherKey: ['fooKey', 'fooKey2'],
                 },
-            }
-        )
+            },
+        ),
     ).toEqual({
         cacheSize: 50,
         theme: {

@@ -29,7 +29,7 @@ async function forEachFile(patterns: string | string[], callback: (fileContent: 
 
     await Promise.all(
         paths.map((filePath) =>
-            fs.promises.readFile(filePath, { encoding: 'utf-8' }).then(callback)
-        )
+            fs.promises.readFile(filePath, { encoding: 'utf-8' }).then(callback),
+        ),
     )
 }

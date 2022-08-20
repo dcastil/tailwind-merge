@@ -16,10 +16,10 @@ test('extendTailwindMerge works correctly with single config', () => {
 
     expect(tailwindMerge('')).toBe('')
     expect(tailwindMerge('my-modifier:fooKey-bar my-modifier:fooKey-baz')).toBe(
-        'my-modifier:fooKey-baz'
+        'my-modifier:fooKey-baz',
     )
     expect(tailwindMerge('other-modifier:fooKey-bar other-modifier:fooKey-baz')).toBe(
-        'other-modifier:fooKey-baz'
+        'other-modifier:fooKey-baz',
     )
     expect(tailwindMerge('group fooKey-bar')).toBe('fooKey-bar')
     expect(tailwindMerge('fooKey-bar group')).toBe('group')
@@ -50,15 +50,15 @@ test('extendTailwindMerge works corectly with multiple configs', () => {
                 ...config.classGroups,
                 secondConfigKey: ['hi-there', 'hello'],
             },
-        })
+        }),
     )
 
     expect(tailwindMerge('')).toBe('')
     expect(tailwindMerge('my-modifier:fooKey-bar my-modifier:fooKey-baz')).toBe(
-        'my-modifier:fooKey-baz'
+        'my-modifier:fooKey-baz',
     )
     expect(tailwindMerge('other-modifier:hi-there other-modifier:hello')).toBe(
-        'other-modifier:hello'
+        'other-modifier:hello',
     )
     expect(tailwindMerge('group fooKey-bar')).toBe('fooKey-bar')
     expect(tailwindMerge('fooKey-bar group')).toBe('group')
@@ -88,10 +88,10 @@ test('extendTailwindMerge works correctly with function config', () => {
 
     expect(tailwindMerge('')).toBe('')
     expect(tailwindMerge('my-modifier:fooKey-bar my-modifier:fooKey-baz')).toBe(
-        'my-modifier:fooKey-baz'
+        'my-modifier:fooKey-baz',
     )
     expect(tailwindMerge('other-modifier:fooKey-bar other-modifier:fooKey-baz')).toBe(
-        'other-modifier:fooKey-baz'
+        'other-modifier:fooKey-baz',
     )
     expect(tailwindMerge('group fooKey-bar')).toBe('fooKey-bar')
     expect(tailwindMerge('fooKey-bar group')).toBe('group')
