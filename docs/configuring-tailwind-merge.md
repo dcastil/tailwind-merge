@@ -208,6 +208,6 @@ const twMerge3 = createTailwindMerge(() => ({  … }), withMagic, withMoreMagic)
 
 ---
 
-Next: [API reference](./api-reference.md)
+Next: [Recipes](./recipes.md)
 
 Previous: [Features](./features.md)

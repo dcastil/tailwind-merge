@@ -3,7 +3,7 @@
 If you use Tailwind with a component-based UI renderer like [React](https://reactjs.org) or [Vue](https://vuejs.org), you're probably familiar with the situation that you want to change some styles of a component, but only in one place.
 
 ```jsx
-import React from 'react'
+// React components with JSX syntax used in this example
 
 function MyGenericInput(props) {
     const className = `border rounded px-2 py-1 ${props.className || ''}`

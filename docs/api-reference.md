@@ -239,4 +239,4 @@ TypeScript type for config object. Useful if you want to build a `createConfig` 
 
 Next: [Writing plugins](./writing-plugins.md)
 
-Previous: [Configuring tailwind-merge](./configuring-tailwind-merge.md)
+Previous: [Recipes](./recipes.md)
