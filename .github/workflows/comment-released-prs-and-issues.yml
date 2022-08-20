@@ -7,6 +7,9 @@ on:
 jobs:
     release:
         runs-on: ubuntu-latest
+        permissions:
+            issues: write
+            pull-requests: write
         steps:
             - uses: apexskier/github-release-commenter@v1
               with:
