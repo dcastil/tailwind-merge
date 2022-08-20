@@ -74,13 +74,16 @@ export function mergeClassList(classList: string, configUtils: ConfigUtils) {
     )
 }
 
+const SPLIT_MODIFIER_REGEX = /[:[\]]/g
+
 function splitModifiers(className: string) {
     const modifiers = []
 
     let bracketDepth = 0
     let modifierStart = 0
+    let match: RegExpExecArray | null
 
-    for (const match of className.matchAll(/[:[\]]/g)) {
+    while ((match = SPLIT_MODIFIER_REGEX.exec(className))) {
         if (match[0] === ':') {
             if (bracketDepth === 0) {
                 const nextModifierStart = match.index! + 1
