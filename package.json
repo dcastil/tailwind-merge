@@ -49,7 +49,7 @@
     },
     "devDependencies": {
         "@size-limit/preset-small-lib": "^8.0.0",
-        "@types/jest": "^28.1.6",
+        "@types/jest": "^29.0.0",
         "@typescript-eslint/eslint-plugin": "^5.31.0",
         "@typescript-eslint/parser": "^5.31.0",
         "dts-cli": "^1.5.2",
