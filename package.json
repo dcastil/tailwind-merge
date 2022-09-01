@@ -55,7 +55,7 @@
         "dts-cli": "^1.5.2",
         "eslint": "^8.21.0",
         "eslint-plugin-import": "^2.26.0",
-        "eslint-plugin-jest": "^26.7.0",
+        "eslint-plugin-jest": "^27.0.1",
         "fp-ts": "^2.12.2",
         "globby": "^11.1.0",
         "prettier": "^2.7.1",
