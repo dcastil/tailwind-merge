@@ -4,8 +4,6 @@ template: |
     $CHANGES
 
     **Full Changelog**: https://github.com/dcastil/tailwind-merge/compare/$PREVIOUS_TAG...v$RESOLVED_VERSION
-
-    Thanks to @charkour for sponsoring tailwind-merge! ❤️
 category-template: '### $TITLE'
 change-template: '- $TITLE by @$AUTHOR in https://github.com/dcastil/tailwind-merge/pull/$NUMBER'
 change-title-escapes: '\<*_&'
