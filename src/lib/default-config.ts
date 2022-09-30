@@ -561,7 +561,7 @@ export function getDefaultConfig() {
              * Height
              * @see https://tailwindcss.com/docs/height
              */
-            h: [{ h: getSpacingWithAuto() }],
+            h: [{ h: [spacing, 'auto', 'min', 'max', 'fit'] }],
             /**
              * Min-Height
              * @see https://tailwindcss.com/docs/min-height
