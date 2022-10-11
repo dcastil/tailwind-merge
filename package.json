@@ -60,7 +60,7 @@
         "globby": "^11.1.0",
         "prettier": "^2.7.1",
         "size-limit": "^8.1.0",
-        "ts-jest": "^28.0.8",
+        "ts-jest": "^29.0.3",
         "typescript": "^4.8.4",
         "zx": "^7.1.1"
     }
