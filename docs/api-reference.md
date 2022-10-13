@@ -203,7 +203,7 @@ interface Validators {
     isArbitrarySize(classPart: string): boolean
     isArbitraryPosition(classPart: string): boolean
     isArbitraryUrl(classPart: string): boolean
-    isArbitraryWeight(classPart: string): boolean
+    isArbitraryNumber(classPart: string): boolean
     isArbitraryShadow(classPart: string): boolean
     isAny(classPart: string): boolean
 }
@@ -225,7 +225,7 @@ A brief summary for each validator:
 -   `isArbitrarySize` checks whether class part is an arbitrary value which starts with `size:` (`[size:200px_100px]`) which is necessary for background-size classNames.
 -   `isArbitraryPosition` checks whether class part is an arbitrary value which starts with `position:` (`[position:200px_100px]`) which is necessary for background-position classNames.
 -   `isArbitraryUrl` checks whether class part is an arbitrary value which starts with `url:` or `url(` (`[url('/path-to-image.png')]`, `url:var(--maybe-a-url-at-runtime)]`) which is necessary for background-image classNames.
--   `isArbitraryWeight` checks whether class part is an arbitrary value which starts with `number:` or is a number (`[number:var(--value)]`, `[450]`) which is necessary for font-weight classNames.
+-   `isArbitraryNumber` checks whether class part is an arbitrary value which starts with `number:` or is a number (`[number:var(--value)]`, `[450]`) which is necessary for font-weight and stroke-width classNames.
 -   `isArbitraryShadow` checks whether class part is an arbitrary value which starts with the same pattern as a shadow value (`[0_35px_60px_-15px_rgba(0,0,0,0.3)]`), namely with two lengths separated by a underscore.
 -   `isAny` always returns true. Be careful with this validator as it might match unwanted classes. I use it primarily to match colors or when I'm certain there are no other class groups in a namespace.
 

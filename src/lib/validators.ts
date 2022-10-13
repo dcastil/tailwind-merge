@@ -45,13 +45,18 @@ export function isArbitraryUrl(classPart: string) {
         : false
 }
 
-export function isArbitraryWeight(classPart: string) {
+export function isArbitraryNumber(classPart: string) {
     const arbitraryValue = arbitraryValueRegex.exec(classPart)?.[1]
 
     return arbitraryValue
         ? !Number.isNaN(Number(arbitraryValue)) || arbitraryValue.startsWith('number:')
         : false
 }
+
+/**
+ * @deprecated Will be removed in next major version. Use `isArbitraryNumber` instead.
+ */
+export const isArbitraryWeight = isArbitraryNumber
 
 export function isInteger(classPart: string) {
     const arbitraryValue = arbitraryValueRegex.exec(classPart)?.[1]
