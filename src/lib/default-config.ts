@@ -1523,7 +1523,7 @@ export function getDefaultConfig() {
              * Stroke Width
              * @see https://tailwindcss.com/docs/stroke-width
              */
-            'stroke-w': [{ stroke: [isLength] }],
+            'stroke-w': [{ stroke: [isLength, isArbitraryNumber] }],
             /**
              * Stroke
              * @see https://tailwindcss.com/docs/stroke
