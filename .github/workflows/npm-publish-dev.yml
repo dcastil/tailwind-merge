@@ -28,7 +28,9 @@ jobs:
                   path: dist
                   if-no-files-found: error
             - run: yarn size
-            - run: yarn version --no-git-tag-version --new-version 0.0.0-dev.${{ github.sha }}
+            - uses: stevenbenitez/get-package-version-action@v1
+              id: package-version
+            - run: yarn version --no-git-tag-version --new-version ${{ steps.package-version.outputs.version }}-dev.${{ github.sha }}
             - uses: JS-DevTools/npm-publish@v1
               with:
                   token: ${{ secrets.NPM_TOKEN }}
