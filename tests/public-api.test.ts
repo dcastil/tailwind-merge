@@ -24,6 +24,7 @@ test('has correct export types', () => {
         isArbitraryPosition: expect.any(Function),
         isArbitraryUrl: expect.any(Function),
         isArbitraryWeight: expect.any(Function),
+        isArbitraryNumber: expect.any(Function),
         isArbitraryShadow: expect.any(Function),
         isAny: expect.any(Function),
     })
@@ -138,6 +139,7 @@ test('validators have correct inputs and outputs', () => {
     expect(validators.isArbitraryPosition('')).toEqual(expect.any(Boolean))
     expect(validators.isArbitraryUrl('')).toEqual(expect.any(Boolean))
     expect(validators.isArbitraryWeight('')).toEqual(expect.any(Boolean))
+    expect(validators.isArbitraryNumber('')).toEqual(expect.any(Boolean))
     expect(validators.isArbitraryShadow('')).toEqual(expect.any(Boolean))
 })
 

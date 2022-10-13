@@ -10,7 +10,7 @@ const {
     isArbitrarySize,
     isArbitraryPosition,
     isArbitraryUrl,
-    isArbitraryWeight,
+    isArbitraryNumber,
     isArbitraryShadow,
 } = validators
 
@@ -143,17 +143,17 @@ describe('validators', () => {
         expect(isArbitraryUrl('url(2px)')).toBe(false)
     })
 
-    test('isArbitraryWeight', () => {
-        expect(isArbitraryWeight('[number:black]')).toBe(true)
-        expect(isArbitraryWeight('[number:bla]')).toBe(true)
-        expect(isArbitraryWeight('[number:230]')).toBe(true)
-        expect(isArbitraryWeight('[450]')).toBe(true)
+    test('isArbitraryNumber', () => {
+        expect(isArbitraryNumber('[number:black]')).toBe(true)
+        expect(isArbitraryNumber('[number:bla]')).toBe(true)
+        expect(isArbitraryNumber('[number:230]')).toBe(true)
+        expect(isArbitraryNumber('[450]')).toBe(true)
 
-        expect(isArbitraryWeight('[2px]')).toBe(false)
-        expect(isArbitraryWeight('[bla]')).toBe(false)
-        expect(isArbitraryWeight('[black]')).toBe(false)
-        expect(isArbitraryWeight('black')).toBe(false)
-        expect(isArbitraryWeight('450')).toBe(false)
+        expect(isArbitraryNumber('[2px]')).toBe(false)
+        expect(isArbitraryNumber('[bla]')).toBe(false)
+        expect(isArbitraryNumber('[black]')).toBe(false)
+        expect(isArbitraryNumber('black')).toBe(false)
+        expect(isArbitraryNumber('450')).toBe(false)
     })
 
     test('isArbitraryShadow', () => {
