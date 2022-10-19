@@ -771,7 +771,7 @@ export function getDefaultConfig() {
              * Word Break
              * @see https://tailwindcss.com/docs/word-break
              */
-            break: [{ break: ['normal', 'words', 'all'] }],
+            break: [{ break: ['normal', 'words', 'all', 'keep'] }],
             /**
              * Content
              * @see https://tailwindcss.com/docs/content
