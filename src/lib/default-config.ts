@@ -1518,7 +1518,7 @@ export function getDefaultConfig() {
              * Fill
              * @see https://tailwindcss.com/docs/fill
              */
-            fill: [{ fill: [colors] }],
+            fill: [{ fill: [colors, 'none'] }],
             /**
              * Stroke Width
              * @see https://tailwindcss.com/docs/stroke-width
@@ -1528,7 +1528,7 @@ export function getDefaultConfig() {
              * Stroke
              * @see https://tailwindcss.com/docs/stroke
              */
-            stroke: [{ stroke: [colors] }],
+            stroke: [{ stroke: [colors, 'none'] }],
             // Accessibility
             /**
              * Screen Readers
