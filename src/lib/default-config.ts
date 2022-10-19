@@ -409,7 +409,7 @@ export function getDefaultConfig() {
              * Align Content
              * @see https://tailwindcss.com/docs/align-content
              */
-            'align-content': [{ content: getAlign() }],
+            'align-content': [{ content: [...getAlign(), 'baseline'] }],
             /**
              * Align Items
              * @see https://tailwindcss.com/docs/align-items
@@ -429,7 +429,7 @@ export function getDefaultConfig() {
              * Place Items
              * @see https://tailwindcss.com/docs/place-items
              */
-            'place-items': [{ 'place-items': ['start', 'end', 'center', 'stretch'] }],
+            'place-items': [{ 'place-items': ['start', 'end', 'center', 'baseline', 'stretch'] }],
             /**
              * Place Self
              * @see https://tailwindcss.com/docs/place-self
