@@ -424,7 +424,7 @@ export function getDefaultConfig() {
              * Place Content
              * @see https://tailwindcss.com/docs/place-content
              */
-            'place-content': [{ 'place-content': [...getAlign(), 'stretch'] }],
+            'place-content': [{ 'place-content': [...getAlign(), 'baseline', 'stretch'] }],
             /**
              * Place Items
              * @see https://tailwindcss.com/docs/place-items
