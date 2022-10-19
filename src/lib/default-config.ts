@@ -1012,7 +1012,7 @@ export function getDefaultConfig() {
              * Outline Style
              * @see https://tailwindcss.com/docs/outline-style
              */
-            'outline-style': [{ outline: ['', ...getLineStyles(), 'hidden'] }],
+            'outline-style': [{ outline: ['', ...getLineStyles()] }],
             /**
              * Outline Offset
              * @see https://tailwindcss.com/docs/outline-offset
