@@ -121,7 +121,7 @@ function sortModifiers(modifiers: string[]) {
         return modifiers
     }
 
-    const sortedModifiers = []
+    const sortedModifiers: string[] = []
     let unsortedModifiers: string[] = []
 
     modifiers.forEach((modifier) => {
