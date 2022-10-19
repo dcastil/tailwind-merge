@@ -5,6 +5,9 @@ test('basic arbitrary variants', () => {
     expect(twMerge('[&>*]:underline [&>*]:line-through [&_div]:line-through')).toBe(
         '[&>*]:line-through [&_div]:line-through',
     )
+    expect(twMerge('supports-[display:grid]:flex supports-[display:grid]:grid')).toBe(
+        'supports-[display:grid]:grid',
+    )
 })
 
 test('arbitrary variants with modifiers', () => {
