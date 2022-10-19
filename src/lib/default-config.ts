@@ -278,7 +278,7 @@ export function getDefaultConfig() {
              * Visibility
              * @see https://tailwindcss.com/docs/visibility
              */
-            visibility: ['visible', 'invisible'],
+            visibility: ['visible', 'invisible', 'collapse'],
             /**
              * Z-Index
              * @see https://tailwindcss.com/docs/z-index
