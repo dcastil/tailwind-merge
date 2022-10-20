@@ -1,7 +1,7 @@
 import { createConfigUtils } from './config-utils'
 import { Config } from './types'
 import { mergeClassList } from './merge-classlist'
-import { ClassNameValue, join } from './join'
+import { ClassNameValue, twJoin } from './tw-join'
 
 type CreateConfigFirst = () => Config
 type CreateConfigSubsequent = (config: Config) => Config
@@ -46,6 +46,6 @@ export function createTailwindMerge(
     }
 
     return function callTailwindMerge() {
-        return functionToCall(join.apply(null, arguments as any))
+        return functionToCall(twJoin.apply(null, arguments as any))
     }
 }
