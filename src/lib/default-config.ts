@@ -278,7 +278,7 @@ export function getDefaultConfig() {
              * Visibility
              * @see https://tailwindcss.com/docs/visibility
              */
-            visibility: ['visible', 'invisible'],
+            visibility: ['visible', 'invisible', 'collapse'],
             /**
              * Z-Index
              * @see https://tailwindcss.com/docs/z-index
@@ -409,7 +409,7 @@ export function getDefaultConfig() {
              * Align Content
              * @see https://tailwindcss.com/docs/align-content
              */
-            'align-content': [{ content: getAlign() }],
+            'align-content': [{ content: [...getAlign(), 'baseline'] }],
             /**
              * Align Items
              * @see https://tailwindcss.com/docs/align-items
@@ -424,12 +424,12 @@ export function getDefaultConfig() {
              * Place Content
              * @see https://tailwindcss.com/docs/place-content
              */
-            'place-content': [{ 'place-content': [...getAlign(), 'stretch'] }],
+            'place-content': [{ 'place-content': [...getAlign(), 'baseline', 'stretch'] }],
             /**
              * Place Items
              * @see https://tailwindcss.com/docs/place-items
              */
-            'place-items': [{ 'place-items': ['start', 'end', 'center', 'stretch'] }],
+            'place-items': [{ 'place-items': ['start', 'end', 'center', 'baseline', 'stretch'] }],
             /**
              * Place Self
              * @see https://tailwindcss.com/docs/place-self
@@ -771,7 +771,7 @@ export function getDefaultConfig() {
              * Word Break
              * @see https://tailwindcss.com/docs/word-break
              */
-            break: [{ break: ['normal', 'words', 'all'] }],
+            break: [{ break: ['normal', 'words', 'all', 'keep'] }],
             /**
              * Content
              * @see https://tailwindcss.com/docs/content
@@ -1012,7 +1012,7 @@ export function getDefaultConfig() {
              * Outline Style
              * @see https://tailwindcss.com/docs/outline-style
              */
-            'outline-style': [{ outline: ['', ...getLineStyles(), 'hidden'] }],
+            'outline-style': [{ outline: ['', ...getLineStyles()] }],
             /**
              * Outline Offset
              * @see https://tailwindcss.com/docs/outline-offset
@@ -1518,7 +1518,7 @@ export function getDefaultConfig() {
              * Fill
              * @see https://tailwindcss.com/docs/fill
              */
-            fill: [{ fill: [colors] }],
+            fill: [{ fill: [colors, 'none'] }],
             /**
              * Stroke Width
              * @see https://tailwindcss.com/docs/stroke-width
@@ -1528,7 +1528,7 @@ export function getDefaultConfig() {
              * Stroke
              * @see https://tailwindcss.com/docs/stroke
              */
-            stroke: [{ stroke: [colors] }],
+            stroke: [{ stroke: [colors, 'none'] }],
             // Accessibility
             /**
              * Screen Readers
