@@ -8,6 +8,7 @@ import {
     extendTailwindMerge,
     fromTheme,
     join,
+    twJoin,
 } from '../src'
 
 test('has correct export types', () => {
@@ -174,6 +175,14 @@ test('join has correct inputs and outputs', () => {
     expect(join()).toStrictEqual(expect.any(String))
     expect(join('')).toStrictEqual(expect.any(String))
     expect(join('', [false, null, undefined, 0, [], [false, [''], '']])).toStrictEqual(
+        expect.any(String),
+    )
+})
+
+test('twJoin has correct inputs and outputs', () => {
+    expect(twJoin()).toStrictEqual(expect.any(String))
+    expect(twJoin('')).toStrictEqual(expect.any(String))
+    expect(twJoin('', [false, null, undefined, 0, [], [false, [''], '']])).toStrictEqual(
         expect.any(String),
     )
 })

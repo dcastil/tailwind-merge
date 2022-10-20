@@ -11,8 +11,8 @@
 export type ClassNameValue = ClassNameArray | string | null | undefined | 0 | false
 type ClassNameArray = ClassNameValue[]
 
-export function join(...classLists: ClassNameValue[]): string
-export function join() {
+export function twJoin(...classLists: ClassNameValue[]): string
+export function twJoin() {
     let index = 0
     let argument: ClassNameValue
     let resolvedValue: string
