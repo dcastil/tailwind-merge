@@ -7,38 +7,38 @@
  * Original code has MIT license: Copyright (c) Luke Edwards <luke.edwards05@gmail.com> (lukeed.com)
  */
 
-import { join } from '../src'
+import { twJoin } from '../src'
 
 test('strings', () => {
-    expect(join('')).toBe('')
-    expect(join('foo')).toBe('foo')
-    expect(join(true && 'foo')).toBe('foo')
-    expect(join(false && 'foo')).toBe('')
+    expect(twJoin('')).toBe('')
+    expect(twJoin('foo')).toBe('foo')
+    expect(twJoin(true && 'foo')).toBe('foo')
+    expect(twJoin(false && 'foo')).toBe('')
 })
 
 test('strings (variadic)', () => {
-    expect(join('')).toBe('')
-    expect(join('foo', 'bar')).toBe('foo bar')
-    expect(join(true && 'foo', false && 'bar', 'baz')).toBe('foo baz')
-    expect(join(false && 'foo', 'bar', 'baz', '')).toBe('bar baz')
+    expect(twJoin('')).toBe('')
+    expect(twJoin('foo', 'bar')).toBe('foo bar')
+    expect(twJoin(true && 'foo', false && 'bar', 'baz')).toBe('foo baz')
+    expect(twJoin(false && 'foo', 'bar', 'baz', '')).toBe('bar baz')
 })
 
 test('arrays', () => {
-    expect(join([])).toBe('')
-    expect(join(['foo'])).toBe('foo')
-    expect(join(['foo', 'bar'])).toBe('foo bar')
-    expect(join(['foo', 0 && 'bar', 1 && 'baz'])).toBe('foo baz')
+    expect(twJoin([])).toBe('')
+    expect(twJoin(['foo'])).toBe('foo')
+    expect(twJoin(['foo', 'bar'])).toBe('foo bar')
+    expect(twJoin(['foo', 0 && 'bar', 1 && 'baz'])).toBe('foo baz')
 })
 
 test('arrays (nested)', () => {
-    expect(join([[[]]])).toBe('')
-    expect(join([[['foo']]])).toBe('foo')
-    expect(join([false, [['foo']]])).toBe('foo')
-    expect(join(['foo', ['bar', ['', [['baz']]]]])).toBe('foo bar baz')
+    expect(twJoin([[[]]])).toBe('')
+    expect(twJoin([[['foo']]])).toBe('foo')
+    expect(twJoin([false, [['foo']]])).toBe('foo')
+    expect(twJoin(['foo', ['bar', ['', [['baz']]]]])).toBe('foo bar baz')
 })
 
 test('arrays (variadic)', () => {
-    expect(join([], [])).toBe('')
-    expect(join(['foo'], ['bar'])).toBe('foo bar')
-    expect(join(['foo'], null, ['baz', ''], false, '', [])).toBe('foo baz')
+    expect(twJoin([], [])).toBe('')
+    expect(twJoin(['foo'], ['bar'])).toBe('foo bar')
+    expect(twJoin(['foo'], null, ['baz', ''], false, '', [])).toBe('foo baz')
 })
