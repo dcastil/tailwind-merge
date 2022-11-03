@@ -2,7 +2,7 @@ const arbitraryValueRegex = /^\[(.+)\]$/
 const fractionRegex = /^\d+\/\d+$/
 const stringLengths = new Set(['px', 'full', 'screen'])
 const tshirtUnitRegex = /^(\d+)?(xs|sm|md|lg|xl)$/
-const lengthUnitRegex = /\d+(%|px|em|rem|vh|vw|pt|pc|in|cm|mm|cap|ch|ex|lh|rlh|vi|vb|vmin|vmax)/
+const lengthUnitRegex = /\d+(%|px|r?em|[sdl]?v([hwib]|min|max)|pt|pc|in|cm|mm|cap|ch|ex|r?lh)/
 // Shadow always begins with x and y offset separated by underscore
 const shadowRegex = /^-?((\d+)?\.?(\d+)[a-z]+|0)_-?((\d+)?\.?(\d+)[a-z]+|0)/
 
