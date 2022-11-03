@@ -20,7 +20,8 @@
     "license": "MIT",
     "author": "Dany Castillo",
     "files": [
-        "dist"
+        "dist",
+        "src"
     ],
     "source": "src/index.ts",
     "exports": {
