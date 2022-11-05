@@ -86,6 +86,8 @@ const customTwMerge = extendTailwindMerge({
     cacheSize: 0, // ← Disabling cache
     // ↓ Optional prefix from TaiLwind config
     prefix: 'tw-',
+    // ↓ Optional separator from TaiLwind config
+    separator: '_',
     // ↓ Add values to existing theme scale or create a new one
     //   Not all theme keys form the Tailwind config are supported by default.
     theme: {
