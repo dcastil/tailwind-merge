@@ -1,4 +1,4 @@
-# Configuring tailwind-merge
+# Configuration
 
 ## Basic usage
 

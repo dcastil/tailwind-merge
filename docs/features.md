@@ -102,6 +102,6 @@ twMerge('some-class', [undefined, ['another-class', false]], ['third-class'])
 
 ---
 
-Next: [Configuring tailwind-merge](./configuring-tailwind-merge.md)
+Next: [Configuration](./configuration.md)
 
 Previous: [What is it for](./what-is-it-for.md)
