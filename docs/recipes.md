@@ -8,7 +8,7 @@ How to configure tailwind-merge with some common patterns.
 
 You'll be able to do this by creating a custom `twMerge` functon with [`extendTailwindMerge`](./api-reference.md#extendtailwindmerge).
 
-First, check whether your particular theme scale is included in tailwind-merge's theme config object [here](./configuring-tailwind-merge.md#theme). In the hypothetical case that tailwind-merge supported Tailwind's `boxShadow` theme scale, you could add it to the tailwind-merge config like this:
+First, check whether your particular theme scale is included in tailwind-merge's theme config object [here](./configuration.md#theme). In the hypothetical case that tailwind-merge supported Tailwind's `boxShadow` theme scale, you could add it to the tailwind-merge config like this:
 
 ```js
 const customTwMerge = extendTailwindMerge({
@@ -84,4 +84,4 @@ function customTwMerge(...inputs) {
 
 Next: [API reference](./api-reference.md)
 
-Previous: [Configuring tailwind-merge](./configuring-tailwind-merge.md)
+Previous: [Configuration](./configuration.md)

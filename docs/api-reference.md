@@ -10,7 +10,7 @@ function twMerge(
 ): string
 ```
 
-Default function to use if you're using the default Tailwind config or are close enough to the default config. Check out [basic usage](./configuring-tailwind-merge.md#basic-usage) for more info.
+Default function to use if you're using the default Tailwind config or are close enough to the default config. Check out [basic usage](./configuration.md#basic-usage) for more info.
 
 If `twMerge` doesn't work for you, you can create your own custom merge function with [`extendTailwindMerge`](#extendtailwindmerge).
 
@@ -86,6 +86,8 @@ const customTwMerge = extendTailwindMerge({
     cacheSize: 0, // ← Disabling cache
     // ↓ Optional prefix from TaiLwind config
     prefix: 'tw-',
+    // ↓ Optional separator from TaiLwind config
+    separator: '_',
     // ↓ Add values to existing theme scale or create a new one
     //   Not all theme keys form the Tailwind config are supported by default.
     theme: {

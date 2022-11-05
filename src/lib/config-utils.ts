@@ -1,12 +1,14 @@
-import { getLruCache } from './lru-cache'
+import { createLruCache } from './lru-cache'
 import { Config } from './types'
 import { createClassUtils } from './class-utils'
+import { createSplitModifiers } from './modifier-utils'
 
 export type ConfigUtils = ReturnType<typeof createConfigUtils>
 
 export function createConfigUtils(config: Config) {
     return {
-        cache: getLruCache<string, string>(config.cacheSize),
+        cache: createLruCache<string, string>(config.cacheSize),
+        splitModifiers: createSplitModifiers(config),
         ...createClassUtils(config),
     }
 }
