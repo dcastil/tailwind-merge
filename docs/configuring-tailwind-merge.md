@@ -29,6 +29,8 @@ const tailwindMergeConfig = {
     cacheSize: 500,
     // ↓ Optional prefix from TaiLwind config
     prefix: 'tw-',
+    // ↓ Optional separator from TaiLwind config
+    separator: '_',
     theme: {
         // Theme scales are defined here
         // This is not the theme object from your Tailwind config
