@@ -1,10 +1,10 @@
 import { ConfigUtils } from './config-utils'
+import { IMPORTANT_MODIFIER, sortModifiers } from './modifier-utils'
 
 const SPLIT_CLASSES_REGEX = /\s+/
-const IMPORTANT_MODIFIER = '!'
 
 export function mergeClassList(classList: string, configUtils: ConfigUtils) {
-    const { getClassGroupId, getConflictingClassGroupIds } = configUtils
+    const { splitModifiers, getClassGroupId, getConflictingClassGroupIds } = configUtils
 
     /**
      * Set of classGroupIds in following format:
@@ -32,7 +32,7 @@ export function mergeClassList(classList: string, configUtils: ConfigUtils) {
                     }
                 }
 
-                const variantModifier = sortModifiers(modifiers).join('')
+                const variantModifier = sortModifiers(modifiers).join(':')
 
                 const modifierId = hasImportantModifier
                     ? variantModifier + IMPORTANT_MODIFIER
@@ -72,70 +72,4 @@ export function mergeClassList(classList: string, configUtils: ConfigUtils) {
             .map((parsed) => parsed.originalClassName)
             .join(' ')
     )
-}
-
-const SPLIT_MODIFIER_REGEX = /[:[\]]/g
-
-function splitModifiers(className: string) {
-    const modifiers = []
-
-    let bracketDepth = 0
-    let modifierStart = 0
-    let match: RegExpExecArray | null
-
-    while ((match = SPLIT_MODIFIER_REGEX.exec(className))) {
-        if (match[0] === ':') {
-            if (bracketDepth === 0) {
-                const nextModifierStart = match.index! + 1
-                modifiers.push(className.substring(modifierStart, nextModifierStart))
-                modifierStart = nextModifierStart
-            }
-        } else if (match[0] === '[') {
-            bracketDepth++
-        } else if (match[0] === ']') {
-            bracketDepth--
-        }
-    }
-
-    const baseClassNameWithImportantModifier =
-        modifiers.length === 0 ? className : className.substring(modifierStart)
-    const hasImportantModifier = baseClassNameWithImportantModifier.startsWith(IMPORTANT_MODIFIER)
-    const baseClassName = hasImportantModifier
-        ? baseClassNameWithImportantModifier.substring(1)
-        : baseClassNameWithImportantModifier
-
-    return {
-        modifiers,
-        hasImportantModifier,
-        baseClassName,
-    }
-}
-
-/**
- * Sorts modifiers according to following schema:
- * - Predefined modifiers are sorted alphabetically
- * - When an arbitrary variant appears, it must be preserved which modifiers are before and after it
- */
-function sortModifiers(modifiers: string[]) {
-    if (modifiers.length <= 1) {
-        return modifiers
-    }
-
-    const sortedModifiers: string[] = []
-    let unsortedModifiers: string[] = []
-
-    modifiers.forEach((modifier) => {
-        const isArbitraryVariant = modifier[0] === '['
-
-        if (isArbitraryVariant) {
-            sortedModifiers.push(...unsortedModifiers.sort(), modifier)
-            unsortedModifiers = []
-        } else {
-            unsortedModifiers.push(modifier)
-        }
-    })
-
-    sortedModifiers.push(...unsortedModifiers.sort())
-
-    return sortedModifiers
 }
