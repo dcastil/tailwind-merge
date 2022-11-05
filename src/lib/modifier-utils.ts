@@ -5,6 +5,7 @@ export const IMPORTANT_MODIFIER = '!'
 export function createSplitModifiers(config: Config) {
     const separator = config.separator || ':'
 
+    // splitModifiers inspired by https://github.com/tailwindlabs/tailwindcss/blob/v3.2.2/src/util/splitAtTopLevelOnly.js
     return function splitModifiers(className: string) {
         let bracketDepth = 0
         let modifiers = []
