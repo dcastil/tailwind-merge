@@ -29,7 +29,7 @@ twMerge('px-2 py-1 bg-red hover:bg-dark-red', 'p-3 bg-[#B91C1C]')
 
 -   [What is it for](https://github.com/dcastil/tailwind-merge/tree/v1.8.0/docs/what-is-it-for.md)
 -   [Features](https://github.com/dcastil/tailwind-merge/tree/v1.8.0/docs/features.md)
--   [Configruation](https://github.com/dcastil/tailwind-merge/tree/v1.8.0/docs/configuration.md)
+-   [Configuration](https://github.com/dcastil/tailwind-merge/tree/v1.8.0/docs/configuration.md)
 -   [Recipes](https://github.com/dcastil/tailwind-merge/tree/v1.8.0/docs/recipes.md)
 -   [API reference](https://github.com/dcastil/tailwind-merge/tree/v1.8.0/docs/api-reference.md)
 -   [Writing plugins](https://github.com/dcastil/tailwind-merge/tree/v1.8.0/docs/writing-plugins.md)
