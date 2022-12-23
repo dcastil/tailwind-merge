@@ -1543,8 +1543,6 @@ export function getDefaultConfig() {
             'inset-x': ['right', 'left'],
             'inset-y': ['top', 'bottom'],
             flex: ['basis', 'grow', 'shrink'],
-            'col-start-end': ['col-start', 'col-end'],
-            'row-start-end': ['row-start', 'row-end'],
             gap: ['gap-x', 'gap-y'],
             p: ['px', 'py', 'pt', 'pr', 'pb', 'pl'],
             px: ['pr', 'pl'],
