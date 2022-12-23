@@ -2,12 +2,12 @@ import { fromTheme } from './from-theme'
 import {
     isAny,
     isArbitraryLength,
+    isArbitraryNumber,
     isArbitraryPosition,
     isArbitraryShadow,
     isArbitrarySize,
     isArbitraryUrl,
     isArbitraryValue,
-    isArbitraryNumber,
     isInteger,
     isLength,
     isTshirtSize,
