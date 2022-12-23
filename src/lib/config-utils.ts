@@ -1,7 +1,7 @@
-import { createLruCache } from './lru-cache'
-import { Config } from './types'
 import { createClassUtils } from './class-utils'
+import { createLruCache } from './lru-cache'
 import { createSplitModifiers } from './modifier-utils'
+import { Config } from './types'
 
 export type ConfigUtils = ReturnType<typeof createConfigUtils>
 

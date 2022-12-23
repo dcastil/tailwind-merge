@@ -1,7 +1,7 @@
 import { createConfigUtils } from './config-utils'
-import { Config } from './types'
 import { mergeClassList } from './merge-classlist'
 import { ClassNameValue, twJoin } from './tw-join'
+import { Config } from './types'
 
 type CreateConfigFirst = () => Config
 type CreateConfigSubsequent = (config: Config) => Config

@@ -1,4 +1,4 @@
-import { ClassGroupId, Config, ClassGroup, ClassValidator, ThemeObject, ThemeGetter } from './types'
+import { ClassGroup, ClassGroupId, ClassValidator, Config, ThemeGetter, ThemeObject } from './types'
 
 export interface ClassPartObject {
     nextPart: Map<string, ClassPartObject>
