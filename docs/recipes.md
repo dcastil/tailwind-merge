@@ -67,7 +67,7 @@ function ButtonPrimary(props) {
 }
 ```
 
-## Modifying inputs and output of `twMege`
+## Modifying inputs and output of `twMerge`
 
 > How do I make `twMerge` accept the same argument types as clsx/classnames?
 
