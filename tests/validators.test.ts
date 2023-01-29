@@ -103,6 +103,7 @@ describe('validators', () => {
         expect(isTshirtSize('lg')).toBe(true)
         expect(isTshirtSize('xl')).toBe(true)
         expect(isTshirtSize('2xl')).toBe(true)
+        expect(isTshirtSize('2.5xl')).toBe(true)
         expect(isTshirtSize('10xl')).toBe(true)
         expect(isTshirtSize('2xs')).toBe(true)
         expect(isTshirtSize('2lg')).toBe(true)
