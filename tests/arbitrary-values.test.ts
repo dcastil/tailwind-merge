@@ -14,6 +14,9 @@ test('handles simple conflicts with arbitrary values correctly', () => {
         'm-[calc(100%-var(--arbitrary))]',
     )
     expect(twMerge('m-[2px] m-[length:var(--mystery-var)]')).toBe('m-[length:var(--mystery-var)]')
+    expect(twMerge('opacity-10 opacity-[0.025]')).toBe('opacity-[0.025]')
+    expect(twMerge('scale-75 scale-[1.7]')).toBe('scale-[1.7]')
+    expect(twMerge('brightness-90 brightness-[1.75]')).toBe('brightness-[1.75]')
 })
 
 test('handles arbitrary length conflicts with labels and modifiers correctly', () => {
