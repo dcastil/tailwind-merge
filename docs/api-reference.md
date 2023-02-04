@@ -197,18 +197,18 @@ const customTwMerge = createTailwindMerge(getDefaultConfig, (config) =>
 
 ```ts
 interface Validators {
-    isLength(classPart: string): boolean
-    isArbitraryLength(classPart: string): boolean
-    isNumber(classPart: string): boolean
-    isInteger(classPart: string): boolean
-    isArbitraryValue(classPart: string): boolean
-    isTshirtSize(classPart: string): boolean
-    isArbitrarySize(classPart: string): boolean
-    isArbitraryPosition(classPart: string): boolean
-    isArbitraryUrl(classPart: string): boolean
-    isArbitraryNumber(classPart: string): boolean
-    isArbitraryShadow(classPart: string): boolean
-    isAny(classPart: string): boolean
+    isLength(value: string): boolean
+    isArbitraryLength(value: string): boolean
+    isNumber(value: string): boolean
+    isInteger(value: string): boolean
+    isArbitraryValue(value: string): boolean
+    isTshirtSize(value: string): boolean
+    isArbitrarySize(value: string): boolean
+    isArbitraryPosition(value: string): boolean
+    isArbitraryUrl(value: string): boolean
+    isArbitraryNumber(value: string): boolean
+    isArbitraryShadow(value: string): boolean
+    isAny(value: string): boolean
 }
 ```
 
