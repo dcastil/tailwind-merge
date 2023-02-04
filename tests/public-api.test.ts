@@ -1,14 +1,14 @@
 import {
-    twMerge,
-    createTailwindMerge,
-    validators,
-    getDefaultConfig,
     Config,
-    mergeConfigs,
+    createTailwindMerge,
     extendTailwindMerge,
     fromTheme,
+    getDefaultConfig,
     join,
+    mergeConfigs,
     twJoin,
+    twMerge,
+    validators,
 } from '../src'
 
 test('has correct export types', () => {
@@ -16,18 +16,19 @@ test('has correct export types', () => {
     expect(createTailwindMerge).toStrictEqual(expect.any(Function))
     expect(getDefaultConfig).toStrictEqual(expect.any(Function))
     expect(validators).toEqual({
-        isLength: expect.any(Function),
-        isArbitraryLength: expect.any(Function),
-        isInteger: expect.any(Function),
-        isArbitraryValue: expect.any(Function),
-        isTshirtSize: expect.any(Function),
-        isArbitrarySize: expect.any(Function),
-        isArbitraryPosition: expect.any(Function),
-        isArbitraryUrl: expect.any(Function),
-        isArbitraryWeight: expect.any(Function),
-        isArbitraryNumber: expect.any(Function),
-        isArbitraryShadow: expect.any(Function),
         isAny: expect.any(Function),
+        isArbitraryLength: expect.any(Function),
+        isArbitraryNumber: expect.any(Function),
+        isArbitraryPosition: expect.any(Function),
+        isArbitraryShadow: expect.any(Function),
+        isArbitrarySize: expect.any(Function),
+        isArbitraryUrl: expect.any(Function),
+        isArbitraryValue: expect.any(Function),
+        isArbitraryWeight: expect.any(Function),
+        isInteger: expect.any(Function),
+        isLength: expect.any(Function),
+        isNumber: expect.any(Function),
+        isTshirtSize: expect.any(Function),
     })
     expect(mergeConfigs).toStrictEqual(expect.any(Function))
     expect(extendTailwindMerge).toStrictEqual(expect.any(Function))

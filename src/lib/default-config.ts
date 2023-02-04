@@ -10,6 +10,7 @@ import {
     isArbitraryValue,
     isInteger,
     isLength,
+    isNumber,
     isTshirtSize,
 } from './validators'
 
@@ -43,7 +44,7 @@ export function getDefaultConfig() {
     const getOverflow = () => ['auto', 'hidden', 'clip', 'visible', 'scroll'] as const
     const getSpacingWithAuto = () => ['auto', spacing] as const
     const getLengthWithEmpty = () => ['', isLength] as const
-    const getIntegerWithAuto = () => ['auto', isInteger] as const
+    const getNumberWithAutoAndArbitrary = () => ['auto', isNumber, isArbitraryValue] as const
     const getPositions = () =>
         [
             'bottom',
@@ -81,6 +82,8 @@ export function getDefaultConfig() {
     const getZeroAndEmpty = () => ['', '0', isArbitraryValue] as const
     const getBreaks = () =>
         ['auto', 'avoid', 'all', 'avoid-page', 'page', 'left', 'right', 'column'] as const
+    const getNumber = () => [isNumber, isArbitraryNumber]
+    const getNumberAndArbitrary = () => [isNumber, isArbitraryValue]
 
     return {
         cacheSize: 500,
@@ -88,25 +91,25 @@ export function getDefaultConfig() {
             colors: [isAny],
             spacing: [isLength],
             blur: ['none', '', isTshirtSize, isArbitraryLength],
-            brightness: [isInteger],
+            brightness: getNumber(),
             borderColor: [colors],
             borderRadius: ['none', '', 'full', isTshirtSize, isArbitraryLength],
             borderSpacing: [spacing],
             borderWidth: getLengthWithEmpty(),
-            contrast: [isInteger],
+            contrast: getNumber(),
             grayscale: getZeroAndEmpty(),
-            hueRotate: [isInteger],
+            hueRotate: getNumberAndArbitrary(),
             invert: getZeroAndEmpty(),
             gap: [spacing],
             gradientColorStops: [colors],
             inset: getSpacingWithAuto(),
             margin: getSpacingWithAuto(),
-            opacity: [isInteger],
+            opacity: getNumber(),
             padding: [spacing],
-            saturate: [isInteger],
-            scale: [isInteger],
+            saturate: getNumber(),
+            scale: getNumber(),
             sepia: getZeroAndEmpty(),
-            skew: [isInteger, isArbitraryValue],
+            skew: getNumberAndArbitrary(),
             space: [spacing],
             translate: [spacing],
         },
@@ -283,7 +286,7 @@ export function getDefaultConfig() {
              * Z-Index
              * @see https://tailwindcss.com/docs/z-index
              */
-            z: [{ z: [isInteger] }],
+            z: [{ z: ['auto', isInteger] }],
             // Flexbox and Grid
             /**
              * Flex Basis
@@ -329,17 +332,17 @@ export function getDefaultConfig() {
              * Grid Column Start / End
              * @see https://tailwindcss.com/docs/grid-column
              */
-            'col-start-end': [{ col: ['auto', { span: [isInteger] }] }],
+            'col-start-end': [{ col: ['auto', { span: [isInteger] }, isArbitraryValue] }],
             /**
              * Grid Column Start
              * @see https://tailwindcss.com/docs/grid-column
              */
-            'col-start': [{ 'col-start': getIntegerWithAuto() }],
+            'col-start': [{ 'col-start': getNumberWithAutoAndArbitrary() }],
             /**
              * Grid Column End
              * @see https://tailwindcss.com/docs/grid-column
              */
-            'col-end': [{ 'col-end': getIntegerWithAuto() }],
+            'col-end': [{ 'col-end': getNumberWithAutoAndArbitrary() }],
             /**
              * Grid Template Rows
              * @see https://tailwindcss.com/docs/grid-template-rows
@@ -349,17 +352,17 @@ export function getDefaultConfig() {
              * Grid Row Start / End
              * @see https://tailwindcss.com/docs/grid-row
              */
-            'row-start-end': [{ row: ['auto', { span: [isInteger] }] }],
+            'row-start-end': [{ row: ['auto', { span: [isInteger] }, isArbitraryValue] }],
             /**
              * Grid Row Start
              * @see https://tailwindcss.com/docs/grid-row
              */
-            'row-start': [{ 'row-start': getIntegerWithAuto() }],
+            'row-start': [{ 'row-start': getNumberWithAutoAndArbitrary() }],
             /**
              * Grid Row End
              * @see https://tailwindcss.com/docs/grid-row
              */
-            'row-end': [{ 'row-end': getIntegerWithAuto() }],
+            'row-end': [{ 'row-end': getNumberWithAutoAndArbitrary() }],
             /**
              * Grid Auto Flow
              * @see https://tailwindcss.com/docs/grid-auto-flow
@@ -1236,7 +1239,7 @@ export function getDefaultConfig() {
              * Transition Duration
              * @see https://tailwindcss.com/docs/transition-duration
              */
-            duration: [{ duration: [isInteger] }],
+            duration: [{ duration: getNumberAndArbitrary() }],
             /**
              * Transition Timing Function
              * @see https://tailwindcss.com/docs/transition-timing-function
@@ -1246,7 +1249,7 @@ export function getDefaultConfig() {
              * Transition Delay
              * @see https://tailwindcss.com/docs/transition-delay
              */
-            delay: [{ delay: [isInteger] }],
+            delay: [{ delay: getNumberAndArbitrary() }],
             /**
              * Animation
              * @see https://tailwindcss.com/docs/animation

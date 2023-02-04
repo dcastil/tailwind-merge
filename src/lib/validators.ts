@@ -6,33 +6,33 @@ const lengthUnitRegex = /\d+(%|px|r?em|[sdl]?v([hwib]|min|max)|pt|pc|in|cm|mm|ca
 // Shadow always begins with x and y offset separated by underscore
 const shadowRegex = /^-?((\d+)?\.?(\d+)[a-z]+|0)_-?((\d+)?\.?(\d+)[a-z]+|0)/
 
-export function isLength(classPart: string) {
+export function isLength(value: string) {
     return (
-        !Number.isNaN(Number(classPart)) ||
-        stringLengths.has(classPart) ||
-        fractionRegex.test(classPart) ||
-        isArbitraryLength(classPart)
+        isNumber(value) ||
+        stringLengths.has(value) ||
+        fractionRegex.test(value) ||
+        isArbitraryLength(value)
     )
 }
 
-export function isArbitraryLength(classPart: string) {
-    return getIsArbitraryValue(classPart, 'length', isValueLength)
+export function isArbitraryLength(value: string) {
+    return getIsArbitraryValue(value, 'length', isLengthOnly)
 }
 
-export function isArbitrarySize(classPart: string) {
-    return getIsArbitraryValue(classPart, 'size', isValueNever)
+export function isArbitrarySize(value: string) {
+    return getIsArbitraryValue(value, 'size', isNever)
 }
 
-export function isArbitraryPosition(classPart: string) {
-    return getIsArbitraryValue(classPart, 'position', isValueNever)
+export function isArbitraryPosition(value: string) {
+    return getIsArbitraryValue(value, 'position', isNever)
 }
 
-export function isArbitraryUrl(classPart: string) {
-    return getIsArbitraryValue(classPart, 'url', isValueUrl)
+export function isArbitraryUrl(value: string) {
+    return getIsArbitraryValue(value, 'url', isUrl)
 }
 
-export function isArbitraryNumber(classPart: string) {
-    return getIsArbitraryValue(classPart, 'number', isValueNumber)
+export function isArbitraryNumber(value: string) {
+    return getIsArbitraryValue(value, 'number', isNumber)
 }
 
 /**
@@ -40,32 +40,32 @@ export function isArbitraryNumber(classPart: string) {
  */
 export const isArbitraryWeight = isArbitraryNumber
 
-export function isInteger(classPart: string) {
-    return isValueInteger(classPart) || getIsArbitraryValue(classPart, 'number', isValueInteger)
+export function isNumber(value: string) {
+    return !Number.isNaN(Number(value))
 }
 
-export function isArbitraryValue(classPart: string) {
-    return arbitraryValueRegex.test(classPart)
+export function isInteger(value: string) {
+    return isIntegerOnly(value) || getIsArbitraryValue(value, 'number', isIntegerOnly)
+}
+
+export function isArbitraryValue(value: string) {
+    return arbitraryValueRegex.test(value)
 }
 
 export function isAny() {
     return true
 }
 
-export function isTshirtSize(classPart: string) {
-    return tshirtUnitRegex.test(classPart)
+export function isTshirtSize(value: string) {
+    return tshirtUnitRegex.test(value)
 }
 
-export function isArbitraryShadow(classPart: string) {
-    return getIsArbitraryValue(classPart, '', isValueShadow)
+export function isArbitraryShadow(value: string) {
+    return getIsArbitraryValue(value, '', isShadow)
 }
 
-function getIsArbitraryValue(
-    classPart: string,
-    label: string,
-    testValue: (value: string) => boolean,
-) {
-    const result = arbitraryValueRegex.exec(classPart)
+function getIsArbitraryValue(value: string, label: string, testValue: (value: string) => boolean) {
+    const result = arbitraryValueRegex.exec(value)
 
     if (result) {
         if (result[1]) {
@@ -78,26 +78,22 @@ function getIsArbitraryValue(
     return false
 }
 
-function isValueLength(value: string) {
+function isLengthOnly(value: string) {
     return lengthUnitRegex.test(value)
 }
 
-function isValueNever() {
+function isNever() {
     return false
 }
 
-function isValueUrl(value: string) {
+function isUrl(value: string) {
     return value.startsWith('url(')
 }
 
-function isValueNumber(value: string) {
-    return !Number.isNaN(Number(value))
-}
-
-function isValueInteger(value: string) {
+function isIntegerOnly(value: string) {
     return Number.isInteger(Number(value))
 }
 
-function isValueShadow(value: string) {
+function isShadow(value: string) {
     return shadowRegex.test(value)
 }
