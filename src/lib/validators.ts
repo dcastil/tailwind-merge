@@ -8,7 +8,7 @@ const shadowRegex = /^-?((\d+)?\.?(\d+)[a-z]+|0)_-?((\d+)?\.?(\d+)[a-z]+|0)/
 
 export function isLength(classPart: string) {
     return (
-        !Number.isNaN(Number(classPart)) ||
+        isNumber(classPart) ||
         stringLengths.has(classPart) ||
         fractionRegex.test(classPart) ||
         isArbitraryLength(classPart)
@@ -16,23 +16,23 @@ export function isLength(classPart: string) {
 }
 
 export function isArbitraryLength(classPart: string) {
-    return getIsArbitraryValue(classPart, 'length', isValueLength)
+    return getIsArbitraryValue(classPart, 'length', isLengthOnly)
 }
 
 export function isArbitrarySize(classPart: string) {
-    return getIsArbitraryValue(classPart, 'size', isValueNever)
+    return getIsArbitraryValue(classPart, 'size', isNever)
 }
 
 export function isArbitraryPosition(classPart: string) {
-    return getIsArbitraryValue(classPart, 'position', isValueNever)
+    return getIsArbitraryValue(classPart, 'position', isNever)
 }
 
 export function isArbitraryUrl(classPart: string) {
-    return getIsArbitraryValue(classPart, 'url', isValueUrl)
+    return getIsArbitraryValue(classPart, 'url', isUrl)
 }
 
 export function isArbitraryNumber(classPart: string) {
-    return getIsArbitraryValue(classPart, 'number', isValueNumber)
+    return getIsArbitraryValue(classPart, 'number', isNumber)
 }
 
 /**
@@ -40,8 +40,12 @@ export function isArbitraryNumber(classPart: string) {
  */
 export const isArbitraryWeight = isArbitraryNumber
 
+export function isNumber(classPart: string) {
+    return !Number.isNaN(Number(classPart))
+}
+
 export function isInteger(classPart: string) {
-    return isValueInteger(classPart) || getIsArbitraryValue(classPart, 'number', isValueInteger)
+    return isIntegerOnly(classPart) || getIsArbitraryValue(classPart, 'number', isIntegerOnly)
 }
 
 export function isArbitraryValue(classPart: string) {
@@ -57,7 +61,7 @@ export function isTshirtSize(classPart: string) {
 }
 
 export function isArbitraryShadow(classPart: string) {
-    return getIsArbitraryValue(classPart, '', isValueShadow)
+    return getIsArbitraryValue(classPart, '', isShadow)
 }
 
 function getIsArbitraryValue(
@@ -78,26 +82,22 @@ function getIsArbitraryValue(
     return false
 }
 
-function isValueLength(value: string) {
+function isLengthOnly(value: string) {
     return lengthUnitRegex.test(value)
 }
 
-function isValueNever() {
+function isNever() {
     return false
 }
 
-function isValueUrl(value: string) {
+function isUrl(value: string) {
     return value.startsWith('url(')
 }
 
-function isValueNumber(value: string) {
-    return !Number.isNaN(Number(value))
-}
-
-function isValueInteger(value: string) {
+function isIntegerOnly(value: string) {
     return Number.isInteger(Number(value))
 }
 
-function isValueShadow(value: string) {
+function isShadow(value: string) {
     return shadowRegex.test(value)
 }
