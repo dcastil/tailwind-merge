@@ -21,6 +21,15 @@ test('handles arbitrary length conflicts with labels and modifiers correctly', (
     expect(twMerge('hover:focus:m-[2px] focus:hover:m-[length:var(--c)]')).toBe(
         'focus:hover:m-[length:var(--c)]',
     )
+    expect(twMerge('border-b border-[color:rgb(var(--color-gray-500-rgb)/50%))]')).toBe(
+        'border-b border-[color:rgb(var(--color-gray-500-rgb)/50%))]',
+    )
+    expect(twMerge('border-[color:rgb(var(--color-gray-500-rgb)/50%))] border-b')).toBe(
+        'border-[color:rgb(var(--color-gray-500-rgb)/50%))] border-b',
+    )
+    expect(
+        twMerge('border-b border-[color:rgb(var(--color-gray-500-rgb)/50%))] border-some-coloooor'),
+    ).toBe('border-b border-some-coloooor')
 })
 
 test('handles complex arbitrary value conflicts correctly', () => {

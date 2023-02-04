@@ -1,4 +1,4 @@
-const arbitraryValueRegex = /^\[(.+)\]$/
+const arbitraryValueRegex = /^\[(?:([a-z-]+):)?(.+)\]$/i
 const fractionRegex = /^\d+\/\d+$/
 const stringLengths = new Set(['px', 'full', 'screen'])
 const tshirtUnitRegex = /^(\d+(\.\d+)?)?(xs|sm|md|lg|xl)$/
@@ -16,41 +16,23 @@ export function isLength(classPart: string) {
 }
 
 export function isArbitraryLength(classPart: string) {
-    const arbitraryValue = arbitraryValueRegex.exec(classPart)?.[1]
-
-    if (arbitraryValue) {
-        return arbitraryValue.startsWith('length:') || lengthUnitRegex.test(arbitraryValue)
-    }
-
-    return false
+    return getIsArbitraryValue(classPart, 'length', isValueLength)
 }
 
 export function isArbitrarySize(classPart: string) {
-    const arbitraryValue = arbitraryValueRegex.exec(classPart)?.[1]
-
-    return arbitraryValue ? arbitraryValue.startsWith('size:') : false
+    return getIsArbitraryValue(classPart, 'size', isValueNever)
 }
 
 export function isArbitraryPosition(classPart: string) {
-    const arbitraryValue = arbitraryValueRegex.exec(classPart)?.[1]
-
-    return arbitraryValue ? arbitraryValue.startsWith('position:') : false
+    return getIsArbitraryValue(classPart, 'position', isValueNever)
 }
 
 export function isArbitraryUrl(classPart: string) {
-    const arbitraryValue = arbitraryValueRegex.exec(classPart)?.[1]
-
-    return arbitraryValue
-        ? arbitraryValue.startsWith('url(') || arbitraryValue.startsWith('url:')
-        : false
+    return getIsArbitraryValue(classPart, 'url', isValueUrl)
 }
 
 export function isArbitraryNumber(classPart: string) {
-    const arbitraryValue = arbitraryValueRegex.exec(classPart)?.[1]
-
-    return arbitraryValue
-        ? !Number.isNaN(Number(arbitraryValue)) || arbitraryValue.startsWith('number:')
-        : false
+    return getIsArbitraryValue(classPart, 'number', isValueNumber)
 }
 
 /**
@@ -59,13 +41,7 @@ export function isArbitraryNumber(classPart: string) {
 export const isArbitraryWeight = isArbitraryNumber
 
 export function isInteger(classPart: string) {
-    const arbitraryValue = arbitraryValueRegex.exec(classPart)?.[1]
-
-    if (arbitraryValue) {
-        return Number.isInteger(Number(arbitraryValue))
-    }
-
-    return Number.isInteger(Number(classPart))
+    return isValueInteger(classPart) || getIsArbitraryValue(classPart, 'number', isValueInteger)
 }
 
 export function isArbitraryValue(classPart: string) {
@@ -81,11 +57,47 @@ export function isTshirtSize(classPart: string) {
 }
 
 export function isArbitraryShadow(classPart: string) {
-    const arbitraryValue = arbitraryValueRegex.exec(classPart)?.[1]
+    return getIsArbitraryValue(classPart, '', isValueShadow)
+}
 
-    if (arbitraryValue) {
-        return shadowRegex.test(arbitraryValue)
+function getIsArbitraryValue(
+    classPart: string,
+    label: string,
+    testValue: (value: string) => boolean,
+) {
+    const result = arbitraryValueRegex.exec(classPart)
+
+    if (result) {
+        if (result[1]) {
+            return result[1] === label
+        }
+
+        return testValue(result[2]!)
     }
 
     return false
+}
+
+function isValueLength(value: string) {
+    return lengthUnitRegex.test(value)
+}
+
+function isValueNever() {
+    return false
+}
+
+function isValueUrl(value: string) {
+    return value.startsWith('url(')
+}
+
+function isValueNumber(value: string) {
+    return !Number.isNaN(Number(value))
+}
+
+function isValueInteger(value: string) {
+    return Number.isInteger(Number(value))
+}
+
+function isValueShadow(value: string) {
+    return shadowRegex.test(value)
 }
