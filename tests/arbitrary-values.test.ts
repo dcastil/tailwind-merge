@@ -7,6 +7,9 @@ test('handles simple conflicts with arbitrary values correctly', () => {
             'm-[2px] m-[11svmin] m-[12in] m-[13lvi] m-[14vb] m-[15vmax] m-[16mm] m-[17%] m-[18em] m-[19px] m-[10dvh]',
         ),
     ).toBe('m-[10dvh]')
+    expect(
+        twMerge('h-[10px] h-[11cqw] h-[12cqh] h-[13cqi] h-[14cqb] h-[15cqmin] h-[16cqmax]'),
+    ).toBe('h-[16cqmax]')
     expect(twMerge('z-20 z-[99]')).toBe('z-[99]')
     expect(twMerge('my-[2px] m-[10rem]')).toBe('m-[10rem]')
     expect(twMerge('cursor-pointer cursor-[grab]')).toBe('cursor-[grab]')
