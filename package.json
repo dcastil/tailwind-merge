@@ -17,6 +17,10 @@
     "bugs": {
         "url": "https://github.com/dcastil/tailwind-merge/issues"
     },
+    "funding": {
+        "type": "github",
+        "url": "https://github.com/sponsors/dcastil"
+    },
     "license": "MIT",
     "author": "Dany Castillo",
     "files": [
