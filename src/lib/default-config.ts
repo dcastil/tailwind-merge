@@ -1224,6 +1224,11 @@ export function getDefaultConfig() {
              * @see https://tailwindcss.com/docs/table-layout
              */
             'table-layout': [{ table: ['auto', 'fixed'] }],
+            /**
+             * Caption Side
+             * @see TBD
+             */
+            caption: [{ caption: ['top', 'bottom'] }],
             // Transitions and Animation
             /**
              * Tranisition Property
