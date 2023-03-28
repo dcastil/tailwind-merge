@@ -131,7 +131,7 @@ test('class map has correct class groups at first part', () => {
         left: ['left'],
         line: ['line-clamp', 'text-decoration'],
         lining: ['fvn-figure'],
-        list: ['display', 'list-style-position', 'list-style-type'],
+        list: ['display', 'list-image', 'list-style-position', 'list-style-type'],
         lowercase: ['text-transform'],
         m: ['m'],
         max: ['max-h', 'max-w'],

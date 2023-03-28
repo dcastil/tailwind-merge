@@ -677,6 +677,11 @@ export function getDefaultConfig() {
                 { leading: ['none', 'tight', 'snug', 'normal', 'relaxed', 'loose', isLength] },
             ],
             /**
+             * List Style Image
+             * @see https://tailwindcss.com/docs/list-style-image
+             */
+            'list-image': [{ 'list-image': ['none', isArbitraryValue] }],
+            /**
              * List Style Type
              * @see https://tailwindcss.com/docs/list-style-type
              */
