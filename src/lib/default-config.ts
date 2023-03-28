@@ -78,7 +78,8 @@ export function getDefaultConfig() {
             'luminosity',
             'plus-lighter',
         ] as const
-    const getAlign = () => ['start', 'end', 'center', 'between', 'around', 'evenly'] as const
+    const getAlign = () =>
+        ['start', 'end', 'center', 'between', 'around', 'evenly', 'stretch'] as const
     const getZeroAndEmpty = () => ['', '0', isArbitraryValue] as const
     const getBreaks = () =>
         ['auto', 'avoid', 'all', 'avoid-page', 'page', 'left', 'right', 'column'] as const
@@ -397,7 +398,7 @@ export function getDefaultConfig() {
              * Justify Content
              * @see https://tailwindcss.com/docs/justify-content
              */
-            'justify-content': [{ justify: getAlign() }],
+            'justify-content': [{ justify: ['normal', ...getAlign()] }],
             /**
              * Justify Items
              * @see https://tailwindcss.com/docs/justify-items
@@ -412,7 +413,7 @@ export function getDefaultConfig() {
              * Align Content
              * @see https://tailwindcss.com/docs/align-content
              */
-            'align-content': [{ content: [...getAlign(), 'baseline'] }],
+            'align-content': [{ content: ['normal', ...getAlign(), 'baseline'] }],
             /**
              * Align Items
              * @see https://tailwindcss.com/docs/align-items
@@ -427,7 +428,7 @@ export function getDefaultConfig() {
              * Place Content
              * @see https://tailwindcss.com/docs/place-content
              */
-            'place-content': [{ 'place-content': [...getAlign(), 'baseline', 'stretch'] }],
+            'place-content': [{ 'place-content': [...getAlign(), 'baseline'] }],
             /**
              * Place Items
              * @see https://tailwindcss.com/docs/place-items
