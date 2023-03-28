@@ -157,6 +157,11 @@ export function getDefaultConfig() {
              */
             box: [{ box: ['border', 'content'] }],
             /**
+             * Line Clamp
+             * @see TBD
+             */
+            'line-clamp': [{ 'line-clamp': ['none', isNumber, isArbitraryNumber] }],
+            /**
              * Display
              * @see https://tailwindcss.com/docs/display
              */

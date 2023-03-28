@@ -128,7 +128,7 @@ test('class map has correct class groups at first part', () => {
         justify: ['justify-content', 'justify-items', 'justify-self'],
         leading: ['leading'],
         left: ['left'],
-        line: ['text-decoration'],
+        line: ['line-clamp', 'text-decoration'],
         lining: ['fvn-figure'],
         list: ['display', 'list-style-position', 'list-style-type'],
         lowercase: ['text-transform'],
