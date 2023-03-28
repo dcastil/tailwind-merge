@@ -27,6 +27,7 @@ test('has correct export types', () => {
         isArbitraryWeight: expect.any(Function),
         isInteger: expect.any(Function),
         isLength: expect.any(Function),
+        isPercent: expect.any(Function),
         isNumber: expect.any(Function),
         isTshirtSize: expect.any(Function),
     })

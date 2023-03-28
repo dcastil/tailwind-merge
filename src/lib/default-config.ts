@@ -11,6 +11,7 @@ import {
     isInteger,
     isLength,
     isNumber,
+    isPercent,
     isTshirtSize,
 } from './validators'
 
@@ -29,6 +30,7 @@ export function getDefaultConfig() {
     const invert = fromTheme('invert')
     const gap = fromTheme('gap')
     const gradientColorStops = fromTheme('gradientColorStops')
+    const gradientColorStopPositions = fromTheme('gradientColorStopPositions')
     const inset = fromTheme('inset')
     const margin = fromTheme('margin')
     const opacity = fromTheme('opacity')
@@ -103,6 +105,7 @@ export function getDefaultConfig() {
             invert: getZeroAndEmpty(),
             gap: [spacing],
             gradientColorStops: [colors],
+            gradientColorStopPositions: [isPercent, isArbitraryLength],
             inset: getSpacingWithAuto(),
             margin: getSpacingWithAuto(),
             opacity: getNumber(),
@@ -848,6 +851,21 @@ export function getDefaultConfig() {
              * @see https://tailwindcss.com/docs/background-color
              */
             'bg-color': [{ bg: [colors] }],
+            /**
+             * Gradient Color Stops From Position
+             * @see https://tailwindcss.com/docs/gradient-color-stops
+             */
+            'gradient-from-pos': [{ from: [gradientColorStopPositions] }],
+            /**
+             * Gradient Color Stops Via Position
+             * @see https://tailwindcss.com/docs/gradient-color-stops
+             */
+            'gradient-via-pos': [{ via: [gradientColorStopPositions] }],
+            /**
+             * Gradient Color Stops To Position
+             * @see https://tailwindcss.com/docs/gradient-color-stops
+             */
+            'gradient-to-pos': [{ to: [gradientColorStopPositions] }],
             /**
              * Gradient Color Stops From
              * @see https://tailwindcss.com/docs/gradient-color-stops

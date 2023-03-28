@@ -128,6 +128,7 @@ In the Tailwind config you can modify theme scales. tailwind-merge follows the s
 -   `invert`
 -   `gap`
 -   `gradientColorStops`
+-   `gradientColorStopPositions`
 -   `inset`
 -   `margin`
 -   `opacity`
