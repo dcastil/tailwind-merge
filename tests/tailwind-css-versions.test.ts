@@ -1,0 +1,8 @@
+import { twMerge } from '../src'
+
+test('supports Tailwind CSS v3.3 features', () => {
+    expect(twMerge('delay-150 delay-0 duration-150 duration-0')).toBe('delay-0 duration-0')
+    expect(twMerge('justify-normal justify-center justify-stretch')).toBe('justify-stretch')
+    expect(twMerge('content-normal content-center content-stretch')).toBe('content-stretch')
+    expect(twMerge('whitespace-nowrap whitespace-break-spaces')).toBe('whitespace-break-spaces')
+})
