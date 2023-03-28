@@ -769,7 +769,9 @@ export function getDefaultConfig() {
              * Whitespace
              * @see https://tailwindcss.com/docs/whitespace
              */
-            whitespace: [{ whitespace: ['normal', 'nowrap', 'pre', 'pre-line', 'pre-wrap'] }],
+            whitespace: [
+                { whitespace: ['normal', 'nowrap', 'pre', 'pre-line', 'pre-wrap', 'break-spaces'] },
+            ],
             /**
              * Word Break
              * @see https://tailwindcss.com/docs/word-break
