@@ -262,6 +262,16 @@ export function getDefaultConfig() {
              */
             'inset-y': [{ 'inset-y': [inset] }],
             /**
+             * Start
+             * @see https://tailwindcss.com/docs/top-right-bottom-left
+             */
+            start: [{ start: [inset] }],
+            /**
+             * End
+             * @see https://tailwindcss.com/docs/top-right-bottom-left
+             */
+            end: [{ end: [inset] }],
+            /**
              * Top
              * @see https://tailwindcss.com/docs/top-right-bottom-left
              */
@@ -459,6 +469,16 @@ export function getDefaultConfig() {
              */
             py: [{ py: [padding] }],
             /**
+             * Padding Start
+             * @see https://tailwindcss.com/docs/padding
+             */
+            ps: [{ ps: [padding] }],
+            /**
+             * Padding End
+             * @see https://tailwindcss.com/docs/padding
+             */
+            pe: [{ pe: [padding] }],
+            /**
              * Padding Top
              * @see https://tailwindcss.com/docs/padding
              */
@@ -493,6 +513,16 @@ export function getDefaultConfig() {
              * @see https://tailwindcss.com/docs/margin
              */
             my: [{ my: [margin] }],
+            /**
+             * Margin Start
+             * @see https://tailwindcss.com/docs/margin
+             */
+            ms: [{ ms: [margin] }],
+            /**
+             * Margin End
+             * @see https://tailwindcss.com/docs/margin
+             */
+            me: [{ me: [margin] }],
             /**
              * Margin Top
              * @see https://tailwindcss.com/docs/margin
@@ -893,6 +923,16 @@ export function getDefaultConfig() {
              */
             rounded: [{ rounded: [borderRadius] }],
             /**
+             * Border Radius Start
+             * @see https://tailwindcss.com/docs/border-radius
+             */
+            'rounded-s': [{ 'rounded-s': [borderRadius] }],
+            /**
+             * Border Radius End
+             * @see https://tailwindcss.com/docs/border-radius
+             */
+            'rounded-e': [{ 'rounded-e': [borderRadius] }],
+            /**
              * Border Radius Top
              * @see https://tailwindcss.com/docs/border-radius
              */
@@ -912,6 +952,26 @@ export function getDefaultConfig() {
              * @see https://tailwindcss.com/docs/border-radius
              */
             'rounded-l': [{ 'rounded-l': [borderRadius] }],
+            /**
+             * Border Radius Start Start
+             * @see https://tailwindcss.com/docs/border-radius
+             */
+            'rounded-ss': [{ 'rounded-ss': [borderRadius] }],
+            /**
+             * Border Radius Start End
+             * @see https://tailwindcss.com/docs/border-radius
+             */
+            'rounded-se': [{ 'rounded-se': [borderRadius] }],
+            /**
+             * Border Radius End End
+             * @see https://tailwindcss.com/docs/border-radius
+             */
+            'rounded-ee': [{ 'rounded-ee': [borderRadius] }],
+            /**
+             * Border Radius End Start
+             * @see https://tailwindcss.com/docs/border-radius
+             */
+            'rounded-es': [{ 'rounded-es': [borderRadius] }],
             /**
              * Border Radius Top Left
              * @see https://tailwindcss.com/docs/border-radius
@@ -947,6 +1007,16 @@ export function getDefaultConfig() {
              * @see https://tailwindcss.com/docs/border-width
              */
             'border-w-y': [{ 'border-y': [borderWidth] }],
+            /**
+             * Border Width Start
+             * @see https://tailwindcss.com/docs/border-width
+             */
+            'border-w-s': [{ 'border-s': [borderWidth] }],
+            /**
+             * Border Width End
+             * @see https://tailwindcss.com/docs/border-width
+             */
+            'border-w-e': [{ 'border-e': [borderWidth] }],
             /**
              * Border Width Top
              * @see https://tailwindcss.com/docs/border-width
@@ -1456,6 +1526,16 @@ export function getDefaultConfig() {
              */
             'scroll-my': [{ 'scroll-my': [spacing] }],
             /**
+             * Scroll Margin Start
+             * @see https://tailwindcss.com/docs/scroll-margin
+             */
+            'scroll-ms': [{ 'scroll-ms': [spacing] }],
+            /**
+             * Scroll Margin End
+             * @see https://tailwindcss.com/docs/scroll-margin
+             */
+            'scroll-me': [{ 'scroll-me': [spacing] }],
+            /**
              * Scroll Margin Top
              * @see https://tailwindcss.com/docs/scroll-margin
              */
@@ -1490,6 +1570,16 @@ export function getDefaultConfig() {
              * @see https://tailwindcss.com/docs/scroll-padding
              */
             'scroll-py': [{ 'scroll-py': [spacing] }],
+            /**
+             * Scroll Padding Start
+             * @see https://tailwindcss.com/docs/scroll-padding
+             */
+            'scroll-ps': [{ 'scroll-ps': [spacing] }],
+            /**
+             * Scroll Padding End
+             * @see https://tailwindcss.com/docs/scroll-padding
+             */
+            'scroll-pe': [{ 'scroll-pe': [spacing] }],
             /**
              * Scroll Padding Top
              * @see https://tailwindcss.com/docs/scroll-padding
@@ -1583,15 +1673,15 @@ export function getDefaultConfig() {
         conflictingClassGroups: {
             overflow: ['overflow-x', 'overflow-y'],
             overscroll: ['overscroll-x', 'overscroll-y'],
-            inset: ['inset-x', 'inset-y', 'top', 'right', 'bottom', 'left'],
+            inset: ['inset-x', 'inset-y', 'start', 'end', 'top', 'right', 'bottom', 'left'],
             'inset-x': ['right', 'left'],
             'inset-y': ['top', 'bottom'],
             flex: ['basis', 'grow', 'shrink'],
             gap: ['gap-x', 'gap-y'],
-            p: ['px', 'py', 'pt', 'pr', 'pb', 'pl'],
+            p: ['px', 'py', 'ps', 'pe', 'pt', 'pr', 'pb', 'pl'],
             px: ['pr', 'pl'],
             py: ['pt', 'pb'],
-            m: ['mx', 'my', 'mt', 'mr', 'mb', 'ml'],
+            m: ['mx', 'my', 'ms', 'me', 'mt', 'mr', 'mb', 'ml'],
             mx: ['mr', 'ml'],
             my: ['mt', 'mb'],
             'font-size': ['leading'],
@@ -1608,21 +1698,36 @@ export function getDefaultConfig() {
             'fvn-spacing': ['fvn-normal'],
             'fvn-fraction': ['fvn-normal'],
             rounded: [
+                'rounded-s',
+                'rounded-e',
                 'rounded-t',
                 'rounded-r',
                 'rounded-b',
                 'rounded-l',
+                'rounded-ss',
+                'rounded-se',
+                'rounded-ee',
+                'rounded-es',
                 'rounded-tl',
                 'rounded-tr',
                 'rounded-br',
                 'rounded-bl',
             ],
+            'rounded-s': ['rounded-ss', 'rounded-es'],
+            'rounded-e': ['rounded-se', 'rounded-ee'],
             'rounded-t': ['rounded-tl', 'rounded-tr'],
             'rounded-r': ['rounded-tr', 'rounded-br'],
             'rounded-b': ['rounded-br', 'rounded-bl'],
             'rounded-l': ['rounded-tl', 'rounded-bl'],
             'border-spacing': ['border-spacing-x', 'border-spacing-y'],
-            'border-w': ['border-w-t', 'border-w-r', 'border-w-b', 'border-w-l'],
+            'border-w': [
+                'border-w-s',
+                'border-w-e',
+                'border-w-t',
+                'border-w-r',
+                'border-w-b',
+                'border-w-l',
+            ],
             'border-w-x': ['border-w-r', 'border-w-l'],
             'border-w-y': ['border-w-t', 'border-w-b'],
             'border-color': [
@@ -1636,6 +1741,8 @@ export function getDefaultConfig() {
             'scroll-m': [
                 'scroll-mx',
                 'scroll-my',
+                'scroll-ms',
+                'scroll-me',
                 'scroll-mt',
                 'scroll-mr',
                 'scroll-mb',
@@ -1646,6 +1753,8 @@ export function getDefaultConfig() {
             'scroll-p': [
                 'scroll-px',
                 'scroll-py',
+                'scroll-ps',
+                'scroll-pe',
                 'scroll-pt',
                 'scroll-pr',
                 'scroll-pb',
