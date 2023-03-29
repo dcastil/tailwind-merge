@@ -201,6 +201,7 @@ interface Validators {
     isArbitraryLength(value: string): boolean
     isNumber(value: string): boolean
     isInteger(value: string): boolean
+    isPercent(value: string): boolean
     isArbitraryValue(value: string): boolean
     isTshirtSize(value: string): boolean
     isArbitrarySize(value: string): boolean
@@ -225,6 +226,7 @@ A brief summary for each validator:
 -   `isNumber` checks for numbers (`3`, `1.5`)
 -   `isArbitraryNumber` checks whether class part is an arbitrary value which starts with `number:` or is a number (`[number:var(--value)]`, `[450]`) which is necessary for font-weight and stroke-width classNames.
 -   `isInteger` checks for integer values (`3`) and arbitrary integer values (`[3]`).
+-   `isPercent` checks for percent values (`12.5%`) which is used for color stop positions.
 -   `isArbitraryValue` checks whether the class part is enclosed in brackets (`[something]`)
 -   `isTshirtSize`checks whether class part is a T-shirt size (`sm`, `xl`), optionally with a preceding number (`2xl`).
 -   `isArbitrarySize` checks whether class part is an arbitrary value which starts with `size:` (`[size:200px_100px]`) which is necessary for background-size classNames.
