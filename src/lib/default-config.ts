@@ -160,11 +160,6 @@ export function getDefaultConfig() {
              */
             box: [{ box: ['border', 'content'] }],
             /**
-             * Line Clamp
-             * @see TBD
-             */
-            'line-clamp': [{ 'line-clamp': ['none', isNumber, isArbitraryNumber] }],
-            /**
              * Display
              * @see https://tailwindcss.com/docs/display
              */
@@ -672,6 +667,11 @@ export function getDefaultConfig() {
                     ],
                 },
             ],
+            /**
+             * Line Clamp
+             * @see https://tailwindcss.com/docs/line-clamp
+             */
+            'line-clamp': [{ 'line-clamp': ['none', isNumber, isArbitraryNumber] }],
             /**
              * Line Height
              * @see https://tailwindcss.com/docs/line-height
@@ -1254,7 +1254,7 @@ export function getDefaultConfig() {
             'table-layout': [{ table: ['auto', 'fixed'] }],
             /**
              * Caption Side
-             * @see TBD
+             * @see https://tailwindcss.com/docs/caption-side
              */
             caption: [{ caption: ['top', 'bottom'] }],
             // Transitions and Animation
