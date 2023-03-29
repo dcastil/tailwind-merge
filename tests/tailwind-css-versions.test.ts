@@ -1,6 +1,7 @@
 import { twMerge } from '../src'
 
 test('supports Tailwind CSS v3.3 features', () => {
+    expect(twMerge('hyphens-auto hyphens-manual')).toBe('hyphens-manual')
     expect(
         twMerge('from-0% from-10% from-[12.5%] via-0% via-10% via-[12.5%] to-0% to-10% to-[12.5%]'),
     ).toBe('from-[12.5%] via-[12.5%] to-[12.5%]')

@@ -792,6 +792,11 @@ export function getDefaultConfig() {
              */
             break: [{ break: ['normal', 'words', 'all', 'keep'] }],
             /**
+             * Hyphens
+             * @see https://tailwindcss.com/docs/hyphens
+             */
+            hyphens: [{ hyphens: ['none', 'manual', 'auto'] }],
+            /**
              * Content
              * @see https://tailwindcss.com/docs/content
              */
