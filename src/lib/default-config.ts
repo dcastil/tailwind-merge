@@ -1,4 +1,5 @@
 import { fromTheme } from './from-theme'
+import { Config } from './types'
 import {
     isAny,
     isArbitraryLength,
@@ -1763,5 +1764,8 @@ export function getDefaultConfig() {
             'scroll-px': ['scroll-pr', 'scroll-pl'],
             'scroll-py': ['scroll-pt', 'scroll-pb'],
         },
-    } as const
+        conflictingClassGroupModifiers: {
+            'font-size': ['leading'],
+        },
+    } as const satisfies Config
 }
