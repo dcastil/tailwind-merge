@@ -4,6 +4,7 @@ export const IMPORTANT_MODIFIER = '!'
 
 export function createSplitModifiers(config: Config) {
     const separator = config.separator || ':'
+    const isSeparatorSingleCharacter = separator.length === 1
 
     // splitModifiers inspired by https://github.com/tailwindlabs/tailwindcss/blob/v3.2.2/src/util/splitAtTopLevelOnly.js
     return function splitModifiers(className: string) {
@@ -16,7 +17,7 @@ export function createSplitModifiers(config: Config) {
 
             if (bracketDepth === 0 && char === separator[0]) {
                 if (
-                    separator.length === 1 ||
+                    isSeparatorSingleCharacter ||
                     className.slice(index, index + separator.length) === separator
                 ) {
                     modifiers.push(className.slice(modifierStart, index))
