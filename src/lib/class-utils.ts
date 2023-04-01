@@ -15,6 +15,7 @@ const CLASS_PART_SEPARATOR = '-'
 
 export function createClassUtils(config: Config) {
     const classMap = createClassMap(config)
+    const { conflictingClassGroups, conflictingClassGroupModifiers = {} } = config
 
     function getClassGroupId(className: string) {
         const classParts = className.split(CLASS_PART_SEPARATOR)
@@ -27,8 +28,14 @@ export function createClassUtils(config: Config) {
         return getGroupRecursive(classParts, classMap) || getGroupIdForArbitraryProperty(className)
     }
 
-    function getConflictingClassGroupIds(classGroupId: ClassGroupId) {
-        return config.conflictingClassGroups[classGroupId] || []
+    function getConflictingClassGroupIds(classGroupId: ClassGroupId, hasPostfixModifier: boolean) {
+        const conflicts = conflictingClassGroups[classGroupId] || []
+
+        if (hasPostfixModifier && conflictingClassGroupModifiers[classGroupId]) {
+            return [...conflicts, ...conflictingClassGroupModifiers[classGroupId]!]
+        }
+
+        return conflicts
     }
 
     return {
