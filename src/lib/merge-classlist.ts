@@ -27,8 +27,13 @@ export function mergeClassList(classList: string, configUtils: ConfigUtils) {
                     maybePostfixModifierPosition,
                 } = splitModifiers(originalClassName)
 
-                let classGroupId = getClassGroupId(baseClassName)
-                let hasPostfixModifier = false
+                let classGroupId = getClassGroupId(
+                    maybePostfixModifierPosition
+                        ? baseClassName.substring(0, maybePostfixModifierPosition)
+                        : baseClassName,
+                )
+
+                let hasPostfixModifier = Boolean(maybePostfixModifierPosition)
 
                 if (!classGroupId) {
                     if (!maybePostfixModifierPosition) {
@@ -38,9 +43,7 @@ export function mergeClassList(classList: string, configUtils: ConfigUtils) {
                         }
                     }
 
-                    classGroupId = getClassGroupId(
-                        baseClassName.substring(0, maybePostfixModifierPosition),
-                    )
+                    classGroupId = getClassGroupId(baseClassName)
 
                     if (!classGroupId) {
                         return {
@@ -49,7 +52,7 @@ export function mergeClassList(classList: string, configUtils: ConfigUtils) {
                         }
                     }
 
-                    hasPostfixModifier = true
+                    hasPostfixModifier = false
                 }
 
                 const variantModifier = sortModifiers(modifiers).join(':')
