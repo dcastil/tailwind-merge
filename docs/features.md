@@ -100,6 +100,8 @@ twMerge('some-class', [undefined, ['another-class', false]], ['third-class'])
 // → 'some-class another-class third-class'
 ```
 
+Why no object support? [Read here](https://github.com/dcastil/tailwind-merge/discussions/137#discussioncomment-3481605).
+
 ---
 
 Next: [Configuration](./configuration.md)
