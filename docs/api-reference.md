@@ -100,14 +100,23 @@ const customTwMerge = extendTailwindMerge({
         //     Classes here: foo, foo-2, bar-baz, bar-baz-1, bar-baz-2
         foo: ['foo', 'foo-2', { 'bar-baz': ['', '1', '2'] }],
         //   ↓ Functions can also be used to match classes.
-        //     Classes here: qux-auto, qux-1000, qux-1001, …
+        //     Classes here: qux-auto, qux-1000, qux-1001,…
         bar: [{ qux: ['auto', (value) => Number(value) >= 1000] }],
+        baz: ['baz-sm', 'baz-md', 'baz-lg'],
     },
     // ↓ Here you can define additional conflicts across different groups
     conflictingClassGroups: {
-        // ↓ ID of class group which creates a conflict with …
-        //     ↓ … classes from groups with these IDs
+        // ↓ ID of class group which creates a conflict with…
+        //     ↓ …classes from groups with these IDs
+        // In this case `twMerge('qux-auto foo') → 'foo'`
         foo: ['bar'],
+    },
+    // ↓ Here you can define conflicts between the postfix modifier of a group and a different class group.
+    conflictingClassGroupModifiers: {
+        // ↓ ID of class group whose postfix modifier creates a conflict with…
+        //     ↓ …classes from groups with these IDs
+        // In this case `twMerge('qux-auto baz-sm/1000') → 'baz-sm/1000'`
+        baz: ['bar'],
     },
 })
 ```
@@ -148,10 +157,15 @@ const customTwMerge = createTailwindMerge(() => {
             ...defaultConfig.classGroups,
             foo: ['foo', 'foo-2', { 'bar-baz': ['', '1', '2'] }],
             bar: [{ qux: ['auto', (value) => Number(value) >= 1000] }],
+            baz: ['baz-sm', 'baz-md', 'baz-lg'],
         },
         conflictingClassGroups: {
             ...defaultConfig.conflictingClassGroups,
             foo: ['bar'],
+        },
+        conflictingClassGroupModifiers: {
+            ...defaultConfig.conflictingClassGroupModifiers,
+            baz: ['bar'],
         },
     }
 })

@@ -41,6 +41,10 @@ const tailwindMergeConfig = {
     conflictingClassGroups: {
         // Conflicts between class groups are defined here
     },
+    conflictingClassGroupModifiers: {
+        // Conflicts between postfox modifier of a class group and another class group are defined here
+    },
+    }
 }
 ```
 
@@ -92,9 +96,9 @@ Sometimes there are conflicts across Tailwind classes which are more complex tha
 
 One example is the combination of the classes `px-3` (setting `padding-left` and `padding-right`) and `pr-4` (setting `padding-right`).
 
-If they are passed to `twMerge` as `pr-4 px-3`, I think you most likely intend to apply `padding-left` and `padding-right` from the `px-3` class and want `pr-4` to be removed, indicating that both these classes should belong to a single class group.
+If they are passed to `twMerge` as `pr-4 px-3`, you most likely intend to apply `padding-left` and `padding-right` from the `px-3` class and want `pr-4` to be removed, indicating that both these classes should belong to a single class group.
 
-But if they are passed to `twMerge` as `px-3 pr-4`, I assume you want to set the `padding-right` from `pr-4` but still want to apply the `padding-left` from `px-3`, so `px-3` shouldn't be removed when inserting the classes in this order, indicating they shouldn't be in the same class group.
+But if they are passed to `twMerge` as `px-3 pr-4`, you want to set the `padding-right` from `pr-4` but still want to apply the `padding-left` from `px-3`, so `px-3` shouldn't be removed when inserting the classes in this order, indicating they shouldn't be in the same class group.
 
 To summarize, `px-3` should stand in conflict with `pr-4`, but `pr-4` should not stand in conflict with `px-3`. To achieve this, we need to define asymmetric conflicts across class groups.
 
@@ -109,6 +113,18 @@ const conflictingClassGroups = {
 If a class group _creates_ a conflict, it means that if it appears in a class list string passed to `twMerge`, all preceding class groups in the string which _receive_ the conflict will be removed.
 
 When we think of our example, the `px` class group creates a conflict which is received by the class groups `pr` and `pl`. This way `px-3` removes a preceding `pr-4`, but not the other way around.
+
+### Postfix modifiers conflicting with class groups
+
+Tailwind CSS allows postfix modifiers for some classes. E.g. you can set font-size and line-height together with `text-lg/7` with `/7` being the postfix modifier. This means that any line-height classes preceding a font-size class with a modifier should be removed.
+
+For this tailwind-merge has the `conflictingClassGroupModifiers` object in its config with the same shape as `conflictingClassGroups` explained in the [section above](#conflicting-class-groups). This time the key is the ID of a class group whose modifier _creates_ a conflict and the value is an array of IDs of class groups which _receive_ the conflict.
+
+```ts
+const conflictingClassGroupModifiers = {
+    'font-size': ['leading'],
+}
+```
 
 ### Theme
 
@@ -158,10 +174,15 @@ const customTwMerge = extendTailwindMerge({
     classGroups: {
         foo: ['foo', 'foo-2', { 'bar-baz': ['', '1', '2'] }],
         bar: [{ qux: ['auto', (value) => Number(value) >= 1000] }],
+        baz: ['baz-sm', 'baz-md', 'baz-lg'],
     },
     // ↓ Here you can define additional conflicts across class groups
     conflictingClassGroups: {
         foo: ['bar'],
+    },
+    // ↓ Define conflicts between postfix modifiers and class groups
+    conflictingClassGroupModifiers: {
+        baz: ['bar'],
     },
 })
 ```
@@ -181,9 +202,13 @@ const customTwMerge = createTailwindMerge(() => ({
     classGroups: {
         foo: ['foo', 'foo-2', { 'bar-baz': ['', '1', '2'] }],
         bar: [{ qux: ['auto', (value) => Number(value) >= 1000] }],
+        baz: ['baz-sm', 'baz-md', 'baz-lg'],
     },
     conflictingClassGroups: {
         foo: ['bar'],
+    },
+    conflictingClassGroupModifiers: {
+        baz: ['bar'],
     },
 }))
 ```
