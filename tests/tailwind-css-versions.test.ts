@@ -1,6 +1,7 @@
 import { twMerge } from '../src'
 
 test('supports Tailwind CSS v3.3 features', () => {
+    expect(twMerge('text-red text-lg/7 text-lg/8')).toBe('text-red text-lg/8')
     expect(
         twMerge(
             'start-0 start-1',
