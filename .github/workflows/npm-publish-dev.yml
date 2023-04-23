@@ -7,6 +7,8 @@ on:
 jobs:
     publish:
         runs-on: ubuntu-latest
+        permissions:
+            id-token: write
         steps:
             - uses: actions/checkout@v3
             - name: Use Node.js 16
@@ -31,7 +33,8 @@ jobs:
             - uses: stevenbenitez/get-package-version-action@v1
               id: package-version
             - run: yarn version --no-git-tag-version --new-version ${{ steps.package-version.outputs.version }}-dev.${{ github.sha }}
-            - uses: JS-DevTools/npm-publish@v1
-              with:
-                  token: ${{ secrets.NPM_TOKEN }}
-                  tag: dev
+              # npm install -g npm@latest is necessary to make provenance available. More info: https://docs.npmjs.com/generating-provenance-statements
+            - run: npm install -g npm@latest
+            - run: npm publish --access public --tag dev
+              env:
+                  NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
