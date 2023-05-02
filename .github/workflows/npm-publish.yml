@@ -33,7 +33,7 @@ jobs:
                   if-no-files-found: error
             - run: yarn test:exports
             - run: yarn size
-              # npm install -g npm@latest is necessary to make provenance available. More info: https://docs.npmjs.com/generating-provenance-statements
+              # npm install -g npm@latest is necessary to make provenance available (available since v9.6.5 or so). More info: https://docs.npmjs.com/generating-provenance-statements
             - run: npm install -g npm@latest
             - uses: JS-DevTools/npm-publish@v1
               with:
