@@ -1185,7 +1185,7 @@ export function getDefaultConfig() {
              */
             opacity: [{ opacity: [opacity] }],
             /**
-             * Mix Beldn Mode
+             * Mix Blend Mode
              * @see https://tailwindcss.com/docs/mix-blend-mode
              */
             'mix-blend': [{ 'mix-blend': getBlendModes() }],
