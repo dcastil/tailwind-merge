@@ -113,7 +113,7 @@ twMerge('some-class', 'another-class yet-another-class', 'so-many-classes')
 ```ts
 twMerge('some-class', undefined, null, false, 0) // → 'some-class'
 twMerge('my-class', false && 'not-this', null && 'also-not-this', true && 'but-this')
-// → 'some-class but-this'
+// → 'my-class but-this'
 ```
 
 ### Supports arrays and nested arrays
