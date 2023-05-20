@@ -53,7 +53,8 @@ twMerge('[--scroll-offset:56px] lg:[--scroll-offset:44px]')
 twMerge('[padding:1rem] p-8') // → '[padding:1rem] p-8'
 ```
 
-Watch out for mixing arbitrary properties which could be expressed as Tailwind classes. tailwind-merge does not resolve conflicts between arbitrary properties and their matching Tailwind classes to keep the bundle size small.
+> **Warning**
+> Watch out for mixing arbitrary properties which could be expressed as Tailwind classes. tailwind-merge does not resolve conflicts between arbitrary properties and their matching Tailwind classes to keep the bundle size small.
 
 ## Supports arbitrary variants
 
@@ -66,7 +67,8 @@ twMerge('dark:hover:[&:nth-child(3)]:py-0 hover:dark:[&:nth-child(3)]:py-4')
 twMerge('[&:focus]:ring focus:ring-4') // → '[&:focus]:ring focus:ring-4'
 ```
 
-Similarly to arbitrary properties, tailwind-merge does not resolve conflicts between arbitrary variants and their matching predefined modifiers for bundle size reasons.
+> **Warning**
+> Similarly to arbitrary properties, tailwind-merge does not resolve conflicts between arbitrary variants and their matching predefined modifiers for bundle size reasons.
 
 ## Supports important modifier
 
