@@ -99,7 +99,7 @@ twMerge('text-red text-secret-sauce') // → 'text-secret-sauce'
 
 ## Composition
 
-tailwind-merge has some features that simplify composing class strings together.
+tailwind-merge has some features that simplify composing class strings together. Those allow you to compose classes like in [clsx](https://www.npmjs.com/package/clsx), [classnames](https://www.npmjs.com/package/classnames) or [classix](https://www.npmjs.com/package/classix).
 
 ### Supports multiple arguments
 
