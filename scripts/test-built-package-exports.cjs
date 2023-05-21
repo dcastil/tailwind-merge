@@ -1,6 +1,6 @@
 const assert = require('assert')
 
-const { twMerge } = require('..')
+const { twMerge } = require('../dist')
 
 assert(twMerge() === '')
 assert(

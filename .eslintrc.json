@@ -161,7 +161,7 @@
             "extends": ["plugin:jest/recommended", "plugin:jest/style"]
         },
         {
-            "files": ["scripts/**/*.?(m)js"],
+            "files": ["scripts/**/*.?(m|c)js"],
             "rules": {
                 "no-console": "off"
             }
