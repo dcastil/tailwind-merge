@@ -36,6 +36,6 @@ tailwind-merge overrides conflicting classes and keeps everything else untouched
 
 ---
 
-Next: [Features](./features.md)
+Next: [When and how to use it](./when-and-how-to-use-it.md)
 
 [Back to overview](./README.md)

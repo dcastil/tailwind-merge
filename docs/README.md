@@ -24,6 +24,7 @@ twMerge('px-2 py-1 bg-red hover:bg-dark-red', 'p-3 bg-[#B91C1C]')
 ## Get started
 
 -   [What is it for](./what-is-it-for.md)
+-   [When and how to use it](./when-and-how-to-use-it.md)
 -   [Features](./features.md)
 -   [Configuration](./configuration.md)
 -   [Recipes](./recipes.md)
