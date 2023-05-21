@@ -262,3 +262,5 @@ TypeScript type for config object. Useful if you want to build a `createConfig` 
 Next: [Writing plugins](./writing-plugins.md)
 
 Previous: [Recipes](./recipes.md)
+
+[Back to overview](./README.md)

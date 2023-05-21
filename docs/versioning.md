@@ -21,3 +21,5 @@ This package follows the [SemVer](https://semver.org) versioning rules. More spe
 Next: [Contributing](./contributing.md)
 
 Previous: [Writing plugins](./writing-plugins.md)
+
+[Back to overview](./README.md)

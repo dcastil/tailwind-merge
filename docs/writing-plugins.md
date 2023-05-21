@@ -37,3 +37,5 @@ Also, feel free to check out [tailwind-merge-rtl-plugin](https://www.npmjs.com/p
 Next: [Versioning](./versioning.md)
 
 Previous: [API reference](./api-reference.md)
+
+[Back to overview](./README.md)

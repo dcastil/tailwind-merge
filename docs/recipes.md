@@ -85,3 +85,5 @@ function customTwMerge(...inputs) {
 Next: [API reference](./api-reference.md)
 
 Previous: [Configuration](./configuration.md)
+
+[Back to overview](./README.md)
