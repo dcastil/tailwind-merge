@@ -20,6 +20,11 @@ test('handles simple conflicts with arbitrary values correctly', () => {
     expect(twMerge('opacity-10 opacity-[0.025]')).toBe('opacity-[0.025]')
     expect(twMerge('scale-75 scale-[1.7]')).toBe('scale-[1.7]')
     expect(twMerge('brightness-90 brightness-[1.75]')).toBe('brightness-[1.75]')
+
+    // Handling of value `0`
+    expect(twMerge('min-h-[0.5px] min-h-[0]')).toBe('min-h-[0]')
+    expect(twMerge('text-[0.5px] text-[color:0]')).toBe('text-[0.5px] text-[color:0]')
+    expect(twMerge('text-[0.5px] text-[--my-0]')).toBe('text-[0.5px] text-[--my-0]')
 })
 
 test('handles arbitrary length conflicts with labels and modifiers correctly', () => {
