@@ -35,6 +35,8 @@ twJoin(
 
 It is used internally within `twMerge` and a direct subset of [`clsx`](https://www.npmjs.com/package/clsx). If you use `clsx` or [`classnames`](https://www.npmjs.com/package/classnames) to apply Tailwind classes conditionally and don't need support for object arguments, you can use `twJoin` instead, it is a little faster and will save you a few hundred bytes in bundle size.
 
+Why no object support? [Read here](https://github.com/dcastil/tailwind-merge/discussions/137#discussioncomment-3481605).
+
 ## `getDefaultConfig`
 
 ```ts
