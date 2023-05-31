@@ -104,11 +104,55 @@ You don't need to worry about potentially expensive re-renders here because tail
 
 ## Alternatives
 
-TODO:
+In case the disadvantages of tailwind-merge weigh in too much for your use case, here are some alternatives that might be a better fit.
 
--   Write about important modifier
--   Adding prop dealing with one-off style to component
--   Adding more granular className props like `paddingClassNames` to component
+### Adding props that toggle internal styles
+
+This is the goold-old way of styling components and is also probably your default. E.g. think of a variant prop that toggles between a primary and a secondary styles of a button. The `variant` prop is already toggling between internal styles of the component. If you have a one-off use case to give the button a full width, you can add a `isFullWidth` prop to the button component which toggles the `w-full` class internally.
+
+```jsx
+// React components with JSX syntax used in this example
+
+function Button({ variant = 'primary', isFullWidth, ...props }) {
+    return <button {...props} className={join(BUTTON_VARIANTS[variant], isFullWidth && 'w-full')} />
+}
+
+const BUTTON_VARIANTS = {
+    primary: 'bg-blue-500 text-white',
+    secondary: 'bg-gray-200 text-black',
+}
+
+function join(...args) {
+    return args.filter(Boolean).join(' ')
+}
+```
+
+### Using Tailwind's important modifier
+
+If you have too many different one-off use cases to add a prop for each of them to a component, you can use Tailwind's [important modifier](https://tailwindcss.com/docs/configuration#important-modifier) to override internal styles.
+
+```jsx
+// React components with JSX syntax used in this example
+
+function MyComponent() {
+    return (
+        <>
+            <Button className="w-full">No danger</Button>
+            <Button className="w-full !bg-red-500" >Danger!</Button>
+        </>
+    )
+}
+
+function Button({ className ...props }) {
+    return <button {...props} className={join('bg-blue-500 text-white', className)} />
+}
+
+function join(...args) {
+    return args.filter(Boolean).join(' ')
+}
+```
+
+The main downsides of this approach are that it only works one level deep (you can't override the `!bg-red-500` class in the example above) and that it's not obvious from the component's API which classes can be overridden.
 
 ---
 
@@ -117,3 +161,7 @@ Next: [Features](./features.md)
 Previous: [What is it for](./what-is-it-for.md)
 
 [Back to overview](./README.md)
+
+```
+
+```
