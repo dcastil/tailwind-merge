@@ -150,3 +150,5 @@ The initial computations are called lazily on the first call to `twMerge` to pre
 Next: [Configuration](./configuration.md)
 
 Previous: [What is it for](./what-is-it-for.md)
+
+[Back to overview](./README.md)

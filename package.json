@@ -45,7 +45,7 @@
     "scripts": {
         "build": "dts build",
         "test": "dts test",
-        "test:exports": "node scripts/test-built-package-exports.js && node scripts/test-built-package-exports.mjs",
+        "test:exports": "node scripts/test-built-package-exports.cjs && node scripts/test-built-package-exports.mjs",
         "lint": "eslint --max-warnings 0 '**'",
         "size": "size-limit",
         "preversion": "if [ -n \"$DANYS_MACHINE\" ]; then git checkout main && git pull; fi",
@@ -61,7 +61,6 @@
         "eslint": "^8.39.0",
         "eslint-plugin-import": "^2.27.5",
         "eslint-plugin-jest": "^27.2.1",
-        "fp-ts": "^2.14.0",
         "globby": "^11.1.0",
         "prettier": "^2.8.8",
         "size-limit": "^8.2.4",

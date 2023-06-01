@@ -1,6 +1,6 @@
 # What is it for
 
-If you use Tailwind with a component-based UI renderer like [React](https://reactjs.org) or [Vue](https://vuejs.org), you're probably familiar with the situation that you want to change some styles of a component, but only in one place.
+If you use Tailwind CSS with a component-based UI renderer like [React](https://reactjs.org) or [Vue](https://vuejs.org), you're probably familiar with the situation that you want to change some styles of a component, but only in a one-off case.
 
 ```jsx
 // React components with JSX syntax used in this example
@@ -10,7 +10,7 @@ function MyGenericInput(props) {
     return <input {...props} className={className} />
 }
 
-function MySlightlyModifiedInput(props) {
+function MyOneOffInput(props) {
     return (
         <MyGenericInput
             {...props}
@@ -20,7 +20,7 @@ function MySlightlyModifiedInput(props) {
 }
 ```
 
-When the `MySlightlyModifiedInput` is rendered, an input with the className `border rounded px-2 py-1 p-3` gets created. But because of the way the [CSS cascade](https://developer.mozilla.org/en-US/docs/Web/CSS/Cascade) works, the styles of the `p-3` class are ignored. The order of the classes in the `className` string doesn't matter at all and the only way to apply the `p-3` styles is to remove both `px-2` and `py-1`.
+When `MyOneOffInput` is rendered, an input with the className `border rounded px-2 py-1 p-3` gets created. But because of the way the [CSS cascade](https://developer.mozilla.org/en-US/docs/Web/CSS/Cascade) works, the styles of the `p-3` class are ignored. The order of the classes in the `className` string doesn't matter at all and the only way to apply the `p-3` styles is to remove both `px-2` and `py-1`.
 
 This is where tailwind-merge comes in.
 
@@ -32,10 +32,10 @@ function MyGenericInput(props) {
 }
 ```
 
-tailwind-merge overrides conflicting classes and keeps everything else untouched. In the case of the `MySlightlyModifiedInput`, the input now only renders the classes `border rounded p-3`.
+tailwind-merge overrides conflicting classes and keeps everything else untouched. In the case of the `MyOneOffInput`, the input is now rendered with the classes `border rounded p-3`.
 
 ---
 
-Next: [Features](./features.md)
+Next: [When and how to use it](./when-and-how-to-use-it.md)
 
-Previous: [Overview](../README.md)
+[Back to overview](./README.md)
