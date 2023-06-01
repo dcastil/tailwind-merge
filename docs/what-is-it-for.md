@@ -2,7 +2,7 @@
 
 ## Video introduction
 
-[Watch this introduction video from Simon Vrachliotis (@simonswiss) ↓ ![The "why" behind tailwind-merge](https://img.youtube.com/vi/tfgLd5ZSNPc/maxresdefault.jpg)](https://www.youtube.com/watch?v=tfgLd5ZSNPc "Watch YouTube video \"Tailwind-Merge Is Incredibly Useful — And Here's Why!\"")
+[Watch this introduction video from Simon Vrachliotis (@simonswiss) ↓ ![The "why" behind tailwind-merge](https://img.youtube.com/vi/tfgLd5ZSNPc/maxresdefault.jpg)](https://www.youtube.com/watch?v=tfgLd5ZSNPc (Watch YouTube video "Tailwind-Merge Is Incredibly Useful — And Here's Why!"))
 
 ## Thanks, but I prefer to read
 
