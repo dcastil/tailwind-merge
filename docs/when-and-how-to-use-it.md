@@ -39,7 +39,7 @@ tailwind-merge allows you to support a wide range of styling use cases without h
 
 ### Preventing premature abstractions
 
-Let's say you have a Button component that you already use in many places. You have a place in your app in which you want to make its background red to signal that the action of the button is destructive. You could modify the Button component to deal with the concept of destructiveness, but then you'd need to make sure that those styles work with all the other permutations of the component which you don't need in the place where the destructive button is used. And maybe you're not even sure whether you'll keep the Button red in this one place, so the time investment of making the Button understand destructiveness doesn't seem worth it.
+Let's say you have a Button component that you already use in many places. You have a place in your app in which you want to make its background red to signal that the action of the button is destructive. You could modify the Button component to deal with the concept of destructiveness (e.g. by passing a `variant` prop with the value `destructive`), but then you'd need to make sure that those styles work with all the other permutations of the component which you don't need in the place where the destructive button is used. And maybe you're not even sure whether you'll keep the Button red in this one place, so the time investment of making the Button understand destructiveness doesn't seem worth it.
 
 tailwind-merge allows you to defer the creation of abstractions like destructiveness to the point where you're sure that you need them. You can just pass a `className` prop to the Button component in which you define the red background and be done with it for now. If you later decide that you want to make the Button red in more places, you can still define the logic inside the Button component later.
 
@@ -47,12 +47,12 @@ tailwind-merge allows you to defer the creation of abstractions like destructive
 
 ### Joining internal classes
 
-If you want to merge classes that are all defined within a component, prefer using the [`twJoin`](./api-reference.md#twjoin) function over `twMerge`. As the name suggests, `twJoin` only joins the class strings together and doesn't deal with conflicting classes.
+If you want to merge classes that are all defined within a component, prefer using the [`twJoin`](./api-reference.md#twjoin) function over [`twMerge`](./api-reference.md#twmerge). As the name suggests, `twJoin` only joins the class strings together and doesn't deal with conflicting classes.
 
 ```jsx
 // React components with JSX syntax used in this example
 
-function MyComponent({ forceHover, disbaled, isMuted }) {
+function MyComponent({ forceHover, disabled, isMuted }) {
     return (
         <div
             className={twJoin(
@@ -83,7 +83,7 @@ The primary purpose of tailwind-merge is to merge a `className` prop with the de
 ```jsx
 // React components with JSX syntax used in this example
 
-function MyComponent({ forceHover, disbaled, isMuted, className }) {
+function MyComponent({ forceHover, disabled, isMuted, className }) {
     return (
         <div
             className={twMerge(
@@ -108,7 +108,7 @@ In case the disadvantages of tailwind-merge weigh in too much for your use case,
 
 ### Adding props that toggle internal styles
 
-This is the goold-old way of styling components and is also probably your default. E.g. think of a variant prop that toggles between a primary and a secondary styles of a button. The `variant` prop is already toggling between internal styles of the component. If you have a one-off use case to give the button a full width, you can add a `isFullWidth` prop to the button component which toggles the `w-full` class internally.
+This is the goold-old way of styling components and is also probably your default. E.g. think of a variant prop that toggles between primary and secondary styles of a button. The `variant` prop is already toggling between internal styles of the component and you can use the same pattern to define any number of styling use cases to a component. If you have a one-off use case to give the button a full width, you can add a `isFullWidth` prop to the button component which toggles the `w-full` class internally.
 
 ```jsx
 // React components with JSX syntax used in this example
@@ -152,7 +152,7 @@ function join(...args) {
 }
 ```
 
-The main downsides of this approach are that it only works one level deep (you can't override the `!bg-red-500` class in the example above) and that it's not obvious from the component's API which classes can be overridden.
+The main downside of this approach are that it only works one level deep (you can't override the `!bg-red-500` class in the example above).
 
 ---
 
