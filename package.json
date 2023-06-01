@@ -49,7 +49,7 @@
         "lint": "eslint --max-warnings 0 '**'",
         "size": "size-limit",
         "preversion": "if [ -n \"$DANYS_MACHINE\" ]; then git checkout main && git pull; fi",
-        "version": "zx scripts/update-readme.js",
+        "version": "zx scripts/update-readme.mjs",
         "postversion": "if [ -n \"$DANYS_MACHINE\" ]; then git push --follow-tags && open https://github.com/dcastil/tailwind-merge/releases; fi"
     },
     "devDependencies": {
