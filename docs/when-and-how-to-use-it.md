@@ -31,7 +31,7 @@ tailwind-merge is probably only useful if you use Tailwind CSS and compose compo
 
 ### Easy to compose components through multiple levels
 
-tailwind-merge is a great fit for highly composed components like in design systems or UI component libraries. If you expect that styles of a component will be modified on multiple levels, e.g. ContextMenuOption -> MenuOption -> BaseOption, with each component passing some modifications to the component it renders, tailwind-merge can help you to keep the API surface between components small.
+tailwind-merge is a great fit for highly composed components like in design systems or UI component libraries. If you expect that styles of a component will be modified on multiple levels, e.g. ContextMenuOption → MenuOption → BaseOption, with each component passing some modifications to the component it renders, tailwind-merge can help you to keep the API surface between components small.
 
 ### Enables fast development velocity and iteration speed
 
