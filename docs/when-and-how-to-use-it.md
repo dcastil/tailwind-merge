@@ -152,7 +152,7 @@ function join(...args) {
 }
 ```
 
-The main downside of this approach are that it only works one level deep (you can't override the `!bg-red-500` class in the example above).
+The main downside of this approach is that it only works one level deep (you can't override the `!bg-red-500` class in the example above). But if you don't need to be able to override styles through multiple levels of composition, this might be the most lightweight approach possible.
 
 ---
 
