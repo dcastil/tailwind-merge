@@ -161,7 +161,3 @@ Next: [Features](./features.md)
 Previous: [What is it for](./what-is-it-for.md)
 
 [Back to overview](./README.md)
-
-```
-
-```
