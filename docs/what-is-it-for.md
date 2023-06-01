@@ -1,5 +1,11 @@
 # What is it for
 
+## Video introduction
+
+[Watch this introduction video from Simon Vrachliotis (@simonswiss) ↓ ![The "why" behind tailwind-merge](https://img.youtube.com/vi/tfgLd5ZSNPc/maxresdefault.jpg)](https://www.youtube.com/watch?v=tfgLd5ZSNPc "Watch YouTube video \"Tailwind-Merge Is Incredibly Useful — And Here's Why!\"")
+
+## Thanks, but I prefer to read
+
 If you use Tailwind CSS with a component-based UI renderer like [React](https://reactjs.org) or [Vue](https://vuejs.org), you're probably familiar with the situation that you want to change some styles of a component, but only in a one-off case.
 
 ```jsx
