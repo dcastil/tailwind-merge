@@ -307,7 +307,7 @@ export function getDefaultConfig() {
              * Flex Basis
              * @see https://tailwindcss.com/docs/flex-basis
              */
-            basis: [{ basis: [spacing] }],
+            basis: [{ basis: getSpacingWithAuto() }],
             /**
              * Flex Direction
              * @see https://tailwindcss.com/docs/flex-direction

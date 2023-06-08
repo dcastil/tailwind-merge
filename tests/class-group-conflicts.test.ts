@@ -2,6 +2,7 @@ import { twMerge } from '../src'
 
 test('merges classes from same group correctly', () => {
     expect(twMerge('overflow-x-auto overflow-x-hidden')).toBe('overflow-x-hidden')
+    expect(twMerge('basis-full basis-auto')).toBe('basis-auto')
     expect(twMerge('w-full w-fit')).toBe('w-fit')
     expect(twMerge('overflow-x-auto overflow-x-hidden overflow-x-scroll')).toBe('overflow-x-scroll')
     expect(twMerge('overflow-x-auto hover:overflow-x-hidden overflow-x-scroll')).toBe(
