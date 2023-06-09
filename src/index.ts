@@ -1,7 +1,7 @@
 import { twJoin } from './lib/tw-join'
 
 export { twMerge } from './lib/tw-merge'
-export { twJoin } from './lib/tw-join'
+export { twJoin, type ClassNameValue } from './lib/tw-join'
 export { getDefaultConfig } from './lib/default-config'
 export { extendTailwindMerge } from './lib/extend-tailwind-merge'
 export { createTailwindMerge } from './lib/create-tailwind-merge'
