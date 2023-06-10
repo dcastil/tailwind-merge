@@ -10,7 +10,7 @@
 ## Other languages
 
 -   [tailwind_merge](https://rubygems.org/gems/tailwind_merge) (Ruby)
--   [Twix](https://hex.pm/packages/twix/0.1.0) (Elixir)
+-   [Twix](https://hex.pm/packages/twix) (Elixir)
 -   [tailwind-merge-php](https://github.com/YieldStudio/tailwind-merge-php) (PHP)
 
 ---
