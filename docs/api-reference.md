@@ -259,6 +259,21 @@ interface Config { … }
 
 TypeScript type for config object. Useful if you want to build a `createConfig` function but don't want to define it inline in [`extendTailwindMerge`](#extendtailwindmerge) or [`createTailwindMerge`](#createtailwindmerge).
 
+## `ClassNameValue`
+
+```ts
+type ClassNameValue = string | null | undefined | 0 | false | ClassNameValue[]
+```
+
+TypeScript type for arguments accepted by [`twMerge`](#twmerge) and [`twJoin`](#twjoin). You might want to use it if you wrap any of those with your own function.
+
+```ts
+function myWrappedTwMerge(...args: ClassNameValue[]) {
+    doSomething()
+    return twMerge(...args)
+}
+```
+
 ---
 
 Next: [Writing plugins](./writing-plugins.md)

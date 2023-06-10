@@ -1,4 +1,5 @@
 import {
+    ClassNameValue,
     Config,
     createTailwindMerge,
     extendTailwindMerge,
@@ -37,8 +38,15 @@ test('has correct export types', () => {
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const noRun = () => {
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const config: Config = getDefaultConfig()
+        const classNameValue: ClassNameValue = 'some-class'
+
+        twMerge(classNameValue, classNameValue, classNameValue)
+        twJoin(classNameValue, classNameValue, classNameValue)
+
+        return {
+            config,
+        }
     }
 })
 
