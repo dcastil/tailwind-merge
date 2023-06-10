@@ -1,10 +1,9 @@
 ---
-name: Bug report
-about: Report that something isn't working as expected
+name: Bug Report
+about: Report that something isn't working as expected in tailwind-merge
 title: ''
 labels: bug
 assignees: ''
-
 ---
 
 **Describe the bug**
@@ -18,8 +17,9 @@ You can use https://codesandbox.io/s/tailwind-merge-playground-cssr35?file=/src/
 A clear and concise description of what you expected to happen.
 
 **Environment**
- - tailwind-merge version: [e.g. 1.13.1]
- - Browser version [e.g. chrome 114, safari 17]
+
+-   tailwind-merge version: [e.g. 1.13.1]
+-   Browser version [e.g. chrome 114, safari 17]
 
 **Additional context**
 Add any other context about the problem here.

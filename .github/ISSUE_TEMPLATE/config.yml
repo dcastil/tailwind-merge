@@ -6,9 +6,6 @@ contact_links:
     - name: Feature Request
       url: https://github.com/dcastil/tailwind-merge/discussions/new?category=ideas
       about: Suggest any ideas you have using the discussion forum.
-    - name: Bug Report
-      url: https://github.com/dcastil/tailwind-merge/issues/new
-      about: If something is broken with tailwind-merge itself, create a bug report.
     - name: Start discussion
       url: https://github.com/dcastil/tailwind-merge/discussions
       about: Anything else on your mind? Check out the discussions forum.
