@@ -5,7 +5,7 @@ Like any other package, tailwind-merge comes with opportunities and trade-offs. 
 > **Note**
 > If you're thinking of a major argument that is not covered here, please [let me know](https://github.com/dcastil/tailwind-merge/discussions/new?category=ideas)!
 
-## When not to use it
+## Reasons not to use it
 
 Generally speaking, there are situations where you _could_ use tailwind-merge but probably shouldn't. Think of tailwind-merge as an escape hatch rather than the primary tool to handle style variants.[^simonswiss-quote]
 
@@ -27,7 +27,7 @@ When you allow arbitrary classes to be passed into a component, you can break th
 
 tailwind-merge is probably only useful if you use Tailwind CSS and compose components together in some form. If you have a use case for tailwind-merge outside of those boundaries, please [let me know](https://github.com/dcastil/tailwind-merge/discussions/new?category=show-and-tell), I'm curious about it!
 
-## When to use it
+## Reasons to use it
 
 ### Easy to compose components through multiple levels
 
