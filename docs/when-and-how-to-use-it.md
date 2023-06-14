@@ -5,7 +5,7 @@ Like any other package, tailwind-merge comes with opportunities and trade-offs. 
 > **Note**
 > If you're thinking of a major argument that is not covered here, please [let me know](https://github.com/dcastil/tailwind-merge/discussions/new?category=ideas)!
 
-## Why not to use it
+## Reasons not to use it
 
 Generally speaking, there are situations where you _could_ use tailwind-merge but probably shouldn't. Think of tailwind-merge as an escape hatch rather than the primary tool to handle style variants.[^simonswiss-quote]
 
@@ -25,13 +25,13 @@ When you allow arbitrary classes to be passed into a component, you can break th
 
 ### Not using Tailwind CSS or component composition
 
-tailwind-merge is probably only useful if you use Tailwind CSS and compose components together in some form. If you have a use case for tailwind-merge outside of thosse boundaries, please [let me know](https://github.com/dcastil/tailwind-merge/discussions/new?category=show-and-tell), I'm curious about it!
+tailwind-merge is probably only useful if you use Tailwind CSS and compose components together in some form. If you have a use case for tailwind-merge outside of those boundaries, please [let me know](https://github.com/dcastil/tailwind-merge/discussions/new?category=show-and-tell), I'm curious about it!
 
-## Why to use it
+## Reasons to use it
 
 ### Easy to compose components through multiple levels
 
-tailwind-merge is a great fit for highly composed components like in design systems or UI component libraries. If you expect that styles of a component will be modified on multiple levels, e.g. ContextMenuOption → MenuOption → BaseOption, with each component passing some modifications to the component it renders, tailwind-merge can help you to keep the API surface between components small.
+tailwind-merge is a great fit for highly composed components, like in design systems or UI component libraries. If you expect that styles of a component will be modified on multiple levels, e.g. ContextMenuOption → MenuOption → BaseOption, with each component passing some modifications to the component it renders, tailwind-merge can help you to keep the API surface between components small.
 
 ### Enables fast development velocity and iteration speed
 
@@ -108,7 +108,7 @@ In case the disadvantages of tailwind-merge weigh in too much for your use case,
 
 ### Adding props that toggle internal styles
 
-This is the goold-old way of styling components and is also probably your default. E.g. think of a variant prop that toggles between primary and secondary styles of a button. The `variant` prop is already toggling between internal styles of the component and you can use the same pattern to define any number of styling use cases to a component. If you have a one-off use case to give the button a full width, you can add a `isFullWidth` prop to the button component which toggles the `w-full` class internally.
+This is the good-old way of styling components and is also probably your default. E.g. think of a variant prop that toggles between primary and secondary styles of a button. The `variant` prop is already toggling between internal styles of the component and you can use the same pattern to define any number of styling use cases to a component. If you have a one-off use case to give the button a full width, you can add a `isFullWidth` prop to the button component which toggles the `w-full` class internally.
 
 ```jsx
 // React components with JSX syntax used in this example
