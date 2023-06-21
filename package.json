@@ -45,6 +45,7 @@
     "scripts": {
         "build": "dts build",
         "test": "dts test",
+        "test:watch": "dts test --watch",
         "test:exports": "node scripts/test-built-package-exports.cjs && node scripts/test-built-package-exports.mjs",
         "lint": "eslint --max-warnings 0 '**'",
         "size": "size-limit",
