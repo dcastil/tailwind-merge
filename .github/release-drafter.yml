@@ -17,6 +17,8 @@ categories:
       label: 'feature'
     - title: 'Bug Fixes'
       label: 'bugfix'
+    - title: 'Documentation'
+      label: 'documentation'
     - title: 'Other'
       label: 'other'
 exclude-labels:
@@ -31,6 +33,7 @@ version-resolver:
     patch:
         labels:
             - 'bugfix'
+            - 'documentation'
             - 'other'
     default: 'patch'
 autolabeler:
@@ -44,6 +47,11 @@ autolabeler:
           - '/\b(bugfix|fix)\b/i'
       title:
           - '/\b(bugfix|fix)\b/i'
+    - label: 'documentation'
+      branch:
+          - '/\b(documentation|docs)\b/i'
+      title:
+          - '/\b(documentation|docs)\b/i'
     - label: 'other'
       branch:
           - '/^other\b/i'
