@@ -45,7 +45,8 @@ export function getDefaultConfig() {
 
     const getOverscroll = () => ['auto', 'contain', 'none'] as const
     const getOverflow = () => ['auto', 'hidden', 'clip', 'visible', 'scroll'] as const
-    const getSpacingWithAuto = () => ['auto', spacing] as const
+    const getSpacingWithAutoAndArbitrary = () => ['auto', isArbitraryValue, spacing] as const
+    const getSpacingWithArbitrary = () => [isArbitraryValue, spacing] as const
     const getLengthWithEmpty = () => ['', isLength] as const
     const getNumberWithAutoAndArbitrary = () => ['auto', isNumber, isArbitraryValue] as const
     const getPositions = () =>
@@ -94,29 +95,29 @@ export function getDefaultConfig() {
         theme: {
             colors: [isAny],
             spacing: [isLength],
-            blur: ['none', '', isTshirtSize, isArbitraryLength],
+            blur: ['none', '', isTshirtSize, isArbitraryValue],
             brightness: getNumber(),
             borderColor: [colors],
-            borderRadius: ['none', '', 'full', isTshirtSize, isArbitraryLength],
-            borderSpacing: [spacing],
+            borderRadius: ['none', '', 'full', isTshirtSize, isArbitraryValue],
+            borderSpacing: getSpacingWithArbitrary(),
             borderWidth: getLengthWithEmpty(),
             contrast: getNumber(),
             grayscale: getZeroAndEmpty(),
             hueRotate: getNumberAndArbitrary(),
             invert: getZeroAndEmpty(),
-            gap: [spacing],
+            gap: getSpacingWithArbitrary(),
             gradientColorStops: [colors],
             gradientColorStopPositions: [isPercent, isArbitraryLength],
-            inset: getSpacingWithAuto(),
-            margin: getSpacingWithAuto(),
+            inset: getSpacingWithAutoAndArbitrary(),
+            margin: getSpacingWithAutoAndArbitrary(),
             opacity: getNumber(),
-            padding: [spacing],
+            padding: getSpacingWithArbitrary(),
             saturate: getNumber(),
             scale: getNumber(),
             sepia: getZeroAndEmpty(),
             skew: getNumberAndArbitrary(),
-            space: [spacing],
-            translate: [spacing],
+            space: getSpacingWithArbitrary(),
+            translate: getSpacingWithArbitrary(),
         },
         classGroups: {
             // Layout
@@ -307,7 +308,7 @@ export function getDefaultConfig() {
              * Flex Basis
              * @see https://tailwindcss.com/docs/flex-basis
              */
-            basis: [{ basis: getSpacingWithAuto() }],
+            basis: [{ basis: getSpacingWithAutoAndArbitrary() }],
             /**
              * Flex Direction
              * @see https://tailwindcss.com/docs/flex-direction
@@ -569,12 +570,12 @@ export function getDefaultConfig() {
              * Width
              * @see https://tailwindcss.com/docs/width
              */
-            w: [{ w: ['auto', 'min', 'max', 'fit', spacing] }],
+            w: [{ w: ['auto', 'min', 'max', 'fit', isArbitraryValue, spacing] }],
             /**
              * Min-Width
              * @see https://tailwindcss.com/docs/min-width
              */
-            'min-w': [{ 'min-w': ['min', 'max', 'fit', isLength] }],
+            'min-w': [{ 'min-w': ['min', 'max', 'fit', isArbitraryValue, isLength] }],
             /**
              * Max-Width
              * @see https://tailwindcss.com/docs/max-width
@@ -591,7 +592,7 @@ export function getDefaultConfig() {
                         'prose',
                         { screen: [isTshirtSize] },
                         isTshirtSize,
-                        isArbitraryLength,
+                        isArbitraryValue,
                     ],
                 },
             ],
@@ -599,17 +600,17 @@ export function getDefaultConfig() {
              * Height
              * @see https://tailwindcss.com/docs/height
              */
-            h: [{ h: [spacing, 'auto', 'min', 'max', 'fit'] }],
+            h: [{ h: [isArbitraryValue, spacing, 'auto', 'min', 'max', 'fit'] }],
             /**
              * Min-Height
              * @see https://tailwindcss.com/docs/min-height
              */
-            'min-h': [{ 'min-h': ['min', 'max', 'fit', isLength] }],
+            'min-h': [{ 'min-h': ['min', 'max', 'fit', isArbitraryValue, isLength] }],
             /**
              * Max-Height
              * @see https://tailwindcss.com/docs/max-height
              */
-            'max-h': [{ 'max-h': [spacing, 'min', 'max', 'fit'] }],
+            'max-h': [{ 'max-h': [isArbitraryValue, spacing, 'min', 'max', 'fit'] }],
             // Typography
             /**
              * Font Size
@@ -694,7 +695,7 @@ export function getDefaultConfig() {
                         'wide',
                         'wider',
                         'widest',
-                        isArbitraryLength,
+                        isArbitraryValue,
                     ],
                 },
             ],
@@ -708,7 +709,18 @@ export function getDefaultConfig() {
              * @see https://tailwindcss.com/docs/line-height
              */
             leading: [
-                { leading: ['none', 'tight', 'snug', 'normal', 'relaxed', 'loose', isLength] },
+                {
+                    leading: [
+                        'none',
+                        'tight',
+                        'snug',
+                        'normal',
+                        'relaxed',
+                        'loose',
+                        isArbitraryValue,
+                        isLength,
+                    ],
+                },
             ],
             /**
              * List Style Image
@@ -770,7 +782,7 @@ export function getDefaultConfig() {
              * Text Underline Offset
              * @see https://tailwindcss.com/docs/text-underline-offset
              */
-            'underline-offset': [{ 'underline-offset': ['auto', isLength] }],
+            'underline-offset': [{ 'underline-offset': ['auto', isArbitraryValue, isLength] }],
             /**
              * Text Decoration Color
              * @see https://tailwindcss.com/docs/text-decoration-color
@@ -790,7 +802,7 @@ export function getDefaultConfig() {
              * Text Indent
              * @see https://tailwindcss.com/docs/text-indent
              */
-            indent: [{ indent: [spacing] }],
+            indent: [{ indent: getSpacingWithArbitrary() }],
             /**
              * Vertical Alignment
              * @see https://tailwindcss.com/docs/vertical-align
@@ -806,7 +818,7 @@ export function getDefaultConfig() {
                         'text-bottom',
                         'sub',
                         'super',
-                        isArbitraryLength,
+                        isArbitraryValue,
                     ],
                 },
             ],
@@ -1127,7 +1139,7 @@ export function getDefaultConfig() {
              * Outline Offset
              * @see https://tailwindcss.com/docs/outline-offset
              */
-            'outline-offset': [{ 'outline-offset': [isLength] }],
+            'outline-offset': [{ 'outline-offset': [isArbitraryValue, isLength] }],
             /**
              * Outline Width
              * @see https://tailwindcss.com/docs/outline-width
@@ -1515,92 +1527,92 @@ export function getDefaultConfig() {
              * Scroll Margin
              * @see https://tailwindcss.com/docs/scroll-margin
              */
-            'scroll-m': [{ 'scroll-m': [spacing] }],
+            'scroll-m': [{ 'scroll-m': getSpacingWithArbitrary() }],
             /**
              * Scroll Margin X
              * @see https://tailwindcss.com/docs/scroll-margin
              */
-            'scroll-mx': [{ 'scroll-mx': [spacing] }],
+            'scroll-mx': [{ 'scroll-mx': getSpacingWithArbitrary() }],
             /**
              * Scroll Margin Y
              * @see https://tailwindcss.com/docs/scroll-margin
              */
-            'scroll-my': [{ 'scroll-my': [spacing] }],
+            'scroll-my': [{ 'scroll-my': getSpacingWithArbitrary() }],
             /**
              * Scroll Margin Start
              * @see https://tailwindcss.com/docs/scroll-margin
              */
-            'scroll-ms': [{ 'scroll-ms': [spacing] }],
+            'scroll-ms': [{ 'scroll-ms': getSpacingWithArbitrary() }],
             /**
              * Scroll Margin End
              * @see https://tailwindcss.com/docs/scroll-margin
              */
-            'scroll-me': [{ 'scroll-me': [spacing] }],
+            'scroll-me': [{ 'scroll-me': getSpacingWithArbitrary() }],
             /**
              * Scroll Margin Top
              * @see https://tailwindcss.com/docs/scroll-margin
              */
-            'scroll-mt': [{ 'scroll-mt': [spacing] }],
+            'scroll-mt': [{ 'scroll-mt': getSpacingWithArbitrary() }],
             /**
              * Scroll Margin Right
              * @see https://tailwindcss.com/docs/scroll-margin
              */
-            'scroll-mr': [{ 'scroll-mr': [spacing] }],
+            'scroll-mr': [{ 'scroll-mr': getSpacingWithArbitrary() }],
             /**
              * Scroll Margin Bottom
              * @see https://tailwindcss.com/docs/scroll-margin
              */
-            'scroll-mb': [{ 'scroll-mb': [spacing] }],
+            'scroll-mb': [{ 'scroll-mb': getSpacingWithArbitrary() }],
             /**
              * Scroll Margin Left
              * @see https://tailwindcss.com/docs/scroll-margin
              */
-            'scroll-ml': [{ 'scroll-ml': [spacing] }],
+            'scroll-ml': [{ 'scroll-ml': getSpacingWithArbitrary() }],
             /**
              * Scroll Padding
              * @see https://tailwindcss.com/docs/scroll-padding
              */
-            'scroll-p': [{ 'scroll-p': [spacing] }],
+            'scroll-p': [{ 'scroll-p': getSpacingWithArbitrary() }],
             /**
              * Scroll Padding X
              * @see https://tailwindcss.com/docs/scroll-padding
              */
-            'scroll-px': [{ 'scroll-px': [spacing] }],
+            'scroll-px': [{ 'scroll-px': getSpacingWithArbitrary() }],
             /**
              * Scroll Padding Y
              * @see https://tailwindcss.com/docs/scroll-padding
              */
-            'scroll-py': [{ 'scroll-py': [spacing] }],
+            'scroll-py': [{ 'scroll-py': getSpacingWithArbitrary() }],
             /**
              * Scroll Padding Start
              * @see https://tailwindcss.com/docs/scroll-padding
              */
-            'scroll-ps': [{ 'scroll-ps': [spacing] }],
+            'scroll-ps': [{ 'scroll-ps': getSpacingWithArbitrary() }],
             /**
              * Scroll Padding End
              * @see https://tailwindcss.com/docs/scroll-padding
              */
-            'scroll-pe': [{ 'scroll-pe': [spacing] }],
+            'scroll-pe': [{ 'scroll-pe': getSpacingWithArbitrary() }],
             /**
              * Scroll Padding Top
              * @see https://tailwindcss.com/docs/scroll-padding
              */
-            'scroll-pt': [{ 'scroll-pt': [spacing] }],
+            'scroll-pt': [{ 'scroll-pt': getSpacingWithArbitrary() }],
             /**
              * Scroll Padding Right
              * @see https://tailwindcss.com/docs/scroll-padding
              */
-            'scroll-pr': [{ 'scroll-pr': [spacing] }],
+            'scroll-pr': [{ 'scroll-pr': getSpacingWithArbitrary() }],
             /**
              * Scroll Padding Bottom
              * @see https://tailwindcss.com/docs/scroll-padding
              */
-            'scroll-pb': [{ 'scroll-pb': [spacing] }],
+            'scroll-pb': [{ 'scroll-pb': getSpacingWithArbitrary() }],
             /**
              * Scroll Padding Left
              * @see https://tailwindcss.com/docs/scroll-padding
              */
-            'scroll-pl': [{ 'scroll-pl': [spacing] }],
+            'scroll-pl': [{ 'scroll-pl': getSpacingWithArbitrary() }],
             /**
              * Scroll Snap Align
              * @see https://tailwindcss.com/docs/scroll-snap-align
