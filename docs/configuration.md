@@ -187,6 +187,9 @@ const customTwMerge = extendTailwindMerge({
 })
 ```
 
+> **Note**
+> The function `extendTailwindMerge` computes a large data structure based on the config passed to it. I recommend to call it only once and store the result in a top-level variable instead of calling it inline within another repeatedly called function.
+
 ### Using completely custom tailwind-merge config
 
 If you need to modify the tailwind-merge config and need more control than [`extendTailwindMerge`](./api-reference.md#extendtailwindmerge) gives you or don't want to use the default config (and tree-shake it out of your bundle), you can use [`createTailwindMerge`](./api-reference.md#createtailwindmerge).
@@ -212,6 +215,9 @@ const customTwMerge = createTailwindMerge(() => ({
     },
 }))
 ```
+
+> **Note**
+> The function `createTailwindMerge` computes a large data structure based on the config passed to it. I recommend to call it only once and store the result in a top-level variable instead of calling it inline within another repeatedly called function.
 
 The callback passed to `createTailwindMerge` will be called when `customTwMerge` is called the first time, so you don't need to worry about the computations in it affecting app startup performance in case you aren't using tailwind-merge at app startup.
 
