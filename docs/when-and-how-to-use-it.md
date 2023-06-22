@@ -52,6 +52,8 @@ If you want to merge classes that are all defined within a component, prefer usi
 ```jsx
 // React components with JSX syntax used in this example
 
+import { twJoin } from 'tailwind-merge'
+
 function MyComponent({ forceHover, disabled, isMuted }) {
     return (
         <div
@@ -83,6 +85,8 @@ The primary purpose of tailwind-merge is to merge a `className` prop with the de
 ```jsx
 // React components with JSX syntax used in this example
 
+import { twMerge } from 'tailwind-merge'
+
 function MyComponent({ forceHover, disabled, isMuted, className }) {
     return (
         <div
@@ -101,6 +105,8 @@ function MyComponent({ forceHover, disabled, isMuted, className }) {
 ```
 
 You don't need to worry about potentially expensive re-renders here because tailwind-merge [caches results](./features.md#results-are-cached) so that a re-render with the same props and state becomes computationally lightweight as far as the call to `twMerge` goes.
+
+If you use a custom Tailwind CSS config, don't forget to [configure tailwind-merge](./configuration.md#usage-with-custom-tailwind-config) as well.
 
 ## Alternatives
 
