@@ -81,6 +81,9 @@ function extendTailwindMerge(...createConfig: Array<(config: Config) => Config>)
 
 Function to create merge function with custom config which extends the default config. Use this if you use the default Tailwind config and just extend it in some places.
 
+> **Note**
+> This function computes a lot of data structures based on the config passed to it. I recommend to call it only once and store the result in a top-level variable instead of calling it inline within another repeatedly called function.
+
 You provide it a `configExtension` object which gets [merged](#mergeconfigs) with the default config.
 
 ```ts
@@ -144,6 +147,9 @@ function createTailwindMerge(
 ```
 
 Function to create merge function with custom config. Use this function instead of [`extendTailwindMerge`](#extendtailwindmerge) if you don't need the default config or want more control over the config.
+
+> **Note**
+> This function computes a lot of data structures based on the config passed to it. I recommend to call it only once and store the result in a top-level variable instead of calling it inline within another repeatedly called function.
 
 You need to provide a function which resolves to the config tailwind-merge should use for the new merge function. You can either extend from the default config or create a new one from scratch.
 
