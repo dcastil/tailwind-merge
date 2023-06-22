@@ -47,3 +47,22 @@ test('handles complex arbitrary value conflicts correctly', () => {
     expect(twMerge('grid-rows-[1fr,auto] grid-rows-2')).toBe('grid-rows-2')
     expect(twMerge('grid-rows-[repeat(20,minmax(0,1fr))] grid-rows-3')).toBe('grid-rows-3')
 })
+
+test('handles ambiguous arbitrary values correctly', () => {
+    expect(twMerge('mt-2 mt-[calc(theme(fontSize.4xl)/1.125)]')).toBe(
+        'mt-[calc(theme(fontSize.4xl)/1.125)]',
+    )
+    expect(twMerge('p-2 p-[calc(theme(fontSize.4xl)/1.125)_10px]')).toBe(
+        'p-[calc(theme(fontSize.4xl)/1.125)_10px]',
+    )
+    expect(twMerge('mt-2 mt-[length:theme(someScale.someValue)]')).toBe(
+        'mt-[length:theme(someScale.someValue)]',
+    )
+    expect(twMerge('mt-2 mt-[theme(someScale.someValue)]')).toBe('mt-[theme(someScale.someValue)]')
+    expect(twMerge('text-2xl text-[length:theme(someScale.someValue)]')).toBe(
+        'text-[length:theme(someScale.someValue)]',
+    )
+    expect(twMerge('text-2xl text-[calc(theme(fontSize.4xl)/1.125)]')).toBe(
+        'text-[calc(theme(fontSize.4xl)/1.125)]',
+    )
+})
