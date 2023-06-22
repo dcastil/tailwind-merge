@@ -42,6 +42,13 @@ twMerge('bg-black bg-[color:var(--mystery-var)]') // → 'bg-[color:var(--myster
 twMerge('grid-cols-[1fr,auto] grid-cols-2') // → 'grid-cols-2'
 ```
 
+> **Warning**
+> Labels necessary in ambiguous cases
+>
+> When using arbitrary values in ambiguous classes like `text-[calc(var(--rebecca)-1rem)]` tailwind-merge looks at the arbitrary value for clues to determine what type of class it is. In this case, like in most ambiguous classes, it would try to figure out whether `calc(var(--rebecca)-1rem)` is a length (making it a font-size class) or a color (making it a text-color class). For lengths it takes clues into account like the presence of the `calc()` function or a digit followed by a length unit like `1rem`.
+>
+> But it isn't always possible to figure out the type by looking at the arbitrary value. E.g. in the class `text-[theme(myCustomScale.rebecca)]` tailwind-merge can't know the type of the arbitrary value and will default to a text-color class. To make tailwind-merge understand the correct type of the arbitrary value in those cases, you can use CSS data type labels [which are used by Tailwind CSS to disambiguate classes](https://tailwindcss.com/docs/adding-custom-styles#resolving-ambiguities): `text-[length:theme(myCustomScale.rebecca)]`.
+
 ### Supports arbitrary properties
 
 ```ts
@@ -54,7 +61,7 @@ twMerge('[padding:1rem] p-8') // → '[padding:1rem] p-8'
 ```
 
 > **Warning**
-> Watch out for using arbitrary properties which could be expressed as Tailwind classes. tailwind-merge does not resolve conflicts between arbitrary properties and their matching Tailwind classes to keep the bundle size small.
+> tailwind-merge does not resolve conflicts between arbitrary properties and their matching Tailwind classes to keep the bundle size small.
 
 ### Supports arbitrary variants
 
