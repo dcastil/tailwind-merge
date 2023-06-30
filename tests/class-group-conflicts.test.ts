@@ -11,6 +11,7 @@ test('merges classes from same group correctly', () => {
     expect(
         twMerge('overflow-x-auto hover:overflow-x-hidden hover:overflow-x-auto overflow-x-scroll'),
     ).toBe('hover:overflow-x-auto overflow-x-scroll')
+    expect(twMerge('col-span-1 col-span-full')).toBe('col-span-full')
 })
 
 test('merges classes from Font Variant Numeric section correctly', () => {
