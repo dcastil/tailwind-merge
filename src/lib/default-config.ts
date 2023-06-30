@@ -348,7 +348,7 @@ export function getDefaultConfig() {
              * Grid Column Start / End
              * @see https://tailwindcss.com/docs/grid-column
              */
-            'col-start-end': [{ col: ['auto', { span: [isInteger] }, isArbitraryValue] }],
+            'col-start-end': [{ col: ['auto', { span: ['full', isInteger] }, isArbitraryValue] }],
             /**
              * Grid Column Start
              * @see https://tailwindcss.com/docs/grid-column
