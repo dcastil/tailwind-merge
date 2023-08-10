@@ -61,7 +61,7 @@ export interface ConfigExtension extends Partial<ConfigStatic> {
 }
 
 /**
- * If you want to use a scale that is not supported in the ThemeObject type,
+ * If you want to use a scale that is not supported in the `ThemeObject` type,
  * consider using `classGroups` instead of `theme`.
  *
  * @see https://github.com/dcastil/tailwind-merge/blob/main/docs/configuration.md#theme
