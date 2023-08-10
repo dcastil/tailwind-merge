@@ -60,7 +60,41 @@ export interface ConfigExtension extends Partial<ConfigStatic> {
     extend?: Partial<ConfigGroups>
 }
 
-export type ThemeObject = Record<string, ClassGroup>
+/**
+ * If you want to use a scale that is not supported in the ThemeObject type,
+ * consider using `classGroups` instead of `theme`.
+ *
+ * @see https://github.com/dcastil/tailwind-merge/blob/main/docs/configuration.md#theme
+ *      (the list of supported keys may vary between `tailwind-merge` versions)
+ */
+export type SupportedThemeScale =
+    | 'colors'
+    | 'spacing'
+    | 'blur'
+    | 'brightness'
+    | 'borderColor'
+    | 'borderRadius'
+    | 'borderSpacing'
+    | 'borderWidth'
+    | 'contrast'
+    | 'grayscale'
+    | 'hueRotate'
+    | 'invert'
+    | 'gap'
+    | 'gradientColorStops'
+    | 'gradientColorStopPositions'
+    | 'inset'
+    | 'margin'
+    | 'opacity'
+    | 'padding'
+    | 'saturate'
+    | 'scale'
+    | 'sepia'
+    | 'skew'
+    | 'space'
+    | 'translate'
+
+export type ThemeObject = Record<SupportedThemeScale, ClassGroup>
 export type ClassGroupId = string
 export type ClassGroup = readonly ClassDefinition[]
 type ClassDefinition = string | ClassValidator | ThemeGetter | ClassObject
