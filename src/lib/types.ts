@@ -94,7 +94,7 @@ export type SupportedThemeScale =
     | 'space'
     | 'translate'
 
-export type ThemeObject = Record<SupportedThemeScale, ClassGroup>
+export type ThemeObject = Partial<Record<SupportedThemeScale, ClassGroup | undefined>>
 export type ClassGroupId = string
 export type ClassGroup = readonly ClassDefinition[]
 type ClassDefinition = string | ClassValidator | ThemeGetter | ClassObject
