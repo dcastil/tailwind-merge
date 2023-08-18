@@ -1,10 +1,10 @@
 [
     {
-        "path": "dist/tailwind-merge.mjs",
+        "path": "dist/bundle-mjs.mjs",
         "limit": "10 KB"
     },
     {
-        "path": "dist/tailwind-merge.cjs.production.min.js",
+        "path": "dist/bundle-cjs.js",
         "limit": "10 KB"
     }
 ]
