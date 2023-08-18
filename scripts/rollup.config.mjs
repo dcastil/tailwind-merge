@@ -1,7 +1,7 @@
 // @ts-check
 
+import { getBabelOutputPlugin } from '@rollup/plugin-babel'
 import { nodeResolve } from '@rollup/plugin-node-resolve'
-import swc from '@rollup/plugin-swc'
 import typescript from '@rollup/plugin-typescript'
 import { defineConfig } from 'rollup'
 import del from 'rollup-plugin-delete'
@@ -11,68 +11,47 @@ import pkg from '../package.json' assert { type: 'json' }
 
 // eslint-disable-next-line import/no-default-export
 export default defineConfig([
-    // ESM and CJS package exports of default bundle
+    // Default entry point
     {
         input: pkg.source,
         output: [
-            {
+            getOutputConfig({
                 file: pkg.exports['.'].import,
                 format: 'esm',
-                sourcemap: true,
-                freeze: false,
-                generatedCode: 'es5',
-            },
-            {
+                targets: '> 0.2%, last 2 versions, Firefox ESR, not dead',
+            }),
+            getOutputConfig({
                 file: pkg.exports['.'].require,
                 format: 'cjs',
-                sourcemap: true,
-                freeze: false,
-                generatedCode: 'es5',
-            },
+                targets: '> 0.2%, last 2 versions, Firefox ESR, not dead',
+            }),
         ],
         external: /node_modules/,
         plugins: [
-            del({
-                targets: 'dist/*',
-                runOnce: true,
-            }),
+            del({ targets: 'dist/*' }),
             nodeResolve(),
             typescript({
                 compilerOptions: {
                     noEmitOnError: true,
                 },
             }),
-            swc({
-                swc: {
-                    jsc: {
-                        target: undefined,
-                    },
-                    env: {
-                        targets: 'defaults',
-                    },
-                },
-            }),
         ],
     },
 
-    // ESM and CJS package exports of ES5 bundle
+    // es5 entry point
     {
         input: pkg.source,
         output: [
-            {
+            getOutputConfig({
                 file: pkg.exports['./es5'].import,
                 format: 'esm',
-                sourcemap: true,
-                freeze: false,
-                generatedCode: 'es5',
-            },
-            {
+                targets: 'supports es5',
+            }),
+            getOutputConfig({
                 file: pkg.exports['./es5'].require,
                 format: 'cjs',
-                sourcemap: true,
-                freeze: false,
-                generatedCode: 'es5',
-            },
+                targets: 'supports es5',
+            }),
         ],
         external: /node_modules/,
         plugins: [
@@ -85,20 +64,10 @@ export default defineConfig([
                     declarationMap: false,
                 },
             }),
-            swc({
-                swc: {
-                    jsc: {
-                        target: undefined,
-                    },
-                    env: {
-                        targets: 'supports es5',
-                    },
-                },
-            }),
         ],
     },
 
-    // Type declarations of default and es5 bundles
+    // Type declarations of default and es5 entry points
     {
         input: 'dist/types/index.d.ts',
         output: {
@@ -115,3 +84,41 @@ export default defineConfig([
         ],
     },
 ])
+
+/**
+ *
+ * @param {{ file: string; format: 'esm' | 'cjs'; targets: string}} param0
+ * @returns
+ */
+function getOutputConfig({ file, format, targets }) {
+    /** @satisfies {import('rollup').OutputOptions} */
+    const config = {
+        file,
+        format,
+        sourcemap: true,
+        freeze: false,
+        generatedCode: 'es2015',
+        plugins: [
+            getBabelOutputPlugin({
+                presets: [
+                    [
+                        '@babel/preset-env',
+                        {
+                            loose: true,
+                            bugfixes: true,
+                            modules: false,
+                            targets,
+                        },
+                    ],
+                ],
+                plugins: [
+                    'babel-plugin-annotate-pure-calls',
+                    ['@babel/plugin-transform-runtime', { useESModules: format === 'esm' }],
+                    ['babel-plugin-polyfill-regenerator', { method: 'usage-pure' }],
+                ],
+            }),
+        ],
+    }
+
+    return config
+}
