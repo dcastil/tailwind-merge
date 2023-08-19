@@ -47,7 +47,7 @@ export function getDefaultConfig() {
     const getOverflow = () => ['auto', 'hidden', 'clip', 'visible', 'scroll'] as const
     const getSpacingWithAutoAndArbitrary = () => ['auto', isArbitraryValue, spacing] as const
     const getSpacingWithArbitrary = () => [isArbitraryValue, spacing] as const
-    const getLengthWithEmpty = () => ['', isLength] as const
+    const getLengthWithEmptyAndArbitrary = () => ['', isLength, isArbitraryLength] as const
     const getNumberWithAutoAndArbitrary = () => ['auto', isNumber, isArbitraryValue] as const
     const getPositions = () =>
         [
@@ -95,13 +95,13 @@ export function getDefaultConfig() {
         separator: ':',
         theme: {
             colors: [isAny],
-            spacing: [isLength],
+            spacing: [isLength, isArbitraryLength],
             blur: ['none', '', isTshirtSize, isArbitraryValue],
             brightness: getNumber(),
             borderColor: [colors],
             borderRadius: ['none', '', 'full', isTshirtSize, isArbitraryValue],
             borderSpacing: getSpacingWithArbitrary(),
-            borderWidth: getLengthWithEmpty(),
+            borderWidth: getLengthWithEmptyAndArbitrary(),
             contrast: getNumber(),
             grayscale: getZeroAndEmpty(),
             hueRotate: getNumberAndArbitrary(),
@@ -606,7 +606,7 @@ export function getDefaultConfig() {
              * Min-Height
              * @see https://tailwindcss.com/docs/min-height
              */
-            'min-h': [{ 'min-h': ['min', 'max', 'fit', isArbitraryValue, isLength] }],
+            'min-h': [{ 'min-h': ['min', 'max', 'fit', isLength, isArbitraryValue] }],
             /**
              * Max-Height
              * @see https://tailwindcss.com/docs/max-height
@@ -718,8 +718,8 @@ export function getDefaultConfig() {
                         'normal',
                         'relaxed',
                         'loose',
-                        isArbitraryValue,
                         isLength,
+                        isArbitraryValue,
                     ],
                 },
             ],
@@ -778,12 +778,14 @@ export function getDefaultConfig() {
              * Text Decoration Thickness
              * @see https://tailwindcss.com/docs/text-decoration-thickness
              */
-            'text-decoration-thickness': [{ decoration: ['auto', 'from-font', isLength] }],
+            'text-decoration-thickness': [
+                { decoration: ['auto', 'from-font', isLength, isArbitraryLength] },
+            ],
             /**
              * Text Underline Offset
              * @see https://tailwindcss.com/docs/text-underline-offset
              */
-            'underline-offset': [{ 'underline-offset': ['auto', isArbitraryValue, isLength] }],
+            'underline-offset': [{ 'underline-offset': ['auto', isLength, isArbitraryValue] }],
             /**
              * Text Decoration Color
              * @see https://tailwindcss.com/docs/text-decoration-color
@@ -1140,12 +1142,12 @@ export function getDefaultConfig() {
              * Outline Offset
              * @see https://tailwindcss.com/docs/outline-offset
              */
-            'outline-offset': [{ 'outline-offset': [isArbitraryValue, isLength] }],
+            'outline-offset': [{ 'outline-offset': [isLength, isArbitraryValue] }],
             /**
              * Outline Width
              * @see https://tailwindcss.com/docs/outline-width
              */
-            'outline-w': [{ outline: [isLength] }],
+            'outline-w': [{ outline: [isLength, isArbitraryLength] }],
             /**
              * Outline Color
              * @see https://tailwindcss.com/docs/outline-color
@@ -1155,7 +1157,7 @@ export function getDefaultConfig() {
              * Ring Width
              * @see https://tailwindcss.com/docs/ring-width
              */
-            'ring-w': [{ ring: getLengthWithEmpty() }],
+            'ring-w': [{ ring: getLengthWithEmptyAndArbitrary() }],
             /**
              * Ring Width Inset
              * @see https://tailwindcss.com/docs/ring-width
@@ -1175,7 +1177,7 @@ export function getDefaultConfig() {
              * Ring Offset Width
              * @see https://tailwindcss.com/docs/ring-offset-width
              */
-            'ring-offset-w': [{ 'ring-offset': [isLength] }],
+            'ring-offset-w': [{ 'ring-offset': [isLength, isArbitraryLength] }],
             /**
              * Ring Offset Color
              * @see https://tailwindcss.com/docs/ring-offset-color
@@ -1671,7 +1673,7 @@ export function getDefaultConfig() {
              * Stroke Width
              * @see https://tailwindcss.com/docs/stroke-width
              */
-            'stroke-w': [{ stroke: [isLength, isArbitraryNumber] }],
+            'stroke-w': [{ stroke: [isLength, isArbitraryLength, isArbitraryNumber] }],
             /**
              * Stroke
              * @see https://tailwindcss.com/docs/stroke
