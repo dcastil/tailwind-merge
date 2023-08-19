@@ -36,11 +36,6 @@ export function isArbitraryNumber(value: string) {
     return getIsArbitraryValue(value, 'number', isNumber)
 }
 
-/**
- * @deprecated Will be removed in next major version. Use `isArbitraryNumber` instead.
- */
-export const isArbitraryWeight = isArbitraryNumber
-
 export function isNumber(value: string) {
     return !Number.isNaN(Number(value))
 }

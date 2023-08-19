@@ -5,7 +5,6 @@ import {
     extendTailwindMerge,
     fromTheme,
     getDefaultConfig,
-    join,
     mergeConfigs,
     twJoin,
     twMerge,
@@ -25,7 +24,6 @@ test('has correct export types', () => {
         isArbitrarySize: expect.any(Function),
         isArbitraryUrl: expect.any(Function),
         isArbitraryValue: expect.any(Function),
-        isArbitraryWeight: expect.any(Function),
         isInteger: expect.any(Function),
         isLength: expect.any(Function),
         isPercent: expect.any(Function),
@@ -34,7 +32,7 @@ test('has correct export types', () => {
     })
     expect(mergeConfigs).toStrictEqual(expect.any(Function))
     expect(extendTailwindMerge).toStrictEqual(expect.any(Function))
-    expect(join).toStrictEqual(expect.any(Function))
+    expect(twJoin).toStrictEqual(expect.any(Function))
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const noRun = () => {
@@ -149,7 +147,6 @@ test('validators have correct inputs and outputs', () => {
     expect(validators.isArbitrarySize('')).toEqual(expect.any(Boolean))
     expect(validators.isArbitraryPosition('')).toEqual(expect.any(Boolean))
     expect(validators.isArbitraryUrl('')).toEqual(expect.any(Boolean))
-    expect(validators.isArbitraryWeight('')).toEqual(expect.any(Boolean))
     expect(validators.isArbitraryNumber('')).toEqual(expect.any(Boolean))
     expect(validators.isArbitraryShadow('')).toEqual(expect.any(Boolean))
 })
@@ -179,14 +176,6 @@ test('fromTheme has correct inputs and outputs', () => {
     expect(fromTheme('foo')).toStrictEqual(expect.any(Function))
     expect(fromTheme('foo').isThemeGetter).toBe(true)
     expect(fromTheme('foo')({ foo: ['hello'] })).toStrictEqual(['hello'])
-})
-
-test('join has correct inputs and outputs', () => {
-    expect(join()).toStrictEqual(expect.any(String))
-    expect(join('')).toStrictEqual(expect.any(String))
-    expect(join('', [false, null, undefined, 0, [], [false, [''], '']])).toStrictEqual(
-        expect.any(String),
-    )
 })
 
 test('twJoin has correct inputs and outputs', () => {
