@@ -17,6 +17,7 @@ test('conflicts across postfix modifiers', () => {
 
     const customTwMerge = createTailwindMerge(() => ({
         cacheSize: 10,
+        separator: ':',
         theme: {},
         classGroups: {
             foo: ['foo-1/2', 'foo-2/3'],
