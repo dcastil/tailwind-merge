@@ -303,7 +303,7 @@ export function getDefaultConfig() {
              * Z-Index
              * @see https://tailwindcss.com/docs/z-index
              */
-            z: [{ z: ['auto', isInteger] }],
+            z: [{ z: ['auto', isInteger, isArbitraryValue] }],
             // Flexbox and Grid
             /**
              * Flex Basis
@@ -339,7 +339,7 @@ export function getDefaultConfig() {
              * Order
              * @see https://tailwindcss.com/docs/order
              */
-            order: [{ order: ['first', 'last', 'none', isInteger] }],
+            order: [{ order: ['first', 'last', 'none', isInteger, isArbitraryValue] }],
             /**
              * Grid Template Columns
              * @see https://tailwindcss.com/docs/grid-template-columns
@@ -349,7 +349,15 @@ export function getDefaultConfig() {
              * Grid Column Start / End
              * @see https://tailwindcss.com/docs/grid-column
              */
-            'col-start-end': [{ col: ['auto', { span: ['full', isInteger] }, isArbitraryValue] }],
+            'col-start-end': [
+                {
+                    col: [
+                        'auto',
+                        { span: ['full', isInteger, isArbitraryValue] },
+                        isArbitraryValue,
+                    ],
+                },
+            ],
             /**
              * Grid Column Start
              * @see https://tailwindcss.com/docs/grid-column
@@ -369,7 +377,9 @@ export function getDefaultConfig() {
              * Grid Row Start / End
              * @see https://tailwindcss.com/docs/grid-row
              */
-            'row-start-end': [{ row: ['auto', { span: [isInteger] }, isArbitraryValue] }],
+            'row-start-end': [
+                { row: ['auto', { span: [isInteger, isArbitraryValue] }, isArbitraryValue] },
+            ],
             /**
              * Grid Row Start
              * @see https://tailwindcss.com/docs/grid-row
