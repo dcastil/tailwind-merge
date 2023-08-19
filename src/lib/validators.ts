@@ -27,10 +27,6 @@ export function isInteger(value: string) {
     return Number.isInteger(Number(value))
 }
 
-export function isArbitraryInteger(value: string) {
-    return getIsArbitraryValue(value, 'number', isInteger)
-}
-
 export function isPercent(value: string) {
     return value.endsWith('%') && isNumber(value.slice(0, -1))
 }
