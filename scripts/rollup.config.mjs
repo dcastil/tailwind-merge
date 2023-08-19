@@ -18,12 +18,16 @@ export default defineConfig([
             getOutputConfig({
                 file: pkg.exports['.'].import,
                 format: 'esm',
-                targets: '> 0.5%, last 2 versions, Firefox ESR, not dead, maintained node versions',
+                targets: 'supports es5',
+                // To be enabled in https://github.com/dcastil/tailwind-merge/issues/126
+                // targets: '> 0.5%, last 2 versions, Firefox ESR, not dead, maintained node versions',
             }),
             getOutputConfig({
                 file: pkg.exports['.'].require,
                 format: 'cjs',
-                targets: '> 0.5%, last 2 versions, Firefox ESR, not dead, maintained node versions',
+                targets: 'supports es5',
+                // To be enabled in https://github.com/dcastil/tailwind-merge/issues/126
+                // targets: '> 0.5%, last 2 versions, Firefox ESR, not dead, maintained node versions',
             }),
         ],
         external: /node_modules/,
