@@ -13,7 +13,7 @@
         // Emit
         "declaration": true,
         "noEmit": true,
-        "outDir": "dist/types",
+        "outDir": "types",
         "sourceMap": true,
         // Interop Constraints
         "esModuleInterop": true,
