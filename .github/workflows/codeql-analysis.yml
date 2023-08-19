@@ -16,8 +16,11 @@ jobs:
             security-events: write
 
         steps:
-            - name: Checkout repository
-              uses: actions/checkout@v3
+            - uses: actions/checkout@v3
+            - name: Use Node.js 18
+              uses: actions/setup-node@v3
+              with:
+                  node-version: 18.17.1
             - name: Use node_modules cache
               uses: actions/cache@v3
               with:
