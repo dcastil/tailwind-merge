@@ -24,7 +24,6 @@ test('has correct export types', () => {
         isArbitrarySize: expect.any(Function),
         isArbitraryUrl: expect.any(Function),
         isArbitraryValue: expect.any(Function),
-        isArbitraryWeight: expect.any(Function),
         isInteger: expect.any(Function),
         isLength: expect.any(Function),
         isPercent: expect.any(Function),
