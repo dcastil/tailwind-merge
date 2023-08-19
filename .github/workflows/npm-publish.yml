@@ -11,17 +11,17 @@ jobs:
             id-token: write
         steps:
             - uses: actions/checkout@v3
-            - name: Use Node.js 16
+            - name: Use Node.js 18
               uses: actions/setup-node@v3
               with:
-                  node-version: 16
+                  node-version: 18
             - name: Use node_modules cache
               uses: actions/cache@v3
               with:
                   path: node_modules
-                  key: yarn-node-16-lock-${{ hashFiles('yarn.lock') }}
+                  key: yarn-node-18-lock-${{ hashFiles('yarn.lock') }}
                   restore-keys: |
-                      yarn-node-16-lock-
+                      yarn-node-18-lock-
             - run: yarn install --frozen-lockfile
             - run: yarn lint
             - run: yarn test --ci --coverage --maxWorkers=2

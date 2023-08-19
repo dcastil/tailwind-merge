@@ -22,9 +22,9 @@ jobs:
               uses: actions/cache@v3
               with:
                   path: node_modules
-                  key: yarn-node-16-lock-${{ hashFiles('yarn.lock') }}
+                  key: yarn-node-18-lock-${{ hashFiles('yarn.lock') }}
                   restore-keys: |
-                      yarn-node-16-lock-
+                      yarn-node-18-lock-
             - name: Initialize CodeQL
               uses: github/codeql-action/init@v2
               with:
