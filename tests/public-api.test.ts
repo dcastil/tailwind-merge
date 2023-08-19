@@ -84,6 +84,7 @@ test('createTailwindMerge() has correct inputs and outputs', () => {
     expect(
         createTailwindMerge(() => ({
             cacheSize: 0,
+            separator: ':',
             theme: {},
             classGroups: {},
             conflictingClassGroups: {},
@@ -92,6 +93,7 @@ test('createTailwindMerge() has correct inputs and outputs', () => {
 
     const tailwindMerge = createTailwindMerge(() => ({
         cacheSize: 20,
+        separator: ':',
         theme: {},
         classGroups: {
             fooKey: [{ fooKey: ['bar', 'baz'] }],
@@ -156,6 +158,7 @@ test('mergeConfigs has correct inputs and outputs', () => {
         mergeConfigs(
             {
                 cacheSize: 50,
+                separator: ':',
                 theme: {},
                 classGroups: {
                     fooKey: [{ fooKey: ['one', 'two'] }],

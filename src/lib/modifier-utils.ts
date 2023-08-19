@@ -3,7 +3,7 @@ import { Config } from './types'
 export const IMPORTANT_MODIFIER = '!'
 
 export function createSplitModifiers(config: Config) {
-    const separator = config.separator || ':'
+    const separator = config.separator
     const isSeparatorSingleCharacter = separator.length === 1
     const firstSeparatorCharacter = separator[0]
     const separatorLength = separator.length

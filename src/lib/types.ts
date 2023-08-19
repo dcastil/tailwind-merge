@@ -14,7 +14,7 @@ export interface Config {
      * Custom separator for modifiers in Tailwind classes
      * @see https://tailwindcss.com/docs/configuration#separator
      */
-    separator?: string
+    separator: string
     /**
      * Theme scales used in classGroups.
      * The keys are the same as in the Tailwind config but the values are sometimes defined more broadly.
