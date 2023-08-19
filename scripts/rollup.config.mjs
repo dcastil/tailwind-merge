@@ -18,12 +18,12 @@ export default defineConfig([
             getOutputConfig({
                 file: pkg.exports['.'].import,
                 format: 'esm',
-                targets: '> 0.2%, last 2 versions, Firefox ESR, not dead',
+                targets: '> 0.5%, last 2 versions, Firefox ESR, not dead, maintained node versions',
             }),
             getOutputConfig({
                 file: pkg.exports['.'].require,
                 format: 'cjs',
-                targets: '> 0.2%, last 2 versions, Firefox ESR, not dead',
+                targets: '> 0.5%, last 2 versions, Firefox ESR, not dead, maintained node versions',
             }),
         ],
         external: /node_modules/,
