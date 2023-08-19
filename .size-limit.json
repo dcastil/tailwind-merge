@@ -6,5 +6,13 @@
     {
         "path": "dist/bundle-cjs.js",
         "limit": "10 KB"
+    },
+    {
+        "path": "dist/es5/bundle-mjs.mjs",
+        "limit": "20 KB"
+    },
+    {
+        "path": "dist/es5/bundle-cjs.js",
+        "limit": "20 KB"
     }
 ]
