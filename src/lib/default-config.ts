@@ -92,6 +92,7 @@ export function getDefaultConfig() {
 
     return {
         cacheSize: 500,
+        separator: ':',
         theme: {
             colors: [isAny],
             spacing: [isLength],
