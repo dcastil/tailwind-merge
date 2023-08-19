@@ -76,7 +76,6 @@
         "@typescript-eslint/parser": "^5.60.1",
         "babel-plugin-annotate-pure-calls": "^0.4.0",
         "babel-plugin-polyfill-regenerator": "^0.5.2",
-        "dts-cli": "^2.0.3",
         "eslint": "^8.44.0",
         "eslint-plugin-import": "^2.27.5",
         "eslint-plugin-jest": "^27.2.2",
