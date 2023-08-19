@@ -8,16 +8,39 @@ const lengthUnitRegex =
 const shadowRegex = /^-?((\d+)?\.?(\d+)[a-z]+|0)_-?((\d+)?\.?(\d+)[a-z]+|0)/
 
 export function isLength(value: string) {
-    return (
-        isNumber(value) ||
-        stringLengths.has(value) ||
-        fractionRegex.test(value) ||
-        isArbitraryLength(value)
-    )
+    return isNumber(value) || stringLengths.has(value) || fractionRegex.test(value)
 }
 
 export function isArbitraryLength(value: string) {
     return getIsArbitraryValue(value, 'length', isLengthOnly)
+}
+
+export function isNumber(value: string) {
+    return !Number.isNaN(Number(value))
+}
+
+export function isArbitraryNumber(value: string) {
+    return getIsArbitraryValue(value, 'number', isNumber)
+}
+
+export function isInteger(value: string) {
+    return Number.isInteger(Number(value))
+}
+
+export function isArbitraryInteger(value: string) {
+    return getIsArbitraryValue(value, 'number', isInteger)
+}
+
+export function isPercent(value: string) {
+    return value.endsWith('%') && isNumber(value.slice(0, -1))
+}
+
+export function isArbitraryValue(value: string) {
+    return arbitraryValueRegex.test(value)
+}
+
+export function isTshirtSize(value: string) {
+    return tshirtUnitRegex.test(value)
 }
 
 export function isArbitrarySize(value: string) {
@@ -32,36 +55,16 @@ export function isArbitraryUrl(value: string) {
     return getIsArbitraryValue(value, 'url', isUrl)
 }
 
-export function isArbitraryNumber(value: string) {
-    return getIsArbitraryValue(value, 'number', isNumber)
-}
-
-export function isNumber(value: string) {
-    return !Number.isNaN(Number(value))
-}
-
-export function isPercent(value: string) {
-    return value.endsWith('%') && isNumber(value.slice(0, -1))
-}
-
-export function isInteger(value: string) {
-    return isIntegerOnly(value) || getIsArbitraryValue(value, 'number', isIntegerOnly)
-}
-
-export function isArbitraryValue(value: string) {
-    return arbitraryValueRegex.test(value)
+export function isArbitraryShadow(value: string) {
+    return getIsArbitraryValue(value, '', isShadow)
 }
 
 export function isAny() {
     return true
 }
 
-export function isTshirtSize(value: string) {
-    return tshirtUnitRegex.test(value)
-}
-
-export function isArbitraryShadow(value: string) {
-    return getIsArbitraryValue(value, '', isShadow)
+function isLengthOnly(value: string) {
+    return lengthUnitRegex.test(value)
 }
 
 function getIsArbitraryValue(value: string, label: string, testValue: (value: string) => boolean) {
@@ -78,20 +81,12 @@ function getIsArbitraryValue(value: string, label: string, testValue: (value: st
     return false
 }
 
-function isLengthOnly(value: string) {
-    return lengthUnitRegex.test(value)
-}
-
 function isNever() {
     return false
 }
 
 function isUrl(value: string) {
     return value.startsWith('url(')
-}
-
-function isIntegerOnly(value: string) {
-    return Number.isInteger(Number(value))
 }
 
 function isShadow(value: string) {
