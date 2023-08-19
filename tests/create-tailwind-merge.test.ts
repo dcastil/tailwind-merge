@@ -14,6 +14,7 @@ test('createTailwindMerge works with single config function', () => {
             fooKey: ['otherKey'],
             otherKey: ['fooKey', 'fooKey2'],
         },
+        conflictingClassGroupModifiers: {},
     }))
 
     expect(tailwindMerge('')).toBe('')
@@ -54,6 +55,7 @@ test('createTailwindMerge works with multiple config functions', () => {
                 fooKey: ['otherKey'],
                 otherKey: ['fooKey', 'fooKey2'],
             },
+            conflictingClassGroupModifiers: {},
         }),
         (config) => ({
             ...config,

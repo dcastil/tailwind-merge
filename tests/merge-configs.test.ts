@@ -14,6 +14,9 @@ test('mergeConfigs has correct behavior', () => {
                     bla: [{ bli: ['blub', 'blublub'] }],
                 },
                 conflictingClassGroups: {},
+                conflictingClassGroupModifiers: {
+                    hello: ['world'],
+                },
             },
             {
                 classGroups: {
@@ -24,6 +27,9 @@ test('mergeConfigs has correct behavior', () => {
                 conflictingClassGroups: {
                     fooKey: ['otherKey'],
                     otherKey: ['fooKey', 'fooKey2'],
+                },
+                conflictingClassGroupModifiers: {
+                    hello: ['world2'],
                 },
             },
         ),
@@ -42,6 +48,9 @@ test('mergeConfigs has correct behavior', () => {
         conflictingClassGroups: {
             fooKey: ['otherKey'],
             otherKey: ['fooKey', 'fooKey2'],
+        },
+        conflictingClassGroupModifiers: {
+            hello: ['world', 'world2'],
         },
     })
 })

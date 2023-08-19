@@ -43,7 +43,7 @@ export interface Config {
      * A class group ID is the key of a class group in classGroups object.
      * @example { 'font-size': ['leading'] }
      */
-    conflictingClassGroupModifiers?: Record<ClassGroupId, readonly ClassGroupId[]>
+    conflictingClassGroupModifiers: Record<ClassGroupId, readonly ClassGroupId[]>
 }
 
 export type ThemeObject = Record<string, ClassGroup>
