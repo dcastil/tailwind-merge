@@ -46,6 +46,17 @@ export interface Config {
     conflictingClassGroupModifiers: Record<ClassGroupId, readonly ClassGroupId[]>
 }
 
+export type ConfigExtend = Partial<
+    Pick<
+        Config,
+        'theme' | 'classGroups' | 'conflictingClassGroups' | 'conflictingClassGroupModifiers'
+    >
+>
+
+export interface ConfigExtension extends Partial<Config> {
+    extend?: ConfigExtend
+}
+
 export type ThemeObject = Record<string, ClassGroup>
 export type ClassGroupId = string
 export type ClassGroup = readonly ClassDefinition[]
