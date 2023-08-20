@@ -169,4 +169,8 @@ test('mergeConfigs type generics work correctly', () => {
     const config2 = mergeConfigs<'very', 'strict'>(getDefaultConfig(), {})
 
     expect(config2).toEqual(expect.any(Object))
+
+    const config3 = mergeConfigs<'single-arg'>(getDefaultConfig(), {})
+
+    expect(config3).toEqual(expect.any(Object))
 })

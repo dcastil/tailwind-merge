@@ -4,7 +4,7 @@ import { ConfigExtension, GenericConfig } from './types'
  * @param baseConfig Config where other config will be merged into. This object will be mutated.
  * @param configExtension Partial config to merge into the `baseConfig`.
  */
-export function mergeConfigs<ClassGroupIds extends string, ThemeGroupIds extends string>(
+export function mergeConfigs<ClassGroupIds extends string, ThemeGroupIds extends string = never>(
     baseConfig: GenericConfig,
     {
         cacheSize,
