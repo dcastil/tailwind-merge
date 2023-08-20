@@ -3,14 +3,16 @@ import { extendTailwindMerge } from '../src'
 test('extendTailwindMerge works correctly with single config', () => {
     const tailwindMerge = extendTailwindMerge({
         cacheSize: 20,
-        classGroups: {
-            fooKey: [{ fooKey: ['bar', 'baz'] }],
-            fooKey2: [{ fooKey: ['qux', 'quux'] }, 'other-2'],
-            otherKey: ['nother', 'group'],
-        },
-        conflictingClassGroups: {
-            fooKey: ['otherKey'],
-            otherKey: ['fooKey', 'fooKey2'],
+        extend: {
+            classGroups: {
+                fooKey: [{ fooKey: ['bar', 'baz'] }],
+                fooKey2: [{ fooKey: ['qux', 'quux'] }, 'other-2'],
+                otherKey: ['nother', 'group'],
+            },
+            conflictingClassGroups: {
+                fooKey: ['otherKey'],
+                otherKey: ['fooKey', 'fooKey2'],
+            },
         },
     })
 
@@ -34,14 +36,16 @@ test('extendTailwindMerge works corectly with multiple configs', () => {
     const tailwindMerge = extendTailwindMerge(
         {
             cacheSize: 20,
-            classGroups: {
-                fooKey: [{ fooKey: ['bar', 'baz'] }],
-                fooKey2: [{ fooKey: ['qux', 'quux'] }, 'other-2'],
-                otherKey: ['nother', 'group'],
-            },
-            conflictingClassGroups: {
-                fooKey: ['otherKey'],
-                otherKey: ['fooKey', 'fooKey2'],
+            extend: {
+                classGroups: {
+                    fooKey: [{ fooKey: ['bar', 'baz'] }],
+                    fooKey2: [{ fooKey: ['qux', 'quux'] }, 'other-2'],
+                    otherKey: ['nother', 'group'],
+                },
+                conflictingClassGroups: {
+                    fooKey: ['otherKey'],
+                    otherKey: ['fooKey', 'fooKey2'],
+                },
             },
         },
         (config) => ({
@@ -105,12 +109,14 @@ test('extendTailwindMerge works correctly with function config', () => {
 test('extendTailwindMerge overrides and extends correctly', () => {
     const tailwindMerge = extendTailwindMerge({
         cacheSize: 20,
-        classGroups: {
-            shadow: ['shadow-100', 'shadow-200'],
-            customKey: ['custom-100'],
-        },
-        conflictingClassGroups: {
-            p: ['px'],
+        override: {
+            classGroups: {
+                shadow: ['shadow-100', 'shadow-200'],
+                customKey: ['custom-100'],
+            },
+            conflictingClassGroups: {
+                p: ['px'],
+            },
         },
         extend: {
             classGroups: {

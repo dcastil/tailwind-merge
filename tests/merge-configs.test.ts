@@ -28,18 +28,20 @@ test('mergeConfigs has correct behavior', () => {
             {
                 separator: '-',
                 prefix: undefined,
-                theme: {
-                    themeToOverride: ['overridden'],
-                },
-                classGroups: {
-                    groupToOverride: ['I', 'overrode', 'you'],
-                    groupToOverride2: undefined!,
-                },
-                conflictingClassGroups: {
-                    toOverride: ['groupOverridden'],
-                },
-                conflictingClassGroupModifiers: {
-                    toOverride: ['overridden-2'],
+                override: {
+                    theme: {
+                        themeToOverride: ['overridden'],
+                    },
+                    classGroups: {
+                        groupToOverride: ['I', 'overrode', 'you'],
+                        groupToOverride2: undefined!,
+                    },
+                    conflictingClassGroups: {
+                        toOverride: ['groupOverridden'],
+                    },
+                    conflictingClassGroupModifiers: {
+                        toOverride: ['overridden-2'],
+                    },
                 },
                 extend: {
                     classGroups: {
