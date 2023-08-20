@@ -40,7 +40,7 @@ Why no object support? [Read here](https://github.com/dcastil/tailwind-merge/dis
 ## `getDefaultConfig`
 
 ```ts
-function getDefaultConfig(): Config
+function getDefaultConfig(): satisfies Config<DefaultClassGroupIds, DefaultThemeGroupIds>
 ```
 
 Function which returns the default config used by tailwind-merge. The tailwind-merge config is different from the Tailwind config. It is optimized for small bundle size and fast runtime performance because it is expected to run in the browser.
@@ -48,24 +48,34 @@ Function which returns the default config used by tailwind-merge. The tailwind-m
 ## `fromTheme`
 
 ```ts
-function fromTheme(key: string): ThemeGetter
+function fromTheme<
+    AdditionalThemeGroupIds extends string = never,
+    DefaultThemeGroupIdsInner extends string = DefaultThemeGroupIds,
+>(key: NoInfer<DefaultThemeGroupIdsInner | AdditionalThemeGroupIds>): ThemeGetter
 ```
 
 Function to retrieve values from a theme scale, to be used in class groups.
 
 `fromTheme` doesn't return the values from the theme scale, but rather another function which is used by tailwind-merge internally to retrieve the theme values. tailwind-merge can differentiate the theme getter function from a validator because it has a `isThemeGetter` property set to `true`.
 
-It can be used like this:
+When using TypeScript, the function only allows passing the default theme group IDs as the `key` argument. If you use custom theme group IDs, you need to pass them as the generic type argument `AdditionalThemeGroupIds`. In case you aren't using the default tailwind-merge config and use a different set of theme group IDs entirely, you can also pass them as the generic type argument `DefaultThemeGroupIdsInner`.
+
+`fromTheme` can be used like this:
 
 ```ts
-extendTailwindMerge({
+type MyClassGroupIds = 'my-group' | 'my-group-x'
+type MyThemeGroupIds = 'my-scale'
+
+extendTailwindMerge<MyClassGroupIds, MyThemeGroupIds>({
     extend: {
         theme: {
             'my-scale': ['foo', 'bar'],
         },
         classGroups: {
-            'my-group': [{ 'my-group': [fromTheme('my-scale'), fromTheme('spacing')] }],
-            'my-group-x': [{ 'my-group-x': [fromTheme('my-scale')] }],
+            'my-group': [
+                { 'my-group': [fromTheme<MyThemeGroupIds>('my-scale'), fromTheme('spacing')] },
+            ],
+            'my-group-x': [{ 'my-group-x': [fromTheme<MyThemeGroupIds>('my-scale')] }],
         },
     },
 })
