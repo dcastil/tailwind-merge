@@ -1,4 +1,6 @@
-export interface Config {
+export interface Config extends ConfigStatic, ConfigGroups {}
+
+interface ConfigStatic {
     /**
      * Integer indicating size of LRU cache used for memoizing results.
      * - Cache might be up to twice as big as `cacheSize`
@@ -15,6 +17,13 @@ export interface Config {
      * @see https://tailwindcss.com/docs/configuration#separator
      */
     separator: string
+    /**
+     * Theme scales used in classGroups.
+     * The keys are the same as in the Tailwind config but the values are sometimes defined more broadly.
+     */
+}
+
+interface ConfigGroups {
     /**
      * Theme scales used in classGroups.
      * The keys are the same as in the Tailwind config but the values are sometimes defined more broadly.
@@ -46,15 +55,9 @@ export interface Config {
     conflictingClassGroupModifiers: Record<ClassGroupId, readonly ClassGroupId[]>
 }
 
-export type ConfigExtend = Partial<
-    Pick<
-        Config,
-        'theme' | 'classGroups' | 'conflictingClassGroups' | 'conflictingClassGroupModifiers'
-    >
->
-
-export interface ConfigExtension extends Partial<Config> {
-    extend?: ConfigExtend
+export interface ConfigExtension extends Partial<ConfigStatic> {
+    override?: Partial<ConfigGroups>
+    extend?: Partial<ConfigGroups>
 }
 
 export type ThemeObject = Record<string, ClassGroup>

@@ -6,16 +6,16 @@ import { Config, ConfigExtension } from './types'
  */
 export function mergeConfigs(
     baseConfig: Config,
-    { cacheSize, prefix, separator, extend = {}, ...configOverride }: ConfigExtension,
+    { cacheSize, prefix, separator, extend = {}, override = {} }: ConfigExtension,
 ) {
     overrideProperty(baseConfig, 'cacheSize', cacheSize)
     overrideProperty(baseConfig, 'prefix', prefix)
     overrideProperty(baseConfig, 'separator', separator)
 
-    for (const configKey in configOverride) {
+    for (const configKey in override) {
         overrideConfigProperties(
-            baseConfig[configKey as keyof typeof configOverride],
-            configOverride[configKey as keyof typeof configOverride],
+            baseConfig[configKey as keyof typeof override],
+            override[configKey as keyof typeof override],
         )
     }
 
