@@ -59,13 +59,15 @@ It can be used like this:
 
 ```ts
 extendTailwindMerge({
-    theme: {
-        'my-scale': ['foo', 'bar']
+    extend: {
+        theme: {
+            'my-scale': ['foo', 'bar'],
+        },
+        classGroups: {
+            'my-group': [{ 'my-group': [fromTheme('my-scale'), fromTheme('spacing')] }],
+            'my-group-x': [{ 'my-group-x': [fromTheme('my-scale')] }],
+        },
     },
-    classGroups: {
-        'my-group': [{ 'my-group': [fromTheme('my-scale'), fromTheme('spacing')] }]
-        'my-group-x': [{ 'my-group-x': [fromTheme('my-scale')] }]
-    }
 })
 ```
 
@@ -73,13 +75,13 @@ extendTailwindMerge({
 
 ```ts
 function extendTailwindMerge(
-    configExtension: Partial<Config>,
-    ...createConfig: Array<(config: Config) => Config>
+    configExtension: ConfigExtension,
+    ...createConfig: ((config: Config) => Config)[]
 ): TailwindMerge
-function extendTailwindMerge(...createConfig: Array<(config: Config) => Config>): TailwindMerge
+function extendTailwindMerge(...createConfig: ((config: Config) => Config)[]): TailwindMerge
 ```
 
-Function to create merge function with custom config which extends the default config. Use this if you use the default Tailwind config and just extend it in some places.
+Function to create merge function with custom config which extends the default config. Use this if you use the default Tailwind config and just modified it in some places.
 
 > **Note**
 > The function `extendTailwindMerge` computes a large data structure based on the config passed to it. I recommend to call it only once and store the result in a top-level variable instead of calling it inline within another repeatedly called function.
@@ -88,40 +90,82 @@ You provide it a `configExtension` object which gets [merged](#mergeconfigs) wit
 
 ```ts
 const customTwMerge = extendTailwindMerge({
-    cacheSize: 0, // ← Disabling cache
+    // ↓ Optional cache size
+    //   Here we're disabling the cache
+    cacheSize: 0,
     // ↓ Optional prefix from TaiLwind config
     prefix: 'tw-',
     // ↓ Optional separator from TaiLwind config
     separator: '_',
-    // ↓ Add values to existing theme scale or create a new one
-    //   Not all theme keys form the Tailwind config are supported by default.
-    theme: {
-        spacing: ['sm', 'md', 'lg'],
+
+    // ↓ Optional config overrides
+    //   Only elements from the second level onwards are overridden
+    override: {
+        // ↓ Theme scales to override
+        //   Not all theme keys from the Tailwind config are supported by default.
+        theme: {
+            colors: ['black', 'white', 'yellow-500'],
+        },
+        // ↓ Class groups to override
+        classGroups: {
+            // ↓ The `shadow` key here is the class group ID
+            //      ↓ Creates group of classes which have conflicting styles
+            //        Classes here: shadow-100, shadow-200, shadow-300, shadow-400, shadow-500
+            shadow: [{ shadow: ['100', '200', '300', '400', '500'] }],
+        },
+        // ↓ Conflicts across different groups to override
+        conflictingClassGroups: {
+            // ↓ ID of class group which creates a conflict with…
+            //           ↓ …classes from groups with these IDs
+            //   Here we remove the default conflict between the font-size and leading class
+            //   groups.
+            'font-size': [],
+        },
+        // ↓ Conflicts between the postfix modifier of a group and a different class group to
+        //   override
+        conflictingClassGroupModifiers: {
+            // You probably won't need this, but it follows the same shape as
+            // `conflictingClassGroups`.
+        },
     },
-    // ↓ Here you define class groups
-    classGroups: {
-        // ↓ The `foo` key here is the class group ID
-        //   ↓ Creates group of classes which have conflicting styles
-        //     Classes here: foo, foo-2, bar-baz, bar-baz-1, bar-baz-2
-        foo: ['foo', 'foo-2', { 'bar-baz': ['', '1', '2'] }],
-        //   ↓ Functions can also be used to match classes.
-        //     Classes here: qux-auto, qux-1000, qux-1001,…
-        bar: [{ qux: ['auto', (value) => Number(value) >= 1000] }],
-        baz: ['baz-sm', 'baz-md', 'baz-lg'],
-    },
-    // ↓ Here you can define additional conflicts across different groups
-    conflictingClassGroups: {
-        // ↓ ID of class group which creates a conflict with…
-        //     ↓ …classes from groups with these IDs
-        // In this case `twMerge('qux-auto foo') → 'foo'`
-        foo: ['bar'],
-    },
-    // ↓ Here you can define conflicts between the postfix modifier of a group and a different class group.
-    conflictingClassGroupModifiers: {
-        // ↓ ID of class group whose postfix modifier creates a conflict with…
-        //     ↓ …classes from groups with these IDs
-        // In this case `twMerge('qux-auto baz-sm/1000') → 'baz-sm/1000'`
-        baz: ['bar'],
+
+    // ↓ Optional config extensions
+    //   Follows same shape as the `override` object.
+    extend: {
+        // ↓ Theme scales to extend or create
+        //   Not all theme keys from the Tailwind config are supported by default.
+        theme: {
+            spacing: ['sm', 'md', 'lg'],
+        },
+        // ↓ Class groups to extend or create
+        classGroups: {
+            // ↓ The `animate` key here is the class group ID
+            //       ↓ Adds class animate-shimmer to existing group with ID `animate` or creates
+            //         new class group if it doesn't exist.
+            animate: ['animate-shimmer'],
+            // ↓ Functions can also be used to match classes
+            //   They take the class part value as argument and return a boolean defining whether
+            //   it is a match.
+            //   Here we accept all string classes starting with `aspec-w-` followed by a number.
+            'aspect-w': [{ 'aspect-w': [(value) => Boolean(value) && !isNaN(value)] }],
+            'aspect-h': [{ 'aspect-h': [(value) => Boolean(value) && !isNaN(value)] }],
+            'aspect-reset': ['aspect-none'],
+            // ↓ You can also use validators exported by tailwind-merge
+            'prose-size': [{ prose: ['base', validators.isTshirtSize] }],
+        },
+        // ↓ Conflicts across different groups to extend or create
+        conflictingClassGroups: {
+            // ↓ ID of class group which creates a conflict with…
+            //              ↓ …classes from groups with these IDs
+            //   In this case `twMerge('aspect-w-5 aspect-none') → 'aspect-none'`
+            'aspect-reset': ['aspect-w', 'aspect-h'],
+        },
+        // ↓ Conflicts between the postfix modifier of a group and a different class group to
+        //   extend or create
+        conflictingClassGroupModifiers: {
+            // You probably won't need this, but it follows the same shape as
+            // `conflictingClassGroups`.
+        },
     },
 })
 ```
