@@ -6,15 +6,19 @@ How to configure tailwind-merge with some common patterns.
 
 > I have a custom shadow scale with the keys 100, 200 and 300 configured in Tailwind. How do I make tailwind-merge resolve conflicts among those?
 
-You'll be able to do this by creating a custom `twMerge` functon with [`extendTailwindMerge`](./api-reference.md#extendtailwindmerge).
+We'll be able to do this by creating a custom `twMerge` functon with [`extendTailwindMerge`](./api-reference.md#extendtailwindmerge).
 
-First, check whether your particular theme scale is included in tailwind-merge's theme config object [here](./configuration.md#theme). In the hypothetical case that tailwind-merge supported Tailwind's `boxShadow` theme scale, you could add it to the tailwind-merge config like this:
+First, we need to know whether we want to override or extend the default scale. Let's say we extended the default config by putting the scale into the `extend` key in the Tailwind config.
+
+Then we check whether our particular theme scale is included in tailwind-merge's theme config object [here](./configuration.md#theme). In the hypothetical case that tailwind-merge supported Tailwind's `boxShadow` theme scale, we could add it to the tailwind-merge config like this:
 
 ```js
 const customTwMerge = extendTailwindMerge({
-    theme: {
-        // The `boxShadow` key isn't actually supported
-        boxShadow: [{ shadow: ['100', '200', '300'] }],
+    extend: {
+        theme: {
+            // The `boxShadow` key isn't actually supported
+            boxShadow: [{ shadow: ['100', '200', '300'] }],
+        },
     },
 })
 ```
@@ -23,23 +27,15 @@ In the case of the `boxShadow` scale, tailwind-merge doesn't include it in the t
 
 ```js
 const customTwMerge = extendTailwindMerge({
-    classGroups: {
-        shadow: [{ shadow: ['100', '200', '300'] }],
+    extend: {
+        classGroups: {
+            shadow: [{ shadow: ['100', '200', '300'] }],
+        },
     },
 })
 ```
 
-Note that by using `extendTailwindMerge` we're only adding our custom classes to the existing ones in the config, so `twMerge('shadow-200 shadow-lg')` will return the string `shadow-lg`. In most cases that's fine because you won't use that class in your project.
-
-If you expect classes like `shadow-lg` to be input in `twMerge` and don't want the class to cause incorrect merges, you can explicitly override the class group with [`createTailwindMerge`](./api-reference.md#createtailwindmerge), removing the default classes.
-
-```js
-const customTwMerge = createTailwindMerge(() => {
-    const config = getDefaultConfig()
-    config.classGroups.shadow = [{ shadow: ['100', '200', '300'] }]
-    return config
-})
-```
+Note that by using the `extend` object we're only adding our custom classes to the existing ones in the config, so `twMerge('shadow-200 shadow-lg')` will return the string `shadow-lg`. If we want to override the class instead, we need to use the `override` object instead.
 
 ## Extracting classes with Tailwind's [`@apply`](https://tailwindcss.com/docs/reusing-styles#extracting-classes-with-apply)
 

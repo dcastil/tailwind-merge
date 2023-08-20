@@ -14,8 +14,10 @@ import { mergeConfigs, validators, Config } from 'tailwind-merge'
 
 export function withMagic(config: Config): Config {
     return mergeConfigs(config, {
-        classGroups: {
-            'magic.my-group': [{ magic: [validators.isLength, 'wow'] }],
+        extend: {
+            classGroups: {
+                'magic.my-group': [{ magic: [validators.isLength, 'wow'] }],
+            },
         },
     })
 }

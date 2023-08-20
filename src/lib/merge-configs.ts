@@ -1,51 +1,66 @@
-import { Config } from './types'
+import { Config, ConfigExtension } from './types'
 
 /**
  * @param baseConfig Config where other config will be merged into. This object will be mutated.
  * @param configExtension Partial config to merge into the `baseConfig`.
  */
-export function mergeConfigs(baseConfig: Config, configExtension: Partial<Config>) {
-    for (const key in configExtension) {
-        mergePropertyRecursively(baseConfig as any, key, configExtension[key as keyof Config])
+export function mergeConfigs(
+    baseConfig: Config,
+    { cacheSize, prefix, separator, extend = {}, override = {} }: ConfigExtension,
+) {
+    overrideProperty(baseConfig, 'cacheSize', cacheSize)
+    overrideProperty(baseConfig, 'prefix', prefix)
+    overrideProperty(baseConfig, 'separator', separator)
+
+    for (const configKey in override) {
+        overrideConfigProperties(
+            baseConfig[configKey as keyof typeof override],
+            override[configKey as keyof typeof override],
+        )
+    }
+
+    for (const key in extend) {
+        mergeConfigProperties(
+            baseConfig[key as keyof typeof extend],
+            extend[key as keyof typeof extend],
+        )
     }
 
     return baseConfig
 }
 
-const hasOwnProperty = Object.prototype.hasOwnProperty
-const overrideTypes = new Set(['string', 'number', 'boolean'])
-
-function mergePropertyRecursively(
-    baseObject: Record<string, unknown>,
-    mergeKey: string,
-    mergeValue: unknown,
+function overrideProperty<T extends object, K extends keyof T>(
+    baseObject: T,
+    overrideKey: K,
+    overrideValue: T[K] | undefined,
 ) {
-    if (
-        !hasOwnProperty.call(baseObject, mergeKey) ||
-        overrideTypes.has(typeof mergeValue) ||
-        mergeValue === null
-    ) {
-        baseObject[mergeKey] = mergeValue
-        return
+    if (overrideValue !== undefined) {
+        baseObject[overrideKey] = overrideValue
     }
+}
 
-    if (Array.isArray(mergeValue) && Array.isArray(baseObject[mergeKey])) {
-        baseObject[mergeKey] = (baseObject[mergeKey] as unknown[]).concat(mergeValue)
-        return
-    }
-
-    if (typeof mergeValue === 'object' && typeof baseObject[mergeKey] === 'object') {
-        if (baseObject[mergeKey] === null) {
-            baseObject[mergeKey] = mergeValue
-            return
+function overrideConfigProperties(
+    baseObject: Record<string, readonly unknown[]>,
+    overrideObject: Record<string, readonly unknown[]> | undefined,
+) {
+    if (overrideObject) {
+        for (const key in overrideObject) {
+            overrideProperty(baseObject, key, overrideObject[key])
         }
+    }
+}
 
-        for (const nextKey in mergeValue) {
-            mergePropertyRecursively(
-                baseObject[mergeKey] as Record<string, unknown>,
-                nextKey,
-                mergeValue[nextKey as keyof object],
-            )
+function mergeConfigProperties(
+    baseObject: Record<string, readonly unknown[]>,
+    mergeObject: Record<string, readonly unknown[]> | undefined,
+) {
+    if (mergeObject) {
+        for (const key in mergeObject) {
+            const mergeValue = mergeObject[key]
+
+            if (mergeValue !== undefined) {
+                baseObject[key] = (baseObject[key] || []).concat(mergeValue)
+            }
         }
     }
 }

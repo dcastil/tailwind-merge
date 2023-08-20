@@ -2,9 +2,11 @@ import { extendTailwindMerge, fromTheme } from '../src'
 
 test('theme scale can be extended', () => {
     const tailwindMerge = extendTailwindMerge({
-        theme: {
-            spacing: ['my-space'],
-            margin: ['my-margin'],
+        extend: {
+            theme: {
+                spacing: ['my-space'],
+                margin: ['my-margin'],
+            },
         },
     })
 
@@ -14,11 +16,13 @@ test('theme scale can be extended', () => {
 
 test('theme object can be extended', () => {
     const tailwindMerge = extendTailwindMerge({
-        theme: {
-            'my-theme': ['hallo', 'hello'],
-        },
-        classGroups: {
-            px: [{ px: [fromTheme('my-theme')] }],
+        extend: {
+            theme: {
+                'my-theme': ['hallo', 'hello'],
+            },
+            classGroups: {
+                px: [{ px: [fromTheme('my-theme')] }],
+            },
         },
     })
 
