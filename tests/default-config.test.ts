@@ -1,10 +1,11 @@
-import { getDefaultConfig, Config } from '../src'
+import { getDefaultConfig } from '../src'
+import { Config, DefaultClassGroupIds, DefaultThemeGroupIds } from '../src/lib/types'
 
 test('default config has correct types', () => {
     const defaultConfig = getDefaultConfig()
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const genericConfig: Config = defaultConfig
+    const genericConfig: Config<DefaultClassGroupIds, DefaultThemeGroupIds> = defaultConfig
 
     expect(defaultConfig.cacheSize).toBe(500)
     // @ts-expect-error

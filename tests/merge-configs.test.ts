@@ -2,7 +2,7 @@ import { mergeConfigs } from '../src'
 
 test('mergeConfigs has correct behavior', () => {
     expect(
-        mergeConfigs(
+        mergeConfigs<string, string>(
             {
                 cacheSize: 50,
                 prefix: 'tw-',
@@ -37,7 +37,7 @@ test('mergeConfigs has correct behavior', () => {
                         groupToOverride2: undefined!,
                     },
                     conflictingClassGroups: {
-                        toOverride: ['groupOverridden'],
+                        toOverride: ['groupOverridden'] as const,
                     },
                     conflictingClassGroupModifiers: {
                         toOverride: ['overridden-2'],
