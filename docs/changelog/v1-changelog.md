@@ -327,7 +327,7 @@ Thanks to [@charkour](https://github.com/charkour) for sponsoring tailwind-merge
 
 v1! 🎉
 
-### Summary
+### Overview
 
 After being 5 months on v0 I think it's time to release a stable version of tailwind-merge. Tailwind v3 was [released](https://github.com/tailwindlabs/tailwindcss/releases/tag/v3.0.0) yesterday and it's no coincidence that I'm releasing tailwind-merge v1 today. I added full support for Tailwind v3 so you can update both at once.
 
