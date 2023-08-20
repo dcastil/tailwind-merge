@@ -58,7 +58,7 @@ Function to retrieve values from a theme scale, to be used in class groups.
 
 `fromTheme` doesn't return the values from the theme scale, but rather another function which is used by tailwind-merge internally to retrieve the theme values. tailwind-merge can differentiate the theme getter function from a validator because it has a `isThemeGetter` property set to `true`.
 
-When using TypeScript, the function only allows passing the default theme group IDs as the `key` argument. If you use custom theme group IDs, you need to pass them as the generic type argument `AdditionalThemeGroupIds`. In case you aren't using the default tailwind-merge config and use a different set of theme group IDs entirely, you can also pass them as the generic type argument `DefaultThemeGroupIdsInner`.
+When using TypeScript, the function only allows passing the default theme group IDs as the `key` argument. If you use custom theme group IDs, you need to pass them as the generic type argument `AdditionalThemeGroupIds`. In case you aren't using the default tailwind-merge config and use a different set of theme group IDs entirely, you can also pass them as the generic type argument `DefaultThemeGroupIdsInner`. If you want to allow any keys, you can call it as `fromTheme<string>('anything-goes-here')`.
 
 `fromTheme` can be used like this:
 
@@ -251,14 +251,19 @@ But don't merge configs like that. Use [`mergeConfigs`](#mergeconfigs) instead.
 ## `mergeConfigs`
 
 ```ts
-function mergeConfigs(baseConfig: Config, configExtension: Partial<Config>): Config
+function mergeConfigs<ClassGroupIds extends string, ThemeGroupIds extends string = never>(
+    baseConfig: GenericConfig,
+    configExtension: ConfigExtension<ClassGroupIds, ThemeGroupIds>,
+): GenericConfig
 ```
 
 Helper function to merge multiple tailwind-merge configs. Properties with the value `undefined` are skipped.
 
+When using TypeScript you need to pass a union of all class group IDs and theme group IDs used in `configExtension` as generic arguments to `mergeConfigs` or pass `string` to both arguments to allow any IDs.
+
 ```ts
 const customTwMerge = createTailwindMerge(getDefaultConfig, (config) =>
-    mergeConfigs(config, {
+    mergeConfigs<'shadow' | 'animate' | 'prose'>(config, {
         override: {
             classGroups: {
                 // ↓ Overriding existing class group
@@ -266,10 +271,12 @@ const customTwMerge = createTailwindMerge(getDefaultConfig, (config) =>
             },
         }
         extend: {
-            // ↓ Adding value to existing class group
-            animate: ['animate-shimmer'],
-            // ↓ Adding new class group
-            prose: [{ prose: ['', validators.isTshirtSize] }],
+            classGroups: {
+                // ↓ Adding value to existing class group
+                animate: ['animate-shimmer'],
+                // ↓ Adding new class group
+                prose: [{ prose: ['', validators.isTshirtSize] }],
+            }
         },
     }),
 )
