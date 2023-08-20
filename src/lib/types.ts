@@ -128,9 +128,6 @@ export type DefaultThemeGroupIds =
 
 export type DefaultClassGroupIds =
     | 'accent'
-    /**
-     * Test test
-     */
     | 'align-content'
     | 'align-items'
     | 'align-self'
