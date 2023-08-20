@@ -15,13 +15,13 @@ test('theme scale can be extended', () => {
 })
 
 test('theme object can be extended', () => {
-    const tailwindMerge = extendTailwindMerge({
+    const tailwindMerge = extendTailwindMerge<never, string>({
         extend: {
             theme: {
                 'my-theme': ['hallo', 'hello'],
             },
             classGroups: {
-                px: [{ px: [fromTheme('my-theme')] }],
+                px: [{ px: [fromTheme<string>('my-theme')] }],
             },
         },
     })

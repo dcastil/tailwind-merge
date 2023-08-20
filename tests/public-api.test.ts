@@ -1,6 +1,8 @@
 import {
     ClassNameValue,
     Config,
+    DefaultClassGroupIds,
+    DefaultThemeGroupIds,
     createTailwindMerge,
     extendTailwindMerge,
     fromTheme,
@@ -36,7 +38,7 @@ test('has correct export types', () => {
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const noRun = () => {
-        const config: Config = getDefaultConfig()
+        const config: Config<DefaultClassGroupIds, DefaultThemeGroupIds> = getDefaultConfig()
         const classNameValue: ClassNameValue = 'some-class'
 
         twMerge(classNameValue, classNameValue, classNameValue)
@@ -179,9 +181,17 @@ test('extendTailwindMerge has correct inputs and outputs', () => {
 })
 
 test('fromTheme has correct inputs and outputs', () => {
-    expect(fromTheme('foo')).toStrictEqual(expect.any(Function))
-    expect(fromTheme('foo').isThemeGetter).toBe(true)
-    expect(fromTheme('foo')({ foo: ['hello'] })).toStrictEqual(['hello'])
+    expect(fromTheme('spacing')).toStrictEqual(expect.any(Function))
+    expect(fromTheme<string>('foo')).toStrictEqual(expect.any(Function))
+    expect(fromTheme<string>('foo').isThemeGetter).toBe(true)
+    expect(fromTheme<string>('foo')({ foo: ['hello'] })).toStrictEqual(['hello'])
+
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const noRun = () => {
+        // @ts-expect-error
+        fromTheme('custom-key')
+        fromTheme<'custom-key'>('custom-key')
+    }
 })
 
 test('twJoin has correct inputs and outputs', () => {

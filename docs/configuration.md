@@ -165,7 +165,7 @@ If you only need to slightly modify the default tailwind-merge config, [`extendT
 ```ts
 import { extendTailwindMerge } from 'tailwind-merge'
 
-const customTwMerge = extendTailwindMerge({
+const customTwMerge = extendTailwindMerge<'foo' | 'bar' | 'baz'>({
     // ↓ Override eleemnts from the default config
     //   It has the same shape as the `extend` object, so we're going to skip it here.
     override: {},

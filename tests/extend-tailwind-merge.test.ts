@@ -1,7 +1,7 @@
 import { extendTailwindMerge } from '../src'
 
 test('extendTailwindMerge works correctly with single config', () => {
-    const tailwindMerge = extendTailwindMerge({
+    const tailwindMerge = extendTailwindMerge<string>({
         cacheSize: 20,
         extend: {
             classGroups: {
@@ -33,7 +33,7 @@ test('extendTailwindMerge works correctly with single config', () => {
 })
 
 test('extendTailwindMerge works corectly with multiple configs', () => {
-    const tailwindMerge = extendTailwindMerge(
+    const tailwindMerge = extendTailwindMerge<string>(
         {
             cacheSize: 20,
             extend: {
@@ -107,7 +107,7 @@ test('extendTailwindMerge works correctly with function config', () => {
 })
 
 test('extendTailwindMerge overrides and extends correctly', () => {
-    const tailwindMerge = extendTailwindMerge({
+    const tailwindMerge = extendTailwindMerge<string>({
         cacheSize: 20,
         override: {
             classGroups: {

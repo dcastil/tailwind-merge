@@ -13,7 +13,7 @@ Here is an example of how a plugin could look like:
 import { mergeConfigs, validators, Config } from 'tailwind-merge'
 
 export function withMagic(config: Config): Config {
-    return mergeConfigs(config, {
+    return mergeConfigs<'magic.my-group'>(config, {
         extend: {
             classGroups: {
                 'magic.my-group': [{ magic: [validators.isLength, 'wow'] }],

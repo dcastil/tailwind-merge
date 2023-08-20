@@ -1,12 +1,20 @@
 import { createTailwindMerge } from './create-tailwind-merge'
 import { getDefaultConfig } from './default-config'
 import { mergeConfigs } from './merge-configs'
-import { Config, ConfigExtension } from './types'
+import { ConfigExtension, DefaultClassGroupIds, DefaultThemeGroupIds, GenericConfig } from './types'
 
-type CreateConfigSubsequent = (config: Config) => Config
+type CreateConfigSubsequent = (config: GenericConfig) => GenericConfig
 
-export function extendTailwindMerge(
-    configExtension: ConfigExtension | CreateConfigSubsequent,
+export function extendTailwindMerge<
+    AdditionalClassGroupIds extends string = never,
+    AdditionalThemeGroupIds extends string = never,
+>(
+    configExtension:
+        | ConfigExtension<
+              DefaultClassGroupIds | AdditionalClassGroupIds,
+              DefaultThemeGroupIds | AdditionalThemeGroupIds
+          >
+        | CreateConfigSubsequent,
     ...createConfig: CreateConfigSubsequent[]
 ) {
     return typeof configExtension === 'function'

@@ -1,5 +1,5 @@
 import { fromTheme } from './from-theme'
-import { Config } from './types'
+import { Config, DefaultClassGroupIds, DefaultThemeGroupIds } from './types'
 import {
     isAny,
     isArbitraryLength,
@@ -1792,5 +1792,5 @@ export function getDefaultConfig() {
         conflictingClassGroupModifiers: {
             'font-size': ['leading'],
         },
-    } as const satisfies Config
+    } as const satisfies Config<DefaultClassGroupIds, DefaultThemeGroupIds>
 }

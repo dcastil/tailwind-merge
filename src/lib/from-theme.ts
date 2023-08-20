@@ -1,7 +1,11 @@
-import { ThemeGetter, ThemeObject } from './types'
+import { DefaultThemeGroupIds, NoInfer, ThemeGetter, ThemeObject } from './types'
 
-export function fromTheme(key: string): ThemeGetter {
-    const themeGetter = (theme: ThemeObject) => theme[key] || []
+export function fromTheme<
+    AdditionalThemeGroupIds extends string = never,
+    DefaultThemeGroupIdsInner extends string = DefaultThemeGroupIds,
+>(key: NoInfer<DefaultThemeGroupIdsInner | AdditionalThemeGroupIds>): ThemeGetter {
+    const themeGetter = (theme: ThemeObject<DefaultThemeGroupIdsInner | AdditionalThemeGroupIds>) =>
+        theme[key] || []
 
     themeGetter.isThemeGetter = true as const
 
