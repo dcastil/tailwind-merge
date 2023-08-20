@@ -200,16 +200,22 @@ But don't merge configs like that. Use [`mergeConfigs`](#mergeconfigs) instead.
 function mergeConfigs(baseConfig: Config, configExtension: Partial<Config>): Config
 ```
 
-Helper function to merge multiple config objects. Objects are merged, arrays are concatenated, scalar values are overridden and `undefined` does nothing. The function assumes that both parameters are tailwind-merge config objects and shouldn't be used as a generic merge function.
+Helper function to merge multiple tailwind-merge configs. Properties with the value `undefined` are skipped.
 
 ```ts
 const customTwMerge = createTailwindMerge(getDefaultConfig, (config) =>
     mergeConfigs(config, {
-        classGroups: {
-            // ↓ Adding new class group
-            mySpecialClassGroup: [{ special: ['1', '2'] }],
+        override: {
+            classGroups: {
+                // ↓ Overriding existing class group
+                shadow: [{ shadow: ['100', '200', '300', '400', '500'] }],
+            },
+        }
+        extend: {
             // ↓ Adding value to existing class group
-            animate: ['animate-magic'],
+            animate: ['animate-shimmer'],
+            // ↓ Adding new class group
+            prose: [{ prose: ['', validators.isTshirtSize] }],
         },
     }),
 )
