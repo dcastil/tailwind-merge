@@ -63,19 +63,24 @@ When using TypeScript, the function only allows passing the default theme group 
 `fromTheme` can be used like this:
 
 ```ts
-type MyClassGroupIds = 'my-group' | 'my-group-x'
-type MyThemeGroupIds = 'my-scale'
+type AdditionalClassGroupIds = 'my-group' | 'my-group-x'
+type AdditionalThemeGroupIds = 'my-scale'
 
-extendTailwindMerge<MyClassGroupIds, MyThemeGroupIds>({
+extendTailwindMerge<AdditionalClassGroupIds, AdditionalThemeGroupIds>({
     extend: {
         theme: {
             'my-scale': ['foo', 'bar'],
         },
         classGroups: {
             'my-group': [
-                { 'my-group': [fromTheme<MyThemeGroupIds>('my-scale'), fromTheme('spacing')] },
+                {
+                    'my-group': [
+                        fromTheme<AdditionalThemeGroupIds>('my-scale'),
+                        fromTheme('spacing'),
+                    ],
+                },
             ],
-            'my-group-x': [{ 'my-group-x': [fromTheme<MyThemeGroupIds>('my-scale')] }],
+            'my-group-x': [{ 'my-group-x': [fromTheme<AdditionalThemeGroupIds>('my-scale')] }],
         },
     },
 })
@@ -84,11 +89,20 @@ extendTailwindMerge<MyClassGroupIds, MyThemeGroupIds>({
 ## `extendTailwindMerge`
 
 ```ts
-function extendTailwindMerge(
-    configExtension: ConfigExtension,
-    ...createConfig: ((config: Config) => Config)[]
+function extendTailwindMerge<
+    AdditionalClassGroupIds extends string = never,
+    AdditionalThemeGroupIds extends string = never,
+>(
+    configExtension: ConfigExtension<
+        DefaultClassGroupIds | AdditionalClassGroupIds,
+        DefaultThemeGroupIds | AdditionalThemeGroupIds
+    >,
+    ...createConfig: ((config: GenericConfig) => GenericConfig)[]
 ): TailwindMerge
-function extendTailwindMerge(...createConfig: ((config: Config) => Config)[]): TailwindMerge
+function extendTailwindMerge<
+    AdditionalClassGroupIds extends string = never,
+    AdditionalThemeGroupIds extends string = never,
+>(...createConfig: ((config: GenericConfig) => GenericConfig)[]): TailwindMerge
 ```
 
 Function to create merge function with custom config which extends the default config. Use this if you use the default Tailwind config and just modified it in some places.
@@ -98,8 +112,13 @@ Function to create merge function with custom config which extends the default c
 
 You provide it a `configExtension` object which gets [merged](#mergeconfigs) with the default config.
 
+When using TypeScript and you use custom class group IDs or theme group IDs, you need to pass them as the generic type arguments `AdditionalClassGroupIds` and `AdditionalThemeGroupIds`. This is enforced to prevent accidental use of non-existing class group IDs accidentally. If you want to allow any custom keys without explicitly defining them, you can pass as `string` to both arguments.
+
 ```ts
-const customTwMerge = extendTailwindMerge({
+type AdditionalClassGroupIds = 'aspect-w' | 'aspect-h' | 'aspect-reset'
+type AdditionalThemeGroupIds = never
+
+const customTwMerge = extendTailwindMerge<AdditionalClassGroupIds, AdditionalThemeGroupIds>({
     // ↓ Optional cache size
     //   Here we're disabling the cache
     cacheSize: 0,
@@ -259,7 +278,7 @@ function mergeConfigs<ClassGroupIds extends string, ThemeGroupIds extends string
 
 Helper function to merge multiple tailwind-merge configs. Properties with the value `undefined` are skipped.
 
-When using TypeScript you need to pass a union of all class group IDs and theme group IDs used in `configExtension` as generic arguments to `mergeConfigs` or pass `string` to both arguments to allow any IDs.
+When using TypeScript, you need to pass a union of all class group IDs and theme group IDs used in `configExtension` as generic arguments to `mergeConfigs` or pass `string` to both arguments to allow any IDs.
 
 ```ts
 const customTwMerge = createTailwindMerge(getDefaultConfig, (config) =>
@@ -327,7 +346,7 @@ A brief summary for each validator:
 ## `Config`
 
 ```ts
-interface Config { … }
+interface Config<ClassGroupIds extends string, ThemeGroupIds extends string> { … }
 ```
 
 TypeScript type for config object. Useful if you want to build a `createConfig` function but don't want to define it inline in [`extendTailwindMerge`](#extendtailwindmerge) or [`createTailwindMerge`](#createtailwindmerge).
