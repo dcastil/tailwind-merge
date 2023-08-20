@@ -1,8 +1,8 @@
-import { Config } from './types'
+import { GenericConfig } from './types'
 
 export const IMPORTANT_MODIFIER = '!'
 
-export function createSplitModifiers(config: Config) {
+export function createSplitModifiers(config: GenericConfig) {
     const separator = config.separator
     const isSeparatorSingleCharacter = separator.length === 1
     const firstSeparatorCharacter = separator[0]

@@ -1,12 +1,18 @@
-import { Config, ConfigExtension } from './types'
+import { ConfigExtension, GenericConfig } from './types'
 
 /**
  * @param baseConfig Config where other config will be merged into. This object will be mutated.
  * @param configExtension Partial config to merge into the `baseConfig`.
  */
-export function mergeConfigs(
-    baseConfig: Config,
-    { cacheSize, prefix, separator, extend = {}, override = {} }: ConfigExtension,
+export function mergeConfigs<ClassGroupIds extends string, ThemeGroupIds extends string>(
+    baseConfig: GenericConfig,
+    {
+        cacheSize,
+        prefix,
+        separator,
+        extend = {},
+        override = {},
+    }: ConfigExtension<ClassGroupIds, ThemeGroupIds>,
 ) {
     overrideProperty(baseConfig, 'cacheSize', cacheSize)
     overrideProperty(baseConfig, 'prefix', prefix)
@@ -40,8 +46,8 @@ function overrideProperty<T extends object, K extends keyof T>(
 }
 
 function overrideConfigProperties(
-    baseObject: Record<string, readonly unknown[]>,
-    overrideObject: Record<string, readonly unknown[]> | undefined,
+    baseObject: Partial<Record<string, readonly unknown[]>>,
+    overrideObject: Partial<Record<string, readonly unknown[]>> | undefined,
 ) {
     if (overrideObject) {
         for (const key in overrideObject) {
@@ -51,8 +57,8 @@ function overrideConfigProperties(
 }
 
 function mergeConfigProperties(
-    baseObject: Record<string, readonly unknown[]>,
-    mergeObject: Record<string, readonly unknown[]> | undefined,
+    baseObject: Partial<Record<string, readonly unknown[]>>,
+    mergeObject: Partial<Record<string, readonly unknown[]>> | undefined,
 ) {
     if (mergeObject) {
         for (const key in mergeObject) {
