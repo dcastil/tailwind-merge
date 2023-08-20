@@ -1,5 +1,8 @@
 import {
     ClassNameValue,
+    Config,
+    DefaultClassGroupIds,
+    DefaultThemeGroupIds,
     createTailwindMerge,
     extendTailwindMerge,
     fromTheme,
@@ -9,7 +12,6 @@ import {
     twMerge,
     validators,
 } from '../src'
-import { Config, DefaultClassGroupIds, DefaultThemeGroupIds } from '../src/lib/types'
 
 test('has correct export types', () => {
     expect(twMerge).toStrictEqual(expect.any(Function))
