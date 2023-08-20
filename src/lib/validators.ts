@@ -16,7 +16,7 @@ export function isArbitraryLength(value: string) {
 }
 
 export function isNumber(value: string) {
-    return !Number.isNaN(Number(value))
+    return Boolean(value) && !Number.isNaN(Number(value))
 }
 
 export function isArbitraryNumber(value: string) {
@@ -24,7 +24,7 @@ export function isArbitraryNumber(value: string) {
 }
 
 export function isInteger(value: string) {
-    return Number.isInteger(Number(value))
+    return Boolean(value) && Number.isInteger(Number(value))
 }
 
 export function isPercent(value: string) {
