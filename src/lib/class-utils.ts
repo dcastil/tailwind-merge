@@ -24,7 +24,7 @@ const CLASS_PART_SEPARATOR = '-'
 
 export function createClassUtils(config: GenericConfig) {
     const classMap = createClassMap(config)
-    const { conflictingClassGroups, conflictingClassGroupModifiers = {} } = config
+    const { conflictingClassGroups, conflictingClassGroupModifiers } = config
 
     function getClassGroupId(className: string) {
         const classParts = className.split(CLASS_PART_SEPARATOR)
