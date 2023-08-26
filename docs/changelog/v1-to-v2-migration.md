@@ -1,5 +1,7 @@
 # Guide to migrate from v1 to v2
 
+This document is only about breaking changes between v1 and v2. For a full list of changes, see the [v2.0.0 release](./v2-changelog.md#v200).
+
 ## Overview
 
 The tailwind-merge v2 release focuses on making it easier to configure the library.

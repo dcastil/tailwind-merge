@@ -1,5 +1,7 @@
 # Guide to migrate from v0 to v1
 
+This document is only about breaking changes between v0 and v1. For a full list of changes, see the [v1.0.0 release](./v1-changelog.md#v100).
+
 ## Overview
 
 tailwind-merge v1 drops support for Tailwind CSS v2 and in turn adds support for Tailwind CSS v3.
