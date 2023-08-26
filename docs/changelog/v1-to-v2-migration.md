@@ -60,6 +60,61 @@ This field was briefly introduced by bundlers to import the ES module version of
 
 Make sure that you resolve the tailwind-merge module via the `exports` or `main` field in the `package.json` file.
 
+### `extendTailwindMerge`: object shape changed
+
+Related: [#294](https://github.com/dcastil/tailwind-merge/pull/294)
+
+In the object passed to `extendTailwindMerge` it is now possible to not just extend groups, but also to override them. To distinguish between extending and overriding, there are two new top level keys in the object: `extend` and `override`. Both of these objects can define a `theme`, `classGroups`, `conflictingClassGroups` and `conflictingClassGroupModifiers` object whose groups will either override or extend the corresponding groups in the default config.
+
+You might remember the `extend` key in your `tailwind.config.js`, now it works similarly in tailwind-merge as well. However, you need to use the `override` object instead of defining groups on the top level to override. This was done to make overriding more explicit and to prevent accidentally overriding groups when migrating to tailwind-merge v2.
+
+#### Minimal upgrade
+
+To get the same behavior as before, move `theme`, `classGroups`, `conflictingClassGroups` and `conflictingClassGroupModifiers` into an `extend` object.
+
+```diff
+  const twMerge = extendTailwindMerge({
+      cacheSize: 1000,
+-     theme: { … },
+-     classGroups: { … },
+-     conflictingClassGroups: { … },
+-     conflictingClassGroupModifiers: { … },
++     extend: {
++         theme: { … },
++         classGroups: { … },
++         conflictingClassGroups: { … },
++         conflictingClassGroupModifiers: { … },
++     }
+  })
+```
+
+#### Full upgrade
+
+If you override groups in your `tailwind.config.js`, you can now do the same in tailwind-merge. Move the groups you want to override into the `override` object and the rest into the `extend` object.
+
+```diff
+  const twMerge = extendTailwindMerge({
+-     classGroups: {
+-         // Here we actually meant to override this group
+-         shadow: [{ shadow: ['none', '100', '200', '300'] }],
+-         // Here we really meant to extend this group
+-         animate: ['animate-shimmer'],
+-     },
++     override: {
++         classGroups: {
++             // Now we can override this group
++             shadow: [{ shadow: ['none', '100', '200', '300'] }],
++         },
++     },
++     extend: {
++         classGroups: {
++             // And we can still extend this group
++             animate: ['animate-shimmer'],
++         },
++     },
+  })
+```
+
 ### `createTailwindMerge`: mandatory elements added
 
 Related: [#290](https://github.com/dcastil/tailwind-merge/pull/290), [#291](https://github.com/dcastil/tailwind-merge/pull/291)
