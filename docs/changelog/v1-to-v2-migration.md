@@ -73,6 +73,8 @@ You might remember the `extend` key in your `tailwind.config.js`, now it works s
 To get the same behavior as before, move `theme`, `classGroups`, `conflictingClassGroups` and `conflictingClassGroupModifiers` into an `extend` object.
 
 ```diff
+  import { extendTailwindMerge } from 'tailwind-merge'
+
   const twMerge = extendTailwindMerge({
       cacheSize: 1000,
 -     theme: { … },
@@ -93,6 +95,8 @@ To get the same behavior as before, move `theme`, `classGroups`, `conflictingCla
 If you override groups in your `tailwind.config.js`, you can now do the same in tailwind-merge. Move the groups you want to override into the `override` object and the rest into the `extend` object.
 
 ```diff
+  import { extendTailwindMerge } from 'tailwind-merge'
+
   const twMerge = extendTailwindMerge({
 -     classGroups: {
 -         // Here we actually meant to override this group
