@@ -211,6 +211,114 @@ If you use any custom group or theme IDs in your tailwind-merge config, pass the
 
 If you still see TypeScript errors on object keys of class groups or theme groups, check in the [default config](../../src/lib/default-config.ts) whether the group ID is defined there. It might be that you configured tailwind-merge incorrectly.
 
+### `validators.isLength`: Does not check for arbitrary values anymore
+
+Related: [#292](https://github.com/dcastil/tailwind-merge/pull/292)
+
+To be consistent with other validators and to make validators more composable, each validator only checks for class parts with either arbitrary values or non-arbitrary values. The `isLength` validator previously checked for both which made it inconsistent with the rest. Now, `isLength` does not check for arbitrary lengths anymore.
+
+#### Upgrade
+
+Compose the `isLength` and `isArbitraryLength` validators to get the same behavior as before. You can use one of several options:
+
+```diff
+  import { validators } from 'tailwind-merge'
+
++ function isLengthOrArbitraryLength(value: string) {
++     return validators.isLength(value) || validators.isArbitraryLength(value)
++ }
+
+- validators.isLength
++ isLengthOrArbitraryLength
+```
+
+```diff
+  import { validators } from 'tailwind-merge'
+
+  const twMerge = createTailwindMerge(() => ({
+      cacheSize: 500,
+      separator: ':',
+      theme: {},
+      classGroups: {
+-         mySpecialGroup: [{ special: [validators.isLength] }],
++         mySpecialGroup: [{ special: [validators.isLength, validators.isArbitraryLength] }],
+      },
+      conflictingClassGroups: {},
+      conflictingClassGroupModifiers: {},
+  }))
+```
+
+### `validators.isInteger`: Does not check for arbitrary values anymore
+
+Related: [#292](https://github.com/dcastil/tailwind-merge/pull/292)
+
+Same as the `isLength` validator: To be consistent with other validators and to make validators more composable, each validator only checks for class parts with either arbitrary values or non-arbitrary values. The `isInteger` validator previously checked for both which made it inconsistent with the rest. Now, `isInteger` does not check for arbitrary integers anymore.
+
+#### Minimal upgrade
+
+tailwind-merge doesn't export an `isArbitraryInteger` validator because it doesn't use one in the default config (it uses `isArbitraryValue` instead because there are no ambiguous arbitrary values in the default config). You'll need to rebuild the previous functionality.
+
+```diff
+  import { validators } from 'tailwind-merge'
+
++ function isIntegerOrArbitraryInteger(value: string) {
++     return validators.isInteger(value) || /^\[(number:.+|-?\d+)\]$/.test(value)
++ }
+
+- validators.isInteger
++ isIntegerOrArbitraryInteger
+```
+
+#### Full upgrade
+
+If the classes where you previously used `validators.isInteger` don't use arbitrary values, you can continue to use it without any changes.
+
+If those classes use arbitrary values but there is only a single class group that could use the arbitrary value, you don't need to check that the arbitrary value is an integer, only that it is any arbitrary value. E.g. for the class `px-[<any-value-in-here>]` we don't need to know what is between the brackets because only the `px` class group uses the `px-` prefix. In that case you can compose `isInteger` and `isArbitraryValue` as shown in the upgrade section for `validators.isLength`.
+
+Otherwise, proceed as shown in the minimal upgrade.
+
+### `validators.isArbitraryWeight`: Removed
+
+Related: [#288](https://github.com/dcastil/tailwind-merge/pull/288)
+
+The validator was renamed to `validators.isArbitraryNumber` in `v1.6.2` to better reflect what it's doing. `validators.isArbitraryWeight` has been deprecated since then and was removed in this release.
+
+#### Upgrade
+
+Replace all uses of `validators.isArbitraryWeight` with `validators.isArbitraryNumber`.
+
+```diff
+  import { validators } from 'tailwind-merge'
+
+- validators.isArbitraryWeight
++ validators.isArbitraryNumber
+```
+
+### `createTailwindMerge`: Mandatory elements added
+
+Related: [#290](https://github.com/dcastil/tailwind-merge/pull/290), [#291](https://github.com/dcastil/tailwind-merge/pull/291)
+
+The `separator` and `conflictingClassGroupModifiers` keys became mandatory in the configuration object returned in the `createTailwindMerge` callback since tailwind-merge defines those defaults only in its default config. This change makes processing for plugins easier.
+
+#### Upgrade
+
+If you don't have those keys defined in the configuration object, add them with their default values.
+
+```diff
+  import { createTailwindMerge } from 'tailwind-merge'
+
+  const twMerge = createTailwindMerge(() => {
+      return {
+          cacheSize: 500,
++         separator: ':',
+          theme: {},
+          classGroups: {},
+          conflictingClassGroups: {},
++         conflictingClassGroupModifiers: {},
+      }
+  })
+```
+
 ### `fromTheme`: Stricter TypeScript types
 
 Related: [#279](https://github.com/dcastil/tailwind-merge/pull/279)
@@ -301,114 +409,6 @@ You need to define all the class group IDs and theme group IDs you use in two st
           classGroups: { … },
       }
   })
-```
-
-### `createTailwindMerge`: Mandatory elements added
-
-Related: [#290](https://github.com/dcastil/tailwind-merge/pull/290), [#291](https://github.com/dcastil/tailwind-merge/pull/291)
-
-The `separator` and `conflictingClassGroupModifiers` keys became mandatory in the configuration object returned in the `createTailwindMerge` callback since tailwind-merge defines those defaults only in its default config. This change makes processing for plugins easier.
-
-#### Upgrade
-
-If you don't have those keys defined in the configuration object, add them with their default values.
-
-```diff
-  import { createTailwindMerge } from 'tailwind-merge'
-
-  const twMerge = createTailwindMerge(() => {
-      return {
-          cacheSize: 500,
-+         separator: ':',
-          theme: {},
-          classGroups: {},
-          conflictingClassGroups: {},
-+         conflictingClassGroupModifiers: {},
-      }
-  })
-```
-
-### `validators.isLength`: Does not check for arbitrary values anymore
-
-Related: [#292](https://github.com/dcastil/tailwind-merge/pull/292)
-
-To be consistent with other validators and to make validators more composable, each validator only checks for class parts with either arbitrary values or non-arbitrary values. The `isLength` validator previously checked for both which made it inconsistent with the rest. Now, `isLength` does not check for arbitrary lengths anymore.
-
-#### Upgrade
-
-Compose the `isLength` and `isArbitraryLength` validators to get the same behavior as before. You can use one of several options:
-
-```diff
-  import { validators } from 'tailwind-merge'
-
-+ function isLengthOrArbitraryLength(value: string) {
-+     return validators.isLength(value) || validators.isArbitraryLength(value)
-+ }
-
-- validators.isLength
-+ isLengthOrArbitraryLength
-```
-
-```diff
-  import { validators } from 'tailwind-merge'
-
-  const twMerge = createTailwindMerge(() => ({
-      cacheSize: 500,
-      separator: ':',
-      theme: {},
-      classGroups: {
--         mySpecialGroup: [{ special: [validators.isLength] }],
-+         mySpecialGroup: [{ special: [validators.isLength, validators.isArbitraryLength] }],
-      },
-      conflictingClassGroups: {},
-      conflictingClassGroupModifiers: {},
-  }))
-```
-
-### `validators.isInteger`: Does not check for arbitrary values anymore
-
-Related: [#292](https://github.com/dcastil/tailwind-merge/pull/292)
-
-Same as the `isLength` validator: To be consistent with other validators and to make validators more composable, each validator only checks for class parts with either arbitrary values or non-arbitrary values. The `isInteger` validator previously checked for both which made it inconsistent with the rest. Now, `isInteger` does not check for arbitrary integers anymore.
-
-#### Minimal upgrade
-
-tailwind-merge doesn't export an `isArbitraryInteger` validator because it doesn't use one in the default config (it uses `isArbitraryValue` instead because there are no ambiguous arbitrary values in the default config). You'll need to rebuild the previous functionality.
-
-```diff
-  import { validators } from 'tailwind-merge'
-
-+ function isIntegerOrArbitraryInteger(value: string) {
-+     return validators.isInteger(value) || /^\[(number:.+|-?\d+)\]$/.test(value)
-+ }
-
-- validators.isInteger
-+ isIntegerOrArbitraryInteger
-```
-
-#### Full upgrade
-
-If the classes where you previously used `validators.isInteger` don't use arbitrary values, you can continue to use it without any changes.
-
-If those classes use arbitrary values but there is only a single class group that could use the arbitrary value, you don't need to check that the arbitrary value is an integer, only that it is any arbitrary value. E.g. for the class `px-[<any-value-in-here>]` we don't need to know what is between the brackets because only the `px` class group uses the `px-` prefix. In that case you can compose `isInteger` and `isArbitraryValue` as shown in the upgrade section for `validators.isLength`.
-
-Otherwise, proceed as shown in the minimal upgrade.
-
-### `validators.isArbitraryWeight`: Removed
-
-Related: [#288](https://github.com/dcastil/tailwind-merge/pull/288)
-
-The validator was renamed to `validators.isArbitraryNumber` in `v1.6.2` to better reflect what it's doing. `validators.isArbitraryWeight` has been deprecated since then and was removed in this release.
-
-#### Upgrade
-
-Replace all uses of `validators.isArbitraryWeight` with `validators.isArbitraryNumber`.
-
-```diff
-  import { validators } from 'tailwind-merge'
-
-- validators.isArbitraryWeight
-+ validators.isArbitraryNumber
 ```
 
 ### `join`: Removed
