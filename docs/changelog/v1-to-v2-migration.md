@@ -60,7 +60,7 @@ This field was briefly introduced by bundlers to import the ES module version of
 
 Make sure that you resolve the tailwind-merge module via the `exports` or `main` field in the `package.json` file.
 
-### `extendTailwindMerge`: object shape changed
+### `extendTailwindMerge`: Object shape changed
 
 Related: [#294](https://github.com/dcastil/tailwind-merge/pull/294)
 
@@ -119,7 +119,7 @@ If you override groups in your `tailwind.config.js`, you can now do the same in 
   })
 ```
 
-### `extendTailwindMerge`: Group IDs are typed in TypeScript
+### `extendTailwindMerge`: Stricter TypeScript types
 
 Related: [#279](https://github.com/dcastil/tailwind-merge/pull/279)
 
@@ -193,6 +193,8 @@ To get the the same behavior as before, allow any group IDs by passing `string` 
 
 #### Full upgrade
 
+If you aren't using any custom groups, there is nothing you need to do to upgrade.
+
 If you use any custom group or theme IDs in your tailwind-merge config, pass them as generic arguments to `extendTailwindMerge`.
 
 ```diff
@@ -208,6 +210,98 @@ If you use any custom group or theme IDs in your tailwind-merge config, pass the
 ```
 
 If you still see TypeScript errors on object keys of class groups or theme groups, check in the [default config](../../src/lib/default-config.ts) whether the group ID is defined there. It might be that you configured tailwind-merge incorrectly.
+
+### `fromTheme`: Stricter TypeScript types
+
+Related: [#279](https://github.com/dcastil/tailwind-merge/pull/279)
+
+Matching the stricter types in `extendTailwindMerge`, the `fromTheme` function now only accepts theme group IDs that are defined in the default config.
+
+You can define additional allowed theme group IDs by passing them as generic arguments to `fromTheme`. If you don't use the default config, you can also redefine the default theme group IDs by passing them as a second generic arguments to `fromTheme`.
+
+#### Minimal upgrade
+
+To get the the same behavior as before, allow any theme group IDs by passing `string` as generic arguments to `fromTheme`.
+
+```diff
+  import { fromTheme } from 'tailwind-merge'
+
+- const customThemeGroup = fromTheme('my-theme-group')
++ const customThemeGroup = fromTheme<string>('my-theme-group')
+```
+
+#### Full upgrade
+
+If you don't use any custom theme groups, there is nothing you need to do to upgrade.
+
+If you use any custom theme groups in your tailwind-merge config, pass them as a generic argument to `fromTheme`.
+
+```diff
+  import { fromTheme } from 'tailwind-merge'
+
++ type AdditionalThemeGroupIds = 'my-theme-group' | 'my-other-theme-group'
+
+- const customThemeGroup = fromTheme('my-theme-group')
++ const customThemeGroup = fromTheme<AdditionalThemeGroupIds>('my-theme-group')
+```
+
+In case you're not extending the default config but defining a config from scratch with `createTailwindMerge`, you can also redefine the default theme group IDs by passing them as the second generic arguments to `fromTheme`.
+
+```diff
+  import { fromTheme } from 'tailwind-merge'
+
++ type ThemeGroupIds = 'my-theme-group' | 'my-other-theme-group'
+
+- const customThemeGroup = fromTheme('my-theme-group')
++ const customThemeGroup = fromTheme<never, ThemeGroupIds>('my-theme-group')
+```
+
+### `mergeConfigs`: Object shape changed
+
+Related: [#279](https://github.com/dcastil/tailwind-merge/pull/279)
+
+`mergeConfigs` is used internally within `extendTailwindMerge`, therefore the object shape change in `extendTailwindMerge` applies to `mergeConfigs` as well. Please read [`extendTailwindMerge`: Object shape changed](#extendtailwindmerge-object-shape-changed) for the details and upgrade instructions.
+
+### `mergeConfigs`: Stricter TypeScript types
+
+Related: [#279](https://github.com/dcastil/tailwind-merge/pull/279)
+
+The reason and effect of the stricter TypeScript types is the same as in [`extendTailwindMerge`: Stricter TypeScript types](#extendtailwindmerge-stricter-typescript-types). The main difference in `mergeConfigs` is that the generic arguments don't accept additional group IDs but rather all allowed group IDs since `mergeConfigs` is independent of the default config.
+
+#### Minimal upgrade
+
+To get the the same behavior as before, allow any group IDs by passing `string` as generic arguments to `mergeConfigs`.
+
+```diff
+  import { mergeConfigs } from 'tailwind-merge'
+
+- mergeConfigs(baseConfig, {
++ mergeConfigs<string, string>(baseConfig, {
+      extend: {
+          theme: { … },
+          classGroups: { … },
+      }
+  })
+```
+
+#### Full upgrade
+
+You need to define all the class group IDs and theme group IDs you use in two string literal union types and pass them as generic arguments to `mergeConfigs`.
+
+```diff
+  import { mergeConfigs } from 'tailwind-merge'
+
++ type ClassGroupIds = 'class-a' | 'class-b'
++ type ThemeGroupIds = 'theme-c' | 'theme-d'
+
+- mergeConfigs(baseConfig, {
++ mergeConfigs<ClassGroupIds, ThemeGroupIds>(baseConfig, {
+      extend: {
+          theme: { … },
+          classGroups: { … },
+      }
+  })
+```
 
 ### `createTailwindMerge`: mandatory elements added
 
