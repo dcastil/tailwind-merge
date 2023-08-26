@@ -351,6 +351,22 @@ interface Config<ClassGroupIds extends string, ThemeGroupIds extends string> { �
 
 TypeScript type for config object. Useful if you want to build a `createConfig` function but don't want to define it inline in [`extendTailwindMerge`](#extendtailwindmerge) or [`createTailwindMerge`](#createtailwindmerge).
 
+## `DefaultClassGroupIds`
+
+```ts
+type DefaultClassGroupIds = 'accent' | 'align-content' | 'align-items' | …
+```
+
+TypeScript type for all class group IDs defined in the default config of tailwind-merge.
+
+## `DefaultThemeGroupIds`
+
+```ts
+type DefaultThemeGroupIds = 'blur' | 'borderColor' | 'borderRadius' | …
+```
+
+TypeScript type for all theme group IDs defined in the default config of tailwind-merge.
+
 ## `ClassNameValue`
 
 ```ts
