@@ -303,7 +303,7 @@ You need to define all the class group IDs and theme group IDs you use in two st
   })
 ```
 
-### `createTailwindMerge`: mandatory elements added
+### `createTailwindMerge`: Mandatory elements added
 
 Related: [#290](https://github.com/dcastil/tailwind-merge/pull/290), [#291](https://github.com/dcastil/tailwind-merge/pull/291)
 
@@ -328,7 +328,7 @@ If you don't have those keys defined in the configuration object, add them with 
   })
 ```
 
-### `validators.isLength`: does not check for arbitrary values anymore
+### `validators.isLength`: Does not check for arbitrary values anymore
 
 Related: [#292](https://github.com/dcastil/tailwind-merge/pull/292)
 
@@ -365,7 +365,7 @@ Compose the `isLength` and `isArbitraryLength` validators to get the same behavi
   }))
 ```
 
-### `validators.isInteger`: does not check for arbitrary values anymore
+### `validators.isInteger`: Does not check for arbitrary values anymore
 
 Related: [#292](https://github.com/dcastil/tailwind-merge/pull/292)
 
@@ -394,7 +394,7 @@ If those classes use arbitrary values but there is only a single class group tha
 
 Otherwise, proceed as shown in the minimal upgrade.
 
-### `validators.isArbitraryWeight`: removed
+### `validators.isArbitraryWeight`: Removed
 
 Related: [#288](https://github.com/dcastil/tailwind-merge/pull/288)
 
@@ -411,7 +411,7 @@ Replace all uses of `validators.isArbitraryWeight` with `validators.isArbitraryN
 + validators.isArbitraryNumber
 ```
 
-### `join`: removed
+### `join`: Removed
 
 Related: [#288](https://github.com/dcastil/tailwind-merge/pull/288)
 
