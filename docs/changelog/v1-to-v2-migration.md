@@ -119,6 +119,96 @@ If you override groups in your `tailwind.config.js`, you can now do the same in 
   })
 ```
 
+### `extendTailwindMerge`: Group IDs are typed in TypeScript
+
+Related: [#279](https://github.com/dcastil/tailwind-merge/pull/279)
+
+One of the more annoying things about configuring tailwind-merge is to find the right IDs of groups to edit. Some users also fall into the trap that [not all theme groups from Tailwind CSS are supported in tailwind-merge](../configuration.md#theme).
+
+To add some guidance to the process, all the group objects passed to `extendTailwindMerge` don't accept any string keys in TypeScript anymore but only a set of specific keys which are defined in the default config.
+
+```ts
+import { extendTailwindMerge } from 'tailwind-merge'
+
+const twMerge = extendTailwindMerge({
+    extend: {
+        classGroups: {
+            // ↓ No problem
+            shadow: [{ shadow: ['100', '200', '300'] }],
+            // ↓ Error: Object literal may only specify known properties, and 'animation' does not
+            //   exist in type 'Partial<Record<DefaultClassGroupIds, ClassGroup<DefaultThemeGroupIds>>>'.
+            animation: ['animate-shimmer'],
+        },
+    },
+})
+```
+
+This means you can't accidentally extend or override a group with a typo in the ID anymore without noticing and you get code completion when you start typing the ID of a group in your editor.
+
+But this also means that you can't add any new groups to the configuration object anymore. To allow custom class group IDs, you can use generic arguments to `extendTailwindMerge` to pass further allowed IDs for class groups and theme groups separately.
+
+```ts
+import { extendTailwindMerge } from 'tailwind-merge'
+
+const twMerge = extendTailwindMerge<
+    // ↓ Add additional class group IDs as the first generic argument
+    'class-a' | 'class-b',
+    // ↓ Optionally, you can add additional theme group IDs as the second generic argument
+    'theme-c' | 'theme-d'
+>({
+    extend: {
+        theme: {
+          // ↓ No problem since we defined 'theme-c' as allowed theme group ID
+          'theme-c': […],
+          // ↓ No problem since we defined 'theme-d' as allowed theme group ID
+          'theme-d': […],
+        },
+        classGroups: {
+            // ↓ No problem since it's part of the default allowed class group IDs
+            shadow: […],
+            // ↓ No problem since we defined 'class-a' as allowed class group ID
+            'class-a': […],
+            // ↓ No problem since we defined 'class-b' as allowed class group ID
+            'class-b': […],
+        },
+    },
+})
+```
+
+#### Minimal upgrade
+
+To get the the same behavior as before, allow any group IDs by passing `string` as generic arguments to `extendTailwindMerge`.
+
+```diff
+  import { extendTailwindMerge } from 'tailwind-merge'
+
+- const twMerge = extendTailwindMerge({
++ const twMerge = extendTailwindMerge<string, string>({
+      extend: {
+          theme: { … },
+          classGroups: { … },
+      },
+  })
+```
+
+#### Full upgrade
+
+If you use any custom group or theme IDs in your tailwind-merge config, pass them as generic arguments to `extendTailwindMerge`.
+
+```diff
+  import { extendTailwindMerge } from 'tailwind-merge'
+
++ type AdditionalClassGroupIds = 'class-a' | 'class-b'
++ type AdditionalThemeGroupIds = 'theme-c' | 'theme-d'
+
+- const twMerge = extendTailwindMerge({
++ const twMerge = extendTailwindMerge<AdditionalClassGroupIds, AdditionalThemeGroupIds>({
+      // your config
+  })
+```
+
+If you still see TypeScript errors on object keys of class groups or theme groups, check in the [default config](../../src/lib/default-config.ts) whether the group ID is defined there. It might be that you configured tailwind-merge incorrectly.
+
 ### `createTailwindMerge`: mandatory elements added
 
 Related: [#290](https://github.com/dcastil/tailwind-merge/pull/290), [#291](https://github.com/dcastil/tailwind-merge/pull/291)
