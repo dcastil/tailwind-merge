@@ -19,6 +19,28 @@ If you have feedback of any kind to this release, feel free to open an [issue or
 
 ## Breaking changes
 
+Summarized by exports:
+
+-   All
+    -   [Modern JS syntax](#modern-js-syntax)
+    -   [Module resolution](#module-resolution)
+-   `extendTailwindMerge`
+    -   [Object shape changed](#extendtailwindmerge-object-shape-changed)
+    -   [Stricter TypeScript types](#extendtailwindmerge-stricter-typescript-types)
+-   `validators`
+    -   [`isLength`: Does not check for arbitrary values anymore](#validatorsislength-does-not-check-for-arbitrary-values-anymore)
+    -   [`isInteger`: Does not check for arbitrary values anymore](#validatorsisinteger-does-not-check-for-arbitrary-values-anymore)
+    -   [`isArbitraryWeight`: Removed](#validatorsisarbitraryweight-removed)
+-   `createTailwindMerge`
+    -   [Mandatory elements added](#createtailwindmerge-mandatory-elements-added)
+-   `fromTheme`
+    -   [Stricter TypeScript types](#fromtheme-stricter-typescript-types)
+-   `mergeConfigs`
+    -   [Object shape changed](#mergeconfigs-object-shape-changed)
+    -   [Stricter TypeScript types](#mergeconfigs-stricter-typescript-types)
+-   `join`
+    -   [Removed](#join-removed)
+
 ### Modern JS syntax
 
 Related: [#286](https://github.com/dcastil/tailwind-merge/pull/286), [#287](https://github.com/dcastil/tailwind-merge/pull/287)
