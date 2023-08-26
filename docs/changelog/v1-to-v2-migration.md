@@ -4,9 +4,9 @@ This document is only about breaking changes between v1 and v2. For a full list 
 
 ## Overview
 
-The tailwind-merge v2 release focuses on making it easier to configure the library.
+The tailwind-merge v2 release focuses on making it easier to configure the library for new users.
 
-Over the past one and a half years since the v1 release the biggest source of issues was the initial configuration of the library. That will unfortunately not change since most of the inconvenience comes from keeping the bundle size to a minimum. However, a few ideas with breaking changes accumulated over time to make the configuration a little bit more straight forward without increasing the bundle size. Those ideas were implemented in this release.
+Over the past one and a half years since the v1 release, the biggest source of issues was the initial configuration of the library. That will unfortunately not change since most of the inconvenience comes from keeping the bundle size to a minimum. However, a few ideas with breaking changes accumulated over time to make the configuration a little bit more straight forward without increasing the bundle size. Those ideas were implemented in this release.
 
 The highlights:
 
@@ -15,11 +15,11 @@ The highlights:
 -   TypeScript types of configuration object passed to `extendTailwindMerge` are stricter and prevent you from using unknown theme groups and class groups unless specified otherwise.
 -   The library now exports a bundle using modern JS syntax to further reduce its size. There is also an additional bundle with ES5-only syntax for compatibility with older browsers.
 
-If you have feedback of any kind to this release, feel free to open an [issue or discussion](https://github.com/dcastil/tailwind-merge/issues/new/choose). I'm always happy to hear from you!
+If you have feedback of any kind regarding this release, feel free to [open an issue or discussion](https://github.com/dcastil/tailwind-merge/issues/new/choose). I'm always happy to hear from you!
 
 ## Breaking changes
 
-Summarized by exports:
+By exports:
 
 -   All
     -   [Modern JS syntax](#modern-js-syntax)
@@ -45,7 +45,7 @@ Summarized by exports:
 
 Related: [#286](https://github.com/dcastil/tailwind-merge/pull/286), [#287](https://github.com/dcastil/tailwind-merge/pull/287)
 
-The build of tailwind-merge was updated to output more modern JS syntax. This removes a lot of code to substitute modern JS features like object spread or arrow functions, but also means that the new bundle doesn't work on older browsers anymore (in case you don't transpile your dependencies).
+The build of tailwind-merge was updated to output more modern JS syntax. This removes a lot of code to substitute modern JS features like object spread or arrow functions, but also means that the new bundle doesn't work in older browsers anymore in case you don't transpile your dependencies.
 
 The exact [browserslist](https://github.com/browserslist/browserslist) query used to define how tailwind-merge gets transpiled from now on is
 
@@ -76,11 +76,11 @@ Related: [#289](https://github.com/dcastil/tailwind-merge/issues/289)
 
 The `module` field was removed from the `package.json` file of tailwind-merge.
 
-This field was briefly introduced by bundlers to import the ES module version of a library but ultimately succeeded by the `exports` field which became a standard in Node.js and is also used by tailwind-merge. All major bundlers support the `exports` field, so this should hopefully not affect anyone. However, if you encounter any problems with this change, please open an issue.
+This field was briefly introduced by bundlers to import the ES module version of a library. But it was ultimately succeeded by the `exports` field which became a standard in Node.js and is also used by tailwind-merge. All major bundlers support the `exports` field, so removing the `module` field should hopefully not affect anyone. However, if you encounter any problems with this change, please open an issue.
 
 #### Upgrade
 
-Make sure that you resolve the tailwind-merge module via the `exports` or `main` field in the `package.json` file.
+If you can import tailwind-merge and your module resolution system doesn't complain, there is nothing you need to do. If you encounter issues, make sure that you resolve the tailwind-merge library via the `exports` or `main` field of its `package.json` file.
 
 ### `extendTailwindMerge`: Object shape changed
 
@@ -88,7 +88,7 @@ Related: [#294](https://github.com/dcastil/tailwind-merge/pull/294)
 
 In the object passed to `extendTailwindMerge` it is now possible to not just extend groups, but also to override them. To distinguish between extending and overriding, there are two new top level keys in the object: `extend` and `override`. Both of these objects can define a `theme`, `classGroups`, `conflictingClassGroups` and `conflictingClassGroupModifiers` object whose groups will either override or extend the corresponding groups in the default config.
 
-You might remember the `extend` key in your `tailwind.config.js`, now it works similarly in tailwind-merge as well. However, you need to use the `override` object instead of defining groups on the top level to override. This was done to make overriding more explicit and to prevent accidentally overriding groups when migrating to tailwind-merge v2.
+You might remember the `extend` key in your `tailwind.config.js`, now it works similarly in tailwind-merge as well. However, you need to use the `override` object instead of defining groups at the top level to override. This was done to make overriding more explicit and to prevent accidentally overriding groups when migrating to tailwind-merge v2.
 
 #### Minimal upgrade
 
@@ -167,7 +167,7 @@ const twMerge = extendTailwindMerge({
 
 This means you can't accidentally extend or override a group with a typo in the ID anymore without noticing and you get code completion when you start typing the ID of a group in your editor.
 
-But this also means that you can't add any new groups to the configuration object anymore. To allow custom class group IDs, you can use generic arguments to `extendTailwindMerge` to pass further allowed IDs for class groups and theme groups separately.
+But this also means that you can't add any new groups to the configuration object anymore. To allow custom class group IDs, you can use generic arguments to `extendTailwindMerge` to pass additional allowed IDs for class groups and theme groups separately.
 
 ```ts
 import { extendTailwindMerge } from 'tailwind-merge'
@@ -217,7 +217,7 @@ To get the the same behavior as before, allow any group IDs by passing `string` 
 
 If you aren't using any custom groups, there is nothing you need to do to upgrade.
 
-If you use any custom group or theme IDs in your tailwind-merge config, pass them as generic arguments to `extendTailwindMerge`.
+If you use any custom class group or theme group IDs in your tailwind-merge config, pass them as generic arguments to `extendTailwindMerge`.
 
 ```diff
   import { extendTailwindMerge } from 'tailwind-merge'
@@ -230,6 +230,8 @@ If you use any custom group or theme IDs in your tailwind-merge config, pass the
       // your config
   })
 ```
+
+You can also pass `never` to any argument if you don't use any custom groups of that type.
 
 If you still see TypeScript errors on object keys of class groups or theme groups, check in the [default config](../../src/lib/default-config.ts) whether the group ID is defined there. It might be that you configured tailwind-merge incorrectly.
 
@@ -356,8 +358,8 @@ To get the the same behavior as before, allow any theme group IDs by passing `st
 ```diff
   import { fromTheme } from 'tailwind-merge'
 
-- const customThemeGroup = fromTheme('my-theme-group')
-+ const customThemeGroup = fromTheme<string>('my-theme-group')
+- const myThemeGroup = fromTheme('my-theme-group')
++ const myThemeGroup = fromTheme<string>('my-theme-group')
 ```
 
 #### Full upgrade
@@ -416,7 +418,7 @@ To get the the same behavior as before, allow any group IDs by passing `string` 
 
 #### Full upgrade
 
-You need to define all the class group IDs and theme group IDs you use in two string literal union types and pass them as generic arguments to `mergeConfigs`.
+You need to define all the class group IDs and theme group IDs you use in two string literal union types and pass them as generic arguments to `mergeConfigs` unless TypeScript inference can infer the types.
 
 ```diff
   import { mergeConfigs } from 'tailwind-merge'
