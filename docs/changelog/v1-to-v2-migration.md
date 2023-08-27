@@ -30,6 +30,7 @@ By exports:
 -   `validators`
     -   [`isLength`: Does not check for arbitrary values anymore](#validatorsislength-does-not-check-for-arbitrary-values-anymore)
     -   [`isInteger`: Does not check for arbitrary values anymore](#validatorsisinteger-does-not-check-for-arbitrary-values-anymore)
+    -   [`isArbitraryUrl`: Renamed](#validatorsisarbitraryurl-renamed)
     -   [`isArbitraryWeight`: Removed](#validatorsisarbitraryweight-removed)
 -   `createTailwindMerge`
     -   [Mandatory elements added](#createtailwindmerge-mandatory-elements-added)
@@ -300,6 +301,23 @@ If the classes where you previously used `validators.isInteger` don't use arbitr
 If those classes use arbitrary values but there is only a single class group that could use the arbitrary value, you don't need to check that the arbitrary value is an integer, only that it is any arbitrary value. E.g. for the class `px-[<any-value-in-here>]` we don't need to know what is between the brackets because only the `px` class group uses the `px-` prefix. In that case you can compose `isInteger` and `isArbitraryValue` as shown in the upgrade section for `validators.isLength`.
 
 Otherwise, proceed as shown in the minimal upgrade.
+
+### `validators.isArbitraryUrl`: Renamed
+
+Related: [#300](https://github.com/dcastil/tailwind-merge/pull/300)
+
+`isArbitraryUrl` was used to detect arbitrary `background-image` values. However, the `background-image` CSS property supports more than just URLs, so the functionality of the validator was expanded to also detect values like `image:var(--maybe-an-image-at-runtime)]` or `linear-gradient(rgba(0,0,255,0.5),rgba(255,255,0,0.5))` and therefore renamed as well.
+
+#### Upgrade
+
+Replace all uses of `validators.isArbitraryUrl` with `validators.isArbitraryImage`.
+
+```diff
+  import { validators } from 'tailwind-merge'
+
+- validators.isArbitraryUrl
++ validators.isArbitraryImage
+```
 
 ### `validators.isArbitraryWeight`: Removed
 

@@ -10,7 +10,7 @@ const {
     isTshirtSize,
     isArbitrarySize,
     isArbitraryPosition,
-    isArbitraryUrl,
+    isArbitraryImage,
     isArbitraryNumber,
     isArbitraryShadow,
 } = validators
@@ -120,6 +120,8 @@ test('isTshirtSize', () => {
 test('isArbitrarySize', () => {
     expect(isArbitrarySize('[size:2px]')).toBe(true)
     expect(isArbitrarySize('[size:bla]')).toBe(true)
+    expect(isArbitrarySize('[length:bla]')).toBe(true)
+    expect(isArbitrarySize('[percentage:bla]')).toBe(true)
 
     expect(isArbitrarySize('[2px]')).toBe(false)
     expect(isArbitrarySize('[bla]')).toBe(false)
@@ -135,15 +137,18 @@ test('isArbitraryPosition', () => {
     expect(isArbitraryPosition('position:2px')).toBe(false)
 })
 
-test('isArbitraryUrl', () => {
-    expect(isArbitraryUrl('[url:var(--my-url)]')).toBe(true)
-    expect(isArbitraryUrl('[url(something)]')).toBe(true)
-    expect(isArbitraryUrl('[url:bla]')).toBe(true)
+test('isArbitraryImage', () => {
+    expect(isArbitraryImage('[url:var(--my-url)]')).toBe(true)
+    expect(isArbitraryImage('[url(something)]')).toBe(true)
+    expect(isArbitraryImage('[url:bla]')).toBe(true)
+    expect(isArbitraryImage('[image:bla]')).toBe(true)
+    expect(isArbitraryImage('[linear-gradient(something)]')).toBe(true)
+    expect(isArbitraryImage('[repeating-conic-gradient(something)]')).toBe(true)
 
-    expect(isArbitraryUrl('[var(--my-url)]')).toBe(false)
-    expect(isArbitraryUrl('[bla]')).toBe(false)
-    expect(isArbitraryUrl('url:2px')).toBe(false)
-    expect(isArbitraryUrl('url(2px)')).toBe(false)
+    expect(isArbitraryImage('[var(--my-url)]')).toBe(false)
+    expect(isArbitraryImage('[bla]')).toBe(false)
+    expect(isArbitraryImage('url:2px')).toBe(false)
+    expect(isArbitraryImage('url(2px)')).toBe(false)
 })
 
 test('isArbitraryNumber', () => {

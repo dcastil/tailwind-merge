@@ -24,7 +24,7 @@ test('has correct export types', () => {
         isArbitraryPosition: expect.any(Function),
         isArbitraryShadow: expect.any(Function),
         isArbitrarySize: expect.any(Function),
-        isArbitraryUrl: expect.any(Function),
+        isArbitraryImage: expect.any(Function),
         isArbitraryValue: expect.any(Function),
         isInteger: expect.any(Function),
         isLength: expect.any(Function),
@@ -152,7 +152,7 @@ test('validators have correct inputs and outputs', () => {
     expect(validators.isTshirtSize('')).toEqual(expect.any(Boolean))
     expect(validators.isArbitrarySize('')).toEqual(expect.any(Boolean))
     expect(validators.isArbitraryPosition('')).toEqual(expect.any(Boolean))
-    expect(validators.isArbitraryUrl('')).toEqual(expect.any(Boolean))
+    expect(validators.isArbitraryImage('')).toEqual(expect.any(Boolean))
     expect(validators.isArbitraryNumber('')).toEqual(expect.any(Boolean))
     expect(validators.isArbitraryShadow('')).toEqual(expect.any(Boolean))
 })

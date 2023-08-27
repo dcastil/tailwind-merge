@@ -2,12 +2,12 @@ import { fromTheme } from './from-theme'
 import { Config, DefaultClassGroupIds, DefaultThemeGroupIds } from './types'
 import {
     isAny,
+    isArbitraryImage,
     isArbitraryLength,
     isArbitraryNumber,
     isArbitraryPosition,
     isArbitraryShadow,
     isArbitrarySize,
-    isArbitraryUrl,
     isArbitraryValue,
     isInteger,
     isLength,
@@ -903,7 +903,7 @@ export function getDefaultConfig() {
                     bg: [
                         'none',
                         { 'gradient-to': ['t', 'tr', 'r', 'br', 'b', 'bl', 'l', 'tl'] },
-                        isArbitraryUrl,
+                        isArbitraryImage,
                     ],
                 },
             ],
