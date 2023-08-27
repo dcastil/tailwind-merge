@@ -6,6 +6,8 @@ const lengthUnitRegex =
     /\d+(%|px|r?em|[sdl]?v([hwib]|min|max)|pt|pc|in|cm|mm|cap|ch|ex|r?lh|cq(w|h|i|b|min|max))|\b(calc|min|max|clamp)\(.+\)|^0$/
 // Shadow always begins with x and y offset separated by underscore
 const shadowRegex = /^-?((\d+)?\.?(\d+)[a-z]+|0)_-?((\d+)?\.?(\d+)[a-z]+|0)/
+const imageRegex =
+    /^(url|image|image-set|cross-fade|element|(repeating-)?(linear|radial|conic)-gradient)\(.+\)$/
 
 export function isLength(value: string) {
     return isNumber(value) || stringLengths.has(value) || fractionRegex.test(value)
@@ -49,8 +51,10 @@ export function isArbitraryPosition(value: string) {
     return getIsArbitraryValue(value, 'position', isNever)
 }
 
-export function isArbitraryUrl(value: string) {
-    return getIsArbitraryValue(value, 'url', isUrl)
+const imageLabels = new Set(['image', 'url'])
+
+export function isArbitraryImage(value: string) {
+    return getIsArbitraryValue(value, imageLabels, isImage)
 }
 
 export function isArbitraryShadow(value: string) {
@@ -59,10 +63,6 @@ export function isArbitraryShadow(value: string) {
 
 export function isAny() {
     return true
-}
-
-function isLengthOnly(value: string) {
-    return lengthUnitRegex.test(value)
 }
 
 function getIsArbitraryValue(
@@ -83,14 +83,18 @@ function getIsArbitraryValue(
     return false
 }
 
+function isLengthOnly(value: string) {
+    return lengthUnitRegex.test(value)
+}
+
 function isNever() {
     return false
 }
 
-function isUrl(value: string) {
-    return value.startsWith('url(')
-}
-
 function isShadow(value: string) {
     return shadowRegex.test(value)
+}
+
+function isImage(value: string) {
+    return imageRegex.test(value)
 }

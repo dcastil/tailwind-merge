@@ -68,4 +68,9 @@ test('handles ambiguous arbitrary values correctly', () => {
     expect(twMerge('bg-cover bg-[percentage:30%] bg-[length:200px_100px]')).toBe(
         'bg-[length:200px_100px]',
     )
+    expect(
+        twMerge(
+            'bg-none bg-[url(.)] bg-[image:.] bg-[url:.] bg-[linear-gradient(.)] bg-gradient-to-r',
+        ),
+    ).toBe('bg-gradient-to-r')
 })
