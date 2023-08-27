@@ -39,8 +39,10 @@ export function isTshirtSize(value: string) {
     return tshirtUnitRegex.test(value)
 }
 
+const sizeLabels = new Set(['length', 'size', 'percentage'])
+
 export function isArbitrarySize(value: string) {
-    return getIsArbitraryValue(value, 'size', isNever)
+    return getIsArbitraryValue(value, sizeLabels, isNever)
 }
 
 export function isArbitraryPosition(value: string) {
@@ -63,12 +65,16 @@ function isLengthOnly(value: string) {
     return lengthUnitRegex.test(value)
 }
 
-function getIsArbitraryValue(value: string, label: string, testValue: (value: string) => boolean) {
+function getIsArbitraryValue(
+    value: string,
+    label: string | Set<string>,
+    testValue: (value: string) => boolean,
+) {
     const result = arbitraryValueRegex.exec(value)
 
     if (result) {
         if (result[1]) {
-            return result[1] === label
+            return typeof label === 'string' ? result[1] === label : label.has(result[1])
         }
 
         return testValue(result[2]!)
