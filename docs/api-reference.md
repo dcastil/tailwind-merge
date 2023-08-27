@@ -314,7 +314,7 @@ interface Validators {
     isTshirtSize(value: string): boolean
     isArbitrarySize(value: string): boolean
     isArbitraryPosition(value: string): boolean
-    isArbitraryUrl(value: string): boolean
+    isArbitraryImage(value: string): boolean
     isArbitraryNumber(value: string): boolean
     isArbitraryShadow(value: string): boolean
     isAny(value: string): boolean
