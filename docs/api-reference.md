@@ -339,7 +339,7 @@ A brief summary for each validator:
 -   `isTshirtSize`checks whether class part is a T-shirt size (`sm`, `xl`), optionally with a preceding number (`2xl`).
 -   `isArbitrarySize` checks whether class part is an arbitrary value which starts with `size:` (`[size:200px_100px]`) which is necessary for background-size classNames.
 -   `isArbitraryPosition` checks whether class part is an arbitrary value which starts with `position:` (`[position:200px_100px]`) which is necessary for background-position classNames.
--   `isArbitraryUrl` checks whether class part is an arbitrary value which starts with `url:` or `url(` (`[url('/path-to-image.png')]`, `url:var(--maybe-a-url-at-runtime)]`) which is necessary for background-image classNames.
+-   `isArbitraryImage` checks whether class part is an arbitrary value which is an iamge, e.g. by starting with `image:`, `url:`, `linear-gradient(` or `url(` (`[url('/path-to-image.png')]`, `image:var(--maybe-an-image-at-runtime)]`) which is necessary for background-image classNames.
 -   `isArbitraryShadow` checks whether class part is an arbitrary value which starts with the same pattern as a shadow value (`[0_35px_60px_-15px_rgba(0,0,0,0.3)]`), namely with two lengths separated by a underscore.
 -   `isAny` always returns true. Be careful with this validator as it might match unwanted classes. I use it primarily to match colors or when I'm certain there are no other class groups in a namespace.
 
