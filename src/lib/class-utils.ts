@@ -79,8 +79,9 @@ function getGroupRecursive(
     }
 
     const classRest = classParts.join(CLASS_PART_SEPARATOR)
-
-    return classPartObject.validators.find(({ validator }) => validator(classRest))?.classGroupId
+    const classPartRestValidator = classPartObject.validators.find(({ validator }) => validator(classRest))
+    
+    return classPartRestValidator ? classPartRestValidator.classGroupId : undefined
 }
 
 const arbitraryPropertyRegex = /^\[(.+)\]$/
@@ -88,10 +89,10 @@ const arbitraryPropertyRegex = /^\[(.+)\]$/
 function getGroupIdForArbitraryProperty(className: string) {
     if (arbitraryPropertyRegex.test(className)) {
         const arbitraryPropertyClassName = arbitraryPropertyRegex.exec(className)![1]
-        const property = arbitraryPropertyClassName?.substring(
+        const property = arbitraryPropertyClassName ? arbitraryPropertyClassName.substring(
             0,
             arbitraryPropertyClassName.indexOf(':'),
-        )
+        ) : undefined
 
         if (property) {
             // I use two dots here because one dot is used as prefix for class groups in plugins
