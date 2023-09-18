@@ -18,3 +18,16 @@ test('ring and shadow classes do not create conflict', () => {
     expect(twMerge('shadow ring')).toBe('shadow ring')
     expect(twMerge('shadow-md ring-2')).toBe('shadow-md ring-2')
 })
+
+test('touch classes do create conflicts correctly', () => {
+    expect(twMerge('touch-pan-x touch-pan-right')).toBe('touch-pan-right')
+    expect(twMerge('touch-none touch-pan-x')).toBe('touch-pan-x')
+    expect(twMerge('touch-pan-x touch-none')).toBe('touch-none')
+    expect(twMerge('touch-pan-x touch-pan-y touch-pinch-zoom')).toBe(
+        'touch-pan-x touch-pan-y touch-pinch-zoom',
+    )
+    expect(twMerge('touch-manipulation touch-pan-x touch-pan-y touch-pinch-zoom')).toBe(
+        'touch-pan-x touch-pan-y touch-pinch-zoom',
+    )
+    expect(twMerge('touch-pan-x touch-pan-y touch-pinch-zoom touch-auto')).toBe('touch-auto')
+})
