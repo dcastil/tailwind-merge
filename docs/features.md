@@ -2,7 +2,7 @@
 
 ## Merging behavior
 
-tailwind-merge is designed to be predictable and intuitive. It follows a set of rules to determine which class wins when there are conflicts. Here is a brief overview of the conflict resolution tailwind-merge can do.
+tailwind-merge is built to be intuitive. It follows a set of rules to determine which class wins when there are conflicts. Here is a brief overview of its conflict resolution.
 
 ### Last conflicting class wins
 
@@ -154,7 +154,7 @@ The initial computations are called lazily on the first call to `twMerge` to pre
 
 ---
 
-Next: [Configuration](./configuration.md)
+Next: [Limitations](./limitations.md)
 
 Previous: [What is it for](./what-is-it-for.md)
 

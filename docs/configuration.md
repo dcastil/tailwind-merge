@@ -250,6 +250,6 @@ const twMerge3 = createTailwindMerge(() => ({  … }), withMagic, withMoreMagic)
 
 Next: [Recipes](./recipes.md)
 
-Previous: [Features](./features.md)
+Previous: [Limitations](./limitations.md)
 
 [Back to overview](./README.md)
