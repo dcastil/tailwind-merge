@@ -2,7 +2,7 @@
 
 The tailwind-merge v2 release has been sitting here almost finished for 2 months already. But the timing was never quite right, especially thinking about the increased support needed after the release. In the meantime, the product of the company I work at [launched in public beta](https://medium.com/@risecal/meet-rise-the-calendar-that-works-for-you-were-launching-the-public-beta-today-bc07555a2191) and I married. Thank you for your patience.
 
-This release focuses on making it easier to configure the library for new users. Check out the [migration guide](./v1-to-v2-migration.md)!
+This release focuses on making it easier to configure the library for new users. Check out the migration guide and if you have any questions, feel free to [create an issue](https://github.com/dcastil/tailwind-merge/issues/new/choose).
 
 ### Breaking Changes
 
