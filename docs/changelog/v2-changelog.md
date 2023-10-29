@@ -7,7 +7,7 @@ This release focuses on making it easier to configure the library for new users.
 ### Breaking Changes
 
 -   Fix `background-image` and `background-position` being merged incorrectly by [@dcastil](https://github.com/dcastil) in [#300](https://github.com/dcastil/tailwind-merge/pull/300)
-    -   Values for `background-position` and `background-size` can look very similar and Tailwind CSS uses the same `bg-` prefix for both groups. This results in some [limitations](../limitations.md) for tailwind-merge.
+    -   Values for `background-position` and `background-size` can look very similar and Tailwind CSS uses the same `bg-` prefix for both groups. This results in some [limitations](../limitations.md) for tailwind-merge. If you use background position or background size with arbitrary values, please read [this section](../limitations.md#you-need-to-use-label-in-arbitrary-background-position-and-background-size-classes) about how to use them.
 -   Make types of available keys more strict and configurable through generics by [@kachkaev](https://github.com/kachkaev) in [#279](https://github.com/dcastil/tailwind-merge/pull/279)
 -   Make it possible to override elements with `extendTailwindMerge` by [@dcastil](https://github.com/dcastil) in [#294](https://github.com/dcastil/tailwind-merge/pull/294)
 -   Separate validators better by [@dcastil](https://github.com/dcastil) in [#292](https://github.com/dcastil/tailwind-merge/pull/292)
