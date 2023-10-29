@@ -41,3 +41,5 @@ This release focuses on making it easier to configure the library for new users.
 -   Explain limitations of arbitrary values in `bg-size` and `bg-position` class groups in docs by [@dcastil](https://github.com/dcastil) in [#328](https://github.com/dcastil/tailwind-merge/pull/328)
 
 **Full Changelog**: [`v1.14.0...v2.0.0`](https://github.com/dcastil/tailwind-merge/compare/v1.14.0...v2.0.0)
+
+Thanks to [@quezlatch](https://github.com/quezlatch), [@brandonmcconnell](https://github.com/brandonmcconnell), [@manavm1990](https://github.com/manavm1990) and [@ErwinAI](https://github.com/ErwinAI) for sponsoring tailwind-merge! ❤️
