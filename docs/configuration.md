@@ -166,7 +166,7 @@ If you only need to slightly modify the default tailwind-merge config, [`extendT
 import { extendTailwindMerge } from 'tailwind-merge'
 
 const customTwMerge = extendTailwindMerge<'foo' | 'bar' | 'baz'>({
-    // ↓ Override eleemnts from the default config
+    // ↓ Override elements from the default config
     //   It has the same shape as the `extend` object, so we're going to skip it here.
     override: {},
     // ↓ Extend values from the default config
@@ -195,6 +195,54 @@ const customTwMerge = extendTailwindMerge<'foo' | 'bar' | 'baz'>({
 
 > **Note**
 > The function `extendTailwindMerge` computes a large data structure based on the config passed to it. I recommend to call it only once and store the result in a top-level variable instead of calling it inline within another repeatedly called function.
+
+### TypeScript types for `extendTailwindMerge`
+
+If you're using TypeScript, you'll notice that all the places in the `configExtension` object where class group IDs and theme group IDs are used are typed strictly so that you're only allowed to use IDs which are defined in the default config of tailwind-merge. The strict TypeScript types are meant as a safety net to prevent you from making typos in your config and to give you auto-completion for IDs.
+
+In case you want to define new class groups or theme objects, you need to add the IDs as a generic argument to `extendTailwindMerge`:
+
+```ts
+import { extendTailwindMerge } from 'tailwind-merge'
+
+type AdditionalClassGroupIDs = 'class-a' | 'class-b'
+type AdditionalThemeGroupIDs = 'theme-c' | 'theme-d'
+
+const twMerge = extendTailwindMerge<
+    // ↓ Add additional class group IDs as the first generic argument
+    AdditionalClassGroupIDs,
+    // ↓ Optionally, you can add additional theme group IDs as the second generic argument
+    AdditionalThemeGroupIDs
+>({
+    extend: {
+        theme: {
+          // ↓ Works because we defined 'theme-c' as additional theme group ID
+          'theme-c': […],
+          // ↓ Works because we defined 'theme-d' as additional theme group ID
+          'theme-d': […],
+        },
+        classGroups: {
+            // ↓ Works because it's part of the default additional class group IDs
+            shadow: […],
+            // ↓ Works because we defined 'class-a' as additional class group ID
+            'class-a': […],
+            // ↓ Works because we defined 'class-b' as additional class group ID
+            'class-b': […],
+            // ↓ Type […] is not assignable to type […].
+            //   Object literal may only specify known properties, and ''not-defined'' does not exist in type […]. ts(2322)
+            'not-defined': [],
+        },
+    },
+})
+```
+
+If those strict TypeScript types for IDs are too restrictive for you, you can also allow any strings as IDs by using the `string` type as generic argument.
+
+```ts
+import { extendTailwindMerge } from 'tailwind-merge'
+
+const twMerge = extendTailwindMerge<string, string>(/* anything goes here */)
+```
 
 ### Using completely custom tailwind-merge config
 
