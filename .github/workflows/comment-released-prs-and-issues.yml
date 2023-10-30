@@ -15,3 +15,4 @@ jobs:
               with:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
                   comment-template: This was addressed in release {release_link}.
+                  skip-label: skip-release-comment
