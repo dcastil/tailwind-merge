@@ -84,7 +84,7 @@
         "rollup": "^3.29.4",
         "rollup-plugin-delete": "^2.0.0",
         "rollup-plugin-dts": "^6.1.0",
-        "size-limit": "^9.0.0",
+        "size-limit": "^10.0.1",
         "ts-jest": "^29.1.1",
         "typescript": "^5.2.2",
         "zx": "^7.2.3"
