@@ -382,6 +382,14 @@ function myWrappedTwMerge(...args: ClassNameValue[]) {
 }
 ```
 
+## `ClassValidator`
+
+```ts
+type ClassValidator = (value: string) => boolean
+```
+
+TypeScript type for class validators accepted in class definitions within [`extendTailwindMerge`](#extendtailwindmerge) and [`createTailwindMerge`](#createtailwindmerge).
+
 ---
 
 Next: [Writing plugins](./writing-plugins.md)
