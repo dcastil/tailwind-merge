@@ -31,3 +31,8 @@ test('touch classes do create conflicts correctly', () => {
     )
     expect(twMerge('touch-pan-x touch-pan-y touch-pinch-zoom touch-auto')).toBe('touch-auto')
 })
+
+test('line-clamp classes do create conflicts correctly', () => {
+    expect(twMerge('overflow-auto inline line-clamp-1')).toBe('line-clamp-1')
+    expect(twMerge('line-clamp-1 overflow-auto inline')).toBe('line-clamp-1 overflow-auto inline')
+})
