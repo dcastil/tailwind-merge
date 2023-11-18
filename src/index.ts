@@ -5,5 +5,10 @@ export { fromTheme } from './lib/from-theme'
 export { mergeConfigs } from './lib/merge-configs'
 export { twJoin, type ClassNameValue } from './lib/tw-join'
 export { twMerge } from './lib/tw-merge'
-export { type Config, type DefaultClassGroupIds, type DefaultThemeGroupIds } from './lib/types'
+export {
+    type ClassValidator,
+    type Config,
+    type DefaultClassGroupIds,
+    type DefaultThemeGroupIds,
+} from './lib/types'
 export * as validators from './lib/validators'
