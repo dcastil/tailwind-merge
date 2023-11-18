@@ -1740,6 +1740,7 @@ export function getDefaultConfig() {
             'fvn-figure': ['fvn-normal'],
             'fvn-spacing': ['fvn-normal'],
             'fvn-fraction': ['fvn-normal'],
+            'line-clamp': ['display', 'overflow'],
             rounded: [
                 'rounded-s',
                 'rounded-e',
