@@ -1,5 +1,6 @@
 import {
     ClassNameValue,
+    ClassValidator,
     Config,
     DefaultClassGroupIds,
     DefaultThemeGroupIds,
@@ -40,12 +41,14 @@ test('has correct export types', () => {
     const noRun = () => {
         const config: Config<DefaultClassGroupIds, DefaultThemeGroupIds> = getDefaultConfig()
         const classNameValue: ClassNameValue = 'some-class'
+        const classValidator: ClassValidator = (value: string) => false
 
         twMerge(classNameValue, classNameValue, classNameValue)
         twJoin(classNameValue, classNameValue, classNameValue)
 
         return {
             config,
+            classValidator,
         }
     }
 })
