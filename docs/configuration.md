@@ -44,7 +44,6 @@ const tailwindMergeConfig = {
     conflictingClassGroupModifiers: {
         // Conflicts between postfox modifier of a class group and another class group are defined here
     },
-    }
 }
 ```
 
