@@ -4908,10 +4908,22 @@ sisteransi@^1.0.5:
   resolved "https://registry.yarnpkg.com/sisteransi/-/sisteransi-1.0.5.tgz#134d681297756437cc05ca01370d3a7a571075ed"
   integrity sha512-bLGGlR1QxBcynn2d5YmDX4MGjlZvy2MRBDRNHLJ8VI6l6+9FUiyTFNJ0IveOSP0bcXgVDPRcfGqA0pjaqUpfVg==
 
-size-limit@10.0.3, size-limit@^10.0.3:
+size-limit@10.0.3:
   version "10.0.3"
   resolved "https://registry.yarnpkg.com/size-limit/-/size-limit-10.0.3.tgz#76296ecbfb083f01cca80cbe8d098cc1aead3989"
   integrity sha512-5k1k2Kykueq5K/PJQclKx2GS1prz4WNNvm+x5CQ2oWLHwmuFnb1z1g412O9aoOFqafXicJTZgZHXRyIe2GZQfA==
+  dependencies:
+    bytes-iec "^3.1.1"
+    chokidar "^3.5.3"
+    globby "^14.0.0"
+    lilconfig "^2.1.0"
+    nanospinner "^1.1.0"
+    picocolors "^1.0.0"
+
+size-limit@^11.0.0:
+  version "11.0.0"
+  resolved "https://registry.yarnpkg.com/size-limit/-/size-limit-11.0.0.tgz#0a7c5245cc792d7e520663399b397538f609b061"
+  integrity sha512-6+i4rE1GRzx/vRpuitRYQiZJNTXJjde+4P2NPg8AK7pURrE1+hA3mGstzvT8vQ8DuYFnvp9fh4CHM7Heq3EKXA==
   dependencies:
     bytes-iec "^3.1.1"
     chokidar "^3.5.3"
