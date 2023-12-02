@@ -1,3 +1,23 @@
+# Changelog for v2 releases
+
+## v2.1.0
+
+### New Features
+
+-   Add `ClassValidator` type to package exports by [@dcastil](https://github.com/dcastil) in [#348](https://github.com/dcastil/tailwind-merge/pull/348)
+
+### Bug Fixes
+
+-   Fix display class not removed when it precedes line-clamp class by [@dcastil](https://github.com/dcastil) in [#347](https://github.com/dcastil/tailwind-merge/pull/347)
+
+### Documentation
+
+-   Fix curly bracket typo in config docs by [@Kosai106](https://github.com/Kosai106) in [#349](https://github.com/dcastil/tailwind-merge/pull/349)
+
+**Full Changelog**: [`v2.0.0...v2.1.0`](https://github.com/dcastil/tailwind-merge/compare/v2.0.0...v2.1.0)
+
+Thanks to [@brandonmcconnell](https://github.com/brandonmcconnell), [@manavm1990](https://github.com/manavm1990), [@ErwinAI](https://github.com/ErwinAI) and [@langy](https://github.com/langy) for sponsoring tailwind-merge! ❤️
+
 ## v2.0.0
 
 The tailwind-merge v2 release has been sitting here almost finished for 2 months already. But the timing was never quite right, especially thinking about the increased support needed after the release. In the meantime, the product of the company I work at [launched in public beta](https://medium.com/@risecal/meet-rise-the-calendar-that-works-for-you-were-launching-the-public-beta-today-bc07555a2191) and I married. Thank you for your patience.
