@@ -1705,27 +1705,27 @@
   dependencies:
     "@sinonjs/commons" "^2.0.0"
 
-"@size-limit/esbuild@10.0.3":
-  version "10.0.3"
-  resolved "https://registry.yarnpkg.com/@size-limit/esbuild/-/esbuild-10.0.3.tgz#86101c2ba445375aa63892ae4a291c4c0d26628e"
-  integrity sha512-5z7qhfKqR3zJJMsbgIiFiqZmBqBYboG67g6vzIovBI/CyOvKTWUrvhx17BHYWNwi+cZgkR+oJjhgJc5hO7rYxQ==
+"@size-limit/esbuild@11.0.0":
+  version "11.0.0"
+  resolved "https://registry.yarnpkg.com/@size-limit/esbuild/-/esbuild-11.0.0.tgz#1f4e2ddc5f357545ffe38930d31b2952038c64e0"
+  integrity sha512-OOmba2ZuMpaUhmBXgCfgrO7L6zkUDwvFFfW8T+dK08968LQ79Q+kNgEXQAd+dhj9TlTkHyyEDczWmx16e9cXoQ==
   dependencies:
     esbuild "^0.19.5"
     nanoid "^5.0.3"
 
-"@size-limit/file@10.0.3":
-  version "10.0.3"
-  resolved "https://registry.yarnpkg.com/@size-limit/file/-/file-10.0.3.tgz#0d8f0e57055d4e69f78ec83d1f2f9959dc615877"
-  integrity sha512-q+AlmVwSU7Adw3TwSwxr8ITZfVt16Lb1Uq7JTD0Ng2+ZnLDu9wY1cVE15yG4l2hN5pOQfdHZ1p9kb6unYmYT3w==
+"@size-limit/file@11.0.0":
+  version "11.0.0"
+  resolved "https://registry.yarnpkg.com/@size-limit/file/-/file-11.0.0.tgz#234fdd2444900808c0ab607f19c82bfbdac75172"
+  integrity sha512-tTg6sSiFbiogiof3GV4iIRCPS4+46Hvq4QWXGXp00Be/tOnpglXF62xNpCfFwefx9YCXxCyeYSqqaRBjpRCsmQ==
 
-"@size-limit/preset-small-lib@^10.0.3":
-  version "10.0.3"
-  resolved "https://registry.yarnpkg.com/@size-limit/preset-small-lib/-/preset-small-lib-10.0.3.tgz#bda98bd28398c910d835731d2e160ea51f2f6807"
-  integrity sha512-NUu/DnTh0YuodfZJ/98doYrvhcDcLe1yX9MblChzWx//onvcUbq2HpzbP4cxXLjoZG5v5ms+7lnHKyLfPftklQ==
+"@size-limit/preset-small-lib@^11.0.0":
+  version "11.0.0"
+  resolved "https://registry.yarnpkg.com/@size-limit/preset-small-lib/-/preset-small-lib-11.0.0.tgz#d7cfb49cb0a895b924ee3f6a3387f5f6e0802b76"
+  integrity sha512-B4KDPbx5E8Vsn/aXilt2iAeofRBJdT8svQRSylTQPw5RkrumXUBKioM1dmWUXcnuHR2zUveJXlMxGmbdmxbJpQ==
   dependencies:
-    "@size-limit/esbuild" "10.0.3"
-    "@size-limit/file" "10.0.3"
-    size-limit "10.0.3"
+    "@size-limit/esbuild" "11.0.0"
+    "@size-limit/file" "11.0.0"
+    size-limit "11.0.0"
 
 "@types/babel__core@^7.1.14":
   version "7.1.16"
@@ -4908,19 +4908,7 @@ sisteransi@^1.0.5:
   resolved "https://registry.yarnpkg.com/sisteransi/-/sisteransi-1.0.5.tgz#134d681297756437cc05ca01370d3a7a571075ed"
   integrity sha512-bLGGlR1QxBcynn2d5YmDX4MGjlZvy2MRBDRNHLJ8VI6l6+9FUiyTFNJ0IveOSP0bcXgVDPRcfGqA0pjaqUpfVg==
 
-size-limit@10.0.3:
-  version "10.0.3"
-  resolved "https://registry.yarnpkg.com/size-limit/-/size-limit-10.0.3.tgz#76296ecbfb083f01cca80cbe8d098cc1aead3989"
-  integrity sha512-5k1k2Kykueq5K/PJQclKx2GS1prz4WNNvm+x5CQ2oWLHwmuFnb1z1g412O9aoOFqafXicJTZgZHXRyIe2GZQfA==
-  dependencies:
-    bytes-iec "^3.1.1"
-    chokidar "^3.5.3"
-    globby "^14.0.0"
-    lilconfig "^2.1.0"
-    nanospinner "^1.1.0"
-    picocolors "^1.0.0"
-
-size-limit@^11.0.0:
+size-limit@11.0.0, size-limit@^11.0.0:
   version "11.0.0"
   resolved "https://registry.yarnpkg.com/size-limit/-/size-limit-11.0.0.tgz#0a7c5245cc792d7e520663399b397538f609b061"
   integrity sha512-6+i4rE1GRzx/vRpuitRYQiZJNTXJjde+4P2NPg8AK7pURrE1+hA3mGstzvT8vQ8DuYFnvp9fh4CHM7Heq3EKXA==
