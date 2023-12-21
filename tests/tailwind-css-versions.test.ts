@@ -53,4 +53,5 @@ test('supports Tailwind CSS v3.4 features', () => {
     )
     expect(twMerge('appearance-none appearance-auto')).toBe('appearance-auto')
     expect(twMerge('float-start float-end clear-start clear-end')).toBe('float-end clear-end')
+    expect(twMerge('*:p-10 *:p-20 hover:*:p-10 hover:*:p-20')).toBe('*:p-20 hover:*:p-20')
 })
