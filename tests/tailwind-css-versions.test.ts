@@ -34,3 +34,7 @@ test('supports Tailwind CSS v3.3 features', () => {
     expect(twMerge('content-normal content-center content-stretch')).toBe('content-stretch')
     expect(twMerge('whitespace-nowrap whitespace-break-spaces')).toBe('whitespace-break-spaces')
 })
+
+test('supports Tailwind CSS v3.4 features', () => {
+    expect(twMerge('h-svh h-dvh w-svw w-dvw')).toBe('h-dvh w-dvw')
+})

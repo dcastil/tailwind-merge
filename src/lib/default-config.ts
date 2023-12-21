@@ -581,7 +581,21 @@ export function getDefaultConfig() {
              * Width
              * @see https://tailwindcss.com/docs/width
              */
-            w: [{ w: ['auto', 'min', 'max', 'fit', isArbitraryValue, spacing] }],
+            w: [
+                {
+                    w: [
+                        'auto',
+                        'min',
+                        'max',
+                        'fit',
+                        'svw',
+                        'lvw',
+                        'dvw',
+                        isArbitraryValue,
+                        spacing,
+                    ],
+                },
+            ],
             /**
              * Min-Width
              * @see https://tailwindcss.com/docs/min-width
@@ -611,17 +625,35 @@ export function getDefaultConfig() {
              * Height
              * @see https://tailwindcss.com/docs/height
              */
-            h: [{ h: [isArbitraryValue, spacing, 'auto', 'min', 'max', 'fit'] }],
+            h: [
+                {
+                    h: [
+                        isArbitraryValue,
+                        spacing,
+                        'auto',
+                        'min',
+                        'max',
+                        'fit',
+                        'svh',
+                        'lvh',
+                        'dvh',
+                    ],
+                },
+            ],
             /**
              * Min-Height
              * @see https://tailwindcss.com/docs/min-height
              */
-            'min-h': [{ 'min-h': ['min', 'max', 'fit', isLength, isArbitraryValue] }],
+            'min-h': [
+                { 'min-h': ['min', 'max', 'fit', 'svh', 'lvh', 'dvh', isLength, isArbitraryValue] },
+            ],
             /**
              * Max-Height
              * @see https://tailwindcss.com/docs/max-height
              */
-            'max-h': [{ 'max-h': [isArbitraryValue, spacing, 'min', 'max', 'fit'] }],
+            'max-h': [
+                { 'max-h': [isArbitraryValue, spacing, 'min', 'max', 'fit', 'svh', 'lvh', 'dvh'] },
+            ],
             // Typography
             /**
              * Font Size
