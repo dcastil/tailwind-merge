@@ -43,4 +43,5 @@ test('supports Tailwind CSS v3.4 features', () => {
         ),
     ).toBe('has-[[data-potato]]:p-2 group-has-[:checked]:flex')
     expect(twMerge('text-wrap text-pretty')).toBe('text-pretty')
+    expect(twMerge('w-5 h-3 size-10 w-12')).toBe('size-10 w-12')
 })

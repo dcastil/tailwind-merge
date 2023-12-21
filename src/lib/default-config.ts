@@ -654,6 +654,11 @@ export function getDefaultConfig() {
             'max-h': [
                 { 'max-h': [isArbitraryValue, spacing, 'min', 'max', 'fit', 'svh', 'lvh', 'dvh'] },
             ],
+            /**
+             * Size
+             * @see https://tailwindcss.com/docs/size
+             */
+            size: [{ size: [isArbitraryValue, spacing, 'auto', 'min', 'max', 'fit'] }],
             // Typography
             /**
              * Font Size
@@ -1764,6 +1769,7 @@ export function getDefaultConfig() {
             m: ['mx', 'my', 'ms', 'me', 'mt', 'mr', 'mb', 'ml'],
             mx: ['mr', 'ml'],
             my: ['mt', 'mb'],
+            size: ['w', 'h'],
             'font-size': ['leading'],
             'fvn-normal': [
                 'fvn-ordinal',

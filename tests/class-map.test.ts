@@ -233,6 +233,7 @@ test('class map has correct class groups at first part', () => {
         sepia: ['sepia'],
         shadow: ['shadow', 'shadow-color'],
         shrink: ['shrink'],
+        size: ['size'],
         skew: ['skew-x', 'skew-y'],
         slashed: ['fvn-slashed-zero'],
         snap: ['snap-align', 'snap-stop', 'snap-strictness', 'snap-type'],
