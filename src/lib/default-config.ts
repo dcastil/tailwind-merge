@@ -1510,7 +1510,7 @@ export function getDefaultConfig() {
              * Appearance
              * @see https://tailwindcss.com/docs/appearance
              */
-            appearance: ['appearance-none'],
+            appearance: [{ appearance: ['none', 'auto'] }],
             /**
              * Cursor
              * @see https://tailwindcss.com/docs/cursor
