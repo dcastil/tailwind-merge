@@ -37,4 +37,5 @@ test('supports Tailwind CSS v3.3 features', () => {
 
 test('supports Tailwind CSS v3.4 features', () => {
     expect(twMerge('h-svh h-dvh w-svw w-dvw')).toBe('h-dvh w-dvw')
+    expect(twMerge('text-wrap text-pretty')).toBe('text-pretty')
 })

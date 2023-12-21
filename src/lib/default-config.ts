@@ -844,6 +844,11 @@ export function getDefaultConfig() {
              */
             'text-overflow': ['truncate', 'text-ellipsis', 'text-clip'],
             /**
+             * Text Wrap
+             * @see https://tailwindcss.com/docs/text-wrap
+             */
+            'text-wrap': [{ text: ['wrap', 'nowrap', 'balance', 'pretty'] }],
+            /**
              * Text Indent
              * @see https://tailwindcss.com/docs/text-indent
              */

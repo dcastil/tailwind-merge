@@ -384,6 +384,7 @@ export type DefaultClassGroupIds =
     | 'text-opacity'
     | 'text-overflow'
     | 'text-transform'
+    | 'text-wrap'
     | 'top'
     | 'touch'
     | 'touch-x'
