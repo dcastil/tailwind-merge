@@ -52,4 +52,5 @@ test('supports Tailwind CSS v3.4 features', () => {
         'forced-color-adjust-auto',
     )
     expect(twMerge('appearance-none appearance-auto')).toBe('appearance-auto')
+    expect(twMerge('float-start float-end clear-start clear-end')).toBe('float-end clear-end')
 })

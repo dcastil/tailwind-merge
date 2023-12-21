@@ -193,12 +193,12 @@ export function getDefaultConfig() {
              * Floats
              * @see https://tailwindcss.com/docs/float
              */
-            float: [{ float: ['right', 'left', 'none'] }],
+            float: [{ float: ['right', 'left', 'none', 'start', 'end'] }],
             /**
              * Clear
              * @see https://tailwindcss.com/docs/clear
              */
-            clear: [{ clear: ['left', 'right', 'both', 'none'] }],
+            clear: [{ clear: ['left', 'right', 'both', 'none', 'start', 'end'] }],
             /**
              * Isolation
              * @see https://tailwindcss.com/docs/isolation
