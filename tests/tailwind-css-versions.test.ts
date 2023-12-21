@@ -34,3 +34,24 @@ test('supports Tailwind CSS v3.3 features', () => {
     expect(twMerge('content-normal content-center content-stretch')).toBe('content-stretch')
     expect(twMerge('whitespace-nowrap whitespace-break-spaces')).toBe('whitespace-break-spaces')
 })
+
+test('supports Tailwind CSS v3.4 features', () => {
+    expect(twMerge('h-svh h-dvh w-svw w-dvw')).toBe('h-dvh w-dvw')
+    expect(
+        twMerge(
+            'has-[[data-potato]]:p-1 has-[[data-potato]]:p-2 group-has-[:checked]:grid group-has-[:checked]:flex',
+        ),
+    ).toBe('has-[[data-potato]]:p-2 group-has-[:checked]:flex')
+    expect(twMerge('text-wrap text-pretty')).toBe('text-pretty')
+    expect(twMerge('w-5 h-3 size-10 w-12')).toBe('size-10 w-12')
+    expect(twMerge('grid-cols-2 grid-cols-subgrid grid-rows-5 grid-rows-subgrid')).toBe(
+        'grid-cols-subgrid grid-rows-subgrid',
+    )
+    expect(twMerge('min-w-0 min-w-50 min-w-px max-w-0 max-w-50 max-w-px')).toBe('min-w-px max-w-px')
+    expect(twMerge('forced-color-adjust-none forced-color-adjust-auto')).toBe(
+        'forced-color-adjust-auto',
+    )
+    expect(twMerge('appearance-none appearance-auto')).toBe('appearance-auto')
+    expect(twMerge('float-start float-end clear-start clear-end')).toBe('float-end clear-end')
+    expect(twMerge('*:p-10 *:p-20 hover:*:p-10 hover:*:p-20')).toBe('*:p-20 hover:*:p-20')
+})

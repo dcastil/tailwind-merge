@@ -193,12 +193,12 @@ export function getDefaultConfig() {
              * Floats
              * @see https://tailwindcss.com/docs/float
              */
-            float: [{ float: ['right', 'left', 'none'] }],
+            float: [{ float: ['right', 'left', 'none', 'start', 'end'] }],
             /**
              * Clear
              * @see https://tailwindcss.com/docs/clear
              */
-            clear: [{ clear: ['left', 'right', 'both', 'none'] }],
+            clear: [{ clear: ['left', 'right', 'both', 'none', 'start', 'end'] }],
             /**
              * Isolation
              * @see https://tailwindcss.com/docs/isolation
@@ -581,12 +581,26 @@ export function getDefaultConfig() {
              * Width
              * @see https://tailwindcss.com/docs/width
              */
-            w: [{ w: ['auto', 'min', 'max', 'fit', isArbitraryValue, spacing] }],
+            w: [
+                {
+                    w: [
+                        'auto',
+                        'min',
+                        'max',
+                        'fit',
+                        'svw',
+                        'lvw',
+                        'dvw',
+                        isArbitraryValue,
+                        spacing,
+                    ],
+                },
+            ],
             /**
              * Min-Width
              * @see https://tailwindcss.com/docs/min-width
              */
-            'min-w': [{ 'min-w': ['min', 'max', 'fit', isArbitraryValue, isLength] }],
+            'min-w': [{ 'min-w': [isArbitraryValue, spacing, 'min', 'max', 'fit'] }],
             /**
              * Max-Width
              * @see https://tailwindcss.com/docs/max-width
@@ -594,7 +608,8 @@ export function getDefaultConfig() {
             'max-w': [
                 {
                     'max-w': [
-                        '0',
+                        isArbitraryValue,
+                        spacing,
                         'none',
                         'full',
                         'min',
@@ -603,7 +618,6 @@ export function getDefaultConfig() {
                         'prose',
                         { screen: [isTshirtSize] },
                         isTshirtSize,
-                        isArbitraryValue,
                     ],
                 },
             ],
@@ -611,17 +625,40 @@ export function getDefaultConfig() {
              * Height
              * @see https://tailwindcss.com/docs/height
              */
-            h: [{ h: [isArbitraryValue, spacing, 'auto', 'min', 'max', 'fit'] }],
+            h: [
+                {
+                    h: [
+                        isArbitraryValue,
+                        spacing,
+                        'auto',
+                        'min',
+                        'max',
+                        'fit',
+                        'svh',
+                        'lvh',
+                        'dvh',
+                    ],
+                },
+            ],
             /**
              * Min-Height
              * @see https://tailwindcss.com/docs/min-height
              */
-            'min-h': [{ 'min-h': ['min', 'max', 'fit', isLength, isArbitraryValue] }],
+            'min-h': [
+                { 'min-h': [isArbitraryValue, spacing, 'min', 'max', 'fit', 'svh', 'lvh', 'dvh'] },
+            ],
             /**
              * Max-Height
              * @see https://tailwindcss.com/docs/max-height
              */
-            'max-h': [{ 'max-h': [isArbitraryValue, spacing, 'min', 'max', 'fit'] }],
+            'max-h': [
+                { 'max-h': [isArbitraryValue, spacing, 'min', 'max', 'fit', 'svh', 'lvh', 'dvh'] },
+            ],
+            /**
+             * Size
+             * @see https://tailwindcss.com/docs/size
+             */
+            size: [{ size: [isArbitraryValue, spacing, 'auto', 'min', 'max', 'fit'] }],
             // Typography
             /**
              * Font Size
@@ -811,6 +848,11 @@ export function getDefaultConfig() {
              * @see https://tailwindcss.com/docs/text-overflow
              */
             'text-overflow': ['truncate', 'text-ellipsis', 'text-clip'],
+            /**
+             * Text Wrap
+             * @see https://tailwindcss.com/docs/text-wrap
+             */
+            'text-wrap': [{ text: ['wrap', 'nowrap', 'balance', 'pretty'] }],
             /**
              * Text Indent
              * @see https://tailwindcss.com/docs/text-indent
@@ -1468,7 +1510,7 @@ export function getDefaultConfig() {
              * Appearance
              * @see https://tailwindcss.com/docs/appearance
              */
-            appearance: ['appearance-none'],
+            appearance: [{ appearance: ['none', 'auto'] }],
             /**
              * Cursor
              * @see https://tailwindcss.com/docs/cursor
@@ -1712,6 +1754,11 @@ export function getDefaultConfig() {
              * @see https://tailwindcss.com/docs/screen-readers
              */
             sr: ['sr-only', 'not-sr-only'],
+            /**
+             * Forced Color Adjust
+             * @see https://tailwindcss.com/docs/forced-color-adjust
+             */
+            'forced-color-adjust': [{ 'forced-color-adjust': ['auto', 'none'] }],
         },
         conflictingClassGroups: {
             overflow: ['overflow-x', 'overflow-y'],
@@ -1727,6 +1774,7 @@ export function getDefaultConfig() {
             m: ['mx', 'my', 'ms', 'me', 'mt', 'mr', 'mb', 'ml'],
             mx: ['mr', 'ml'],
             my: ['mt', 'mb'],
+            size: ['w', 'h'],
             'font-size': ['leading'],
             'fvn-normal': [
                 'fvn-ordinal',
