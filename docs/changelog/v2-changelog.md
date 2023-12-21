@@ -1,5 +1,15 @@
 # Changelog for v2 releases
 
+## v2.2.0
+
+### New Features
+
+-   Add support for Tailwind CSS v3.4 by [@dcastil](https://github.com/dcastil) in [#360](https://github.com/dcastil/tailwind-merge/pull/360)
+
+**Full Changelog**: [`v2.1.0...v2.2.0`](https://github.com/dcastil/tailwind-merge/compare/v2.1.0...v2.2.0)
+
+Thanks to [@brandonmcconnell](https://github.com/brandonmcconnell), [@manavm1990](https://github.com/manavm1990), [@ErwinAI](https://github.com/ErwinAI) and [@langy](https://github.com/langy) for sponsoring tailwind-merge! ❤️
+
 ## v2.1.0
 
 ### New Features
