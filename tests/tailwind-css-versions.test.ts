@@ -37,5 +37,10 @@ test('supports Tailwind CSS v3.3 features', () => {
 
 test('supports Tailwind CSS v3.4 features', () => {
     expect(twMerge('h-svh h-dvh w-svw w-dvw')).toBe('h-dvh w-dvw')
+    expect(
+        twMerge(
+            'has-[[data-potato]]:p-1 has-[[data-potato]]:p-2 group-has-[:checked]:grid group-has-[:checked]:flex',
+        ),
+    ).toBe('has-[[data-potato]]:p-2 group-has-[:checked]:flex')
     expect(twMerge('text-wrap text-pretty')).toBe('text-pretty')
 })
