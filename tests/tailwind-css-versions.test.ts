@@ -44,4 +44,7 @@ test('supports Tailwind CSS v3.4 features', () => {
     ).toBe('has-[[data-potato]]:p-2 group-has-[:checked]:flex')
     expect(twMerge('text-wrap text-pretty')).toBe('text-pretty')
     expect(twMerge('w-5 h-3 size-10 w-12')).toBe('size-10 w-12')
+    expect(twMerge('grid-cols-2 grid-cols-subgrid grid-rows-5 grid-rows-subgrid')).toBe(
+        'grid-cols-subgrid grid-rows-subgrid',
+    )
 })
