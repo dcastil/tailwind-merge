@@ -600,7 +600,7 @@ export function getDefaultConfig() {
              * Min-Width
              * @see https://tailwindcss.com/docs/min-width
              */
-            'min-w': [{ 'min-w': ['min', 'max', 'fit', isArbitraryValue, isLength] }],
+            'min-w': [{ 'min-w': [isArbitraryValue, spacing, 'min', 'max', 'fit'] }],
             /**
              * Max-Width
              * @see https://tailwindcss.com/docs/max-width
@@ -608,7 +608,8 @@ export function getDefaultConfig() {
             'max-w': [
                 {
                     'max-w': [
-                        '0',
+                        isArbitraryValue,
+                        spacing,
                         'none',
                         'full',
                         'min',
@@ -617,7 +618,6 @@ export function getDefaultConfig() {
                         'prose',
                         { screen: [isTshirtSize] },
                         isTshirtSize,
-                        isArbitraryValue,
                     ],
                 },
             ],
@@ -645,7 +645,7 @@ export function getDefaultConfig() {
              * @see https://tailwindcss.com/docs/min-height
              */
             'min-h': [
-                { 'min-h': ['min', 'max', 'fit', 'svh', 'lvh', 'dvh', isLength, isArbitraryValue] },
+                { 'min-h': [isArbitraryValue, spacing, 'min', 'max', 'fit', 'svh', 'lvh', 'dvh'] },
             ],
             /**
              * Max-Height
