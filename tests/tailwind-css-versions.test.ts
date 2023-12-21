@@ -48,4 +48,7 @@ test('supports Tailwind CSS v3.4 features', () => {
         'grid-cols-subgrid grid-rows-subgrid',
     )
     expect(twMerge('min-w-0 min-w-50 min-w-px max-w-0 max-w-50 max-w-px')).toBe('min-w-px max-w-px')
+    expect(twMerge('forced-color-adjust-none forced-color-adjust-auto')).toBe(
+        'forced-color-adjust-auto',
+    )
 })

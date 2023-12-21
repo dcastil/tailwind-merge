@@ -1754,6 +1754,11 @@ export function getDefaultConfig() {
              * @see https://tailwindcss.com/docs/screen-readers
              */
             sr: ['sr-only', 'not-sr-only'],
+            /**
+             * Forced Color Adjust
+             * @see https://tailwindcss.com/docs/forced-color-adjust
+             */
+            'forced-color-adjust': [{ 'forced-color-adjust': ['auto', 'none'] }],
         },
         conflictingClassGroups: {
             overflow: ['overflow-x', 'overflow-y'],

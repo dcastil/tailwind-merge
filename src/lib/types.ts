@@ -223,6 +223,7 @@ export type DefaultClassGroupIds =
     | 'font-smoothing'
     | 'font-style'
     | 'font-weight'
+    | 'forced-color-adjust'
     | 'fvn-figure'
     | 'fvn-fraction'
     | 'fvn-normal'
