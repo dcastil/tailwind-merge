@@ -26,7 +26,7 @@ jobs:
                       yarn-node-18-lock-
             - run: yarn install --frozen-lockfile
             - run: yarn build
-            - uses: actions/upload-artifact@v3
+            - uses: actions/upload-artifact@v4
               with:
                   name: build-output
                   path: dist
