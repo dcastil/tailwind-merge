@@ -1,5 +1,15 @@
 # Changelog for v2 releases
 
+## v2.2.1
+
+### Bug Fixes
+
+-   Fix stroke-color being incorrectly detected as stroke-width by [@dcastil](https://github.com/dcastil) in [#371](https://github.com/dcastil/tailwind-merge/pull/371)
+
+**Full Changelog**: [`v2.2.0...v2.2.1`](https://github.com/dcastil/tailwind-merge/compare/v2.2.0...v2.2.1)
+
+Thanks to [@brandonmcconnell](https://github.com/brandonmcconnell), [@manavm1990](https://github.com/manavm1990) and [@langy](https://github.com/langy) for sponsoring tailwind-merge! ❤️
+
 ## v2.2.0
 
 ### New Features
