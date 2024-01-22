@@ -4,6 +4,7 @@ const stringLengths = new Set(['px', 'full', 'screen'])
 const tshirtUnitRegex = /^(\d+(\.\d+)?)?(xs|sm|md|lg|xl)$/
 const lengthUnitRegex =
     /\d+(%|px|r?em|[sdl]?v([hwib]|min|max)|pt|pc|in|cm|mm|cap|ch|ex|r?lh|cq(w|h|i|b|min|max))|\b(calc|min|max|clamp)\(.+\)|^0$/
+const colorFunctionRegex = /^(rgba?|hsla?|hwb|(ok)?(lab|lch))\(.+\)$/
 // Shadow always begins with x and y offset separated by underscore
 const shadowRegex = /^-?((\d+)?\.?(\d+)[a-z]+|0)_-?((\d+)?\.?(\d+)[a-z]+|0)/
 const imageRegex =
@@ -84,7 +85,10 @@ function getIsArbitraryValue(
 }
 
 function isLengthOnly(value: string) {
-    return lengthUnitRegex.test(value)
+    // `colorFunctionRegex` check is necessary because color functions can have percentages in them which which would be incorrectly classified as lengths.
+    // For example, `hsl(0 0% 0%)` would be classified as a length without this check.
+    // I could also use lookbehind assertion in `lengthUnitRegex` but that isn't supported widely enough.
+    return lengthUnitRegex.test(value) && !colorFunctionRegex.test(value)
 }
 
 function isNever() {
