@@ -27,9 +27,9 @@ The tailwind-merge config is an object with a few keys.
 const tailwindMergeConfig = {
     // ↓ Set how many values should be stored in cache.
     cacheSize: 500,
-    // ↓ Optional prefix from TaiLwind config
+    // ↓ Optional prefix from Tailwind config
     prefix: 'tw-',
-    // ↓ Optional separator from TaiLwind config
+    // ↓ Optional separator from Tailwind config
     separator: '_',
     theme: {
         // Theme scales are defined here
