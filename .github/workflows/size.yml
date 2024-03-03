@@ -11,17 +11,17 @@ jobs:
             CI_JOB_NUMBER: 1
         steps:
             - uses: actions/checkout@v4
-            - name: Use Node.js 18
+            - name: Use Node.js 20
               uses: actions/setup-node@v4
               with:
-                  node-version: 18.17.1
+                  node-version: 20.11.1
             - name: Use node_modules cache
               uses: actions/cache@v3
               with:
                   path: node_modules
-                  key: yarn-node-18-lock-${{ hashFiles('yarn.lock') }}
+                  key: yarn-node-20-lock-${{ hashFiles('yarn.lock') }}
                   restore-keys: |
-                      yarn-node-18-lock-
+                      yarn-node-20-lock-
             - run: yarn install --frozen-lockfile
             - uses: andresz1/size-limit-action@v1
               with:
