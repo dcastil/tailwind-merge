@@ -166,6 +166,7 @@ test('isArbitraryNumber', () => {
 
 test('isArbitraryShadow', () => {
     expect(isArbitraryShadow('[0_35px_60px_-15px_rgba(0,0,0,0.3)]')).toBe(true)
+    expect(isArbitraryShadow('[inset_0_1px_0,inset_0_-1px_0]')).toBe(true)
     expect(isArbitraryShadow('[0_0_#00f]')).toBe(true)
     expect(isArbitraryShadow('[.5rem_0_rgba(5,5,5,5)]')).toBe(true)
     expect(isArbitraryShadow('[-.5rem_0_#123456]')).toBe(true)
