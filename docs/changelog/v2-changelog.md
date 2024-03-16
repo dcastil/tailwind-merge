@@ -1,5 +1,19 @@
 # Changelog for v2 releases
 
+## v2.2.2
+
+### Bug Fixes
+
+-   Fix arbitrary shadow with inset not recognized by [@dcastil](https://github.com/dcastil) in [#392](https://github.com/dcastil/tailwind-merge/pull/392)
+
+### Documentation
+
+-   Fix minor typos in `configuration.md` by [@stephan281094](https://github.com/stephan281094) in [#372](https://github.com/dcastil/tailwind-merge/pull/372)
+
+**Full Changelog**: [`v2.2.1...v2.2.2`](https://github.com/dcastil/tailwind-merge/compare/v2.2.1...v2.2.2)
+
+Thanks to [@brandonmcconnell](https://github.com/brandonmcconnell), [@manavm1990](https://github.com/manavm1990), [@langy](https://github.com/langy), a private sponsor and [@jamesreaco](https://github.com/jamesreaco) for sponsoring tailwind-merge! ❤️
+
 ## v2.2.1
 
 ### Bug Fixes
