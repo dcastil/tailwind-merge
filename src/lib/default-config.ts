@@ -80,7 +80,6 @@ export function getDefaultConfig() {
             'saturation',
             'color',
             'luminosity',
-            'plus-lighter',
         ] as const
     const getAlign = () =>
         ['start', 'end', 'center', 'between', 'around', 'evenly', 'stretch'] as const
@@ -1255,7 +1254,7 @@ export function getDefaultConfig() {
              * Mix Blend Mode
              * @see https://tailwindcss.com/docs/mix-blend-mode
              */
-            'mix-blend': [{ 'mix-blend': getBlendModes() }],
+            'mix-blend': [{ 'mix-blend': [...getBlendModes(), 'plus-lighter', 'plus-darker'] }],
             /**
              * Background Blend Mode
              * @see https://tailwindcss.com/docs/background-blend-mode
