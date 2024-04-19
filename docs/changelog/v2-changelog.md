@@ -1,5 +1,20 @@
 # Changelog for v2 releases
 
+## v2.3.0
+
+### New Features
+
+-   Add support for mix-blend-plus-darker utility by [@dcastil](https://github.com/dcastil) in [#403](https://github.com/dcastil/tailwind-merge/pull/403)
+-   Added support for bigint in ClassNameValue type by [@LarsArtmann](https://github.com/LarsArtmann) in [#402](https://github.com/dcastil/tailwind-merge/pull/402)
+
+### Documentation
+
+-   docs: add tailwind-merge-go to similar packages in docs by [@Oudwins](https://github.com/Oudwins) in [#396](https://github.com/dcastil/tailwind-merge/pull/396)
+
+**Full Changelog**: [`v2.2.2...v2.3.0`](https://github.com/dcastil/tailwind-merge/compare/v2.2.2...v2.3.0)
+
+Thanks to [@brandonmcconnell](https://github.com/brandonmcconnell), [@manavm1990](https://github.com/manavm1990), [@langy](https://github.com/langy) and [@jamesreaco](https://github.com/jamesreaco) for sponsoring tailwind-merge! ❤️
+
 ## v2.2.2
 
 ### Bug Fixes
