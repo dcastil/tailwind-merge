@@ -8,7 +8,7 @@
  * Original code has MIT license: Copyright (c) Luke Edwards <luke.edwards05@gmail.com> (lukeed.com)
  */
 
-export type ClassNameValue = ClassNameArray | string | null | undefined | 0 | false
+export type ClassNameValue = ClassNameArray | string | null | undefined | 0 | 0n | false
 type ClassNameArray = ClassNameValue[]
 
 export function twJoin(...classLists: ClassNameValue[]): string
