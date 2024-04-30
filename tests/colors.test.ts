@@ -6,4 +6,6 @@ test('handles color conflicts properly', () => {
     expect(twMerge('stroke-[hsl(350_80%_0%)] stroke-[10px]')).toBe(
         'stroke-[hsl(350_80%_0%)] stroke-[10px]',
     )
+    expect(twMerge('bg-red-500 bg-black')).toBe('bg-black')
+    expect(twMerge('color-red-500 color-black')).toBe('color-black')
 })
