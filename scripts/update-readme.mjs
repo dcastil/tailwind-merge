@@ -6,6 +6,8 @@ import 'zx/globals'
 
 import packageJson from '../package.json' assert { type: 'json' }
 
+$.verbose = true
+
 updateReadme()
 
 async function updateReadme() {
