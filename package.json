@@ -86,6 +86,7 @@
         "rollup-plugin-dts": "^6.1.0",
         "size-limit": "^11.1.2",
         "ts-jest": "^29.1.2",
+        "tslib": "^2.6.2",
         "typescript": "^5.4.3",
         "zx": "^7.2.3"
     },
