@@ -18,6 +18,7 @@
 -   [gehrisandro/tailwind-merge-php](https://packagist.org/packages/gehrisandro/tailwind-merge-php) (PHP)
 -   [tailwind-merge-laravel](https://packagist.org/packages/gehrisandro/tailwind-merge-laravel) (Laravel, PHP)
 -   [tailwind-merge-go](https://github.com/Oudwins/tailwind-merge-go) (Golang)
+-   [tailwind-merge-dotnet](https://github.com/desmondinho/tailwind-merge-dotnet) (C#)
 
 ---
 
