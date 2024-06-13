@@ -49,7 +49,7 @@ Note that by using the `extend` object we're only adding our custom classes to t
 
 I don't recommend using Tailwind's `@apply` directive for classes that might get processed with tailwind-merge.
 
-tailwind-merge would need to be configured so that it knows about which classes `.btn-primary` is in conflict with. This means: If someone adds another Tailwind class to the `@apply` directive, the tailwind-merge config would need to get modified accordignly, keeping it in sync with the written CSS. This easy-to-miss dependency is fragile and can lead to bugs with incorrect merging behavior.
+tailwind-merge would need to be configured so that it knows about which classes `.btn-primary` is in conflict with. This means: If someone adds another Tailwind class to the `@apply` directive, the tailwind-merge config would need to get modified accordingly, keeping it in sync with the written CSS. This easy-to-miss dependency is fragile and can lead to bugs with incorrect merging behavior.
 
 Instead of creating custom CSS classes, I recommend keeping the collection of Tailwind classes in a string variable in JavaScript and access it whenever you want to apply those styles. This way you can reuse the collection of styles but don't need to touch the tailwind-merge config.
 
