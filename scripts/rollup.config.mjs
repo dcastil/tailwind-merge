@@ -113,7 +113,6 @@ function getOutputConfig({ file, format, targets }) {
                 ],
                 plugins: [
                     'babel-plugin-annotate-pure-calls',
-                    ['@babel/plugin-transform-runtime', { useESModules: format === 'esm' }],
                     ['babel-plugin-polyfill-regenerator', { method: 'usage-pure' }],
                 ],
             }),
