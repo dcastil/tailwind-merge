@@ -20,7 +20,6 @@ jobs:
                   key: yarn-node-20-lock-${{ hashFiles('yarn.lock') }}
                   restore-keys: |
                       yarn-node-20-lock-
-            - run: yarn install --frozen-lockfile
             - name: Use node_modules cache for metrics-report-action
               uses: actions/cache@v4
               with:
