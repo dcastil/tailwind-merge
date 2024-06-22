@@ -12,6 +12,8 @@ run()
 async function run() {
     const pullRequest = context.payload.pull_request
 
+    console.log('📟 - run - pullRequest:', pullRequest)
+
     if (!pullRequest) {
         throw Error('This action can only be run in a pull request')
     }
@@ -26,7 +28,12 @@ async function run() {
     const baseBundleSizes = await getPackageSize({ shouldOmitFailures: true })
     logBundleSizes(baseBundleSizes)
 
-    await setComment('Hello, world!')
+    const commentBody = getBodyText([
+        ['# Metrics report'],
+        [`on commit ${pullRequest} at ${new Date().toLocaleString('de-DE')}`],
+    ])
+
+    await setComment(commentBody)
 }
 
 /**
@@ -74,4 +81,11 @@ function getSizeInKb(size) {
             maximumFractionDigits: 2,
         })
         .padStart(14)
+}
+
+/**
+ * @param {string[][]} paragraphs
+ */
+function getBodyText(paragraphs) {
+    return paragraphs.map((lines) => lines.join('\n')).join('\n\n')
 }
