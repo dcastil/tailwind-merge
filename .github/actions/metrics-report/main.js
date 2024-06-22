@@ -1,3 +1,5 @@
 // @ts-check
 
-console.log('Hello, world!')
+import * as core from '@actions/core'
+
+core.info('Hello, world!')
