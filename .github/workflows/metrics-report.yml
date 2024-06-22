@@ -26,17 +26,12 @@ jobs:
               with:
                   path: node_modules
                   key: yarn-node-20-lock-${{ hashFiles('yarn.lock') }}
-            - name: Restore node_modules cache for metrics-report-action
-              uses: actions/cache/restore@v4
+            - name: Use node_modules cache for metrics-report-action
+              uses: actions/cache@v4
               with:
                   path: .github/actions/metrics-report/node_modules
                   key: yarn-node-20-metrics-report-action-lock-${{ hashFiles('.github/actions/metrics-report/yarn.lock') }}
                   restore-keys: |
                       yarn-node-20-metrics-report-action-lock-
             - run: yarn --cwd .github/actions/metrics-report install --frozen-lockfile
-            - name: Save node_modules cache for metrics-report-action
-              uses: actions/cache/save@v4
-              with:
-                  path: .github/actions/metrics-report/node_modules
-                  key: yarn-node-20-metrics-report-action-lock-${{ hashFiles('.github/actions/metrics-report/yarn.lock') }}
             - uses: ./.github/actions/metrics-report
