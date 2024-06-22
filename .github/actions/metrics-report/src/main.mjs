@@ -12,8 +12,6 @@ run()
 async function run() {
     const pullRequest = context.payload.pull_request
 
-    console.log('📟 - run - pullRequest:', pullRequest)
-
     if (!pullRequest) {
         throw Error('This action can only be run in a pull request')
     }
