@@ -87,7 +87,10 @@ export default defineConfig([
 
 /**
  *
- * @param {{ file: string; format: 'esm' | 'cjs'; targets: string}} param0
+ * @param {object} param0
+ * @param {string} param0.file
+ * @param {'esm' | 'cjs'} param0.format
+ * @param {string} param0.targets
  * @returns
  */
 function getOutputConfig({ file, format, targets }) {
