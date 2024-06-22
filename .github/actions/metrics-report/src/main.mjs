@@ -29,6 +29,7 @@ async function run() {
     const commentBody = getBodyText([
         ['# Metrics report'],
         [`on commit ${pullRequest.head?.sha} at \`${new Date().toISOString()}\``],
+        getBundleSizeTable(localBundleSizes, baseBundleSizes),
     ])
 
     await setComment(commentBody)
@@ -86,4 +87,95 @@ function getSizeInKb(size) {
  */
 function getBodyText(paragraphs) {
     return paragraphs.map((lines) => lines.join('\n')).join('\n\n')
+}
+
+/**
+ * @param {import('./get-package-size.mjs').OverallBundleSize[]} localBundleSizes
+ * @param {import('./get-package-size.mjs').OverallBundleSize[]} baseBundleSizes
+ */
+function getBundleSizeTable(localBundleSizes, baseBundleSizes) {
+    const baseBundleSizesMap = new Map(
+        baseBundleSizes.map((bundleSize) => [bundleSize.bundleSize.label, bundleSize]),
+    )
+
+    return [
+        '| Bundle | Size | Minified | Minified and Brotli compressed |',
+        '| --- | --- | --- | --- |',
+        ...localBundleSizes.flatMap(({ bundleSize, singleExportSizes }) => {
+            const baseBundleSize = baseBundleSizesMap.get(bundleSize.label)
+
+            const mainBundleRow = getBundleSizeRow(bundleSize, baseBundleSize?.bundleSize)
+
+            if (singleExportSizes) {
+                const baseBundleSizeMap = new Map(
+                    baseBundleSize?.singleExportSizes?.map((bundleSize) => [
+                        bundleSize.label,
+                        bundleSize,
+                    ]),
+                )
+
+                return [
+                    mainBundleRow,
+                    ...singleExportSizes.map((singleExportSize) => {
+                        const baseBundleSize = baseBundleSizeMap.get(singleExportSize.label)
+                        return getBundleSizeRow(singleExportSize, baseBundleSize, true)
+                    }),
+                ]
+            }
+
+            return mainBundleRow
+        }),
+    ]
+}
+
+/**
+ *
+ * @param {import('./get-package-size.mjs').BundleSize} bundleSize
+ * @param {import('./get-package-size.mjs').BundleSize=} baseBundleSize
+ * @param {boolean=} isIndented
+ */
+function getBundleSizeRow(bundleSize, baseBundleSize, isIndented) {
+    return [
+        [isIndented ? '→ ' : '', bundleSize.label].join('').padEnd(30),
+        getBundleSizeDifference(bundleSize.size, baseBundleSize?.size),
+        getBundleSizeDifference(bundleSize.sizeMinified, baseBundleSize?.sizeMinified),
+        getBundleSizeDifference(
+            bundleSize.sizeBrotliCompressed,
+            baseBundleSize?.sizeBrotliCompressed,
+        ),
+    ].join(' | ')
+}
+
+/**
+ *
+ * @param {number} size
+ * @param {number=} baseSize
+ */
+function getBundleSizeDifference(size, baseSize) {
+    if (baseSize) {
+        return getSizeInKb(size) + ' ' + getSizeDifference(size, baseSize)
+    }
+
+    return getSizeInKb(size)
+}
+
+/**
+ * @param {number} size
+ * @param {number} baseSize
+ */
+function getSizeDifference(size, baseSize) {
+    const difference = size - baseSize
+    const differencePercent = difference / baseSize
+
+    const percentageString = differencePercent.toLocaleString('en-GB', {
+        style: 'percent',
+        minimumFractionDigits: 1,
+        maximumFractionDigits: 1,
+        signDisplay: 'exceptZero',
+    })
+
+    const isZero = difference === 0
+    const isPositive = difference > 0
+
+    return ['(', percentageString, isZero ? '' : isPositive ? ' ↑' : ' ↓', ')'].join('')
 }
