@@ -1,16 +1,26 @@
 // @ts-check
 
 import core from '@actions/core'
+import { context } from '@actions/github'
 
 import { getPackageSize } from './get-package-size.mjs'
 
 run()
 
 async function run() {
-    core.info('Getting local package sizes')
+    const pullRequest = context.payload.pull_request
 
+    if (!pullRequest) {
+        throw Error('This action can only be run in a pull request')
+    }
+
+    core.info('Getting local package sizes')
     const localBundleSizes = await getPackageSize()
     logBundleSizes(localBundleSizes)
+
+    core.info('Getting PR base package sizes')
+    const baseBundleSizes = await getPackageSize({ branch: pullRequest.base.ref })
+    logBundleSizes(baseBundleSizes)
 }
 
 /**
