@@ -3,7 +3,7 @@ name: Metrics report
 on: [pull_request]
 
 jobs:
-    size:
+    metrics-report:
         runs-on: ubuntu-latest
         permissions:
             pull-requests: write
