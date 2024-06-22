@@ -4,6 +4,7 @@ import core from '@actions/core'
 import { context } from '@actions/github'
 
 import { getPackageSize } from './get-package-size.mjs'
+import { checkoutBranch } from './utils.mjs'
 
 run()
 
@@ -18,8 +19,10 @@ async function run() {
     const localBundleSizes = await getPackageSize()
     logBundleSizes(localBundleSizes)
 
+    await checkoutBranch(pullRequest.head.ref)
+
     core.info('Getting PR base package sizes')
-    const baseBundleSizes = await getPackageSize({ branch: pullRequest.base.ref })
+    const baseBundleSizes = await getPackageSize({ shouldOmitFailures: true })
     logBundleSizes(baseBundleSizes)
 }
 

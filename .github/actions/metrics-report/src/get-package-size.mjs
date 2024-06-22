@@ -42,37 +42,16 @@ const bundleConfigs = [
 
 /**
  * @typedef {object} GetPackageSizeOptions
- * @property {string=} branch
+ * @property {boolean=} shouldOmitFailures
  */
 
 /**
- * @param {GetPackageSizeOptions=} param0
+ * @param {GetPackageSizeOptions=} options
  */
-export async function getPackageSize({ branch } = {}) {
-    if (branch) {
-        await checkoutBranch(branch)
-    }
-
+export async function getPackageSize(options = {}) {
     await buildPackage()
 
-    return getBundleSizes({ shouldOmitFailures: Boolean(branch) })
-}
-
-/**
- * @param {string} branch
- */
-async function checkoutBranch(branch) {
-    try {
-        core.info(`Fetching branch ${branch}`)
-        await exec(`git fetch origin ${branch} --depth=1`)
-    } catch (error) {
-        core.error('git fetch failed', error.message)
-
-        throw error
-    }
-
-    core.info(`Checking out branch ${branch}`)
-    await exec(`git checkout --force ${branch}`)
+    return getBundleSizes(options)
 }
 
 async function buildPackage() {
@@ -84,18 +63,13 @@ async function buildPackage() {
 }
 
 /**
- * @typedef {object} GetBundleSizeOptions
- * @property {boolean=} shouldOmitFailures
- */
-
-/**
  * @typedef {object} OverallBundleSize
  * @property {BundleSize} bundleSize
  * @property {BundleSize[]=} singleExportSizes
  */
 
 /**
- * @param {GetBundleSizeOptions} param0
+ * @param {GetPackageSizeOptions} param0
  * @returns {Promise<OverallBundleSize[]>}
  */
 async function getBundleSizes({ shouldOmitFailures }) {
