@@ -1,0 +1,32 @@
+name: Metrics report
+
+on: [pull_request]
+
+jobs:
+    size:
+        runs-on: ubuntu-latest
+        permissions:
+            pull-requests: write
+        steps:
+            - uses: actions/checkout@v4
+            - name: Use Node.js 20
+              uses: actions/setup-node@v4
+              with:
+                  node-version: 20.11.1
+            - name: Use node_modules cache
+              uses: actions/cache@v4
+              with:
+                  path: node_modules
+                  key: yarn-node-20-lock-${{ hashFiles('yarn.lock') }}
+                  restore-keys: |
+                      yarn-node-20-lock-
+            - run: yarn install --frozen-lockfile
+            - name: Use node_modules cache for metrics-report-action
+              uses: actions/cache@v4
+              with:
+                  path: .github/actions/metrics-report/node_modules
+                  key: yarn-node-20-metrics-report-action-lock-${{ hashFiles('.github/actions/metrics-report/yarn.lock') }}
+                  restore-keys: |
+                      yarn-node-20-metrics-report-action-lock-
+            - run: yarn --cwd .github/actions/metrics-report install --frozen-lockfile
+            - uses: ./.github/actions/metrics-report

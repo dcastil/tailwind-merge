@@ -1,0 +1,11 @@
+{
+    "name": "metrics-report-action",
+    "version": "0.1.0",
+    "private": true,
+    "author": "Dany Castillo",
+    "type": "module",
+    "scripts": {
+        "start": "node main.js"
+    },
+    "dependencies": {}
+}
