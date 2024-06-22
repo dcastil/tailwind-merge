@@ -1,5 +1,6 @@
 // @ts-check
 
+import core from '@actions/core'
 import { context } from '@actions/github'
 
 import { octokit } from './utils.mjs'
@@ -26,6 +27,7 @@ async function findCommentToUpdate() {
         throw new Error('Can only list comments in a pull request')
     }
 
+    core.info('Searching comment to update')
     const iterator = octokit.paginate.iterator(octokit.rest.issues.listComments, {
         owner: context.repo.owner,
         repo: context.repo.repo,
@@ -44,6 +46,14 @@ async function findCommentToUpdate() {
         }
     }
 
+    if (commentToUpdate) {
+        core.info(
+            `Found comment to update with URL ${commentToUpdate.url} and ID ${commentToUpdate.id}`,
+        )
+    } else {
+        core.info('No comment to update found')
+    }
+
     return commentToUpdate
 }
 
@@ -55,12 +65,14 @@ async function createComment(body) {
         throw new Error('Can only create a comment in a pull request')
     }
 
-    await octokit.rest.issues.createComment({
+    const response = await octokit.rest.issues.createComment({
         owner: context.repo.owner,
         repo: context.repo.repo,
         issue_number: context.payload.pull_request.number,
         body: commentIdComment + commentAdditionComment + body,
     })
+
+    core.info(`Created comment with URL ${response.data.url} and ID ${response.data.id}`)
 }
 
 /**
@@ -68,10 +80,12 @@ async function createComment(body) {
  * @param {number} commentId
  */
 async function updateComment(body, commentId) {
-    await octokit.rest.issues.updateComment({
+    const response = await octokit.rest.issues.updateComment({
         owner: context.repo.owner,
         repo: context.repo.repo,
         comment_id: commentId,
         body: commentIdComment + commentAdditionComment + body,
     })
+
+    core.info(`Updated comment with URL ${response.data.url} and ID ${response.data.id}`)
 }
