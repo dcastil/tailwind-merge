@@ -47,9 +47,7 @@ async function findCommentToUpdate() {
     }
 
     if (commentToUpdate) {
-        core.info(
-            `Found comment to update with URL ${commentToUpdate.url} and ID ${commentToUpdate.id}`,
-        )
+        core.info(`Found comment to update with URL ${commentToUpdate.url}`)
     } else {
         core.info('No comment to update found')
     }
@@ -72,7 +70,7 @@ async function createComment(body) {
         body: commentIdComment + commentAdditionComment + body,
     })
 
-    core.info(`Created comment with URL ${response.data.url} and ID ${response.data.id}`)
+    core.info(`Created comment with URL ${response.data.url}`)
 }
 
 /**
@@ -87,5 +85,5 @@ async function updateComment(body, commentId) {
         body: commentIdComment + commentAdditionComment + body,
     })
 
-    core.info(`Updated comment with URL ${response.data.url} and ID ${response.data.id}`)
+    core.info(`Updated comment with URL ${response.data.url}`)
 }

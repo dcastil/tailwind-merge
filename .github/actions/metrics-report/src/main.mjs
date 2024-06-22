@@ -30,7 +30,7 @@ async function run() {
 
     const commentBody = getBodyText([
         ['# Metrics report'],
-        [`on commit ${pullRequest} at ${new Date().toLocaleString('de-DE')}`],
+        [`on commit ${pullRequest.head?.sha} at \`${new Date().toISOString()}\``],
     ])
 
     await setComment(commentBody)
