@@ -27,7 +27,7 @@ async function run() {
     logBundleSizes(baseBundleSizes)
 
     const commentBody = getBodyText([
-        ['# Metrics report'],
+        ['### Metrics report'],
         [`on commit ${pullRequest.head?.sha} at \`${new Date().toISOString()}\``],
         getBundleSizeTable(localBundleSizes, baseBundleSizes),
     ])
