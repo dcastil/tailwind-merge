@@ -176,5 +176,5 @@ function getSizeDifference(size, baseSize) {
         signDisplay: 'exceptZero',
     })
 
-    return ['(', percentageString, isZero ? '' : isPositive ? ' ↑' : ' ↓', ')'].join('')
+    return percentageString + (isZero ? '' : isPositive ? ' 🔴' : ' 🟢')
 }
