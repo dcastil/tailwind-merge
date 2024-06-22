@@ -20,7 +20,7 @@ async function run() {
     const localBundleSizes = await getPackageSize()
     logBundleSizes(localBundleSizes)
 
-    await checkoutBranch(pullRequest.head.ref)
+    await checkoutBranch(pullRequest.base.ref)
 
     core.info('Getting PR base package sizes')
     const baseBundleSizes = await getPackageSize({ shouldOmitFailures: true })
