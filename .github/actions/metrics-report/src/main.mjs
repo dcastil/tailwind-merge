@@ -99,8 +99,8 @@ function getBundleSizeTable(localBundleSizes, baseBundleSizes) {
     )
 
     return [
-        '| Bundle | Size | Minified | Minified and Brotli compressed |',
-        '| --- | --- | --- | --- |',
+        '| Export | Size original | Size minified | Size minified and Brotli compressed |',
+        '| --- | :---: | :---: | :---: |',
         ...localBundleSizes.flatMap(({ bundleSize, singleExportSizes }) => {
             const baseBundleSize = baseBundleSizesMap.get(bundleSize.label)
 
@@ -136,7 +136,7 @@ function getBundleSizeTable(localBundleSizes, baseBundleSizes) {
  */
 function getBundleSizeRow(bundleSize, baseBundleSize, isIndented) {
     return [
-        [isIndented ? '→ ' : '', bundleSize.label].join('').padEnd(30),
+        [isIndented ? '→ ' : '', '`', bundleSize.label, '`'].join('').padEnd(30),
         getBundleSizeDifference(bundleSize.size, baseBundleSize?.size),
         getBundleSizeDifference(bundleSize.sizeMinified, baseBundleSize?.sizeMinified),
         getBundleSizeDifference(
@@ -166,16 +166,15 @@ function getBundleSizeDifference(size, baseSize) {
 function getSizeDifference(size, baseSize) {
     const difference = size - baseSize
     const differencePercent = difference / baseSize
+    const isZero = difference === 0
+    const isPositive = difference > 0
 
     const percentageString = differencePercent.toLocaleString('en-GB', {
         style: 'percent',
-        minimumFractionDigits: 1,
+        minimumFractionDigits: isZero ? 0 : 1,
         maximumFractionDigits: 1,
         signDisplay: 'exceptZero',
     })
-
-    const isZero = difference === 0
-    const isPositive = difference > 0
 
     return ['(', percentageString, isZero ? '' : isPositive ? ' ↑' : ' ↓', ')'].join('')
 }
