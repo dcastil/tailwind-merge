@@ -3,4 +3,4 @@ author: 'Dany Castillo'
 description: 'Posts a comment with a report about changes in important metrics related to tailwind-merge'
 runs:
     using: 'node20'
-    main: 'main.js'
+    main: 'src/main.mjs'
