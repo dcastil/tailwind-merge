@@ -5,11 +5,15 @@ import { fileURLToPath } from 'url'
 
 import core from '@actions/core'
 import { exec } from '@actions/exec'
+import { getOctokit } from '@actions/github'
 
 const currentDirPath = path.dirname(fileURLToPath(import.meta.url))
 
 export const actionRootPath = path.resolve(currentDirPath, '..')
 export const repoRootPath = path.resolve(currentDirPath, '../../../..')
+
+const githubToken = core.getInput('github_token')
+export const octokit = getOctokit(githubToken)
 
 /**
  * @param {string} branch

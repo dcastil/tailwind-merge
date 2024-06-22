@@ -1,6 +1,11 @@
 name: 'metrics-report-action'
 author: 'Dany Castillo'
 description: 'Posts a comment with a report about changes in important metrics related to tailwind-merge'
+inputs:
+    github_token:
+        description: 'Github token of the repository (automatically created by Github)'
+        default: '${{ github.token }}'
+        required: false
 runs:
     using: 'node20'
     main: 'src/main.mjs'

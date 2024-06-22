@@ -4,6 +4,7 @@ import core from '@actions/core'
 import { context } from '@actions/github'
 
 import { getPackageSize } from './get-package-size.mjs'
+import { setComment } from './set-comment.mjs'
 import { checkoutBranch } from './utils.mjs'
 
 run()
@@ -24,6 +25,8 @@ async function run() {
     core.info('Getting PR base package sizes')
     const baseBundleSizes = await getPackageSize({ shouldOmitFailures: true })
     logBundleSizes(baseBundleSizes)
+
+    await setComment('Hello, world!')
 }
 
 /**
