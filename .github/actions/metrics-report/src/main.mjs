@@ -141,7 +141,7 @@ function getBundleSizeTable(localBundleSizes, baseBundleSizes) {
 function getBundleSizeRow(bundleSize, baseBundleSize, isIndented) {
     return [
         nonBreaking(
-            [isIndented ? '› ' : '', '<code>', bundleSize.label, '</code>'].join(''),
+            [isIndented ? ' › ' : '', '<code>', bundleSize.label, '</code>'].join(''),
         ).padEnd(30),
         getBundleSizeDifference(bundleSize.size, baseBundleSize?.size),
         getBundleSizeDifference(bundleSize.sizeMinified, baseBundleSize?.sizeMinified),
