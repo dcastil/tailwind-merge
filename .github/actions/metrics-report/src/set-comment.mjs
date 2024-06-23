@@ -3,7 +3,7 @@
 import core from '@actions/core'
 import { context } from '@actions/github'
 
-import { octokit } from './utils.mjs'
+import { octokit } from './utils/github.mjs'
 
 const commentIdComment = '<!-- comment-id: metrics-report-action report -->'
 const commentAdditionComment =

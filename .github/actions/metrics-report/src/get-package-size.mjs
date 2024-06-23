@@ -10,7 +10,7 @@ import { exec } from '@actions/exec'
 import { transform } from 'esbuild'
 import { rollup } from 'rollup'
 
-import { actionRootPath, repoRootPath } from './utils.mjs'
+import { actionRootPath, repoRootPath } from './utils/path.mjs'
 
 /**
  * @typedef {object} BundleConfiguration
