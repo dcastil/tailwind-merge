@@ -59,9 +59,9 @@ function logBundleSize(bundleSize, isIndented) {
         [
             [isIndented ? '    ' : '', bundleSize.label].join('').padEnd(30),
             [
-                getSizeInKb(bundleSize.size),
-                `${getSizeInKb(bundleSize.sizeMinified)} minified`,
-                `${getSizeInKb(bundleSize.sizeBrotliCompressed)} brotli compressed`,
+                getSizeInKb(bundleSize.size).padStart(14),
+                `${getSizeInKb(bundleSize.sizeMinified).padStart(14)} minified`,
+                `${getSizeInKb(bundleSize.sizeBrotliCompressed).padStart(14)} brotli compressed`,
             ].join(' '),
         ].join(''),
     )
@@ -71,15 +71,13 @@ function logBundleSize(bundleSize, isIndented) {
  * @param {number} size
  */
 function getSizeInKb(size) {
-    return (size / 1024)
-        .toLocaleString('en-GB', {
-            style: 'unit',
-            unit: 'kilobyte',
-            unitDisplay: 'short',
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2,
-        })
-        .padStart(14)
+    return (size / 1024).toLocaleString('en-GB', {
+        style: 'unit',
+        unit: 'kilobyte',
+        unitDisplay: 'short',
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+    })
 }
 
 /**
@@ -142,7 +140,9 @@ function getBundleSizeTable(localBundleSizes, baseBundleSizes) {
  */
 function getBundleSizeRow(bundleSize, baseBundleSize, isIndented) {
     return [
-        [isIndented ? '→ ' : '', '`', bundleSize.label, '`'].join('').padEnd(30),
+        nonBreaking(
+            [isIndented ? '› ' : '', '<code>', bundleSize.label, '</code>'].join(''),
+        ).padEnd(30),
         getBundleSizeDifference(bundleSize.size, baseBundleSize?.size),
         getBundleSizeDifference(bundleSize.sizeMinified, baseBundleSize?.sizeMinified),
         getBundleSizeDifference(
@@ -158,11 +158,13 @@ function getBundleSizeRow(bundleSize, baseBundleSize, isIndented) {
  * @param {number=} baseSize
  */
 function getBundleSizeDifference(size, baseSize) {
+    const sizeString = nonBreaking(getSizeInKb(size))
+
     if (baseSize) {
-        return getSizeInKb(size) + ' ' + getSizeDifference(size, baseSize)
+        return sizeString + ' ' + nonBreaking(getSizeDifference(size, baseSize))
     }
 
-    return getSizeInKb(size)
+    return sizeString
 }
 
 /**
@@ -295,4 +297,11 @@ function getHtmlLinesToIndent(elements) {
 
         return [openingTag, innerHtmlLines, closingTag]
     })
+}
+
+/**
+ * @param {string} text
+ */
+function nonBreaking(text) {
+    return text.replace(/ /g, '&nbsp;')
 }
