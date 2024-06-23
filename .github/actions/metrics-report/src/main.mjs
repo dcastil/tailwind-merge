@@ -4,9 +4,9 @@ import core from '@actions/core'
 import { context } from '@actions/github'
 
 import { getPackageSize } from './get-package-size.mjs'
+import { getSizeInKb, getSizeMetricsReportContent } from './get-size-metrics-report-content.mjs'
 import { setComment } from './set-comment.mjs'
 import { checkoutBranch } from './utils/git.mjs'
-import { getTableHtml } from './utils/html.mjs'
 
 run()
 
@@ -29,8 +29,10 @@ async function run() {
 
     const commentBody = getBodyText([
         ['### Metrics report'],
-        [`on commit ${pullRequest.head?.sha} at \`${new Date().toISOString()}\``],
-        [getBundleSizeTable(entryPointSizesHead, entryPointSizesBase)],
+        [
+            `At head commit ${pullRequest.head?.sha} and base commit ${pullRequest.base?.sha} at \`${new Date().toISOString()}\``,
+        ],
+        [getSizeMetricsReportContent(entryPointSizesHead, entryPointSizesBase)],
     ])
 
     await setComment(commentBody)
@@ -69,131 +71,8 @@ function logBundleSize(bundleSize, isIndented) {
 }
 
 /**
- * @param {number} size
- */
-function getSizeInKb(size) {
-    return (size / 1024).toLocaleString('en-GB', {
-        style: 'unit',
-        unit: 'kilobyte',
-        unitDisplay: 'short',
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2,
-    })
-}
-
-/**
  * @param {string[][]} paragraphs
  */
 function getBodyText(paragraphs) {
     return paragraphs.map((lines) => lines.join('\n')).join('\n\n')
-}
-
-/**
- * @param {import('./get-package-size.mjs').EntryPointSize[]} entryPointSizeHead
- * @param {import('./get-package-size.mjs').EntryPointSize[]} entryPointSizeBase
- */
-function getBundleSizeTable(entryPointSizeHead, entryPointSizeBase) {
-    const baseEntryPointSizesMap = new Map(
-        entryPointSizeBase.map((entryPointSize) => [
-            entryPointSize.bundleSize.label,
-            entryPointSize,
-        ]),
-    )
-
-    return getTableHtml({
-        headers: [
-            'Export',
-            'Size original',
-            'Size minified',
-            'Size minified and Brotli compressed',
-        ],
-        columnAlignments: ['left', 'center', 'center', 'center'],
-        columnWidths: ['225px', '200px', '200px', '200px'],
-        rows: entryPointSizeHead.flatMap(({ bundleSize, singleExportSizes }) => {
-            const baseEntryPointSize = baseEntryPointSizesMap.get(bundleSize.label)
-
-            const mainBundleRow = getBundleSizeRow(bundleSize, baseEntryPointSize?.bundleSize)
-
-            if (singleExportSizes) {
-                const baseBundleSizeMap = new Map(
-                    baseEntryPointSize?.singleExportSizes?.map((bundleSize) => [
-                        bundleSize.label,
-                        bundleSize,
-                    ]),
-                )
-
-                return [
-                    mainBundleRow,
-                    ...singleExportSizes.map((singleExportSize) => {
-                        const baseBundleSize = baseBundleSizeMap.get(singleExportSize.label)
-                        return getBundleSizeRow(singleExportSize, baseBundleSize, true)
-                    }),
-                ]
-            }
-
-            return [mainBundleRow]
-        }),
-    })
-}
-
-/**
- *
- * @param {import('./get-package-size.mjs').BundleSize} bundleSize
- * @param {import('./get-package-size.mjs').BundleSize=} baseBundleSize
- * @param {boolean=} isIndented
- */
-function getBundleSizeRow(bundleSize, baseBundleSize, isIndented) {
-    return [
-        nonBreaking(
-            [isIndented ? ' › ' : '', '<code>', bundleSize.label, '</code>'].join(''),
-        ).padEnd(30),
-        getBundleSizeDifference(bundleSize.size, baseBundleSize?.size),
-        getBundleSizeDifference(bundleSize.sizeMinified, baseBundleSize?.sizeMinified),
-        getBundleSizeDifference(
-            bundleSize.sizeBrotliCompressed,
-            baseBundleSize?.sizeBrotliCompressed,
-        ),
-    ]
-}
-
-/**
- *
- * @param {number} size
- * @param {number=} baseSize
- */
-function getBundleSizeDifference(size, baseSize) {
-    const sizeString = nonBreaking(getSizeInKb(size))
-
-    if (baseSize) {
-        return sizeString + ' ' + nonBreaking(getSizeDifference(size, baseSize))
-    }
-
-    return sizeString
-}
-
-/**
- * @param {number} size
- * @param {number} baseSize
- */
-function getSizeDifference(size, baseSize) {
-    const difference = size - baseSize
-    const differencePercent = difference / baseSize
-    const isZero = difference === 0
-    const isPositive = difference > 0
-
-    const percentageString = differencePercent.toLocaleString('en-GB', {
-        style: 'percent',
-        minimumFractionDigits: isZero ? 0 : 1,
-        maximumFractionDigits: 1,
-        signDisplay: 'exceptZero',
-    })
-
-    return percentageString + (isZero ? '' : isPositive ? ' 🔴' : ' 🟢')
-}
-
-/**
- * @param {string} text
- */
-function nonBreaking(text) {
-    return text.replace(/ /g, '&nbsp;')
 }

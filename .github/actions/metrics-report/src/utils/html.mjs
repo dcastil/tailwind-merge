@@ -124,3 +124,10 @@ function getHtmlLinesToIndent(elements) {
         return [openingTag, innerHtmlLines, closingTag]
     })
 }
+
+/**
+ * @param {string} text
+ */
+export function nonBreaking(text) {
+    return text.replace(/ /g, '&nbsp;')
+}
