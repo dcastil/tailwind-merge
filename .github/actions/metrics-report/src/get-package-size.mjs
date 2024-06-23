@@ -58,7 +58,7 @@ async function getEntryPointSizes({ shouldOmitFailures }) {
                 (error) => {
                     if (shouldOmitFailures) {
                         core.info(
-                            `Failed to get bundle for ${entryPointConfig.entryPointPath}: ${error.message}`,
+                            `Failed to get bundle for ${entryPointConfig.entryPoint}: ${error.message}`,
                         )
                         return
                     }
@@ -72,7 +72,7 @@ async function getEntryPointSizes({ shouldOmitFailures }) {
             }
 
             const [bundleSize, singleExportSizes] = await Promise.all([
-                getBundleSize(entryPointConfig.entryPointPath, bundle),
+                getBundleSize(entryPointConfig.entryPoint, bundle),
                 getSingleExportBundleSizes(
                     entryPointConfig,
                     entryPointIndex,
@@ -96,7 +96,7 @@ async function getEntryPointSizes({ shouldOmitFailures }) {
 
 /**
  * @typedef {object} EntryPointConfiguration
- * @property {string} entryPointPath
+ * @property {string} entryPoint
  * @property {string} bundlePath
  * @property {'esm' | 'cjs'} format
  */
@@ -108,14 +108,14 @@ async function getEntryPointConfigs() {
     const pkg = (await import('../../../../package.json', { assert: { type: 'json' } })).default
 
     return Object.entries(pkg.exports).flatMap(([relativeEntryPointPath, bundleObject]) => {
-        const entryPointPath = path.resolve('tailwind-merge', relativeEntryPointPath)
+        const entryPointPath = path.join('tailwind-merge', relativeEntryPointPath)
 
         /** @type {EntryPointConfiguration[]} */
         const entryPointConfigs = []
 
         if (bundleObject.import) {
             entryPointConfigs.push({
-                entryPointPath,
+                entryPoint: entryPointPath + ' esm',
                 bundlePath: bundleObject.import,
                 format: 'esm',
             })
@@ -123,7 +123,7 @@ async function getEntryPointConfigs() {
 
         if (bundleObject.require) {
             entryPointConfigs.push({
-                entryPointPath,
+                entryPoint: entryPointPath + ' cjs',
                 bundlePath: bundleObject.require,
                 format: 'cjs',
             })
