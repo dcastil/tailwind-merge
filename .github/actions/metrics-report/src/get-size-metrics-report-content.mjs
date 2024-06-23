@@ -43,7 +43,10 @@ export function getSizeMetricsReportContent(entryPointSizesHead, entryPointSizes
  */
 function getEntryPointSizeMetrics(entryPointSizesHead, entryPointSizesBase) {
     const baseEntryPointSizesMap = new Map(
-        entryPointSizesBase.map((bundleSize) => [bundleSize.bundleSize.label, bundleSize]),
+        entryPointSizesBase.map((entryPointSize) => [
+            entryPointSize.bundleSize.label,
+            entryPointSize,
+        ]),
     )
 
     return entryPointSizesHead.map(({ bundleSize, singleExportSizes }) => {
@@ -127,7 +130,7 @@ function getTableHtmlForSizeMetrics(entryPointSizeMetrics) {
                 ]
             }
 
-            return []
+            return [mainBundleRow]
         }),
     })
 }
