@@ -5,8 +5,8 @@ import { context } from '@actions/github'
 
 import { getPackageSize } from './get-package-size.mjs'
 import { setComment } from './set-comment.mjs'
-import { getTableHtml } from './utils/get-table-html.mjs'
 import { checkoutBranch } from './utils/git.mjs'
+import { getTableHtml } from './utils/html.mjs'
 
 run()
 

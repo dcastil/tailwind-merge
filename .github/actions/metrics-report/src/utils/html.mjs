@@ -1,6 +1,19 @@
 // @ts-check
 
 /**
+ * @typedef {object} DetailsData
+ * @property {string} summary
+ * @property {string} content
+ */
+
+/**
+ * @param {DetailsData} param0
+ */
+export function getDetails({ summary, content }) {
+    return [`<details>`, `<summary>${summary}</summary>`, '', content, '', `</details>`].join('\n')
+}
+
+/**
  * @typedef {object} TableData
  * @property {('left' | 'center' | 'right' | undefined)[]=} columnAlignments
  * @property {(string | undefined)[]=} columnWidths
