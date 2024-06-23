@@ -13,14 +13,14 @@ import { rollup } from 'rollup'
 import { actionRootPath, repoRootPath } from './utils/path.mjs'
 
 /**
- * @typedef {object} BundleConfiguration
+ * @typedef {object} EntryPointConfiguration
  * @property {string} path
  * @property {'esm' | 'cjs'} format
  * @property {boolean=} shouldMeasureIndividualExports
  */
 
-/** @type {BundleConfiguration[]} */
-const bundleConfigs = [
+/** @type {EntryPointConfiguration[]} */
+const entryPointConfigs = [
     {
         path: 'dist/bundle-mjs.mjs',
         format: 'esm',
@@ -51,7 +51,7 @@ const bundleConfigs = [
 export async function getPackageSize(options = {}) {
     await buildPackage()
 
-    return getBundleSizes(options)
+    return getEntryPointSizes(options)
 }
 
 async function buildPackage() {
@@ -63,38 +63,47 @@ async function buildPackage() {
 }
 
 /**
- * @typedef {object} OverallBundleSize
+ * @typedef {object} EntryPointSize
  * @property {BundleSize} bundleSize
  * @property {BundleSize[]=} singleExportSizes
  */
 
 /**
  * @param {GetPackageSizeOptions} param0
- * @returns {Promise<OverallBundleSize[]>}
+ * @returns {Promise<EntryPointSize[]>}
  */
-async function getBundleSizes({ shouldOmitFailures }) {
+async function getEntryPointSizes({ shouldOmitFailures }) {
     core.info('Getting bundle sizes')
 
-    const maybeBundleSizes = await Promise.all(
-        bundleConfigs.map(async (bundleConfig, bundleIndex) => {
-            const bundlePath = path.resolve(repoRootPath, bundleConfig.path)
+    const maybeEntryPointSizes = await Promise.all(
+        entryPointConfigs.map(async (entryPointConfig, entryPointIndex) => {
+            const entryPointBundlePath = path.resolve(repoRootPath, entryPointConfig.path)
 
-            const bundle = await getBundle(bundleConfig, bundlePath).catch((error) => {
-                if (shouldOmitFailures) {
-                    core.info(`Failed to get bundle for ${bundleConfig.path}: ${error.message}`)
-                    return
-                }
+            const bundle = await getBundle(entryPointConfig, entryPointBundlePath).catch(
+                (error) => {
+                    if (shouldOmitFailures) {
+                        core.info(
+                            `Failed to get bundle for ${entryPointConfig.path}: ${error.message}`,
+                        )
+                        return
+                    }
 
-                throw error
-            })
+                    throw error
+                },
+            )
 
             if (!bundle) {
                 return
             }
 
             const [bundleSize, singleExportSizes] = await Promise.all([
-                getBundleSize(bundleConfig.path, bundle),
-                getSingleExportBundleSizes(bundleConfig, bundleIndex, bundlePath, bundle),
+                getBundleSize(entryPointConfig.path, bundle),
+                getSingleExportBundleSizes(
+                    entryPointConfig,
+                    entryPointIndex,
+                    entryPointBundlePath,
+                    bundle,
+                ),
             ])
 
             return {
@@ -105,22 +114,22 @@ async function getBundleSizes({ shouldOmitFailures }) {
     )
 
     /** @type {any} */
-    const bundleSizes = maybeBundleSizes.filter((bundleSize) => bundleSize !== undefined)
+    const entryPointSizes = maybeEntryPointSizes.filter((bundleSize) => bundleSize !== undefined)
 
-    return bundleSizes
+    return entryPointSizes
 }
 
 /**
- * @param {BundleConfiguration} bundleConfig
+ * @param {EntryPointConfiguration} entryPointConfig
  * @param {string} entryPoint
  */
-async function getBundle(bundleConfig, entryPoint) {
+async function getBundle(entryPointConfig, entryPoint) {
     const rollupBuild = await rollup({ input: entryPoint })
     let rollupOutput
 
     try {
         rollupOutput = await rollupBuild.generate({
-            format: bundleConfig.format,
+            format: entryPointConfig.format,
         })
     } catch (error) {
         await rollupBuild.close()
@@ -139,20 +148,20 @@ async function getBundle(bundleConfig, entryPoint) {
 }
 
 /**
- * @param {BundleConfiguration} bundleConfig
- * @param {number} bundleIndex
+ * @param {EntryPointConfiguration} entryPointConfig
+ * @param {number} entryPointIndex
  * @param {string} bundlePath
  * @param {import('rollup').OutputChunk} bundle
  */
-async function getSingleExportBundleSizes(bundleConfig, bundleIndex, bundlePath, bundle) {
+async function getSingleExportBundleSizes(entryPointConfig, entryPointIndex, bundlePath, bundle) {
     if (
-        bundleConfig.shouldMeasureIndividualExports &&
-        bundleConfig.format === 'esm' &&
+        entryPointConfig.shouldMeasureIndividualExports &&
+        entryPointConfig.format === 'esm' &&
         bundle.exports.length !== 0
     ) {
         const singleExportBundlesDirPath = path.resolve(
             actionRootPath,
-            `temp/bundle-${bundleIndex}`,
+            `temp/bundle-${entryPointIndex}`,
         )
 
         await fs.mkdir(singleExportBundlesDirPath, { recursive: true })
@@ -165,7 +174,7 @@ async function getSingleExportBundleSizes(bundleConfig, bundleIndex, bundlePath,
                     exportName,
                 )
 
-                const singleExportBundle = await getBundle(bundleConfig, entryPoint)
+                const singleExportBundle = await getBundle(entryPointConfig, entryPoint)
 
                 return getBundleSize(exportName, singleExportBundle)
             }),

@@ -18,31 +18,31 @@ async function run() {
     }
 
     core.info('Getting local package sizes')
-    const localBundleSizes = await getPackageSize()
-    logBundleSizes(localBundleSizes)
+    const entryPointSizesHead = await getPackageSize()
+    logEntryPointSizes(entryPointSizesHead)
 
     await checkoutBranch(pullRequest.base.ref)
 
     core.info('Getting PR base package sizes')
-    const baseBundleSizes = await getPackageSize({ shouldOmitFailures: true })
-    logBundleSizes(baseBundleSizes)
+    const entryPointSizesBase = await getPackageSize({ shouldOmitFailures: true })
+    logEntryPointSizes(entryPointSizesBase)
 
     const commentBody = getBodyText([
         ['### Metrics report'],
         [`on commit ${pullRequest.head?.sha} at \`${new Date().toISOString()}\``],
-        [getBundleSizeTable(localBundleSizes, baseBundleSizes)],
+        [getBundleSizeTable(entryPointSizesHead, entryPointSizesBase)],
     ])
 
     await setComment(commentBody)
 }
 
 /**
- * @param {import('./get-package-size.mjs').OverallBundleSize[]} bundleSizes
+ * @param {import('./get-package-size.mjs').EntryPointSize[]} entryPointSizes
  */
-function logBundleSizes(bundleSizes) {
+function logEntryPointSizes(entryPointSizes) {
     core.info('Package sizes')
 
-    bundleSizes.forEach(({ bundleSize, singleExportSizes }) => {
+    entryPointSizes.forEach(({ bundleSize, singleExportSizes }) => {
         logBundleSize(bundleSize)
 
         singleExportSizes?.forEach((singleExportSize) => {
@@ -89,12 +89,15 @@ function getBodyText(paragraphs) {
 }
 
 /**
- * @param {import('./get-package-size.mjs').OverallBundleSize[]} localBundleSizes
- * @param {import('./get-package-size.mjs').OverallBundleSize[]} baseBundleSizes
+ * @param {import('./get-package-size.mjs').EntryPointSize[]} entryPointSizeHead
+ * @param {import('./get-package-size.mjs').EntryPointSize[]} entryPointSizeBase
  */
-function getBundleSizeTable(localBundleSizes, baseBundleSizes) {
-    const baseBundleSizesMap = new Map(
-        baseBundleSizes.map((bundleSize) => [bundleSize.bundleSize.label, bundleSize]),
+function getBundleSizeTable(entryPointSizeHead, entryPointSizeBase) {
+    const baseEntryPointSizesMap = new Map(
+        entryPointSizeBase.map((entryPointSize) => [
+            entryPointSize.bundleSize.label,
+            entryPointSize,
+        ]),
     )
 
     return getTableHtml({
@@ -106,14 +109,14 @@ function getBundleSizeTable(localBundleSizes, baseBundleSizes) {
         ],
         columnAlignments: ['left', 'center', 'center', 'center'],
         columnWidths: ['225px', '200px', '200px', '200px'],
-        rows: localBundleSizes.flatMap(({ bundleSize, singleExportSizes }) => {
-            const baseBundleSize = baseBundleSizesMap.get(bundleSize.label)
+        rows: entryPointSizeHead.flatMap(({ bundleSize, singleExportSizes }) => {
+            const baseEntryPointSize = baseEntryPointSizesMap.get(bundleSize.label)
 
-            const mainBundleRow = getBundleSizeRow(bundleSize, baseBundleSize?.bundleSize)
+            const mainBundleRow = getBundleSizeRow(bundleSize, baseEntryPointSize?.bundleSize)
 
             if (singleExportSizes) {
                 const baseBundleSizeMap = new Map(
-                    baseBundleSize?.singleExportSizes?.map((bundleSize) => [
+                    baseEntryPointSize?.singleExportSizes?.map((bundleSize) => [
                         bundleSize.label,
                         bundleSize,
                     ]),
