@@ -31,7 +31,6 @@ jobs:
                   name: build-output
                   path: dist
                   if-no-files-found: error
-            - run: yarn size
             - uses: martinbeentjes/npm-get-version-action@v1.3.1
               id: package-version
             - run: yarn version --no-git-tag-version --new-version ${{ steps.package-version.outputs.current-version }}-dev.${{ github.sha }}
