@@ -1218,8 +1218,7 @@ export function getDefaultConfig() {
              * Ring Color
              * @see https://tailwindcss.com/docs/ring-color
              */
-            // TODO: Remove testing class
-            'ring-color': [{ ring: [colors, 'ring-testing-something-this-needs-to-get-removed'] }],
+            'ring-color': [{ ring: [colors] }],
             /**
              * Ring Opacity
              * @see https://tailwindcss.com/docs/ring-opacity
