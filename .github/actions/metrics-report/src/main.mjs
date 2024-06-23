@@ -105,7 +105,7 @@ function getBundleSizeTable(localBundleSizes, baseBundleSizes) {
             'Size minified and Brotli compressed',
         ],
         columnAlignments: ['left', 'center', 'center', 'center'],
-        columnWidths: ['30%', '23.5%', '23.5%', '23.5%'],
+        columnWidths: ['225px', '200px', '200px', '200px'],
         rows: localBundleSizes.flatMap(({ bundleSize, singleExportSizes }) => {
             const baseBundleSize = baseBundleSizesMap.get(bundleSize.label)
 
