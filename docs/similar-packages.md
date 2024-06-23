@@ -1,6 +1,6 @@
 # Similar packages
 
-> **Note**
+> [!Note]
 > If you know of a package that isn't listed here, feel free to submit a PR adding the package to this page.
 
 ## TypeScript/JavaScript

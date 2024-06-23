@@ -192,7 +192,7 @@ const customTwMerge = extendTailwindMerge<'foo' | 'bar' | 'baz'>({
 })
 ```
 
-> **Note**
+> [!Note]
 > The function `extendTailwindMerge` computes a large data structure based on the config passed to it. I recommend to call it only once and store the result in a top-level variable instead of calling it inline within another repeatedly called function.
 
 ### TypeScript types for `extendTailwindMerge`
@@ -269,7 +269,7 @@ const customTwMerge = createTailwindMerge(() => ({
 }))
 ```
 
-> **Note**
+> [!Note]
 > The function `createTailwindMerge` computes a large data structure based on the config passed to it. I recommend to call it only once and store the result in a top-level variable instead of calling it inline within another repeatedly called function.
 
 The callback passed to `createTailwindMerge` will be called when `customTwMerge` is called the first time, so you don't need to worry about the computations in it affecting app startup performance in case you aren't using tailwind-merge at app startup.

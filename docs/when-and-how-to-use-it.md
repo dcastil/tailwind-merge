@@ -2,7 +2,7 @@
 
 Like any other package, tailwind-merge comes with opportunities and trade-offs. This document tries to help you decide whether tailwind-merge is the right tool for your use case based on my own experience and the feedback I got from the community.
 
-> **Note**
+> [!Note]
 > If you're thinking of a major argument that is not covered here, please [let me know](https://github.com/dcastil/tailwind-merge/discussions/new?category=ideas)!
 
 ## Reasons not to use it

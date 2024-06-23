@@ -42,7 +42,7 @@ twMerge('bg-black bg-[color:var(--mystery-var)]') // → 'bg-[color:var(--myster
 twMerge('grid-cols-[1fr,auto] grid-cols-2') // → 'grid-cols-2'
 ```
 
-> **Warning**
+> [!Note]
 > Labels necessary in ambiguous cases
 >
 > When using arbitrary values in ambiguous classes like `text-[calc(var(--rebecca)-1rem)]` tailwind-merge looks at the arbitrary value for clues to determine what type of class it is. In this case, like in most ambiguous classes, it would try to figure out whether `calc(var(--rebecca)-1rem)` is a length (making it a font-size class) or a color (making it a text-color class). For lengths it takes clues into account like the presence of the `calc()` function or a digit followed by a length unit like `1rem`.
@@ -60,7 +60,7 @@ twMerge('[--scroll-offset:56px] lg:[--scroll-offset:44px]')
 twMerge('[padding:1rem] p-8') // → '[padding:1rem] p-8'
 ```
 
-> **Warning**
+> [!Note]
 > tailwind-merge does not resolve conflicts between arbitrary properties and their matching Tailwind classes to keep the bundle size small.
 
 ### Supports arbitrary variants
@@ -74,7 +74,7 @@ twMerge('dark:hover:[&:nth-child(3)]:py-0 hover:dark:[&:nth-child(3)]:py-4')
 twMerge('[&:focus]:ring focus:ring-4') // → '[&:focus]:ring focus:ring-4'
 ```
 
-> **Warning**
+> [!Note]
 > Similarly to arbitrary properties, tailwind-merge does not resolve conflicts between arbitrary variants and their matching predefined modifiers for bundle size reasons.
 
 The order of standard modifiers before and after an arbitrary variant in isolation (all modifiers before are one group, all modifiers after are another group) does not matter for tailwind-merge. However, it does matter whether a standard modifier is before or after an arbitrary variant both for Tailwind CSS and tailwind-merge because the resulting CSS selectors are different.
