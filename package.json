@@ -42,7 +42,6 @@
             "default": "./dist/es5/bundle-mjs.mjs"
         }
     },
-    "module": "./dist/bundle-mjs.mjs",
     "main": "./dist/bundle-cjs.js",
     "types": "./dist/types.d.ts",
     "repository": {
