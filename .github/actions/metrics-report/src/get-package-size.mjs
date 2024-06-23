@@ -13,34 +13,6 @@ import { rollup } from 'rollup'
 import { actionRootPath, repoRootPath } from './utils/path.mjs'
 
 /**
- * @typedef {object} EntryPointConfiguration
- * @property {string} path
- * @property {'esm' | 'cjs'} format
- * @property {boolean=} shouldMeasureIndividualExports
- */
-
-/** @type {EntryPointConfiguration[]} */
-const entryPointConfigs = [
-    {
-        path: 'dist/bundle-mjs.mjs',
-        format: 'esm',
-        shouldMeasureIndividualExports: true,
-    },
-    {
-        path: 'dist/bundle-cjs.js',
-        format: 'cjs',
-    },
-    {
-        path: 'dist/es5/bundle-mjs.mjs',
-        format: 'esm',
-    },
-    {
-        path: 'dist/es5/bundle-cjs.js',
-        format: 'cjs',
-    },
-]
-
-/**
  * @typedef {object} GetPackageSizeOptions
  * @property {boolean=} shouldOmitFailures
  */
@@ -73,17 +45,20 @@ async function buildPackage() {
  * @returns {Promise<EntryPointSize[]>}
  */
 async function getEntryPointSizes({ shouldOmitFailures }) {
+    core.info('Getting entry point configs')
+    const entryPointConfigs = await getEntryPointConfigs()
+
     core.info('Getting bundle sizes')
 
     const maybeEntryPointSizes = await Promise.all(
         entryPointConfigs.map(async (entryPointConfig, entryPointIndex) => {
-            const entryPointBundlePath = path.resolve(repoRootPath, entryPointConfig.path)
+            const entryPointBundlePath = path.resolve(repoRootPath, entryPointConfig.bundlePath)
 
             const bundle = await getBundle(entryPointConfig, entryPointBundlePath).catch(
                 (error) => {
                     if (shouldOmitFailures) {
                         core.info(
-                            `Failed to get bundle for ${entryPointConfig.path}: ${error.message}`,
+                            `Failed to get bundle for ${entryPointConfig.entryPointPath}: ${error.message}`,
                         )
                         return
                     }
@@ -97,7 +72,7 @@ async function getEntryPointSizes({ shouldOmitFailures }) {
             }
 
             const [bundleSize, singleExportSizes] = await Promise.all([
-                getBundleSize(entryPointConfig.path, bundle),
+                getBundleSize(entryPointConfig.entryPointPath, bundle),
                 getSingleExportBundleSizes(
                     entryPointConfig,
                     entryPointIndex,
@@ -117,6 +92,45 @@ async function getEntryPointSizes({ shouldOmitFailures }) {
     const entryPointSizes = maybeEntryPointSizes.filter((bundleSize) => bundleSize !== undefined)
 
     return entryPointSizes
+}
+
+/**
+ * @typedef {object} EntryPointConfiguration
+ * @property {string} entryPointPath
+ * @property {string} bundlePath
+ * @property {'esm' | 'cjs'} format
+ */
+
+/**
+ * @returns {Promise<EntryPointConfiguration[]>}
+ */
+async function getEntryPointConfigs() {
+    const pkg = await import('../../../../package.json', { assert: { type: 'json' } })
+
+    return Object.entries(pkg.exports).flatMap(([relativeEntryPointPath, bundleObject]) => {
+        const entryPointPath = path.resolve('tailwind-merge', relativeEntryPointPath)
+
+        /** @type {EntryPointConfiguration[]} */
+        const entryPointConfigs = []
+
+        if (bundleObject.import) {
+            entryPointConfigs.push({
+                entryPointPath,
+                bundlePath: bundleObject.import,
+                format: 'esm',
+            })
+        }
+
+        if (bundleObject.require) {
+            entryPointConfigs.push({
+                entryPointPath,
+                bundlePath: bundleObject.require,
+                format: 'cjs',
+            })
+        }
+
+        return entryPointConfigs
+    })
 }
 
 /**
@@ -154,11 +168,7 @@ async function getBundle(entryPointConfig, entryPoint) {
  * @param {import('rollup').OutputChunk} bundle
  */
 async function getSingleExportBundleSizes(entryPointConfig, entryPointIndex, bundlePath, bundle) {
-    if (
-        entryPointConfig.shouldMeasureIndividualExports &&
-        entryPointConfig.format === 'esm' &&
-        bundle.exports.length !== 0
-    ) {
+    if (entryPointConfig.format === 'esm' && bundle.exports.length !== 0) {
         const singleExportBundlesDirPath = path.resolve(
             actionRootPath,
             `temp/bundle-${entryPointIndex}`,
