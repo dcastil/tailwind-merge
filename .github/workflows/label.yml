@@ -3,7 +3,7 @@ name: Auto Label New Issues, PRs, and Discussions
 on:
   issues:
     types: [opened]
-  pull_request:
+  pull_request_target:
     types: [opened]
   discussion:
     types: [created]
@@ -21,21 +21,19 @@ jobs:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       REPO_OWNER: ${{ github.repository_owner }}
       REPO_NAME: ${{ github.event.repository.name }}
-
+      
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Add context-v2 label to new issue
-        id: label-issue
         if: github.event_name == 'issues'
         run: |
           ISSUE_NUMBER=${{ github.event.issue.number }}
           gh issue edit "$ISSUE_NUMBER" --add-label "context-v2"
 
       - name: Add context-v2 label to new PR
-        id: label-pr
-        if: github.event_name == 'pull_request'
+        if: github.event_name == 'pull_request_target'
         run: |
           PR_NUMBER=${{ github.event.pull_request.number }}
           gh pr edit "$PR_NUMBER" --add-label "context-v2"
@@ -52,9 +50,8 @@ jobs:
 
       - name: Add context-v2 label to new discussion
         uses: octokit/graphql-action@v2.x
-        id: lable-discussion
         if: github.event_name == 'discussion'
-        env:
+        env: 
           DISCUSSION_ID: ${{ github.event.discussion.node_id }}
           LABEL_ID: ${{ steps.label-data.outputs.label_id }}
         with:
