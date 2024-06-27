@@ -10,4 +10,6 @@ In the event of a security vulnerability in tailwind-merge, a patch release with
 
 Please report vulnerabilities privately via GitHub at https://github.com/dcastil/tailwind-merge/security.
 
+In case it is not possible to report a vulnerability via GitHub, you can send me an email to metro_comical_03@icloud.com. However, I might change or disable this email address at any time depending on how much spam I get through it.
+
 You can expect an answer from me within 24 hours most of the time. However, if I'm travelling and don't have good reception, it could take up to a few days. Usually I set my GitHub status to busy when I expect to be unresponsive for more than a day.
