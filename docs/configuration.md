@@ -42,8 +42,11 @@ const tailwindMergeConfig = {
         // Conflicts between class groups are defined here
     },
     conflictingClassGroupModifiers: {
-        // Conflicts between postfox modifier of a class group and another class group are defined here
+        // Conflicts between postfix modifier of a class group and another class group are defined here
     },
+    ignoredVariants: [
+        // Variants that should be ignored in classes
+    ],
 }
 ```
 
@@ -156,6 +159,12 @@ In the Tailwind config you can modify theme scales. tailwind-merge follows the s
 -   `translate`
 
 If you modified one of these theme scales in your Tailwind config, you can add all your keys right here and tailwind-merge will take care of the rest. If you modified other theme scales, you need to figure out the class group to modify in the [default config](./api-reference.md#getdefaultconfig).
+
+### Ignored variants
+
+Tailwind supports variants that don't modify the selector, which some third-party plugins use to modify utilities.
+If you or one of your Tailwind plugins uses variants like this, you can add them to `ignoredVariants` so
+that tailwind-merge ignores them when merging classes.
 
 ### Extending the tailwind-merge config
 

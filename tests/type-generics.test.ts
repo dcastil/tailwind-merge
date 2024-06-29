@@ -117,6 +117,7 @@ test('mergeConfigs type generics work correctly', () => {
                 hello: ['world'],
                 toOverride: ['groupToOverride-2'],
             },
+            ignoredVariants: [],
         },
         {
             separator: '-',

@@ -1,4 +1,4 @@
-import { createTailwindMerge, twMerge } from '../src'
+import { createTailwindMerge, extendTailwindMerge, twMerge } from '../src'
 
 test('conflicts across prefix modifiers', () => {
     expect(twMerge('hover:block hover:inline')).toBe('hover:inline')
@@ -7,6 +7,18 @@ test('conflicts across prefix modifiers', () => {
         'hover:block focus:hover:inline',
     )
     expect(twMerge('focus-within:inline focus-within:block')).toBe('focus-within:block')
+})
+
+test('ignored variants', () => {
+    const tailwindMerge = extendTailwindMerge<string>({
+        extend: {
+            ignoredVariants: ['custom-variant', (variant) => variant.startsWith('ignore')],
+        },
+    })
+    expect(tailwindMerge('hover:block hover:custom-variant:inline')).toBe(
+        'hover:custom-variant:inline',
+    )
+    expect(tailwindMerge('hover:block hover:ignored:inline')).toBe('hover:ignored:inline')
 })
 
 test('conflicts across postfix modifiers', () => {
@@ -28,6 +40,7 @@ test('conflicts across postfix modifiers', () => {
         conflictingClassGroupModifiers: {
             baz: ['bar'],
         },
+        ignoredVariants: [],
     }))
 
     expect(customTwMerge('foo-1/2 foo-2/3')).toBe('foo-2/3')

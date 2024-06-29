@@ -19,10 +19,6 @@ interface ConfigStatic {
      * @see https://tailwindcss.com/docs/configuration#separator
      */
     separator: string
-    /**
-     * Theme scales used in classGroups.
-     * The keys are the same as in the Tailwind config but the values are sometimes defined more broadly.
-     */
 }
 
 interface ConfigGroups<ClassGroupIds extends string, ThemeGroupIds extends string> {
@@ -57,6 +53,11 @@ interface ConfigGroups<ClassGroupIds extends string, ThemeGroupIds extends strin
     conflictingClassGroupModifiers: NoInfer<
         Partial<Record<ClassGroupIds, readonly ClassGroupIds[]>>
     >
+    /**
+     * Variants that should be ignored in classes.
+     * @example ['no-op', (variant) => variant.startsWith('ignore')]
+     */
+    ignoredVariants: (string | ClassValidator)[]
 }
 
 export interface ConfigExtension<ClassGroupIds extends string, ThemeGroupIds extends string>

@@ -3,14 +3,14 @@ import { GenericConfig } from './types'
 export const IMPORTANT_MODIFIER = '!'
 
 export function createSplitModifiers(config: GenericConfig) {
-    const separator = config.separator
+    const { separator, ignoredVariants } = config
     const isSeparatorSingleCharacter = separator.length === 1
     const firstSeparatorCharacter = separator[0]
     const separatorLength = separator.length
 
     // splitModifiers inspired by https://github.com/tailwindlabs/tailwindcss/blob/v3.2.2/src/util/splitAtTopLevelOnly.js
     return function splitModifiers(className: string) {
-        const modifiers = []
+        const modifiers: string[] = []
 
         let bracketDepth = 0
         let modifierStart = 0
@@ -25,7 +25,13 @@ export function createSplitModifiers(config: GenericConfig) {
                     (isSeparatorSingleCharacter ||
                         className.slice(index, index + separatorLength) === separator)
                 ) {
-                    modifiers.push(className.slice(modifierStart, index))
+                    const modifier = className.slice(modifierStart, index)
+                    if (
+                        !ignoredVariants.some((v) =>
+                            typeof v === 'string' ? v === modifier : v(modifier),
+                        )
+                    )
+                        modifiers.push(modifier)
                     modifierStart = index + separatorLength
                     continue
                 }

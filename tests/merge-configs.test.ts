@@ -24,6 +24,7 @@ test('mergeConfigs has correct behavior', () => {
                     hello: ['world'],
                     toOverride: ['groupToOverride-2'],
                 },
+                ignoredVariants: ['noop-variant'],
             },
             {
                 separator: '-',
@@ -42,6 +43,7 @@ test('mergeConfigs has correct behavior', () => {
                     conflictingClassGroupModifiers: {
                         toOverride: ['overridden-2'],
                     },
+                    ignoredVariants: ['noop-variant2'],
                 },
                 extend: {
                     classGroups: {
@@ -57,6 +59,7 @@ test('mergeConfigs has correct behavior', () => {
                     conflictingClassGroupModifiers: {
                         hello: ['world2'],
                     },
+                    ignoredVariants: ['noop-variant3'],
                 },
             },
         ),
@@ -85,5 +88,6 @@ test('mergeConfigs has correct behavior', () => {
             hello: ['world', 'world2'],
             toOverride: ['overridden-2'],
         },
+        ignoredVariants: ['noop-variant2', 'noop-variant3'],
     })
 })

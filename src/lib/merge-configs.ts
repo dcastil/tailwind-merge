@@ -46,10 +46,13 @@ function overrideProperty<T extends object, K extends keyof T>(
 }
 
 function overrideConfigProperties(
-    baseObject: Partial<Record<string, readonly unknown[]>>,
-    overrideObject: Partial<Record<string, readonly unknown[]>> | undefined,
+    baseObject: Partial<Record<string, readonly unknown[]>> | unknown[],
+    overrideObject: Partial<Record<string, readonly unknown[]>> | unknown[] | undefined,
 ) {
-    if (overrideObject) {
+    if (!overrideObject) return
+    if (Array.isArray(baseObject) && Array.isArray(overrideObject)) {
+        baseObject.splice(0, Infinity, ...overrideObject)
+    } else if (!Array.isArray(baseObject) && !Array.isArray(overrideObject)) {
         for (const key in overrideObject) {
             overrideProperty(baseObject, key, overrideObject[key])
         }
@@ -57,10 +60,13 @@ function overrideConfigProperties(
 }
 
 function mergeConfigProperties(
-    baseObject: Partial<Record<string, readonly unknown[]>>,
-    mergeObject: Partial<Record<string, readonly unknown[]>> | undefined,
+    baseObject: Partial<Record<string, readonly unknown[]>> | unknown[],
+    mergeObject: Partial<Record<string, readonly unknown[]>> | unknown[] | undefined,
 ) {
-    if (mergeObject) {
+    if (!mergeObject) return
+    if (Array.isArray(baseObject) && Array.isArray(mergeObject)) {
+        baseObject.push(...mergeObject)
+    } else if (!Array.isArray(baseObject) && !Array.isArray(mergeObject)) {
         for (const key in mergeObject) {
             const mergeValue = mergeObject[key]
 
