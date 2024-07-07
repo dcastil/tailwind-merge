@@ -1,5 +1,31 @@
 # Changelog for v2 releases
 
+## v2.4.0
+
+### New Features
+
+-   Allow hooking into class parsing logic (experimental) by [@dcastil](https://github.com/dcastil) in [#444](https://github.com/dcastil/tailwind-merge/pull/444)
+    -   There is no info to this in the docs because this is experimental, but there is a new `experimentalParseClassName` property in the config that allows you to customize how tailwind-merge recognizes classes. If you're interested, you can read how to use it in the [inline JSDocs](https://github.com/dcastil/tailwind-merge/pull/444/files#diff-b8b77f5be18cf56dca425b3a5b8e9d2e754dd37fe0e3612b95cd4e9bccda08a5) and subscribe to https://github.com/dcastil/tailwind-merge/issues/385 for upcoming more powerful low-level functionality.
+-   Create security policy by [@dcastil](https://github.com/dcastil) in [#439](https://github.com/dcastil/tailwind-merge/pull/439)
+    -   Added documentation on how to report potential vulnerabilities
+-   Avoid `@babel/runtime` dependency by [@dcastil](https://github.com/dcastil) in [#431](https://github.com/dcastil/tailwind-merge/pull/431)
+    -   Now no dependencies in tailwind-merge anymore. This dependency was only used in the `tailwind-merge/es5` bundle anyway which I don't optimize for.
+
+### Documentation
+
+-   Comment/typo fixes by [@barvian](https://github.com/barvian) in [#443](https://github.com/dcastil/tailwind-merge/pull/443)
+-   Fix typo in doc/recipes.md by [@dsernst](https://github.com/dsernst) in [#428](https://github.com/dcastil/tailwind-merge/pull/428)
+-   docs: add tailwind-merge-dotnet to similar packages by [@desmondinho](https://github.com/desmondinho) in [#415](https://github.com/dcastil/tailwind-merge/pull/415)
+
+### Other
+
+-   Added GitHub Action that adds context-v2 label to every issue, discussion and PR by [@Pritam1211](https://github.com/Pritam1211) in [#434](https://github.com/dcastil/tailwind-merge/pull/434)
+-   Replace size-limit action with own metrics-report action by [@dcastil](https://github.com/dcastil) in [#433](https://github.com/dcastil/tailwind-merge/pull/433)
+
+**Full Changelog**: [`v2.3.0...v2.4.0`](https://github.com/dcastil/tailwind-merge/compare/v2.3.0...v2.4.0)
+
+Thanks to [@brandonmcconnell](https://github.com/brandonmcconnell), [@manavm1990](https://github.com/manavm1990), [@langy](https://github.com/langy), [@jamesreaco](https://github.com/jamesreaco) and [@microsoft](https://github.com/microsoft) for sponsoring tailwind-merge! ❤️
+
 ## v2.3.0
 
 ### New Features
