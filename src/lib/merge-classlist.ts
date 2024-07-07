@@ -27,16 +27,15 @@ export function mergeClassList(classList: string, configUtils: ConfigUtils) {
                     maybePostfixModifierPosition,
                 } = parseClassName(originalClassName)
 
+                let hasPostfixModifier = Boolean(maybePostfixModifierPosition)
                 let classGroupId = getClassGroupId(
-                    maybePostfixModifierPosition
+                    hasPostfixModifier
                         ? baseClassName.substring(0, maybePostfixModifierPosition)
                         : baseClassName,
                 )
 
-                let hasPostfixModifier = Boolean(maybePostfixModifierPosition)
-
                 if (!classGroupId) {
-                    if (!maybePostfixModifierPosition) {
+                    if (!hasPostfixModifier) {
                         return {
                             isTailwindClass: false as const,
                             originalClassName,
