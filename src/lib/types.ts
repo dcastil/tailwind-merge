@@ -19,6 +19,34 @@ interface ConfigStatic {
      * @see https://tailwindcss.com/docs/configuration#separator
      */
     separator: string
+    /**
+     * Allows to customize parsing of individual class names.
+     *
+     * This is an experimental feature and may introduce breaking changes in any minor version update.
+     */
+    experimentalParseClassName?(param: ExperimentalParseClassNameParam): ExperimentalParsedClassName
+}
+
+/**
+ * Type of param passed to experimentalParseClassName function.
+ *
+ * This is an experimental feature and may introduce breaking changes in any minor version update.
+ */
+export interface ExperimentalParseClassNameParam {
+    className: string
+    parseClassName(className: string): ExperimentalParsedClassName
+}
+
+/**
+ * Type of the result returned by experimentalParseClassName function.
+ *
+ * This is an experimental feature and may introduce breaking changes in any minor version update.
+ */
+export interface ExperimentalParsedClassName {
+    modifiers: string[]
+    hasImportantModifier: boolean
+    baseClassName: string
+    maybePostfixModifierPosition: number | undefined
 }
 
 interface ConfigGroups<ClassGroupIds extends string, ThemeGroupIds extends string> {
