@@ -22,7 +22,7 @@ interface ClassValidatorObject {
 
 const CLASS_PART_SEPARATOR = '-'
 
-export function createClassUtils(config: GenericConfig) {
+export function createClassGroupUtils(config: GenericConfig) {
     const classMap = createClassMap(config)
     const { conflictingClassGroups, conflictingClassGroupModifiers } = config
 

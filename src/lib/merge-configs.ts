@@ -10,6 +10,7 @@ export function mergeConfigs<ClassGroupIds extends string, ThemeGroupIds extends
         cacheSize,
         prefix,
         separator,
+        experimentalParseClassName,
         extend = {},
         override = {},
     }: ConfigExtension<ClassGroupIds, ThemeGroupIds>,
@@ -17,6 +18,7 @@ export function mergeConfigs<ClassGroupIds extends string, ThemeGroupIds extends
     overrideProperty(baseConfig, 'cacheSize', cacheSize)
     overrideProperty(baseConfig, 'prefix', prefix)
     overrideProperty(baseConfig, 'separator', separator)
+    overrideProperty(baseConfig, 'experimentalParseClassName', experimentalParseClassName)
 
     for (const configKey in override) {
         overrideConfigProperties(

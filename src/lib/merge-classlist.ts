@@ -1,10 +1,10 @@
 import { ConfigUtils } from './config-utils'
-import { IMPORTANT_MODIFIER, sortModifiers } from './modifier-utils'
+import { IMPORTANT_MODIFIER, sortModifiers } from './parse-class-name'
 
 const SPLIT_CLASSES_REGEX = /\s+/
 
 export function mergeClassList(classList: string, configUtils: ConfigUtils) {
-    const { splitModifiers, getClassGroupId, getConflictingClassGroupIds } = configUtils
+    const { parseClassName, getClassGroupId, getConflictingClassGroupIds } = configUtils
 
     /**
      * Set of classGroupIds in following format:
@@ -25,18 +25,17 @@ export function mergeClassList(classList: string, configUtils: ConfigUtils) {
                     hasImportantModifier,
                     baseClassName,
                     maybePostfixModifierPosition,
-                } = splitModifiers(originalClassName)
+                } = parseClassName(originalClassName)
 
+                let hasPostfixModifier = Boolean(maybePostfixModifierPosition)
                 let classGroupId = getClassGroupId(
-                    maybePostfixModifierPosition
+                    hasPostfixModifier
                         ? baseClassName.substring(0, maybePostfixModifierPosition)
                         : baseClassName,
                 )
 
-                let hasPostfixModifier = Boolean(maybePostfixModifierPosition)
-
                 if (!classGroupId) {
-                    if (!maybePostfixModifierPosition) {
+                    if (!hasPostfixModifier) {
                         return {
                             isTailwindClass: false as const,
                             originalClassName,

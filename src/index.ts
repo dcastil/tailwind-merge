@@ -10,5 +10,7 @@ export {
     type Config,
     type DefaultClassGroupIds,
     type DefaultThemeGroupIds,
+    type ExperimentalParseClassNameParam,
+    type ExperimentalParsedClassName,
 } from './lib/types'
 export * as validators from './lib/validators'

@@ -2,14 +2,14 @@ import { GenericConfig } from './types'
 
 export const IMPORTANT_MODIFIER = '!'
 
-export function createSplitModifiers(config: GenericConfig) {
-    const separator = config.separator
+export function createParseClassName(config: GenericConfig) {
+    const { separator, experimentalParseClassName } = config
     const isSeparatorSingleCharacter = separator.length === 1
     const firstSeparatorCharacter = separator[0]
     const separatorLength = separator.length
 
-    // splitModifiers inspired by https://github.com/tailwindlabs/tailwindcss/blob/v3.2.2/src/util/splitAtTopLevelOnly.js
-    return function splitModifiers(className: string) {
+    // parseClassName inspired by https://github.com/tailwindlabs/tailwindcss/blob/v3.2.2/src/util/splitAtTopLevelOnly.js
+    function parseClassName(className: string) {
         const modifiers = []
 
         let bracketDepth = 0
@@ -63,6 +63,14 @@ export function createSplitModifiers(config: GenericConfig) {
             maybePostfixModifierPosition,
         }
     }
+
+    if (experimentalParseClassName) {
+        return function parseClassNameExperimental(className: string) {
+            return experimentalParseClassName({ className, parseClassName })
+        }
+    }
+
+    return parseClassName
 }
 
 /**

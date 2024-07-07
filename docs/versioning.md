@@ -8,11 +8,13 @@ This package follows the [SemVer](https://semver.org) versioning rules. More spe
 
 -   Major version gets incremented when breaking changes are introduced to the package API. E.g. the return type of `twMerge` changes.
 
--   `alpha` releases might introduce breaking changes on any update. Whereas `beta` releases only introduce new features or bug fixes.
+-   `alpha` releases might introduce breaking changes on any update. `beta` releases intend to only introduce new features or bug fixes, but can introduce breaking changes in rare cases.
+
+-   Any API that has `experimental` in its name can introduce breaking changes in any minor version update.
 
 -   Releases with major version 0 might introduce breaking changes on a minor version update.
 
--   A non-production-ready version of every commit pushed to the main branch is released under the `dev` tag for testing purposes. It has a format like [`1.6.1-dev.4202ccf913525617f19fbc493db478a76d64d054`](https://www.npmjs.com/package/tailwind-merge/v/1.6.1-dev.4202ccf913525617f19fbc493db478a76d64d054) in which the first numbers are the corresponding last release and the hash at the end is the git SHA of the commit. You can install the latest dev release with `yarn add tailwind-merge@dev`.
+-   A non-production-ready version of every commit pushed to the main branch is released under the `dev` tag for testing purposes. It has a format like [`1.6.1-dev.4202ccf913525617f19fbc493db478a76d64d054`](https://www.npmjs.com/package/tailwind-merge/v/1.6.1-dev.4202ccf913525617f19fbc493db478a76d64d054) in which the first numbers are the corresponding last release and the hash at the end is the git SHA of the commit. You can install the latest dev release with `npm install tailwind-merge@dev`.
 
 -   A changelog is documented in [GitHub Releases](https://github.com/dcastil/tailwind-merge/releases).
 

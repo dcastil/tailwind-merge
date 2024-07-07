@@ -19,6 +19,60 @@ interface ConfigStatic {
      * @see https://tailwindcss.com/docs/configuration#separator
      */
     separator: string
+    /**
+     * Allows to customize parsing of individual classes passed to `twMerge`.
+     * All classes passed to `twMerge` outside of cache hits are passed to this function before it is determined whether the class is a valid Tailwind CSS class.
+     *
+     * This is an experimental feature and may introduce breaking changes in any minor version update.
+     */
+    experimentalParseClassName?(param: ExperimentalParseClassNameParam): ExperimentalParsedClassName
+}
+
+/**
+ * Type of param passed to the `experimentalParseClassName` function.
+ *
+ * This is an experimental feature and may introduce breaking changes in any minor version update.
+ */
+export interface ExperimentalParseClassNameParam {
+    className: string
+    parseClassName(className: string): ExperimentalParsedClassName
+}
+
+/**
+ * Type of the result returned by the `experimentalParseClassName` function.
+ *
+ * This is an experimental feature and may introduce breaking changes in any minor version update.
+ */
+export interface ExperimentalParsedClassName {
+    /**
+     * Modifiers of the class in the order they appear in the class.
+     *
+     * @example ['hover', 'dark'] // for `hover:dark:bg-gray-100`
+     */
+    modifiers: string[]
+    /**
+     * Whether the class has an `!important` modifier.
+     *
+     * @example true // for `hover:dark:!bg-gray-100`
+     */
+    hasImportantModifier: boolean
+    /**
+     * Base class without preceding modifiers.
+     *
+     * @example 'bg-gray-100' // for `hover:dark:bg-gray-100`
+     */
+    baseClassName: string
+    /**
+     * Index position of a possible postfix modifier in the class.
+     * If the class has no postfix modifier, this is `undefined`.
+     *
+     * This property is prefixed with "maybe" because tailwind-merge does not know whether something is a postfix modifier or part of the base class since it's possible to configure Tailwind CSS classes which include a `/` in the base class name.
+     *
+     * If a `maybePostfixModifierPosition` is present, tailwind-merge first tries to match the `baseClassName` without the possible postfix modifier to a class group. If tht fails, it tries again with the possible postfix modifier.
+     *
+     * @example 11 // for `bg-gray-100/50`
+     */
+    maybePostfixModifierPosition: number | undefined
 }
 
 interface ConfigGroups<ClassGroupIds extends string, ThemeGroupIds extends string> {

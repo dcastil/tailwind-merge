@@ -1,6 +1,6 @@
-import { createClassUtils } from './class-utils'
+import { createClassGroupUtils } from './class-group-utils'
 import { createLruCache } from './lru-cache'
-import { createSplitModifiers } from './modifier-utils'
+import { createParseClassName } from './parse-class-name'
 import { GenericConfig } from './types'
 
 export type ConfigUtils = ReturnType<typeof createConfigUtils>
@@ -8,7 +8,7 @@ export type ConfigUtils = ReturnType<typeof createConfigUtils>
 export function createConfigUtils(config: GenericConfig) {
     return {
         cache: createLruCache<string, string>(config.cacheSize),
-        splitModifiers: createSplitModifiers(config),
-        ...createClassUtils(config),
+        parseClassName: createParseClassName(config),
+        ...createClassGroupUtils(config),
     }
 }
