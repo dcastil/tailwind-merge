@@ -14,61 +14,59 @@ export function mergeClassList(classList: string, configUtils: ConfigUtils) {
      * @example 'md:!pr'
      */
     const classGroupsInConflict = new Set<string>()
+    const result = []
+    const classes = classList.trim().split(SPLIT_CLASSES_REGEX)
+
+    for (const originalClassName of classes) {
+        const { modifiers, hasImportantModifier, baseClassName, maybePostfixModifierPosition } =
+            parseClassName(originalClassName)
+
+        let hasPostfixModifier = Boolean(maybePostfixModifierPosition)
+        let classGroupId = getClassGroupId(
+            hasPostfixModifier
+                ? baseClassName.substring(0, maybePostfixModifierPosition)
+                : baseClassName,
+        )
+
+        if (!classGroupId) {
+            if (!hasPostfixModifier) {
+                result.unshift({
+                    isTailwindClass: false as const,
+                    originalClassName,
+                })
+                continue
+            }
+
+            classGroupId = getClassGroupId(baseClassName)
+
+            if (!classGroupId) {
+                result.unshift({
+                    isTailwindClass: false as const,
+                    originalClassName,
+                })
+                continue
+            }
+
+            hasPostfixModifier = false
+        }
+
+        const variantModifier = sortModifiers(modifiers).join(':')
+
+        const modifierId = hasImportantModifier
+            ? variantModifier + IMPORTANT_MODIFIER
+            : variantModifier
+
+        result.unshift({
+            isTailwindClass: true as const,
+            modifierId,
+            classGroupId,
+            originalClassName,
+            hasPostfixModifier,
+        })
+    }
 
     return (
-        classList
-            .trim()
-            .split(SPLIT_CLASSES_REGEX)
-            .map((originalClassName) => {
-                const {
-                    modifiers,
-                    hasImportantModifier,
-                    baseClassName,
-                    maybePostfixModifierPosition,
-                } = parseClassName(originalClassName)
-
-                let hasPostfixModifier = Boolean(maybePostfixModifierPosition)
-                let classGroupId = getClassGroupId(
-                    hasPostfixModifier
-                        ? baseClassName.substring(0, maybePostfixModifierPosition)
-                        : baseClassName,
-                )
-
-                if (!classGroupId) {
-                    if (!hasPostfixModifier) {
-                        return {
-                            isTailwindClass: false as const,
-                            originalClassName,
-                        }
-                    }
-
-                    classGroupId = getClassGroupId(baseClassName)
-
-                    if (!classGroupId) {
-                        return {
-                            isTailwindClass: false as const,
-                            originalClassName,
-                        }
-                    }
-
-                    hasPostfixModifier = false
-                }
-
-                const variantModifier = sortModifiers(modifiers).join(':')
-
-                const modifierId = hasImportantModifier
-                    ? variantModifier + IMPORTANT_MODIFIER
-                    : variantModifier
-
-                return {
-                    isTailwindClass: true as const,
-                    modifierId,
-                    classGroupId,
-                    originalClassName,
-                    hasPostfixModifier,
-                }
-            })
-            .reverse()
+        result
             // Last class in conflict wins, so we need to filter conflicting classes in reverse order.
             .filter((parsed) => {
                 if (!parsed.isTailwindClass) {
@@ -85,9 +83,13 @@ export function mergeClassList(classList: string, configUtils: ConfigUtils) {
 
                 classGroupsInConflict.add(classId)
 
-                getConflictingClassGroupIds(classGroupId, hasPostfixModifier).forEach((group) =>
-                    classGroupsInConflict.add(modifierId + group),
+                const conflictingGroups = getConflictingClassGroupIds(
+                    classGroupId,
+                    hasPostfixModifier,
                 )
+                for (const group of conflictingGroups) {
+                    classGroupsInConflict.add(modifierId + group)
+                }
 
                 return true
             })
