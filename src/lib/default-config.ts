@@ -16,7 +16,7 @@ import {
     isTshirtSize,
 } from './validators'
 
-export function getDefaultConfig() {
+export const getDefaultConfig = () => {
     const colors = fromTheme('colors')
     const spacing = fromTheme('spacing')
     const blur = fromTheme('blur')

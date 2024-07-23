@@ -4,7 +4,7 @@ import { ConfigExtension, GenericConfig } from './types'
  * @param baseConfig Config where other config will be merged into. This object will be mutated.
  * @param configExtension Partial config to merge into the `baseConfig`.
  */
-export function mergeConfigs<ClassGroupIds extends string, ThemeGroupIds extends string = never>(
+export const mergeConfigs = <ClassGroupIds extends string, ThemeGroupIds extends string = never>(
     baseConfig: GenericConfig,
     {
         cacheSize,
@@ -14,7 +14,7 @@ export function mergeConfigs<ClassGroupIds extends string, ThemeGroupIds extends
         extend = {},
         override = {},
     }: ConfigExtension<ClassGroupIds, ThemeGroupIds>,
-) {
+) => {
     overrideProperty(baseConfig, 'cacheSize', cacheSize)
     overrideProperty(baseConfig, 'prefix', prefix)
     overrideProperty(baseConfig, 'separator', separator)
@@ -37,20 +37,20 @@ export function mergeConfigs<ClassGroupIds extends string, ThemeGroupIds extends
     return baseConfig
 }
 
-function overrideProperty<T extends object, K extends keyof T>(
+const overrideProperty = <T extends object, K extends keyof T>(
     baseObject: T,
     overrideKey: K,
     overrideValue: T[K] | undefined,
-) {
+) => {
     if (overrideValue !== undefined) {
         baseObject[overrideKey] = overrideValue
     }
 }
 
-function overrideConfigProperties(
+const overrideConfigProperties = (
     baseObject: Partial<Record<string, readonly unknown[]>>,
     overrideObject: Partial<Record<string, readonly unknown[]>> | undefined,
-) {
+) => {
     if (overrideObject) {
         for (const key in overrideObject) {
             overrideProperty(baseObject, key, overrideObject[key])
@@ -58,10 +58,10 @@ function overrideConfigProperties(
     }
 }
 
-function mergeConfigProperties(
+const mergeConfigProperties = (
     baseObject: Partial<Record<string, readonly unknown[]>>,
     mergeObject: Partial<Record<string, readonly unknown[]>> | undefined,
-) {
+) => {
     if (mergeObject) {
         for (const key in mergeObject) {
             const mergeValue = mergeObject[key]

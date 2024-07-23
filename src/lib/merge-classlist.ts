@@ -3,7 +3,7 @@ import { IMPORTANT_MODIFIER, sortModifiers } from './parse-class-name'
 
 const SPLIT_CLASSES_REGEX = /\s+/
 
-export function mergeClassList(classList: string, configUtils: ConfigUtils) {
+export const mergeClassList = (classList: string, configUtils: ConfigUtils) => {
     const { parseClassName, getClassGroupId, getConflictingClassGroupIds } = configUtils
 
     /**
