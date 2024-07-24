@@ -5,10 +5,8 @@ import { GenericConfig } from './types'
 
 export type ConfigUtils = ReturnType<typeof createConfigUtils>
 
-export function createConfigUtils(config: GenericConfig) {
-    return {
-        cache: createLruCache<string, string>(config.cacheSize),
-        parseClassName: createParseClassName(config),
-        ...createClassGroupUtils(config),
-    }
-}
+export const createConfigUtils = (config: GenericConfig) => ({
+    cache: createLruCache<string, string>(config.cacheSize),
+    parseClassName: createParseClassName(config),
+    ...createClassGroupUtils(config),
+})

@@ -22,11 +22,11 @@ interface ClassValidatorObject {
 
 const CLASS_PART_SEPARATOR = '-'
 
-export function createClassGroupUtils(config: GenericConfig) {
+export const createClassGroupUtils = (config: GenericConfig) => {
     const classMap = createClassMap(config)
     const { conflictingClassGroups, conflictingClassGroupModifiers } = config
 
-    function getClassGroupId(className: string) {
+    const getClassGroupId = (className: string) => {
         const classParts = className.split(CLASS_PART_SEPARATOR)
 
         // Classes like `-inset-1` produce an empty string as first classPart. We assume that classes for negative values are used correctly and remove it from classParts.
@@ -37,10 +37,10 @@ export function createClassGroupUtils(config: GenericConfig) {
         return getGroupRecursive(classParts, classMap) || getGroupIdForArbitraryProperty(className)
     }
 
-    function getConflictingClassGroupIds(
+    const getConflictingClassGroupIds = (
         classGroupId: GenericClassGroupIds,
         hasPostfixModifier: boolean,
-    ) {
+    ) => {
         const conflicts = conflictingClassGroups[classGroupId] || []
 
         if (hasPostfixModifier && conflictingClassGroupModifiers[classGroupId]) {
@@ -56,10 +56,10 @@ export function createClassGroupUtils(config: GenericConfig) {
     }
 }
 
-function getGroupRecursive(
+const getGroupRecursive = (
     classParts: string[],
     classPartObject: ClassPartObject,
-): GenericClassGroupIds | undefined {
+): GenericClassGroupIds | undefined => {
     if (classParts.length === 0) {
         return classPartObject.classGroupId
     }
@@ -85,7 +85,7 @@ function getGroupRecursive(
 
 const arbitraryPropertyRegex = /^\[(.+)\]$/
 
-function getGroupIdForArbitraryProperty(className: string) {
+const getGroupIdForArbitraryProperty = (className: string) => {
     if (arbitraryPropertyRegex.test(className)) {
         const arbitraryPropertyClassName = arbitraryPropertyRegex.exec(className)![1]
         const property = arbitraryPropertyClassName?.substring(
@@ -103,7 +103,7 @@ function getGroupIdForArbitraryProperty(className: string) {
 /**
  * Exported for testing only
  */
-export function createClassMap(config: Config<GenericClassGroupIds, GenericThemeGroupIds>) {
+export const createClassMap = (config: Config<GenericClassGroupIds, GenericThemeGroupIds>) => {
     const { theme, prefix } = config
     const classMap: ClassPartObject = {
         nextPart: new Map<string, ClassPartObject>(),
@@ -122,12 +122,12 @@ export function createClassMap(config: Config<GenericClassGroupIds, GenericTheme
     return classMap
 }
 
-function processClassesRecursively(
+const processClassesRecursively = (
     classGroup: ClassGroup<GenericThemeGroupIds>,
     classPartObject: ClassPartObject,
     classGroupId: GenericClassGroupIds,
     theme: ThemeObject<GenericThemeGroupIds>,
-) {
+) => {
     classGroup.forEach((classDefinition) => {
         if (typeof classDefinition === 'string') {
             const classPartObjectToEdit =
@@ -166,7 +166,7 @@ function processClassesRecursively(
     })
 }
 
-function getPart(classPartObject: ClassPartObject, path: string) {
+const getPart = (classPartObject: ClassPartObject, path: string) => {
     let currentClassPartObject = classPartObject
 
     path.split(CLASS_PART_SEPARATOR).forEach((pathPart) => {
@@ -183,14 +183,13 @@ function getPart(classPartObject: ClassPartObject, path: string) {
     return currentClassPartObject
 }
 
-function isThemeGetter(func: ClassValidator | ThemeGetter): func is ThemeGetter {
-    return (func as ThemeGetter).isThemeGetter
-}
+const isThemeGetter = (func: ClassValidator | ThemeGetter): func is ThemeGetter =>
+    (func as ThemeGetter).isThemeGetter
 
-function getPrefixedClassGroupEntries(
+const getPrefixedClassGroupEntries = (
     classGroupEntries: Array<[classGroupId: string, classGroup: ClassGroup<GenericThemeGroupIds>]>,
     prefix: string | undefined,
-): Array<[classGroupId: string, classGroup: ClassGroup<GenericThemeGroupIds>]> {
+): Array<[classGroupId: string, classGroup: ClassGroup<GenericThemeGroupIds>]> => {
     if (!prefix) {
         return classGroupEntries
     }

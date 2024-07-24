@@ -29,7 +29,7 @@ export function twJoin() {
     return string
 }
 
-function toValue(mix: ClassNameArray | string) {
+const toValue = (mix: ClassNameArray | string) => {
     if (typeof mix === 'string') {
         return mix
     }

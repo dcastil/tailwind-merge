@@ -5,7 +5,7 @@ import { ConfigExtension, DefaultClassGroupIds, DefaultThemeGroupIds, GenericCon
 
 type CreateConfigSubsequent = (config: GenericConfig) => GenericConfig
 
-export function extendTailwindMerge<
+export const extendTailwindMerge = <
     AdditionalClassGroupIds extends string = never,
     AdditionalThemeGroupIds extends string = never,
 >(
@@ -16,11 +16,10 @@ export function extendTailwindMerge<
           >
         | CreateConfigSubsequent,
     ...createConfig: CreateConfigSubsequent[]
-) {
-    return typeof configExtension === 'function'
+) =>
+    typeof configExtension === 'function'
         ? createTailwindMerge(getDefaultConfig, configExtension, ...createConfig)
         : createTailwindMerge(
               () => mergeConfigs(getDefaultConfig(), configExtension),
               ...createConfig,
           )
-}
