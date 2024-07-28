@@ -12,25 +12,16 @@ export const mergeClassList = (classList: string, configUtils: ConfigUtils) => {
      * @example 'md:!pr'
      */
     const classGroupsInConflict: string[] = []
-    // const classGroupsInConflict = new Set<string>()
 
-    // let result: string[] = []
     let result = ''
 
-    let currentClass = ''
-    for (let i = classList.length - 1; i >= 0; --i) {
-        const char = classList[i]!
-        // more performant than Regex check - suitable for our case
-        const isSpace = char === ' '
-        if (!isSpace) {
-            currentClass = char + currentClass
-            if (i !== 0) continue
-        } else if (currentClass.length === 0) {
-            continue
+    for (let i = classList.length - 1; i >= 0; ) {
+        while (classList[i] === ' ') {
+            --i
         }
-
-        const originalClassName = currentClass
-        currentClass = ''
+        const nextI = classList.lastIndexOf(' ', i)
+        const originalClassName = classList.slice(nextI === -1 ? 0 : nextI + 1, i + 1)
+        i = nextI
 
         const { modifiers, hasImportantModifier, baseClassName, maybePostfixModifierPosition } =
             parseClassName(originalClassName)
@@ -45,7 +36,6 @@ export const mergeClassList = (classList: string, configUtils: ConfigUtils) => {
         if (!classGroupId) {
             if (!hasPostfixModifier) {
                 result = originalClassName + (result.length > 0 ? ' ' + result : result)
-                // result.push(originalClassName)
                 continue
             }
 
@@ -53,7 +43,6 @@ export const mergeClassList = (classList: string, configUtils: ConfigUtils) => {
 
             if (!classGroupId) {
                 result = originalClassName + (result.length > 0 ? ' ' + result : result)
-                // result.push(originalClassName)
                 continue
             }
 
@@ -80,10 +69,8 @@ export const mergeClassList = (classList: string, configUtils: ConfigUtils) => {
             classGroupsInConflict.push(modifierId + group)
         }
 
-        // result.push(originalClassName)
         result = originalClassName + (result.length > 0 ? ' ' + result : result)
     }
 
     return result
-    // return result.join(' ')
 }
