@@ -1,5 +1,12 @@
 # Changelog for v2 releases
 
+## WIP: v2.5.0
+
+### New Features
+
+-   Performance improvements in mergeClassList by [@XantreDev](htttps://github.com/XantreDev) and [@rortan134](https://github.com/rortan134) in [#450](https://github.com/dcastil/tailwind-merge/pull/450)
+-   Use arrow functions where possible to help with minification by [@VIKTORVAV99](htttps://github.com/VIKTORVAV99) in [#449](https://github.com/dcastil/tailwind-merge/pull/449)
+
 ## v2.4.0
 
 ### New Features
