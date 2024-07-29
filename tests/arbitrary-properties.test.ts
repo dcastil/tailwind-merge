@@ -20,6 +20,9 @@ test('handles arbitrary property conflicts with modifiers correctly', () => {
     expect(
         twMerge('[paint-order:markers] [paint-order:normal] [--my-var:2rem] lg:[--my-var:4px]'),
     ).toBe('[paint-order:normal] [--my-var:2rem] lg:[--my-var:4px]')
+    expect(twMerge('bg-[#B91C1C] bg-opacity-[0.56] bg-opacity-[48%]')).toBe(
+        'bg-[#B91C1C] bg-opacity-[48%]',
+    )
 })
 
 test('handles complex arbitrary property conflicts correctly', () => {

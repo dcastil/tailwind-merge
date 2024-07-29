@@ -86,7 +86,6 @@ export const getDefaultConfig = () => {
     const getZeroAndEmpty = () => ['', '0', isArbitraryValue] as const
     const getBreaks = () =>
         ['auto', 'avoid', 'all', 'avoid-page', 'page', 'left', 'right', 'column'] as const
-    const getNumber = () => [isNumber, isArbitraryNumber]
     const getNumberAndArbitrary = () => [isNumber, isArbitraryValue]
 
     return {
@@ -96,12 +95,12 @@ export const getDefaultConfig = () => {
             colors: [isAny],
             spacing: [isLength, isArbitraryLength],
             blur: ['none', '', isTshirtSize, isArbitraryValue],
-            brightness: getNumber(),
+            brightness: getNumberAndArbitrary(),
             borderColor: [colors],
             borderRadius: ['none', '', 'full', isTshirtSize, isArbitraryValue],
             borderSpacing: getSpacingWithArbitrary(),
             borderWidth: getLengthWithEmptyAndArbitrary(),
-            contrast: getNumber(),
+            contrast: getNumberAndArbitrary(),
             grayscale: getZeroAndEmpty(),
             hueRotate: getNumberAndArbitrary(),
             invert: getZeroAndEmpty(),
@@ -110,10 +109,10 @@ export const getDefaultConfig = () => {
             gradientColorStopPositions: [isPercent, isArbitraryLength],
             inset: getSpacingWithAutoAndArbitrary(),
             margin: getSpacingWithAutoAndArbitrary(),
-            opacity: getNumber(),
+            opacity: getNumberAndArbitrary(),
             padding: getSpacingWithArbitrary(),
-            saturate: getNumber(),
-            scale: getNumber(),
+            saturate: getNumberAndArbitrary(),
+            scale: getNumberAndArbitrary(),
             sepia: getZeroAndEmpty(),
             skew: getNumberAndArbitrary(),
             space: getSpacingWithArbitrary(),
