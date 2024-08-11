@@ -30,7 +30,7 @@ Thanks to [@brandonmcconnell](https://github.com/brandonmcconnell), [@manavm1990
 
 -   Comment/typo fixes by [@barvian](https://github.com/barvian) in [#443](https://github.com/dcastil/tailwind-merge/pull/443)
 -   Fix typo in doc/recipes.md by [@dsernst](https://github.com/dsernst) in [#428](https://github.com/dcastil/tailwind-merge/pull/428)
--   docs: add tailwind-merge-dotnet to similar packages by [@desmondinho](https://github.com/desmondinho) in [#415](https://github.com/dcastil/tailwind-merge/pull/415)
+-   Add tailwind-merge-dotnet to similar packages by [@desmondinho](https://github.com/desmondinho) in [#415](https://github.com/dcastil/tailwind-merge/pull/415)
 
 ### Other
 
@@ -50,7 +50,7 @@ Thanks to [@brandonmcconnell](https://github.com/brandonmcconnell), [@manavm1990
 
 ### Documentation
 
--   docs: add tailwind-merge-go to similar packages in docs by [@Oudwins](https://github.com/Oudwins) in [#396](https://github.com/dcastil/tailwind-merge/pull/396)
+-   Add tailwind-merge-go to similar packages in docs by [@Oudwins](https://github.com/Oudwins) in [#396](https://github.com/dcastil/tailwind-merge/pull/396)
 
 **Full Changelog**: [`v2.2.2...v2.3.0`](https://github.com/dcastil/tailwind-merge/compare/v2.2.2...v2.3.0)
 
