@@ -1,11 +1,19 @@
 # Changelog for v2 releases
 
-## WIP: v2.5.0
+## v2.5.0
 
 ### New Features
 
 -   Performance improvements in mergeClassList by [@XantreDev](htttps://github.com/XantreDev) in [#450](https://github.com/dcastil/tailwind-merge/pull/450) and [@rortan134](https://github.com/rortan134) in [#445](https://github.com/dcastil/tailwind-merge/pull/445)
 -   Use arrow functions where possible to help with minification by [@VIKTORVAV99](htttps://github.com/VIKTORVAV99) in [#449](https://github.com/dcastil/tailwind-merge/pull/449)
+
+### Bug FIxes
+
+-   Fix bg-opacity arbitrary percentages not being recognized properly by [@dcastil](https://github.com/dcastil) in [#451](https://github.com/dcastil/tailwind-merge/pull/451)
+
+**Full Changelog**: [`v2.4.0...v2.5.0`](https://github.com/dcastil/tailwind-merge/compare/v2.4.0...v2.5.0)
+
+Thanks to [@brandonmcconnell](https://github.com/brandonmcconnell), [@manavm1990](https://github.com/manavm1990), [@langy](https://github.com/langy) and [@jamesreaco](https://github.com/jamesreaco) for sponsoring tailwind-merge! ❤️
 
 ## v2.4.0
 
