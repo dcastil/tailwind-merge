@@ -3,7 +3,7 @@ name: codspeed-benchmarks
 on:
     push:
         branches:
-            - 'main' # or "main"
+            - 'main'
     pull_request:
     workflow_dispatch:
 

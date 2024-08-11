@@ -33,5 +33,6 @@ bench.add('twMerge (collection)', () => {
 })
 ;(async () => {
     await bench.run()
+    // eslint-disable-next-line no-console
     console.table(bench.table())
 })()
