@@ -1,5 +1,15 @@
 # Changelog for v2 releases
 
+## v2.5.1
+
+### Bug Fixes
+
+-   Fx space at beginning of input causing infinite loop by [@dcastil](https://github.com/dcastil) in [#457](https://github.com/dcastil/tailwind-merge/pull/457)
+
+**Full Changelog**: [`v2.5.0...v2.5.1`](https://github.com/dcastil/tailwind-merge/compare/v2.5.0...v2.5.1)
+
+Thanks to [@brandonmcconnell](https://github.com/brandonmcconnell), [@manavm1990](https://github.com/manavm1990), [@langy](https://github.com/langy), [@jamesreaco](https://github.com/jamesreaco) and [@jamaluddinrumi](https://github.com/jamaluddinrumi) for sponsoring tailwind-merge! ❤️
+
 ## v2.5.0
 
 ### New Features
