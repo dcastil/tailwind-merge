@@ -4,7 +4,7 @@
 
 ### Bug Fixes
 
--   Fx space at beginning of input causing infinite loop by [@dcastil](https://github.com/dcastil) in [#457](https://github.com/dcastil/tailwind-merge/pull/457)
+-   Fix space at beginning of input causing infinite loop by [@dcastil](https://github.com/dcastil) in [#457](https://github.com/dcastil/tailwind-merge/pull/457)
 
 **Full Changelog**: [`v2.5.0...v2.5.1`](https://github.com/dcastil/tailwind-merge/compare/v2.5.0...v2.5.1)
 
