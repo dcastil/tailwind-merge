@@ -14,14 +14,21 @@ export const mergeClassList = (classList: string, configUtils: ConfigUtils) => {
     const classGroupsInConflict: string[] = []
 
     let result = ''
+    let index = classList.length - 1
 
-    for (let i = classList.length - 1; i >= 0; ) {
-        while (classList[i] === ' ') {
-            --i
+    while (index >= 0) {
+        while (classList[index] === ' ') {
+            index -= 1
         }
-        const nextI = classList.lastIndexOf(' ', i)
-        const originalClassName = classList.slice(nextI === -1 ? 0 : nextI + 1, i + 1)
-        i = nextI
+
+        if (index < 0) {
+            break
+        }
+
+        const nextIndex = classList.lastIndexOf(' ', index)
+        const originalClassName = classList.slice(nextIndex + 1, index + 1)
+
+        index = nextIndex
 
         const { modifiers, hasImportantModifier, baseClassName, maybePostfixModifierPosition } =
             parseClassName(originalClassName)
