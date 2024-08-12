@@ -1,6 +1,8 @@
 import { ConfigUtils } from './config-utils'
 import { IMPORTANT_MODIFIER, sortModifiers } from './parse-class-name'
 
+const SPLIT_CLASSES_REGEX = /\s+/
+
 export const mergeClassList = (classList: string, configUtils: ConfigUtils) => {
     const { parseClassName, getClassGroupId, getConflictingClassGroupIds } = configUtils
 
@@ -12,23 +14,12 @@ export const mergeClassList = (classList: string, configUtils: ConfigUtils) => {
      * @example 'md:!pr'
      */
     const classGroupsInConflict: string[] = []
+    const classNames = classList.trim().split(SPLIT_CLASSES_REGEX)
 
     let result = ''
-    let index = classList.length - 1
 
-    while (index >= 0) {
-        while (classList[index] === ' ') {
-            index -= 1
-        }
-
-        if (index < 0) {
-            break
-        }
-
-        const nextIndex = classList.lastIndexOf(' ', index)
-        const originalClassName = classList.slice(nextIndex + 1, index + 1)
-
-        index = nextIndex
+    for (let index = classNames.length - 1; index >= 0; index -= 1) {
+        const originalClassName = classNames[index]!
 
         const { modifiers, hasImportantModifier, baseClassName, maybePostfixModifierPosition } =
             parseClassName(originalClassName)
@@ -42,6 +33,7 @@ export const mergeClassList = (classList: string, configUtils: ConfigUtils) => {
 
         if (!classGroupId) {
             if (!hasPostfixModifier) {
+                // Not a Tailwind class
                 result = originalClassName + (result.length > 0 ? ' ' + result : result)
                 continue
             }
@@ -49,6 +41,7 @@ export const mergeClassList = (classList: string, configUtils: ConfigUtils) => {
             classGroupId = getClassGroupId(baseClassName)
 
             if (!classGroupId) {
+                // Not a Tailwind class
                 result = originalClassName + (result.length > 0 ? ' ' + result : result)
                 continue
             }
@@ -65,6 +58,7 @@ export const mergeClassList = (classList: string, configUtils: ConfigUtils) => {
         const classId = modifierId + classGroupId
 
         if (classGroupsInConflict.includes(classId)) {
+            // Tailwind class omitted due to conflict
             continue
         }
 
@@ -76,6 +70,7 @@ export const mergeClassList = (classList: string, configUtils: ConfigUtils) => {
             classGroupsInConflict.push(modifierId + group)
         }
 
+        // Tailwind class not in conflict
         result = originalClassName + (result.length > 0 ? ' ' + result : result)
     }
 
