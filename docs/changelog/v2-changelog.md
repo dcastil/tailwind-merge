@@ -1,5 +1,15 @@
 # Changelog for v2 releases
 
+## v2.5.2
+
+### Bug Fixes
+
+-   Fix multiline input not working anymore by [@dcastil](https://github.com/dcastil) in [#459](https://github.com/dcastil/tailwind-merge/pull/459)
+
+**Full Changelog**: [`v2.5.1...v2.5.2`](https://github.com/dcastil/tailwind-merge/compare/v2.5.1...v2.5.2)
+
+Thanks to [@brandonmcconnell](https://github.com/brandonmcconnell), [@manavm1990](https://github.com/manavm1990), [@langy](https://github.com/langy), [@jamesreaco](https://github.com/jamesreaco) and [@jamaluddinrumi](https://github.com/jamaluddinrumi) for sponsoring tailwind-merge! ❤️
+
 ## v2.5.1
 
 ### Bug Fixes
