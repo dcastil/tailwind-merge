@@ -33,6 +33,8 @@ jobs:
               with:
                   languages: javascript
             - run: yarn install --frozen-lockfile
-            - run: yarn build
-            - name: Perform CodeQL Analysis
-              uses: github/codeql-action/analyze@v3
+            - name: Run benchmarks
+              uses: CodSpeedHQ/action@v3
+              with:
+                  run: npm exec vitest bench
+                  token: ${{ secrets.CODSPEED_TOKEN }}

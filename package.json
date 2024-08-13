@@ -51,7 +51,7 @@
     "sideEffects": false,
     "scripts": {
         "build": "rollup --config scripts/rollup.config.mjs",
-        "bench": "node -r @swc-node/register ./benchmarks/bench.ts",
+        "bench": "vitest bench --run",
         "test": "jest test --config scripts/jest.config.mjs --coverage",
         "test:watch": "jest test --config scripts/jest.config.mjs --watch",
         "test:exports": "node scripts/test-built-package-exports.cjs && node scripts/test-built-package-exports.mjs",
@@ -65,6 +65,7 @@
         "@babel/core": "^7.25.2",
         "@babel/preset-env": "^7.25.3",
         "@codspeed/tinybench-plugin": "^3.1.1",
+        "@codspeed/vitest-plugin": "^3.1.1",
         "@rollup/plugin-babel": "^6.0.4",
         "@rollup/plugin-node-resolve": "^15.2.3",
         "@rollup/plugin-typescript": "^11.1.6",
@@ -88,6 +89,7 @@
         "ts-jest": "^29.2.3",
         "tslib": "^2.6.3",
         "typescript": "^5.5.4",
+        "vitest": "^2.0.5",
         "zx": "^8.1.4"
     },
     "publishConfig": {
