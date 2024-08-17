@@ -1,4 +1,4 @@
-import { bench, describe } from 'vitest'
+import { bench, describe, beforeEach, BenchOptions } from 'vitest'
 
 import { createTailwindMerge, getDefaultConfig } from '../src'
 
@@ -21,12 +21,15 @@ describe('twMerge', () => {
             twMerge()
         }
         describe(cached ? 'cached' : 'pure', () => {
+            // codespeed tries to optimize function, before actual setup call - we need to adopt
+            process.env.CI && beforeEach(setup)
+            const options: BenchOptions | undefined = process.env.CI ? undefined : { setup }
             bench(
                 withSuffix('simple'),
                 () => {
                     twMerge('flex mx-10 px-10', 'mr-5 pr-5')
                 },
-                { setup },
+                options,
             )
 
             bench(
@@ -45,7 +48,7 @@ describe('twMerge', () => {
                         null,
                     )
                 },
-                { setup },
+                options,
             )
             bench(
                 withSuffix('collection'),
@@ -55,7 +58,7 @@ describe('twMerge', () => {
                         twMerge(...(testData[i] as Exclude<Item, true>[]))
                     }
                 },
-                { setup },
+                options,
             )
         })
     }
