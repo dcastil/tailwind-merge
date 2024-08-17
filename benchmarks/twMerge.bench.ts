@@ -1,4 +1,4 @@
-import { bench, describe, beforeEach } from 'vitest'
+import { bench, describe } from 'vitest'
 
 import { createTailwindMerge, getDefaultConfig } from '../src'
 
