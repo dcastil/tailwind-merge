@@ -32,3 +32,24 @@ jobs:
                   path: dist
                   if-no-files-found: error
             - run: yarn test:exports
+    benchmark:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v4
+            - name: Use Node.js 20
+              uses: actions/setup-node@v4
+              with:
+                  node-version: 20.11.1
+            - name: Use node_modules cache
+              uses: actions/cache@v4
+              with:
+                  path: node_modules
+                  key: yarn-node-20-lock-${{ hashFiles('yarn.lock') }}
+                  restore-keys: |
+                      yarn-node-20-lock-
+            - run: yarn install --frozen-lockfile
+            - name: Run benchmark
+              uses: CodSpeedHQ/action@v3
+              with:
+                  token: ${{ secrets.CODSPEED_TOKEN }}
+                  run: yarn bench
