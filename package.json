@@ -51,8 +51,8 @@
     "sideEffects": false,
     "scripts": {
         "build": "rollup --config scripts/rollup.config.mjs",
-        "bench": "vitest bench --run --config scripts/vitest.config.mts",
-        "test": "vitest --config scripts/vitest.config.mts --run",
+        "bench": "vitest bench --config scripts/vitest.config.mts --run",
+        "test": "vitest --config scripts/vitest.config.mts --run --coverage",
         "test:watch": "vitest --config scripts/vitest.config.mts",
         "test:exports": "node scripts/test-built-package-exports.cjs && node scripts/test-built-package-exports.mjs",
         "lint": "eslint --max-warnings 0 '**'",

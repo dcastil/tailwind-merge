@@ -24,7 +24,7 @@ jobs:
                       yarn-node-20-lock-
             - run: yarn install --frozen-lockfile
             - run: yarn lint
-            - run: yarn test --ci --coverage --maxWorkers=2
+            - run: yarn test
             - run: yarn build
             - uses: actions/upload-artifact@v4
               with:
