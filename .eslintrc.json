@@ -157,11 +157,13 @@
     },
     "overrides": [
         {
-            "files": ["tests/**/*.ts"],
-            "extends": ["plugin:jest/recommended", "plugin:jest/style"]
+            "files": ["./*.config.?(m|c)@(t|j)s", "./scripts/**/*.config.?(m|c)@(t|j)s"],
+            "rules": {
+                "import/no-default-export": "off"
+            }
         },
         {
-            "files": ["scripts/**/*.?(m|c)js"],
+            "files": ["scripts/**/*.?(m|c)@(t|j)s"],
             "rules": {
                 "no-console": "off"
             }

@@ -1,3 +1,5 @@
+import { expect, test } from 'vitest'
+
 import { getDefaultConfig } from '../src'
 import { ClassPartObject, createClassMap } from '../src/lib/class-group-utils'
 

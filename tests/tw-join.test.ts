@@ -7,6 +7,8 @@
  * Original code has MIT license: Copyright (c) Luke Edwards <luke.edwards05@gmail.com> (lukeed.com)
  */
 
+import { expect, test } from 'vitest'
+
 import { twJoin } from '../src'
 
 test('strings', () => {
