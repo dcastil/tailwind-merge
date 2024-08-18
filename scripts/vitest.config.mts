@@ -1,3 +1,5 @@
+/// <reference types="vitest" />
+
 import codspeedPlugin from '@codspeed/vitest-plugin'
 import { defineConfig } from 'vitest/config'
 
