@@ -2,7 +2,9 @@ import { bench, describe } from 'vitest'
 
 import { extendTailwindMerge } from '../src'
 
-import testData from './tw-merge-benchmark-data.json'
+import testDataCollection from './tw-merge-benchmark-data.json'
+
+type TestDataItem = Exclude<(typeof testDataCollection)[number][number], true>[]
 
 describe('twMerge', () => {
     bench('init', () => {
@@ -37,18 +39,16 @@ describe('twMerge', () => {
     bench('collection with cache', () => {
         const twMerge = extendTailwindMerge({})
 
-        for (let i = 0; i < testData.length; ++i) {
-            type Item = (typeof testData)[number][number]
-            twMerge(...(testData[i] as Exclude<Item, true>[]))
+        for (let index = 0; index < testDataCollection.length; ++index) {
+            twMerge(...(testDataCollection[index] as TestDataItem))
         }
     })
 
     bench('collection without cache', () => {
         const twMerge = extendTailwindMerge({ cacheSize: 0 })
 
-        for (let i = 0; i < testData.length; ++i) {
-            type Item = (typeof testData)[number][number]
-            twMerge(...(testData[i] as Exclude<Item, true>[]))
+        for (let index = 0; index < testDataCollection.length; ++index) {
+            twMerge(...(testDataCollection[index] as TestDataItem))
         }
     })
 })
