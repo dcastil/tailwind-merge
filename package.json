@@ -51,7 +51,7 @@
     "sideEffects": false,
     "scripts": {
         "build": "rollup --config scripts/rollup.config.mjs",
-        "bench": "vitest bench --run",
+        "bench": "vitest bench --run --config scripts/vitest.config.mts",
         "test": "jest test --config scripts/jest.config.mjs --coverage",
         "test:watch": "jest test --config scripts/jest.config.mjs --watch",
         "test:exports": "node scripts/test-built-package-exports.cjs && node scripts/test-built-package-exports.mjs",
