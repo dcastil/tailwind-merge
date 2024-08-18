@@ -24,6 +24,7 @@ jobs:
                   restore-keys: |
                       yarn-node-20-lock-
             - run: yarn install --frozen-lockfile
+            - run: yarn bench
             - name: Run benchmarks
               uses: CodSpeedHQ/action@v3
               with:
