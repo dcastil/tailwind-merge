@@ -1,8 +1,8 @@
-import { bench, describe, beforeEach, BenchOptions } from 'vitest'
+import { beforeEach, bench, BenchOptions, describe } from 'vitest'
 
 import { createTailwindMerge, getDefaultConfig } from '../src'
 
-import testData from './perf-test-data.json'
+import testData from './tw-merge-benchmark-data.json'
 
 describe('twMerge', () => {
     bench('init', () => {
