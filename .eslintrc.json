@@ -163,10 +163,6 @@
             }
         },
         {
-            "files": ["tests/**/*.ts"],
-            "extends": ["plugin:jest/recommended", "plugin:jest/style"]
-        },
-        {
             "files": ["scripts/**/*.?(m|c)@(t|j)s"],
             "rules": {
                 "no-console": "off"
