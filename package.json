@@ -52,8 +52,8 @@
     "scripts": {
         "build": "rollup --config scripts/rollup.config.mjs",
         "bench": "vitest bench --run --config scripts/vitest.config.mts",
-        "test": "jest test --config scripts/jest.config.mjs --coverage",
-        "test:watch": "jest test --config scripts/jest.config.mjs --watch",
+        "test": "vitest --config scripts/vitest.config.mts --run",
+        "test:watch": "vitest --config scripts/vitest.config.mts",
         "test:exports": "node scripts/test-built-package-exports.cjs && node scripts/test-built-package-exports.mjs",
         "lint": "eslint --max-warnings 0 '**'",
         "preversion": "if [ -n \"$DANYS_MACHINE\" ]; then git checkout main && git pull; fi",
@@ -71,6 +71,7 @@
         "@types/jest": "^29.5.12",
         "@typescript-eslint/eslint-plugin": "^8.0.1",
         "@typescript-eslint/parser": "^8.0.1",
+        "@vitest/coverage-v8": "^2.0.5",
         "babel-plugin-annotate-pure-calls": "^0.4.0",
         "babel-plugin-polyfill-regenerator": "^0.6.2",
         "eslint": "^8.57.0",
