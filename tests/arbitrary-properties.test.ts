@@ -1,3 +1,5 @@
+import { expect, test } from 'vitest'
+
 import { twMerge } from '../src'
 
 test('handles arbitrary property conflicts correctly', () => {

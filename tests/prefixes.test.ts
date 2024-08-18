@@ -1,3 +1,5 @@
+import { expect, test } from 'vitest'
+
 import { extendTailwindMerge } from '../src'
 
 test('prefix working correctly', () => {

@@ -1,3 +1,5 @@
+import { expect, test } from 'vitest'
+
 import {
     ClassNameValue,
     ClassValidator,
@@ -18,7 +20,7 @@ test('has correct export types', () => {
     expect(twMerge).toStrictEqual(expect.any(Function))
     expect(createTailwindMerge).toStrictEqual(expect.any(Function))
     expect(getDefaultConfig).toStrictEqual(expect.any(Function))
-    expect(validators).toEqual({
+    expect(validators).toMatchObject({
         isAny: expect.any(Function),
         isArbitraryLength: expect.any(Function),
         isArbitraryNumber: expect.any(Function),
@@ -33,6 +35,7 @@ test('has correct export types', () => {
         isNumber: expect.any(Function),
         isTshirtSize: expect.any(Function),
     })
+    expect(Object.keys(validators)).toHaveLength(13)
     expect(mergeConfigs).toStrictEqual(expect.any(Function))
     expect(extendTailwindMerge).toStrictEqual(expect.any(Function))
     expect(twJoin).toStrictEqual(expect.any(Function))

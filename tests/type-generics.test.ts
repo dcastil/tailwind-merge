@@ -1,3 +1,5 @@
+import { expect, test } from 'vitest'
+
 import { extendTailwindMerge, fromTheme, getDefaultConfig, mergeConfigs } from '../src'
 import { GenericConfig } from '../src/lib/types'
 

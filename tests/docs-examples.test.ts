@@ -1,6 +1,7 @@
 import fs from 'fs'
 
 import globby from 'globby'
+import { expect, test } from 'vitest'
 
 import { twMerge } from '../src'
 

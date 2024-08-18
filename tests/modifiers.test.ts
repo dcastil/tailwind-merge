@@ -1,3 +1,5 @@
+import { expect, test } from 'vitest'
+
 import { createTailwindMerge, twMerge } from '../src'
 
 test('conflicts across prefix modifiers', () => {
