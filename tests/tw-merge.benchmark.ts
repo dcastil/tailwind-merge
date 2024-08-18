@@ -36,7 +36,13 @@ describe('twMerge', () => {
 
             if (process.env.CI) {
                 // codespeed tries to optimize function, before actual setup call - we need to adopt
-                beforeEach(setup)
+                beforeEach(() => {
+                    twMerge = extendTailwindMerge({
+                        cacheSize: isCached ? undefined : 0,
+                    })
+
+                    twMerge()
+                })
             }
 
             bench(
