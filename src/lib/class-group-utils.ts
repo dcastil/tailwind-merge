@@ -83,21 +83,17 @@ const getGroupRecursive = (
     return classPartObject.validators.find(({ validator }) => validator(classRest))?.classGroupId
 }
 
-const arbitraryPropertyRegex = /^\[(.+)\]$/
-
 const getGroupIdForArbitraryProperty = (className: string) => {
-    if (arbitraryPropertyRegex.test(className)) {
-        const arbitraryPropertyClassName = arbitraryPropertyRegex.exec(className)![1]
-        const property = arbitraryPropertyClassName?.substring(
-            0,
-            arbitraryPropertyClassName.indexOf(':'),
-        )
-
-        if (property) {
-            // I use two dots here because one dot is used as prefix for class groups in plugins
-            return 'arbitrary..' + property
-        }
+    if (className[0] !== '[' && className[className.length - 1] !== ']') {
+        return undefined
     }
+
+    const property = className?.substring(1, className.indexOf(':', 1))
+    if (property) {
+        // I use two dots here because one dot is used as prefix for class groups in plugins
+        return 'arbitrary..' + property
+    }
+    return undefined
 }
 
 /**
