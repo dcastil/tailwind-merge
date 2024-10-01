@@ -26,15 +26,7 @@ export default defineConfig([
             }),
         ],
         external: /node_modules/,
-        plugins: [
-            del({ targets: 'dist/*' }),
-            nodeResolve(),
-            typescript({
-                compilerOptions: {
-                    noEmitOnError: true,
-                },
-            }),
-        ],
+        plugins: [del({ targets: 'dist/*' }), nodeResolve(), typescript()],
     },
 
     // es5 entry point
@@ -57,10 +49,10 @@ export default defineConfig([
             nodeResolve(),
             typescript({
                 compilerOptions: {
-                    noEmitOnError: true,
                     // We don't want to emit declaration files more than once
                     declaration: false,
                     declarationMap: false,
+                    outDir: 'dist/es5/types',
                 },
             }),
         ],

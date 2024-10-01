@@ -13,13 +13,14 @@
         // Emit
         "declaration": true,
         "noEmit": true,
-        "outDir": "types",
+        "outDir": "dist/types",
         "sourceMap": true,
         // Interop Constraints
         "esModuleInterop": true,
         "forceConsistentCasingInFileNames": true,
         // Language and Environment
-        "target": "ESNext"
+        "target": "ESNext",
+        "noEmitOnError": true
     },
     "include": ["src/**/*"]
 }
