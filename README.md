@@ -3,7 +3,7 @@
 <div align="center">
     <br />
     <a href="https://github.com/dcastil/tailwind-merge">
-        <img src="https://github.com/dcastil/tailwind-merge/raw/v2.5.2/assets/logo.svg" alt="tailwind-merge" height="150px" />
+        <img src="https://github.com/dcastil/tailwind-merge/raw/v2.5.3/assets/logo.svg" alt="tailwind-merge" height="150px" />
     </a>
 </div>
 
@@ -25,14 +25,14 @@ twMerge('px-2 py-1 bg-red hover:bg-dark-red', 'p-3 bg-[#B91C1C]')
 
 ## Get started
 
--   [What is it for](https://github.com/dcastil/tailwind-merge/tree/v2.5.2/docs/what-is-it-for.md)
--   [When and how to use it](https://github.com/dcastil/tailwind-merge/tree/v2.5.2/docs/when-and-how-to-use-it.md)
--   [Features](https://github.com/dcastil/tailwind-merge/tree/v2.5.2/docs/features.md)
--   [Limitations](https://github.com/dcastil/tailwind-merge/tree/v2.5.2/docs/limitations.md)
--   [Configuration](https://github.com/dcastil/tailwind-merge/tree/v2.5.2/docs/configuration.md)
--   [Recipes](https://github.com/dcastil/tailwind-merge/tree/v2.5.2/docs/recipes.md)
--   [API reference](https://github.com/dcastil/tailwind-merge/tree/v2.5.2/docs/api-reference.md)
--   [Writing plugins](https://github.com/dcastil/tailwind-merge/tree/v2.5.2/docs/writing-plugins.md)
--   [Versioning](https://github.com/dcastil/tailwind-merge/tree/v2.5.2/docs/versioning.md)
--   [Contributing](https://github.com/dcastil/tailwind-merge/tree/v2.5.2/docs/contributing.md)
--   [Similar packages](https://github.com/dcastil/tailwind-merge/tree/v2.5.2/docs/similar-packages.md)
+-   [What is it for](https://github.com/dcastil/tailwind-merge/tree/v2.5.3/docs/what-is-it-for.md)
+-   [When and how to use it](https://github.com/dcastil/tailwind-merge/tree/v2.5.3/docs/when-and-how-to-use-it.md)
+-   [Features](https://github.com/dcastil/tailwind-merge/tree/v2.5.3/docs/features.md)
+-   [Limitations](https://github.com/dcastil/tailwind-merge/tree/v2.5.3/docs/limitations.md)
+-   [Configuration](https://github.com/dcastil/tailwind-merge/tree/v2.5.3/docs/configuration.md)
+-   [Recipes](https://github.com/dcastil/tailwind-merge/tree/v2.5.3/docs/recipes.md)
+-   [API reference](https://github.com/dcastil/tailwind-merge/tree/v2.5.3/docs/api-reference.md)
+-   [Writing plugins](https://github.com/dcastil/tailwind-merge/tree/v2.5.3/docs/writing-plugins.md)
+-   [Versioning](https://github.com/dcastil/tailwind-merge/tree/v2.5.3/docs/versioning.md)
+-   [Contributing](https://github.com/dcastil/tailwind-merge/tree/v2.5.3/docs/contributing.md)
+-   [Similar packages](https://github.com/dcastil/tailwind-merge/tree/v2.5.3/docs/similar-packages.md)
