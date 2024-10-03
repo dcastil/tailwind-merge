@@ -1159,6 +1159,16 @@ export const getDefaultConfig = () => {
              */
             'border-color-y': [{ 'border-y': [borderColor] }],
             /**
+             * Border Color S
+             * @see https://tailwindcss.com/docs/border-color
+             */
+            'border-color-s': [{ 'border-s': [borderColor] }],
+            /**
+             * Border Color E
+             * @see https://tailwindcss.com/docs/border-color
+             */
+            'border-color-e': [{ 'border-e': [borderColor] }],
+            /**
              * Border Color Top
              * @see https://tailwindcss.com/docs/border-color
              */
@@ -1821,6 +1831,8 @@ export const getDefaultConfig = () => {
             'border-w-x': ['border-w-r', 'border-w-l'],
             'border-w-y': ['border-w-t', 'border-w-b'],
             'border-color': [
+                'border-color-s',
+                'border-color-e',
                 'border-color-t',
                 'border-color-r',
                 'border-color-b',
