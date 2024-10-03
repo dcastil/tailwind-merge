@@ -1,5 +1,23 @@
 # Changelog for v2 releases
 
+## v2.5.3
+
+### Bug Fixes
+
+-   Add missing logical border color properties by [@sherlockdoyle](https://github.com/sherlockdoyle) in [#478](https://github.com/dcastil/tailwind-merge/pull/478)
+
+### Documentation
+
+-   Add benchmark reporting to PRs and commits by [@XantreDev](https://github.com/XantreDev) in [#455](https://github.com/dcastil/tailwind-merge/pull/455)
+
+### Other
+
+-   Switch test suite to vitest by [@dcastil](https://github.com/dcastil) in [#461](https://github.com/dcastil/tailwind-merge/pull/461)
+
+**Full Changelog**: [`v2.5.2...v2.5.3`](https://github.com/dcastil/tailwind-merge/compare/v2.5.2...v2.5.3)
+
+Thanks to [@brandonmcconnell](https://github.com/brandonmcconnell), [@manavm1990](https://github.com/manavm1990), [@langy](https://github.com/langy), [@jamesreaco](https://github.com/jamesreaco), [@roboflow](https://github.com/roboflow), [@xeger](https://github.com/xeger) and [@MrDeatHHH](https://github.com/MrDeatHHH) for sponsoring tailwind-merge! ❤️
+
 ## v2.5.2
 
 ### Bug Fixes
