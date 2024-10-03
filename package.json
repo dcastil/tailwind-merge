@@ -69,6 +69,7 @@
         "@rollup/plugin-node-resolve": "^15.3.0",
         "@rollup/plugin-typescript": "^12.1.0",
         "@vitest/coverage-v8": "^2.1.1",
+        "@vitest/eslint-plugin": "^1.1.5",
         "babel-plugin-annotate-pure-calls": "^0.4.0",
         "babel-plugin-polyfill-regenerator": "^0.6.2",
         "eslint": "^9.11.1",

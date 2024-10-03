@@ -1,3 +1,4 @@
+import vitestPlugin from '@vitest/eslint-plugin'
 import importPlugin from 'eslint-plugin-import'
 import typescriptPlugin from 'typescript-eslint'
 
@@ -10,6 +11,7 @@ export default typescriptPlugin.config(
     },
     typescriptPlugin.configs.base,
     importPlugin.configs.typescript,
+    vitestPlugin.configs.recommended,
     {
         plugins: {
             import: importPlugin,
