@@ -1,5 +1,7 @@
 // @ts-check
 
+import path from 'node:path'
+
 import { getBabelOutputPlugin } from '@rollup/plugin-babel'
 import { nodeResolve } from '@rollup/plugin-node-resolve'
 import typescript from '@rollup/plugin-typescript'
@@ -52,7 +54,7 @@ export default defineConfig([
                     // We don't want to emit declaration files more than once
                     declaration: false,
                     declarationMap: false,
-                    outDir: 'dist/es5/types',
+                    outDir: path.dirname(pkg.exports['./es5'].import),
                 },
             }),
         ],
@@ -92,6 +94,11 @@ function getOutputConfig({ file, format, targets }) {
         sourcemap: true,
         freeze: false,
         generatedCode: 'es2015',
+        sourcemapPathTransform(relativeSourcePath) {
+            // This is necessary because of the tsconfig.compilerOptions.outDir option resulting in a path one level deeper than the output directory.
+            // But we also don't want to sync those output paths because that would make the setup for rollup-plugin-delete more complicated.
+            return relativeSourcePath.replace('../', '')
+        },
         plugins: [
             getBabelOutputPlugin({
                 presets: [
