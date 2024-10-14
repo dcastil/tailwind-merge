@@ -1,5 +1,15 @@
 # Changelog for v2 releases
 
+## v2.5.4
+
+### Bug Fixes
+
+-   Fix incorrect paths within sourcemaps by [@dcastil](https://github.com/dcastil) in [#483](https://github.com/dcastil/tailwind-merge/pull/483)
+
+**Full Changelog**: [`v2.5.3...v2.5.4`](https://github.com/dcastil/tailwind-merge/compare/v2.5.3...v2.5.4)
+
+Thanks to [@brandonmcconnell](https://github.com/brandonmcconnell), [@manavm1990](https://github.com/manavm1990), [@langy](https://github.com/langy), [@jamesreaco](https://github.com/jamesreaco), [@roboflow](https://github.com/roboflow) and [@codecov](https://github.com/codecov) for sponsoring tailwind-merge! ❤️
+
 ## v2.5.3
 
 ### Bug Fixes
