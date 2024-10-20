@@ -16,7 +16,7 @@ categories:
     - title: 'New Features'
       label: 'feature'
     - title: 'Bug Fixes'
-      label: 'bugfix'
+      label: 'bug'
     - title: 'Documentation'
       label: 'documentation'
     - title: 'Other'
@@ -32,7 +32,7 @@ version-resolver:
             - 'feature'
     patch:
         labels:
-            - 'bugfix'
+            - 'bug'
             - 'documentation'
             - 'other'
     default: 'patch'
@@ -42,11 +42,11 @@ autolabeler:
           - '/\bfeature\b/i'
       title:
           - '/\bfeature\b/i'
-    - label: 'bugfix'
+    - label: 'bug'
       branch:
-          - '/\b(bugfix|fix)\b/i'
+          - '/\b(bug|bugfix|fix)\b/i'
       title:
-          - '/\b(bugfix|fix)\b/i'
+          - '/\b(bug|bugfix|fix)\b/i'
     - label: 'documentation'
       branch:
           - '/\b(documentation|docs)\b/i'
