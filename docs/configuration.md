@@ -1,5 +1,16 @@
 # Configuration
 
+## Installation
+
+The tailwind-merge package is hosted on npm under the name [`tailwind-merge`](https://www.npmjs.com/package/tailwind-merge). There are lots of package managers for installing packages hosted on npm. Here are installation instructions for the most popular ones: [npm](https://npmjs.com), [yarn](https://yarnpkg.com), [pnpm](https://pnpm.io) and [bun](https://bun.sh).
+
+```sh
+npm add tailwind-merge
+yarn add tailwind-merge
+pnpm add tailwind-merge
+bun add tailwind-merge
+```
+
 ## Basic usage
 
 If you're using Tailwind CSS without any extra config, you can use [`twMerge`](./api-reference.md#twmerge) right away. You can safely stop reading the documentation here.
