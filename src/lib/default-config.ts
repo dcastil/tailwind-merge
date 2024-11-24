@@ -727,7 +727,7 @@ export const getDefaultConfig = () => {
              * Font Variant Numeric
              * @see https://tailwindcss.com/docs/font-variant-numeric
              */
-            'fvn-fraction': ['diagonal-fractions', 'stacked-fractons'],
+            'fvn-fraction': ['diagonal-fractions', 'stacked-fractions'],
             /**
              * Letter Spacing
              * @see https://tailwindcss.com/docs/letter-spacing
