@@ -1,5 +1,19 @@
 # Changelog for v2 releases
 
+## v2.5.5
+
+### Bug Fixes
+
+-   Fix typo "fractons" instead of "fractions" in "stacked-fractions" class by [@oliverhaas](https://github.com/oliverhaas) in [#492](https://github.com/dcastil/tailwind-merge/pull/492)
+
+### Documentation
+
+-   Add installation instructions to configuration docs by [@dcastil](https://github.com/dcastil) in [#486](https://github.com/dcastil/tailwind-merge/pull/486)
+
+**Full Changelog**: [`v2.5.4...v2.5.5`](https://github.com/dcastil/tailwind-merge/compare/v2.5.4...v2.5.5)
+
+Thanks to [@brandonmcconnell](https://github.com/brandonmcconnell), [@manavm1990](https://github.com/manavm1990), [@langy](https://github.com/langy), [@jamesreaco](https://github.com/jamesreaco), [@roboflow](https://github.com/roboflow), [@syntaxfm](https://github.com/syntaxfm), [@getsentry](https://github.com/getsentry), [@codecov](https://github.com/codecov) and more via [@thnxdev](https://github.com/thnxdev) for sponsoring tailwind-merge! ❤️
+
 ## v2.5.4
 
 ### Bug Fixes
