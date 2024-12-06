@@ -28,7 +28,15 @@ export default defineConfig([
             }),
         ],
         external: /node_modules/,
-        plugins: [del({ targets: 'dist/*' }), nodeResolve(), typescript()],
+        plugins: [
+            del({ targets: 'dist/*' }),
+            nodeResolve(),
+            typescript({
+                compilerOptions: {
+                    outDir: path.dirname(pkg.exports['.'].import),
+                },
+            }),
+        ],
     },
 
     // es5 entry point
@@ -55,6 +63,8 @@ export default defineConfig([
                     declaration: false,
                     declarationMap: false,
                     outDir: path.dirname(pkg.exports['./es5'].import),
+                    // This is needed to correct source map paths
+                    sourceRoot: '../src',
                 },
             }),
         ],
@@ -62,7 +72,7 @@ export default defineConfig([
 
     // Type declarations of default and es5 entry points
     {
-        input: 'dist/types/index.d.ts',
+        input: 'dist/index.d.ts',
         output: {
             file: pkg.exports['.'].types,
             format: 'esm',
@@ -70,7 +80,7 @@ export default defineConfig([
         plugins: [
             dts(),
             del({
-                targets: 'dist/types',
+                targets: ['dist/lib', 'dist/index.d.ts'],
                 hook: 'buildEnd',
                 runOnce: true,
             }),
@@ -94,11 +104,6 @@ function getOutputConfig({ file, format, targets }) {
         sourcemap: true,
         freeze: false,
         generatedCode: 'es2015',
-        sourcemapPathTransform(relativeSourcePath) {
-            // This is necessary because of the tsconfig.compilerOptions.outDir option resulting in a path one level deeper than the output directory.
-            // But we also don't want to sync those output paths because that would make the setup for rollup-plugin-delete more complicated.
-            return relativeSourcePath.replace('../', '')
-        },
         plugins: [
             getBabelOutputPlugin({
                 presets: [
