@@ -1,10 +1,10 @@
 import { createConfigUtils } from './config-utils'
 import { mergeClassList } from './merge-classlist'
 import { ClassNameValue, twJoin } from './tw-join'
-import { GenericConfig } from './types'
+import { AnyConfig } from './types'
 
-type CreateConfigFirst = () => GenericConfig
-type CreateConfigSubsequent = (config: GenericConfig) => GenericConfig
+type CreateConfigFirst = () => AnyConfig
+type CreateConfigSubsequent = (config: AnyConfig) => AnyConfig
 type TailwindMerge = (...classLists: ClassNameValue[]) => string
 type ConfigUtils = ReturnType<typeof createConfigUtils>
 
@@ -20,7 +20,7 @@ export function createTailwindMerge(
     function initTailwindMerge(classList: string) {
         const config = createConfigRest.reduce(
             (previousConfig, createConfigCurrent) => createConfigCurrent(previousConfig),
-            createConfigFirst() as GenericConfig,
+            createConfigFirst() as AnyConfig,
         )
 
         configUtils = createConfigUtils(config)

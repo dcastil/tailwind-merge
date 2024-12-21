@@ -1,8 +1,14 @@
+/**
+ * Type the tailwind-merge configuration adheres to.
+ */
 export interface Config<ClassGroupIds extends string, ThemeGroupIds extends string>
-    extends ConfigStatic,
-        ConfigGroups<ClassGroupIds, ThemeGroupIds> {}
+    extends ConfigStaticPart,
+        ConfigGroupsPart<ClassGroupIds, ThemeGroupIds> {}
 
-interface ConfigStatic {
+/**
+ * The static part of the tailwind-merge configuration. When merging multiple configurations, the properties of this interface are always overridden.
+ */
+interface ConfigStaticPart {
     /**
      * Integer indicating size of LRU cache used for memoizing results.
      * - Cache might be up to twice as big as `cacheSize`
@@ -75,7 +81,10 @@ export interface ExperimentalParsedClassName {
     maybePostfixModifierPosition: number | undefined
 }
 
-interface ConfigGroups<ClassGroupIds extends string, ThemeGroupIds extends string> {
+/**
+ * The dynamic part of the tailwind-merge configuration. When merging multiple configurations, the user can choose to either override or extend the properties of this interface.
+ */
+interface ConfigGroupsPart<ClassGroupIds extends string, ThemeGroupIds extends string> {
     /**
      * Theme scales used in classGroups.
      * The keys are the same as in the Tailwind config but the values are sometimes defined more broadly.
@@ -109,10 +118,13 @@ interface ConfigGroups<ClassGroupIds extends string, ThemeGroupIds extends strin
     >
 }
 
+/**
+ * Type of the configuration object that can be passed to `extendTailwindMerge`.
+ */
 export interface ConfigExtension<ClassGroupIds extends string, ThemeGroupIds extends string>
-    extends Partial<ConfigStatic> {
-    override?: PartialPartial<ConfigGroups<ClassGroupIds, ThemeGroupIds>>
-    extend?: PartialPartial<ConfigGroups<ClassGroupIds, ThemeGroupIds>>
+    extends Partial<ConfigStaticPart> {
+    override?: PartialPartial<ConfigGroupsPart<ClassGroupIds, ThemeGroupIds>>
+    extend?: PartialPartial<ConfigGroupsPart<ClassGroupIds, ThemeGroupIds>>
 }
 
 type PartialPartial<T> = {
@@ -131,7 +143,7 @@ type ClassDefinition<ThemeGroupIds extends string> =
     | ClassObject<ThemeGroupIds>
 export type ClassValidator = (classPart: string) => boolean
 export interface ThemeGetter {
-    (theme: ThemeObject<GenericThemeGroupIds>): ClassGroup<GenericClassGroupIds>
+    (theme: ThemeObject<AnyThemeGroupIds>): ClassGroup<AnyClassGroupIds>
     isThemeGetter: true
 }
 type ClassObject<ThemeGroupIds extends string> = Record<
@@ -139,10 +151,16 @@ type ClassObject<ThemeGroupIds extends string> = Record<
     readonly ClassDefinition<ThemeGroupIds>[]
 >
 
-// Hack from https://stackoverflow.com/questions/56687668/a-way-to-disable-type-argument-inference-in-generics/56688073#56688073
+/**
+ * Hack from https://stackoverflow.com/questions/56687668/a-way-to-disable-type-argument-inference-in-generics/56688073#56688073
+ *
+ * Could be replaced with NoInfer utility type from TypeScript (https://www.typescriptlang.org/docs/handbook/utility-types.html#noinfertype), but that is only supported in TypeScript 5.4 or higher, so I should wait some time before using it.
+ */
 export type NoInfer<T> = [T][T extends any ? 0 : never]
 
 /**
+ * Theme group IDs included in the default configuration of tailwind-merge.
+ *
  * If you want to use a scale that is not supported in the `ThemeObject` type,
  * consider using `classGroups` instead of `theme`.
  *
@@ -176,6 +194,9 @@ export type DefaultThemeGroupIds =
     | 'spacing'
     | 'translate'
 
+/**
+ * Class group IDs included in the default configuration of tailwind-merge.
+ */
 export type DefaultClassGroupIds =
     | 'accent'
     | 'align-content'
@@ -458,7 +479,10 @@ export type DefaultClassGroupIds =
     | 'will-change'
     | 'z'
 
-export type GenericClassGroupIds = string
-export type GenericThemeGroupIds = string
+export type AnyClassGroupIds = string
+export type AnyThemeGroupIds = string
 
-export type GenericConfig = Config<GenericClassGroupIds, GenericThemeGroupIds>
+/**
+ * type of the tailwind-merge configuration that allows for any possible configuration.
+ */
+export type AnyConfig = Config<AnyClassGroupIds, AnyThemeGroupIds>
