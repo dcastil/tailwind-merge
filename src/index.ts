@@ -8,6 +8,7 @@ export { twMerge } from './lib/tw-merge'
 export {
     type ClassValidator,
     type Config,
+    type ConfigExtension,
     type DefaultClassGroupIds,
     type DefaultThemeGroupIds,
     type ExperimentalParseClassNameParam,
