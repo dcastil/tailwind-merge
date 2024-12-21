@@ -1,10 +1,10 @@
 import {
+    AnyClassGroupIds,
+    AnyConfig,
+    AnyThemeGroupIds,
     ClassGroup,
     ClassValidator,
     Config,
-    GenericClassGroupIds,
-    GenericConfig,
-    GenericThemeGroupIds,
     ThemeGetter,
     ThemeObject,
 } from './types'
@@ -12,17 +12,17 @@ import {
 export interface ClassPartObject {
     nextPart: Map<string, ClassPartObject>
     validators: ClassValidatorObject[]
-    classGroupId?: GenericClassGroupIds
+    classGroupId?: AnyClassGroupIds
 }
 
 interface ClassValidatorObject {
-    classGroupId: GenericClassGroupIds
+    classGroupId: AnyClassGroupIds
     validator: ClassValidator
 }
 
 const CLASS_PART_SEPARATOR = '-'
 
-export const createClassGroupUtils = (config: GenericConfig) => {
+export const createClassGroupUtils = (config: AnyConfig) => {
     const classMap = createClassMap(config)
     const { conflictingClassGroups, conflictingClassGroupModifiers } = config
 
@@ -38,7 +38,7 @@ export const createClassGroupUtils = (config: GenericConfig) => {
     }
 
     const getConflictingClassGroupIds = (
-        classGroupId: GenericClassGroupIds,
+        classGroupId: AnyClassGroupIds,
         hasPostfixModifier: boolean,
     ) => {
         const conflicts = conflictingClassGroups[classGroupId] || []
@@ -59,7 +59,7 @@ export const createClassGroupUtils = (config: GenericConfig) => {
 const getGroupRecursive = (
     classParts: string[],
     classPartObject: ClassPartObject,
-): GenericClassGroupIds | undefined => {
+): AnyClassGroupIds | undefined => {
     if (classParts.length === 0) {
         return classPartObject.classGroupId
     }
@@ -103,7 +103,7 @@ const getGroupIdForArbitraryProperty = (className: string) => {
 /**
  * Exported for testing only
  */
-export const createClassMap = (config: Config<GenericClassGroupIds, GenericThemeGroupIds>) => {
+export const createClassMap = (config: Config<AnyClassGroupIds, AnyThemeGroupIds>) => {
     const { theme, prefix } = config
     const classMap: ClassPartObject = {
         nextPart: new Map<string, ClassPartObject>(),
@@ -123,10 +123,10 @@ export const createClassMap = (config: Config<GenericClassGroupIds, GenericTheme
 }
 
 const processClassesRecursively = (
-    classGroup: ClassGroup<GenericThemeGroupIds>,
+    classGroup: ClassGroup<AnyThemeGroupIds>,
     classPartObject: ClassPartObject,
-    classGroupId: GenericClassGroupIds,
-    theme: ThemeObject<GenericThemeGroupIds>,
+    classGroupId: AnyClassGroupIds,
+    theme: ThemeObject<AnyThemeGroupIds>,
 ) => {
     classGroup.forEach((classDefinition) => {
         if (typeof classDefinition === 'string') {
@@ -187,9 +187,9 @@ const isThemeGetter = (func: ClassValidator | ThemeGetter): func is ThemeGetter 
     (func as ThemeGetter).isThemeGetter
 
 const getPrefixedClassGroupEntries = (
-    classGroupEntries: Array<[classGroupId: string, classGroup: ClassGroup<GenericThemeGroupIds>]>,
+    classGroupEntries: Array<[classGroupId: string, classGroup: ClassGroup<AnyThemeGroupIds>]>,
     prefix: string | undefined,
-): Array<[classGroupId: string, classGroup: ClassGroup<GenericThemeGroupIds>]> => {
+): Array<[classGroupId: string, classGroup: ClassGroup<AnyThemeGroupIds>]> => {
     if (!prefix) {
         return classGroupEntries
     }

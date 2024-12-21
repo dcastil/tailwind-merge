@@ -1,8 +1,8 @@
-import { GenericConfig } from './types'
+import { AnyConfig } from './types'
 
 export const IMPORTANT_MODIFIER = '!'
 
-export const createParseClassName = (config: GenericConfig) => {
+export const createParseClassName = (config: AnyConfig) => {
     const { separator, experimentalParseClassName } = config
     const isSeparatorSingleCharacter = separator.length === 1
     const firstSeparatorCharacter = separator[0]
