@@ -1,7 +1,7 @@
 import { expect, test } from 'vitest'
 
 import { extendTailwindMerge, fromTheme, getDefaultConfig, mergeConfigs } from '../src'
-import { GenericConfig } from '../src/lib/types'
+import { AnyConfig } from '../src/lib/types'
 
 test('extendTailwindMerge type generics work correctly', () => {
     const tailwindMerge1 = extendTailwindMerge({
@@ -69,7 +69,7 @@ test('extendTailwindMerge type generics work correctly', () => {
 
     expect(tailwindMerge2('')).toBe('')
 
-    const tailwindMerge3 = extendTailwindMerge((v: GenericConfig) => v, getDefaultConfig)
+    const tailwindMerge3 = extendTailwindMerge((v: AnyConfig) => v, getDefaultConfig)
 
     expect(tailwindMerge3('')).toBe('')
 })
