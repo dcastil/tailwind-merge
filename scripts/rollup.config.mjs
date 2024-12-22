@@ -9,7 +9,7 @@ import { defineConfig } from 'rollup'
 import del from 'rollup-plugin-delete'
 import { dts } from 'rollup-plugin-dts'
 
-import pkg from '../package.json' assert { type: 'json' }
+import pkg from '../package.json' with { type: 'json' }
 
 export default defineConfig([
     // Default entry point

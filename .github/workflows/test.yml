@@ -11,17 +11,17 @@ jobs:
         runs-on: ubuntu-latest
         steps:
             - uses: actions/checkout@v4
-            - name: Use Node.js 20
+            - name: Use Node.js 22
               uses: actions/setup-node@v4
               with:
-                  node-version: 20.11.1
+                  node-version: 22.x
             - name: Use node_modules cache
               uses: actions/cache@v4
               with:
                   path: node_modules
-                  key: yarn-node-20-lock-${{ hashFiles('yarn.lock') }}
+                  key: yarn-node-22-lock-${{ hashFiles('yarn.lock') }}
                   restore-keys: |
-                      yarn-node-20-lock-
+                      yarn-node-22-lock-
             - run: yarn install --frozen-lockfile
             - run: yarn lint
             - run: yarn test
