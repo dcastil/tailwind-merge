@@ -1,6 +1,6 @@
 {
     "extends": [
-        "config:base",
+        "config:recommended",
         ":combinePatchMinorReleases",
         "group:allNonMajor",
         ":labels(dependencies,skip changelog)",
