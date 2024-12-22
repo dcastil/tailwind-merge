@@ -64,7 +64,7 @@
     "devDependencies": {
         "@babel/core": "^7.26.0",
         "@babel/preset-env": "^7.26.0",
-        "@codspeed/vitest-plugin": "^3.1.1",
+        "@codspeed/vitest-plugin": "^4.0.0",
         "@rollup/plugin-babel": "^6.0.4",
         "@rollup/plugin-node-resolve": "^15.3.0",
         "@rollup/plugin-typescript": "^12.1.1",
