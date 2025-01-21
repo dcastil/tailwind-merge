@@ -1,68 +1,69 @@
 name: Auto Label New Issues, PRs, and Discussions
 
 on:
-  issues:
-    types: [opened]
-  pull_request_target:
-    types: [opened]
-  discussion:
-    types: [created]
+    issues:
+        types: [opened]
+    pull_request_target:
+        types: [opened]
+    discussion:
+        types: [created]
 
 jobs:
-  add-label:
-    runs-on: ubuntu-latest
+    add-label:
+        runs-on: ubuntu-latest
 
-    permissions:
-      issues: write
-      discussions: write
-      pull-requests: write
+        permissions:
+            issues: write
+            discussions: write
+            pull-requests: write
 
-    env:
-      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      REPO_OWNER: ${{ github.repository_owner }}
-      REPO_NAME: ${{ github.event.repository.name }}
-      
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+        env:
+            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+            REPO_OWNER: ${{ github.repository_owner }}
+            REPO_NAME: ${{ github.event.repository.name }}
+            LABEL_NAME: context-v2
 
-      - name: Add context-v2 label to new issue
-        if: github.event_name == 'issues'
-        run: |
-          ISSUE_NUMBER=${{ github.event.issue.number }}
-          gh issue edit "$ISSUE_NUMBER" --add-label "context-v2"
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@v4
 
-      - name: Add context-v2 label to new PR
-        if: github.event_name == 'pull_request_target'
-        run: |
-          PR_NUMBER=${{ github.event.pull_request.number }}
-          gh pr edit "$PR_NUMBER" --add-label "context-v2"
+            - name: Add label to new issue
+              if: github.event_name == 'issues'
+              run: |
+                  ISSUE_NUMBER=${{ github.event.issue.number }}
+                  gh issue edit "$ISSUE_NUMBER" --add-label "$LABEL_NAME"
 
-      - name: Get label id for discussion
-        id: label-data
-        if: github.event_name == 'discussion'
-        run: |
-          res="$(gh api \
-            -H "Accept: application/vnd.github+json" \
-            -H "X-GitHub-Api-Version: 2022-11-28" \
-            /repos/$REPO_OWNER/$REPO_NAME/labels/context-v2 --jq '.node_id')"
-          echo "label_id=$res" >> $GITHUB_OUTPUT
+            - name: Add label to new PR
+              if: github.event_name == 'pull_request_target'
+              run: |
+                  PR_NUMBER=${{ github.event.pull_request.number }}
+                  gh pr edit "$PR_NUMBER" --add-label "$LABEL_NAME"
 
-      - name: Add context-v2 label to new discussion
-        uses: octokit/graphql-action@v2.x
-        if: github.event_name == 'discussion'
-        env: 
-          DISCUSSION_ID: ${{ github.event.discussion.node_id }}
-          LABEL_ID: ${{ steps.label-data.outputs.label_id }}
-        with:
-          query: |
-            mutation {
-              addLabelsToLabelable(
-                input:{
-                  labelableId: "${{env.DISCUSSION_ID}}"
-                  labelIds: ["${{ env.LABEL_ID}}"]
-                }
-              ) {
-                clientMutationId
-              }
-            }
+            - name: Get label id for discussion
+              id: label-data
+              if: github.event_name == 'discussion'
+              run: |
+                  res="$(gh api \
+                    -H "Accept: application/vnd.github+json" \
+                    -H "X-GitHub-Api-Version: 2022-11-28" \
+                    /repos/$REPO_OWNER/$REPO_NAME/labels/$LABEL_NAME --jq '.node_id')"
+                  echo "label_id=$res" >> $GITHUB_OUTPUT
+
+            - name: Add label to new discussion
+              uses: octokit/graphql-action@v2.x
+              if: github.event_name == 'discussion'
+              env:
+                  DISCUSSION_ID: ${{ github.event.discussion.node_id }}
+                  LABEL_ID: ${{ steps.label-data.outputs.label_id }}
+              with:
+                  query: |
+                      mutation {
+                        addLabelsToLabelable(
+                          input:{
+                            labelableId: "${{env.DISCUSSION_ID}}"
+                            labelIds: ["${{ env.LABEL_ID}}"]
+                          }
+                        ) {
+                          clientMutationId
+                        }
+                      }
