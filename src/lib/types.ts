@@ -267,6 +267,7 @@ export type DefaultClassGroupIds =
     | 'col-end'
     | 'col-start-end'
     | 'col-start'
+    | 'color-scheme'
     | 'columns'
     | 'container'
     | 'content'

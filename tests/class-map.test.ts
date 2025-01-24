@@ -215,6 +215,7 @@ test('class map has correct class groups at first part', () => {
         row: ['row-end', 'row-start', 'row-start-end'],
         saturate: ['saturate'],
         scale: ['scale', 'scale-x', 'scale-y'],
+        scheme: ['color-scheme'],
         scroll: [
             'scroll-behavior',
             'scroll-m',
