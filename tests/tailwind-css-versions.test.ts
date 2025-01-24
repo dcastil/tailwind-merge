@@ -70,6 +70,7 @@ test('supports Tailwind CSS v4.0 features', () => {
         'perspective-origin-top-left',
     )
     expect(twMerge('bg-linear-to-r bg-linear-45')).toBe('bg-linear-45')
+    expect(twMerge('bg-linear-to-r bg-radial-[something] bg-conic-10')).toBe('bg-conic-10')
 
     // TODO: Remove proto
     expect(twMerge('')).toBe('')

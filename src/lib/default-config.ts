@@ -947,7 +947,10 @@ export const getDefaultConfig = () => {
                             linear: [
                                 { to: ['t', 'tr', 'r', 'br', 'b', 'bl', 'l', 'tl'] },
                                 isInteger,
+                                isArbitraryValue,
                             ],
+                            radial: ['', isArbitraryValue],
+                            conic: [isInteger, isArbitraryValue],
                         },
                         isArbitraryImage,
                     ],
