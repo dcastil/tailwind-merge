@@ -87,6 +87,7 @@ export const getDefaultConfig = () => {
     const getBreaks = () =>
         ['auto', 'avoid', 'all', 'avoid-page', 'page', 'left', 'right', 'column'] as const
     const getNumberAndArbitrary = () => [isNumber, isArbitraryValue]
+    const getRotate = () => ['none', isInteger, isArbitraryValue]
 
     return {
         cacheSize: 500,
@@ -1467,7 +1468,22 @@ export const getDefaultConfig = () => {
              * Rotate
              * @see https://tailwindcss.com/docs/rotate
              */
-            rotate: [{ rotate: [isInteger, isArbitraryValue] }],
+            rotate: [{ rotate: getRotate() }],
+            /**
+             * Rotate X
+             * @see https://tailwindcss.com/docs/rotate
+             */
+            'rotate-x': [{ 'rotate-x': getRotate() }],
+            /**
+             * Rotate Y
+             * @see https://tailwindcss.com/docs/rotate
+             */
+            'rotate-y': [{ 'rotate-y': getRotate() }],
+            /**
+             * Rotate Z
+             * @see https://tailwindcss.com/docs/rotate
+             */
+            'rotate-z': [{ 'rotate-z': getRotate() }],
             /**
              * Translate X
              * @see https://tailwindcss.com/docs/translate

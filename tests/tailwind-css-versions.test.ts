@@ -60,4 +60,7 @@ test('supports Tailwind CSS v3.4 features', () => {
 
 test('supports Tailwind CSS v4.0 features', () => {
     expect(twMerge('transform-3d transform-flat')).toBe('transform-flat')
+    expect(twMerge('rotate-12 rotate-x-2 rotate-none rotate-y-3')).toBe(
+        'rotate-x-2 rotate-none rotate-y-3',
+    )
 })
