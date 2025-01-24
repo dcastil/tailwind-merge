@@ -109,6 +109,7 @@ test('class map has correct class groups at first part', () => {
         duration: ['duration'],
         ease: ['ease'],
         end: ['end'],
+        field: ['field-sizing'],
         fill: ['fill'],
         filter: ['filter'],
         fixed: ['position'],

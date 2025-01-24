@@ -74,6 +74,7 @@ test('supports Tailwind CSS v4.0 features', () => {
     expect(twMerge('ring-4 ring-orange inset-ring inset-ring-3 inset-ring-blue')).toBe(
         'ring-4 ring-orange inset-ring-3 inset-ring-blue',
     )
+    expect(twMerge('field-sizing-content field-sizing-fixed')).toBe('field-sizing-fixed')
 
     // TODO: Remove proto
     expect(twMerge('')).toBe('')
