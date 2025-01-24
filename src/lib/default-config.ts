@@ -812,11 +812,6 @@ export const getDefaultConfig = () => {
              */
             'placeholder-color': [{ placeholder: [colors] }],
             /**
-             * Placeholder Opacity
-             * @see https://tailwindcss.com/docs/placeholder-opacity
-             */
-            'placeholder-opacity': [{ 'placeholder-opacity': [opacity] }],
-            /**
              * Text Alignment
              * @see https://tailwindcss.com/docs/text-align
              */
@@ -826,11 +821,6 @@ export const getDefaultConfig = () => {
              * @see https://tailwindcss.com/docs/text-color
              */
             'text-color': [{ text: [colors] }],
-            /**
-             * Text Opacity
-             * @see https://tailwindcss.com/docs/text-opacity
-             */
-            'text-opacity': [{ 'text-opacity': [opacity] }],
             /**
              * Text Decoration
              * @see https://tailwindcss.com/docs/text-decoration
@@ -930,12 +920,6 @@ export const getDefaultConfig = () => {
              * @see https://tailwindcss.com/docs/background-clip
              */
             'bg-clip': [{ 'bg-clip': ['border', 'padding', 'content', 'text'] }],
-            /**
-             * Background Opacity
-             * @deprecated since Tailwind CSS v3.0.0
-             * @see https://tailwindcss.com/docs/background-opacity
-             */
-            'bg-opacity': [{ 'bg-opacity': [opacity] }],
             /**
              * Background Origin
              * @see https://tailwindcss.com/docs/background-origin
@@ -1134,11 +1118,6 @@ export const getDefaultConfig = () => {
              */
             'border-w-l': [{ 'border-l': [borderWidth] }],
             /**
-             * Border Opacity
-             * @see https://tailwindcss.com/docs/border-opacity
-             */
-            'border-opacity': [{ 'border-opacity': [opacity] }],
-            /**
              * Border Style
              * @see https://tailwindcss.com/docs/border-style
              */
@@ -1163,11 +1142,6 @@ export const getDefaultConfig = () => {
              * @see https://tailwindcss.com/docs/divide-width
              */
             'divide-y-reverse': ['divide-y-reverse'],
-            /**
-             * Divide Opacity
-             * @see https://tailwindcss.com/docs/divide-opacity
-             */
-            'divide-opacity': [{ 'divide-opacity': [opacity] }],
             /**
              * Divide Style
              * @see https://tailwindcss.com/docs/divide-style
