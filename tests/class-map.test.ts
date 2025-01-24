@@ -264,7 +264,7 @@ test('class map has correct class groups at first part', () => {
         top: ['top'],
         touch: ['touch', 'touch-pz', 'touch-x', 'touch-y'],
         tracking: ['tracking'],
-        transform: ['transform'],
+        transform: ['transform', 'transform-style'],
         transition: ['transition'],
         translate: ['translate-x', 'translate-y'],
         truncate: ['text-overflow'],

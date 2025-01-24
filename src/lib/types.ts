@@ -467,6 +467,7 @@ export type DefaultClassGroupIds =
     | 'touch'
     | 'tracking'
     | 'transform-origin'
+    | 'transform-style'
     | 'transform'
     | 'transition'
     | 'translate-x'

@@ -57,3 +57,7 @@ test('supports Tailwind CSS v3.4 features', () => {
     expect(twMerge('float-start float-end clear-start clear-end')).toBe('float-end clear-end')
     expect(twMerge('*:p-10 *:p-20 hover:*:p-10 hover:*:p-20')).toBe('*:p-20 hover:*:p-20')
 })
+
+test('supports Tailwind CSS v4.0 features', () => {
+    expect(twMerge('transform-3d transform-flat')).toBe('transform-flat')
+})

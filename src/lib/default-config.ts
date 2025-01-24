@@ -1508,6 +1508,11 @@ export const getDefaultConfig = () => {
                     ],
                 },
             ],
+            /**
+             * Transform Style
+             * @see https://tailwindcss.com/docs/transform-style
+             */
+            'transform-style': [{ transform: ['3d', 'flat'] }],
             // Interactivity
             /**
              * Accent Color
