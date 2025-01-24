@@ -295,6 +295,7 @@ export type DefaultClassGroupIds =
     | 'float'
     | 'font-family'
     | 'font-size'
+    | 'font-stretch'
     | 'font-smoothing'
     | 'font-style'
     | 'font-weight'

@@ -76,6 +76,9 @@ test('supports Tailwind CSS v4.0 features', () => {
     )
     expect(twMerge('field-sizing-content field-sizing-fixed')).toBe('field-sizing-fixed')
     expect(twMerge('scheme-normal scheme-dark')).toBe('scheme-dark')
+    expect(twMerge('font-stretch-expanded font-stretch-[66.66%] font-stretch-50%')).toBe(
+        'font-stretch-50%',
+    )
 
     // TODO: Remove proto
     expect(twMerge('')).toBe('')

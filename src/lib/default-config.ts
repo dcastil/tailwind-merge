@@ -695,6 +695,27 @@ export const getDefaultConfig = () => {
                 },
             ],
             /**
+             * Font Stretch
+             * @see https://tailwindcss.com/docs/font-stretch
+             */
+            'font-stretch': [
+                {
+                    'font-stretch': [
+                        'ultra-condensed',
+                        'extra-condensed',
+                        'condensed',
+                        'semi-condensed',
+                        'normal',
+                        'semi-expanded',
+                        'expanded',
+                        'extra-expanded',
+                        'ultra-expanded',
+                        isPercent,
+                        isArbitraryValue,
+                    ],
+                },
+            ],
+            /**
              * Font Family
              * @see https://tailwindcss.com/docs/font-family
              */
