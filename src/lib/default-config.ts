@@ -47,7 +47,7 @@ export const getDefaultConfig = () => {
     const getOverflow = () => ['auto', 'hidden', 'clip', 'visible', 'scroll'] as const
     const getSpacingWithAutoAndArbitrary = () => ['auto', isArbitraryValue, spacing] as const
     const getSpacingWithArbitrary = () => [isArbitraryValue, spacing] as const
-    const getLengthWithEmptyAndArbitrary = () => ['', isLength, isArbitraryLength] as const
+    const getNumberWithEmptyAndArbitrary = () => ['', isNumber, isArbitraryLength] as const
     const getNumberWithAutoAndArbitrary = () => ['auto', isNumber, isArbitraryValue] as const
     const getPositions = () =>
         [
@@ -100,7 +100,7 @@ export const getDefaultConfig = () => {
             borderColor: [colors],
             borderRadius: ['none', '', 'full', isTshirtSize, isArbitraryValue],
             borderSpacing: getSpacingWithArbitrary(),
-            borderWidth: getLengthWithEmptyAndArbitrary(),
+            borderWidth: getNumberWithEmptyAndArbitrary(),
             contrast: getNumberAndArbitrary(),
             grayscale: getZeroAndEmpty(),
             hueRotate: getNumberAndArbitrary(),
@@ -1222,47 +1222,68 @@ export const getDefaultConfig = () => {
              * @see https://tailwindcss.com/docs/outline-color
              */
             'outline-color': [{ outline: [colors] }],
-            /**
-             * Ring Width
-             * @see https://tailwindcss.com/docs/ring-width
-             */
-            'ring-w': [{ ring: getLengthWithEmptyAndArbitrary() }],
-            /**
-             * Ring Width Inset
-             * @see https://tailwindcss.com/docs/ring-width
-             */
-            'ring-w-inset': ['ring-inset'],
-            /**
-             * Ring Color
-             * @see https://tailwindcss.com/docs/ring-color
-             */
-            'ring-color': [{ ring: [colors] }],
-            /**
-             * Ring Opacity
-             * @see https://tailwindcss.com/docs/ring-opacity
-             */
-            'ring-opacity': [{ 'ring-opacity': [opacity] }],
-            /**
-             * Ring Offset Width
-             * @see https://tailwindcss.com/docs/ring-offset-width
-             */
-            'ring-offset-w': [{ 'ring-offset': [isLength, isArbitraryLength] }],
-            /**
-             * Ring Offset Color
-             * @see https://tailwindcss.com/docs/ring-offset-color
-             */
-            'ring-offset-color': [{ 'ring-offset': [colors] }],
             // Effects
             /**
              * Box Shadow
              * @see https://tailwindcss.com/docs/box-shadow
              */
-            shadow: [{ shadow: ['', 'inner', 'none', isTshirtSize, isArbitraryShadow] }],
+            shadow: [{ shadow: ['none', isTshirtSize, isArbitraryShadow] }],
             /**
              * Box Shadow Color
-             * @see https://tailwindcss.com/docs/box-shadow-color
+             * @see https://tailwindcss.com/docs/box-shadow#setting-the-shadow-color
              */
             'shadow-color': [{ shadow: [isAny] }],
+            /**
+             * Inset Box Shadow
+             * @see https://tailwindcss.com/docs/box-shadow#adding-an-inset-shadow
+             */
+            'inset-shadow': [{ 'inset-shadow': ['none', isTshirtSize, isArbitraryShadow] }],
+            /**
+             * Inset Box Shadow Color
+             * @see https://tailwindcss.com/docs/box-shadow#setting-the-inset-shadow-color
+             */
+            'inset-shadow-color': [{ 'inset-shadow': [isAny] }],
+            /**
+             * Ring Width
+             * @see https://tailwindcss.com/docs/box-shadow#adding-a-ring
+             */
+            'ring-w': [{ ring: getNumberWithEmptyAndArbitrary() }],
+            /**
+             * Ring Width Inset
+             * @see https://v3.tailwindcss.com/docs/ring-width#inset-rings
+             * @deprecated since Tailwind CSS v4.0.0
+             * @see https://github.com/tailwindlabs/tailwindcss/blob/v4.0.0/packages/tailwindcss/src/utilities.ts#L4158
+             */
+            'ring-w-inset': ['ring-inset'],
+            /**
+             * Ring Color
+             * @see https://tailwindcss.com/docs/box-shadow#setting-the-ring-color
+             */
+            'ring-color': [{ ring: [colors] }],
+            /**
+             * Ring Offset Width
+             * @see https://v3.tailwindcss.com/docs/ring-offset-width
+             * @deprecated since Tailwind CSS v4.0.0
+             * @see https://github.com/tailwindlabs/tailwindcss/blob/v4.0.0/packages/tailwindcss/src/utilities.ts#L4158
+             */
+            'ring-offset-w': [{ 'ring-offset': [isLength, isArbitraryLength] }],
+            /**
+             * Ring Offset Color
+             * @see https://v3.tailwindcss.com/docs/ring-offset-color
+             * @deprecated since Tailwind CSS v4.0.0
+             * @see https://github.com/tailwindlabs/tailwindcss/blob/v4.0.0/packages/tailwindcss/src/utilities.ts#L4158
+             */
+            'ring-offset-color': [{ 'ring-offset': [colors] }],
+            /**
+             * Inset Ring Width
+             * @see https://tailwindcss.com/docs/box-shadow#adding-an-inset-ring
+             */
+            'inset-ring-w': [{ 'inset-ring': getNumberWithEmptyAndArbitrary() }],
+            /**
+             * Inset Ring Color
+             * @see https://tailwindcss.com/docs/box-shadow#setting-the-inset-ring-color
+             */
+            'inset-ring-color': [{ 'inset-ring': [colors] }],
             /**
              * Opacity
              * @see https://tailwindcss.com/docs/opacity

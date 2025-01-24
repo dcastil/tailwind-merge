@@ -71,6 +71,9 @@ test('supports Tailwind CSS v4.0 features', () => {
     )
     expect(twMerge('bg-linear-to-r bg-linear-45')).toBe('bg-linear-45')
     expect(twMerge('bg-linear-to-r bg-radial-[something] bg-conic-10')).toBe('bg-conic-10')
+    expect(twMerge('ring-4 ring-orange inset-ring inset-ring-3 inset-ring-blue')).toBe(
+        'ring-4 ring-orange inset-ring-3 inset-ring-blue',
+    )
 
     // TODO: Remove proto
     expect(twMerge('')).toBe('')
