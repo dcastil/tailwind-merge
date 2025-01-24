@@ -72,7 +72,7 @@ test('handles ambiguous arbitrary values correctly', () => {
     )
     expect(
         twMerge(
-            'bg-none bg-[url(.)] bg-[image:.] bg-[url:.] bg-[linear-gradient(.)] bg-gradient-to-r',
+            'bg-none bg-[url(.)] bg-[image:.] bg-[url:.] bg-[linear-gradient(.)] bg-linear-to-r',
         ),
-    ).toBe('bg-gradient-to-r')
+    ).toBe('bg-linear-to-r')
 })

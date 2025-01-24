@@ -943,7 +943,12 @@ export const getDefaultConfig = () => {
                 {
                     bg: [
                         'none',
-                        { 'gradient-to': ['t', 'tr', 'r', 'br', 'b', 'bl', 'l', 'tl'] },
+                        {
+                            linear: [
+                                { to: ['t', 'tr', 'r', 'br', 'b', 'bl', 'l', 'tl'] },
+                                isInteger,
+                            ],
+                        },
                         isArbitraryImage,
                     ],
                 },

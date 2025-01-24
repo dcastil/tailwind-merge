@@ -69,6 +69,7 @@ test('supports Tailwind CSS v4.0 features', () => {
     expect(twMerge('perspective-origin-center perspective-origin-top-left')).toBe(
         'perspective-origin-top-left',
     )
+    expect(twMerge('bg-linear-to-r bg-linear-45')).toBe('bg-linear-45')
 
     // TODO: Remove proto
     expect(twMerge('')).toBe('')
