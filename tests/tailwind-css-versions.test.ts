@@ -66,6 +66,9 @@ test('supports Tailwind CSS v4.0 features', () => {
     expect(twMerge('perspective-dramatic perspective-none perspective-midrange')).toBe(
         'perspective-midrange',
     )
+    expect(twMerge('perspective-origin-center perspective-origin-top-left')).toBe(
+        'perspective-origin-top-left',
+    )
 
     // TODO: Remove proto
     expect(twMerge('')).toBe('')

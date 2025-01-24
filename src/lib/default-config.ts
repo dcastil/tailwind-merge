@@ -1462,6 +1462,26 @@ export const getDefaultConfig = () => {
                 },
             ],
             /**
+             * Perspective Origin
+             * @see https://tailwindcss.com/docs/perspective-origin
+             */
+            'perspective-origin': [
+                {
+                    'perspective-origin': [
+                        'center',
+                        'top',
+                        'top-right',
+                        'right',
+                        'bottom-right',
+                        'bottom',
+                        'bottom-left',
+                        'left',
+                        'top-left',
+                        isArbitraryValue,
+                    ],
+                },
+            ],
+            /**
              * Transform
              * @see https://tailwindcss.com/docs/transform
              */

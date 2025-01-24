@@ -170,7 +170,7 @@ test('class map has correct class groups at first part', () => {
         p: ['p'],
         pb: ['pb'],
         pe: ['pe'],
-        perspective: ['perspective'],
+        perspective: ['perspective', 'perspective-origin'],
         pl: ['pl'],
         place: ['place-content', 'place-items', 'place-self'],
         placeholder: ['placeholder-color', 'placeholder-opacity'],
