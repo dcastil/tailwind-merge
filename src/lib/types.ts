@@ -366,6 +366,7 @@ export type DefaultClassGroupIds =
     | 'p'
     | 'pb'
     | 'pe'
+    | 'perspective'
     | 'pl'
     | 'place-content'
     | 'place-items'

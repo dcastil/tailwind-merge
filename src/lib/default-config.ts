@@ -1406,7 +1406,7 @@ export const getDefaultConfig = () => {
             caption: [{ caption: ['top', 'bottom'] }],
             // Transitions and Animation
             /**
-             * Tranisition Property
+             * Transition Property
              * @see https://tailwindcss.com/docs/transition-property
              */
             transition: [
@@ -1444,6 +1444,23 @@ export const getDefaultConfig = () => {
              */
             animate: [{ animate: ['none', 'spin', 'ping', 'pulse', 'bounce', isArbitraryValue] }],
             // Transforms
+            /**
+             * Perspective
+             * @see https://tailwindcss.com/docs/perspective
+             */
+            perspective: [
+                {
+                    perspective: [
+                        'dramatic',
+                        'near',
+                        'normal',
+                        'midrange',
+                        'distant',
+                        'none',
+                        isArbitraryValue,
+                    ],
+                },
+            ],
             /**
              * Transform
              * @see https://tailwindcss.com/docs/transform
