@@ -95,10 +95,23 @@ export const getDefaultConfig = () => {
         theme: {
             colors: [isAny],
             spacing: [isLength, isArbitraryLength],
-            blur: ['none', '', isTshirtSize, isArbitraryValue],
+            blur: [
+                'none',
+                // Deprecated since Tailwind CSS v4.0.0
+                '',
+                isTshirtSize,
+                isArbitraryValue,
+            ],
             brightness: getNumberAndArbitrary(),
             borderColor: [colors],
-            borderRadius: ['none', '', 'full', isTshirtSize, isArbitraryValue],
+            borderRadius: [
+                'none',
+                // Deprecated since Tailwind CSS v4.0.0
+                '',
+                'full',
+                isTshirtSize,
+                isArbitraryValue,
+            ],
             borderSpacing: getSpacingWithArbitrary(),
             borderWidth: getNumberWithEmptyAndArbitrary(),
             contrast: getNumberAndArbitrary(),
@@ -1201,7 +1214,7 @@ export const getDefaultConfig = () => {
              * Outline Style
              * @see https://tailwindcss.com/docs/outline-style
              */
-            'outline-style': [{ outline: ['', ...getLineStyles()] }],
+            'outline-style': [{ outline: ['', 'hidden', ...getLineStyles()] }],
             /**
              * Outline Offset
              * @see https://tailwindcss.com/docs/outline-offset
@@ -1222,7 +1235,17 @@ export const getDefaultConfig = () => {
              * Box Shadow
              * @see https://tailwindcss.com/docs/box-shadow
              */
-            shadow: [{ shadow: ['none', isTshirtSize, isArbitraryShadow] }],
+            shadow: [
+                {
+                    shadow: [
+                        // Deprecated since Tailwind CSS v4.0.0
+                        '',
+                        'none',
+                        isTshirtSize,
+                        isArbitraryShadow,
+                    ],
+                },
+            ],
             /**
              * Box Shadow Color
              * @see https://tailwindcss.com/docs/box-shadow#setting-the-shadow-color
@@ -1320,7 +1343,17 @@ export const getDefaultConfig = () => {
              * Drop Shadow
              * @see https://tailwindcss.com/docs/drop-shadow
              */
-            'drop-shadow': [{ 'drop-shadow': ['', 'none', isTshirtSize, isArbitraryValue] }],
+            'drop-shadow': [
+                {
+                    'drop-shadow': [
+                        // Deprecated since Tailwind CSS v4.0.0
+                        '',
+                        'none',
+                        isTshirtSize,
+                        isArbitraryValue,
+                    ],
+                },
+            ],
             /**
              * Grayscale
              * @see https://tailwindcss.com/docs/grayscale
