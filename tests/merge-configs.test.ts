@@ -7,7 +7,7 @@ test('mergeConfigs has correct behavior', () => {
         mergeConfigs(
             {
                 cacheSize: 50,
-                prefix: 'tw-',
+                prefix: 'tw',
                 separator: ':',
                 theme: {
                     hi: ['ho'],
@@ -64,7 +64,7 @@ test('mergeConfigs has correct behavior', () => {
         ),
     ).toEqual({
         cacheSize: 50,
-        prefix: 'tw-',
+        prefix: 'tw',
         separator: '-',
         theme: {
             hi: ['ho'],

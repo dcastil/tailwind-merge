@@ -21,10 +21,10 @@ If you're using a custom Tailwind config, you may need to configure tailwind-mer
 
 The default [`twMerge`](./api-reference.md#twmerge) function is configured in a way that you can still use it if all the following points apply to your Tailwind config:
 
--   Only using color names which don't clash with other Tailwind class names
--   Only deviating by number values from number-based Tailwind classes
--   Only using font-family classes which don't clash with default font-weight classes
--   Sticking to default Tailwind config for everything else
+- Only using color names which don't clash with other Tailwind class names
+- Only deviating by number values from number-based Tailwind classes
+- Only using font-family classes which don't clash with default font-weight classes
+- Sticking to default Tailwind config for everything else
 
 If some of these points don't apply to you, you can test whether `twMerge` still works as intended with your custom classes. Otherwise, you need create your own custom merge function by either extending the default tailwind-merge config or using a completely custom one.
 
@@ -39,7 +39,7 @@ const tailwindMergeConfig = {
     // ↓ Set how many values should be stored in cache.
     cacheSize: 500,
     // ↓ Optional prefix from Tailwind config
-    prefix: 'tw-',
+    prefix: 'tw',
     // ↓ Optional separator from Tailwind config
     separator: '_',
     theme: {
@@ -140,31 +140,31 @@ const conflictingClassGroupModifiers = {
 
 In the Tailwind config you can modify theme scales. tailwind-merge follows the same keys for the theme scales, but doesn't support all of them. tailwind-merge only supports theme scales which are used in multiple class groups to save bundle size (more info to that in [PR 55](https://github.com/dcastil/tailwind-merge/pull/55)). At the moment these are:
 
--   `colors`
--   `spacing`
--   `blur`
--   `brightness`
--   `borderColor`
--   `borderRadius`
--   `borderSpacing`
--   `borderWidth`
--   `contrast`
--   `grayscale`
--   `hueRotate`
--   `invert`
--   `gap`
--   `gradientColorStops`
--   `gradientColorStopPositions`
--   `inset`
--   `margin`
--   `opacity`
--   `padding`
--   `saturate`
--   `scale`
--   `sepia`
--   `skew`
--   `space`
--   `translate`
+- `colors`
+- `spacing`
+- `blur`
+- `brightness`
+- `borderColor`
+- `borderRadius`
+- `borderSpacing`
+- `borderWidth`
+- `contrast`
+- `grayscale`
+- `hueRotate`
+- `invert`
+- `gap`
+- `gradientColorStops`
+- `gradientColorStopPositions`
+- `inset`
+- `margin`
+- `opacity`
+- `padding`
+- `saturate`
+- `scale`
+- `sepia`
+- `skew`
+- `space`
+- `translate`
 
 If you modified one of these theme scales in your Tailwind config, you can add all your keys right here and tailwind-merge will take care of the rest. If you modified other theme scales, you need to figure out the class group to modify in the [default config](./api-reference.md#getdefaultconfig).
 

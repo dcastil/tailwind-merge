@@ -100,7 +100,7 @@ test('mergeConfigs type generics work correctly', () => {
     const config1 = mergeConfigs<'foo' | 'bar', 'baz'>(
         {
             cacheSize: 50,
-            prefix: 'tw-',
+            prefix: 'tw',
             separator: ':',
             theme: {
                 hi: ['ho'],

@@ -21,10 +21,20 @@ export const mergeClassList = (classList: string, configUtils: ConfigUtils) => {
     for (let index = classNames.length - 1; index >= 0; index -= 1) {
         const originalClassName = classNames[index]!
 
-        const { modifiers, hasImportantModifier, baseClassName, maybePostfixModifierPosition } =
-            parseClassName(originalClassName)
+        const {
+            isExternal,
+            modifiers,
+            hasImportantModifier,
+            baseClassName,
+            maybePostfixModifierPosition,
+        } = parseClassName(originalClassName)
 
-        let hasPostfixModifier = Boolean(maybePostfixModifierPosition)
+        if (isExternal) {
+            result = originalClassName + (result.length > 0 ? ' ' + result : result)
+            continue
+        }
+
+        let hasPostfixModifier = !!maybePostfixModifierPosition
         let classGroupId = getClassGroupId(
             hasPostfixModifier
                 ? baseClassName.substring(0, maybePostfixModifierPosition)

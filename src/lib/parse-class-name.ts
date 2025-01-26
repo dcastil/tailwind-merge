@@ -1,15 +1,20 @@
-import { AnyConfig } from './types'
+import { AnyConfig, ParsedClassName } from './types'
 
 export const IMPORTANT_MODIFIER = '!'
 
 export const createParseClassName = (config: AnyConfig) => {
-    const { separator, experimentalParseClassName } = config
+    const { prefix, separator, experimentalParseClassName } = config
     const isSeparatorSingleCharacter = separator.length === 1
     const firstSeparatorCharacter = separator[0]
     const separatorLength = separator.length
 
-    // parseClassName inspired by https://github.com/tailwindlabs/tailwindcss/blob/v3.2.2/src/util/splitAtTopLevelOnly.js
-    const parseClassName = (className: string) => {
+    /**
+     * Parse class name into parts.
+     *
+     * Inspired by `splitAtTopLevelOnly` used in Tailwind CSS
+     * @see https://github.com/tailwindlabs/tailwindcss/blob/v3.2.2/src/util/splitAtTopLevelOnly.js
+     */
+    let parseClassName = (className: string): ParsedClassName => {
         const modifiers = []
 
         let bracketDepth = 0
@@ -65,8 +70,25 @@ export const createParseClassName = (config: AnyConfig) => {
         }
     }
 
+    if (prefix) {
+        const fullPrefix = prefix + separator
+        const parseClassNameOriginal = parseClassName
+        parseClassName = (className: string) =>
+            className.startsWith(fullPrefix)
+                ? parseClassNameOriginal(className.substring(fullPrefix.length))
+                : {
+                      isExternal: true,
+                      modifiers: [],
+                      hasImportantModifier: false,
+                      baseClassName: className,
+                      maybePostfixModifierPosition: undefined,
+                  }
+    }
+
     if (experimentalParseClassName) {
-        return (className: string) => experimentalParseClassName({ className, parseClassName })
+        const parseClassNameOriginal = parseClassName
+        parseClassName = (className: string) =>
+            experimentalParseClassName({ className, parseClassName: parseClassNameOriginal })
     }
 
     return parseClassName

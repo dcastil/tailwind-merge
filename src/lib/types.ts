@@ -31,7 +31,7 @@ interface ConfigStaticPart {
      *
      * This is an experimental feature and may introduce breaking changes in any minor version update.
      */
-    experimentalParseClassName?(param: ExperimentalParseClassNameParam): ExperimentalParsedClassName
+    experimentalParseClassName?(param: ExperimentalParseClassNameParam): ParsedClassName
 }
 
 /**
@@ -41,7 +41,7 @@ interface ConfigStaticPart {
  */
 export interface ExperimentalParseClassNameParam {
     className: string
-    parseClassName(className: string): ExperimentalParsedClassName
+    parseClassName(className: string): ParsedClassName
 }
 
 /**
@@ -49,7 +49,13 @@ export interface ExperimentalParseClassNameParam {
  *
  * This is an experimental feature and may introduce breaking changes in any minor version update.
  */
-export interface ExperimentalParsedClassName {
+export interface ParsedClassName {
+    /**
+     * Whether the class is external and merging logic should be sipped.
+     *
+     * If this is `true`, the class will be treated as if it wasn't a Tailwind class and will be passed through as is.
+     */
+    isExternal?: boolean
     /**
      * Modifiers of the class in the order they appear in the class.
      *
