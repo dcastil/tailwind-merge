@@ -73,7 +73,7 @@ export const createParseClassName = (config: AnyConfig) => {
     if (prefix) {
         const fullPrefix = prefix + separator
         const parseClassNameOriginal = parseClassName
-        parseClassName = (className: string) =>
+        parseClassName = (className) =>
             className.startsWith(fullPrefix)
                 ? parseClassNameOriginal(className.substring(fullPrefix.length))
                 : {
@@ -87,7 +87,7 @@ export const createParseClassName = (config: AnyConfig) => {
 
     if (experimentalParseClassName) {
         const parseClassNameOriginal = parseClassName
-        parseClassName = (className: string) =>
+        parseClassName = (className) =>
             experimentalParseClassName({ className, parseClassName: parseClassNameOriginal })
     }
 
