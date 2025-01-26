@@ -118,7 +118,7 @@ When using TypeScript and you use custom class group IDs or theme group IDs, you
 type AdditionalClassGroupIds = 'aspect-w' | 'aspect-h' | 'aspect-reset'
 type AdditionalThemeGroupIds = never
 
-const customTwMerge = extendTailwindMerge<AdditionalClassGroupIds, AdditionalThemeGroupIds>({
+const twMerge = extendTailwindMerge<AdditionalClassGroupIds, AdditionalThemeGroupIds>({
     // ↓ Optional cache size
     //   Here we're disabling the cache
     cacheSize: 0,
@@ -202,13 +202,13 @@ const customTwMerge = extendTailwindMerge<AdditionalClassGroupIds, AdditionalThe
 Additionally, you can pass multiple `createConfig` functions (more to that in [`createTailwindMerge`](#createtailwindmerge)) which is convenient if you want to combine your config with third-party plugins.
 
 ```ts
-const customTwMerge = extendTailwindMerge({ … }, withSomePlugin)
+const twMerge = extendTailwindMerge({ … }, withSomePlugin)
 ```
 
 If you only use plugins, you can omit the `configExtension` object as well.
 
 ```ts
-const customTwMerge = extendTailwindMerge(withSomePlugin)
+const twMerge = extendTailwindMerge(withSomePlugin)
 ```
 
 ## `createTailwindMerge`
@@ -228,8 +228,8 @@ You need to provide a function which resolves to the config tailwind-merge shoul
 
 ```ts
 // ↓ Callback passed to `createTailwindMerge` is called when
-//   `customTwMerge` gets called the first time.
-const customTwMerge = createTailwindMerge(() => {
+//   `twMerge` gets called the first time.
+const twMerge = createTailwindMerge(() => {
     const defaultConfig = getDefaultConfig()
 
     return {
@@ -255,7 +255,7 @@ const customTwMerge = createTailwindMerge(() => {
 Same as in [`extendTailwindMerge`](#extendtailwindmerge) you can use multiple `createConfig` functions which is convenient if you want to combine your config with third-party plugins. Just keep in mind that the first `createConfig` function does not get passed any arguments, whereas the subsequent functions get each passed the config from the previous function.
 
 ```ts
-const customTwMerge = createTailwindMerge(getDefaultConfig, withSomePlugin, (config) => ({
+const twMerge = createTailwindMerge(getDefaultConfig, withSomePlugin, (config) => ({
     // ↓ Config returned by `withSomePlugin`
     ...config,
     classGroups: {
@@ -281,7 +281,7 @@ Helper function to merge multiple tailwind-merge configs. Properties with the va
 When using TypeScript, you need to pass a union of all class group IDs and theme group IDs used in `configExtension` as generic arguments to `mergeConfigs` or pass `string` to both arguments to allow any IDs.
 
 ```ts
-const customTwMerge = createTailwindMerge(getDefaultConfig, (config) =>
+const twMerge = createTailwindMerge(getDefaultConfig, (config) =>
     mergeConfigs<'shadow' | 'animate' | 'prose'>(config, {
         override: {
             classGroups: {
