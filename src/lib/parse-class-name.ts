@@ -50,12 +50,8 @@ export const createParseClassName = (config: AnyConfig) => {
 
         const baseClassNameWithImportantModifier =
             modifiers.length === 0 ? className : className.substring(modifierStart)
-        const hasImportantModifier =
-            baseClassNameWithImportantModifier.startsWith(IMPORTANT_MODIFIER)
-        const baseClassName = hasImportantModifier
-            ? baseClassNameWithImportantModifier.substring(1)
-            : baseClassNameWithImportantModifier
-
+        const baseClassName = stripImportantModifier(baseClassNameWithImportantModifier)
+        const hasImportantModifier = baseClassName !== baseClassNameWithImportantModifier
         const maybePostfixModifierPosition =
             postfixModifierPosition && postfixModifierPosition > modifierStart
                 ? postfixModifierPosition - modifierStart
@@ -103,4 +99,20 @@ export const sortModifiers = (modifiers: string[]) => {
     sortedModifiers.push(...unsortedModifiers.sort())
 
     return sortedModifiers
+}
+
+const stripImportantModifier = (baseClassName: string) => {
+    if (baseClassName.endsWith(IMPORTANT_MODIFIER)) {
+        return baseClassName.substring(0, baseClassName.length - 1)
+    }
+
+    /**
+     * In Tailwind CSS v3 the important modifier was at the start of the base class name. This is still supported for legacy reasons.
+     * @see https://github.com/dcastil/tailwind-merge/issues/513#issuecomment-2614029864
+     */
+    if (baseClassName.startsWith(IMPORTANT_MODIFIER)) {
+        return baseClassName.substring(1)
+    }
+
+    return baseClassName
 }
