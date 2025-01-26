@@ -7,13 +7,15 @@ test('theme scale can be extended', () => {
         extend: {
             theme: {
                 spacing: ['my-space'],
-                margin: ['my-margin'],
+                leading: ['my-leading'],
             },
         },
     })
 
     expect(tailwindMerge('p-3 p-my-space p-my-margin')).toBe('p-my-space p-my-margin')
-    expect(tailwindMerge('m-3 m-my-space m-my-margin')).toBe('m-my-margin')
+    expect(tailwindMerge('leading-3 leading-my-space leading-my-leading')).toBe(
+        'leading-my-leading',
+    )
 })
 
 test('theme object can be extended', () => {

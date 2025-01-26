@@ -13,13 +13,14 @@ export const createParseClassName = (config: AnyConfig) => {
         const modifiers = []
 
         let bracketDepth = 0
+        let parenDepth = 0
         let modifierStart = 0
         let postfixModifierPosition: number | undefined
 
         for (let index = 0; index < className.length; index++) {
             let currentCharacter = className[index]
 
-            if (bracketDepth === 0) {
+            if (bracketDepth === 0 && parenDepth === 0) {
                 if (
                     currentCharacter === firstSeparatorCharacter &&
                     (isSeparatorSingleCharacter ||
@@ -40,6 +41,10 @@ export const createParseClassName = (config: AnyConfig) => {
                 bracketDepth++
             } else if (currentCharacter === ']') {
                 bracketDepth--
+            } else if (currentCharacter === '(') {
+                parenDepth++
+            } else if (currentCharacter === ')') {
+                parenDepth--
             }
         }
 

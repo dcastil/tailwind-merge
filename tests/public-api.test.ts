@@ -23,20 +23,28 @@ test('has correct export types', () => {
     expect(getDefaultConfig).toStrictEqual(expect.any(Function))
     expect(validators).toMatchObject({
         isAny: expect.any(Function),
+        isAnyNonArbitrary: expect.any(Function),
+        isArbitraryImage: expect.any(Function),
         isArbitraryLength: expect.any(Function),
         isArbitraryNumber: expect.any(Function),
         isArbitraryPosition: expect.any(Function),
         isArbitraryShadow: expect.any(Function),
         isArbitrarySize: expect.any(Function),
-        isArbitraryImage: expect.any(Function),
         isArbitraryValue: expect.any(Function),
+        isArbitraryVariable: expect.any(Function),
+        isArbitraryVariableFamilyName: expect.any(Function),
+        isArbitraryVariableImage: expect.any(Function),
+        isArbitraryVariableLength: expect.any(Function),
+        isArbitraryVariablePosition: expect.any(Function),
+        isArbitraryVariableShadow: expect.any(Function),
+        isArbitraryVariableSize: expect.any(Function),
+        isFraction: expect.any(Function),
         isInteger: expect.any(Function),
-        isLength: expect.any(Function),
-        isPercent: expect.any(Function),
         isNumber: expect.any(Function),
+        isPercent: expect.any(Function),
         isTshirtSize: expect.any(Function),
     })
-    expect(Object.keys(validators)).toHaveLength(13)
+    expect(Object.keys(validators)).toHaveLength(21)
     expect(mergeConfigs).toStrictEqual(expect.any(Function))
     expect(extendTailwindMerge).toStrictEqual(expect.any(Function))
     expect(twJoin).toStrictEqual(expect.any(Function))
@@ -151,10 +159,11 @@ test('createTailwindMerge() has correct inputs and outputs', () => {
 })
 
 test('validators have correct inputs and outputs', () => {
-    expect(validators.isLength('')).toEqual(expect.any(Boolean))
+    expect(validators.isFraction('')).toEqual(expect.any(Boolean))
     expect(validators.isArbitraryLength('')).toEqual(expect.any(Boolean))
     expect(validators.isInteger('')).toEqual(expect.any(Boolean))
     expect(validators.isArbitraryValue('')).toEqual(expect.any(Boolean))
+    expect(validators.isArbitraryVariable('')).toEqual(expect.any(Boolean))
     expect(validators.isAny()).toEqual(expect.any(Boolean))
     expect(validators.isTshirtSize('')).toEqual(expect.any(Boolean))
     expect(validators.isArbitrarySize('')).toEqual(expect.any(Boolean))

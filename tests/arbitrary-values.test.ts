@@ -26,7 +26,7 @@ test('handles simple conflicts with arbitrary values correctly', () => {
     // Handling of value `0`
     expect(twMerge('min-h-[0.5px] min-h-[0]')).toBe('min-h-[0]')
     expect(twMerge('text-[0.5px] text-[color:0]')).toBe('text-[0.5px] text-[color:0]')
-    expect(twMerge('text-[0.5px] text-[--my-0]')).toBe('text-[0.5px] text-[--my-0]')
+    expect(twMerge('text-[0.5px] text-(--my-0)')).toBe('text-[0.5px] text-(--my-0)')
 })
 
 test('handles arbitrary length conflicts with labels and modifiers correctly', () => {
@@ -75,4 +75,15 @@ test('handles ambiguous arbitrary values correctly', () => {
             'bg-none bg-[url(.)] bg-[image:.] bg-[url:.] bg-[linear-gradient(.)] bg-linear-to-r',
         ),
     ).toBe('bg-linear-to-r')
+})
+
+test('handles arbitrary custom properties correctly', () => {
+    expect(twMerge('bg-red bg-(--other-red) bg-bottom bg-(position:-my-pos)')).toBe(
+        'bg-(--other-red) bg-(position:-my-pos)',
+    )
+    expect(
+        twMerge(
+            'shadow-xs shadow-(shadow:--something) shadow-red shadow-(--some-other-shadow) shadow-(color:--some-color)',
+        ),
+    ).toBe('shadow-(--some-other-shadow) shadow-(color:--some-color)')
 })
