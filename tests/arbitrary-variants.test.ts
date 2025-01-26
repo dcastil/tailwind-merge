@@ -3,6 +3,7 @@ import { expect, test } from 'vitest'
 import { twMerge } from '../src'
 
 test('basic arbitrary variants', () => {
+    expect(twMerge('[p]:underline [p]:line-through')).toBe('[p]:line-through')
     expect(twMerge('[&>*]:underline [&>*]:line-through')).toBe('[&>*]:line-through')
     expect(twMerge('[&>*]:underline [&>*]:line-through [&_div]:line-through')).toBe(
         '[&>*]:line-through [&_div]:line-through',
