@@ -123,7 +123,18 @@ export const getDefaultConfig = () => {
             isArbitraryValue,
             themeSpacing,
         ] as const
+    const scaleColor = () => [themeColor, isArbitraryVariable, isArbitraryValue] as const
     const scaleGradientStopPosition = () => [isPercent, isArbitraryLength] as const
+    const scaleRadius = () =>
+        [
+            // Deprecated since Tailwind CSS v4.0.0
+            '',
+            'none',
+            'full',
+            themeRadius,
+            isArbitraryVariable,
+            isArbitraryValue,
+        ] as const
     const scaleBorderWidth = () =>
         ['', isNumber, isArbitraryVariableLength, isArbitraryLength] as const
     const scaleLineStyle = () => ['solid', 'dashed', 'dotted', 'double'] as const
@@ -145,6 +156,15 @@ export const getDefaultConfig = () => {
             'saturation',
             'color',
             'luminosity',
+        ] as const
+    const scaleBlur = () =>
+        [
+            // Deprecated since Tailwind CSS v4.0.0
+            '',
+            'none',
+            themeBlur,
+            isArbitraryVariable,
+            isArbitraryValue,
         ] as const
     const scaleOrigin = () =>
         [
@@ -170,9 +190,15 @@ export const getDefaultConfig = () => {
         cacheSize: 500,
         separator: ':',
         theme: {
+            animate: ['spin', 'ping', 'pulse', 'bounce'],
+            aspect: ['video'],
+            blur: [isTshirtSize],
+            breakpoint: [isTshirtSize],
             color: [isAny],
-            font: [isAnyNonArbitrary, isArbitraryVariableFamilyName, isArbitraryValue],
-            text: ['base', isTshirtSize, isArbitraryVariableLength, isArbitraryLength],
+            container: [isTshirtSize],
+            'drop-shadow': [isTshirtSize],
+            ease: ['in', 'out', 'in-out'],
+            font: [isAnyNonArbitrary],
             'font-weight': [
                 'thin',
                 'extralight',
@@ -184,42 +210,14 @@ export const getDefaultConfig = () => {
                 'extrabold',
                 'black',
             ],
-            tracking: ['tighter', 'tight', 'normal', 'wide', 'wider', 'widest'],
-            leading: ['none', 'tight', 'snug', 'normal', 'relaxed', 'loose'],
-            breakpoint: [isTshirtSize],
-            container: [isTshirtSize],
-            spacing: [isNumber, isArbitraryVariableLength, isArbitraryLength],
-            radius: [
-                // Deprecated since Tailwind CSS v4.0.0
-                '',
-                isTshirtSize,
-                'none',
-                'full',
-                isArbitraryVariable,
-                isArbitraryValue,
-            ],
-            shadow: [isTshirtSize, 'none', isArbitraryVariableShadow, isArbitraryShadow],
             'inset-shadow': [isTshirtSize],
-            'drop-shadow': [
-                // Deprecated since Tailwind CSS v4.0.0
-                '',
-                isTshirtSize,
-                'none',
-                isArbitraryVariable,
-                isArbitraryValue,
-            ],
-            blur: [
-                // Deprecated since Tailwind CSS v4.0.0
-                '',
-                isTshirtSize,
-                'none',
-                isArbitraryVariable,
-                isArbitraryValue,
-            ],
+            leading: ['none', 'tight', 'snug', 'normal', 'relaxed', 'loose'],
             perspective: ['dramatic', 'near', 'normal', 'midrange', 'distant', 'none'],
-            aspect: ['video'],
-            ease: ['in', 'out', 'in-out'],
-            animate: ['spin', 'ping', 'pulse', 'bounce'],
+            radius: [isTshirtSize],
+            shadow: [isTshirtSize],
+            spacing: [isNumber],
+            text: [isTshirtSize],
+            tracking: ['tighter', 'tight', 'normal', 'wide', 'wider', 'widest'],
         },
         classGroups: {
             // --------------
@@ -778,7 +776,9 @@ export const getDefaultConfig = () => {
              * Font Size
              * @see https://tailwindcss.com/docs/font-size
              */
-            'font-size': [{ text: [themeText] }],
+            'font-size': [
+                { text: ['base', themeText, isArbitraryVariableLength, isArbitraryLength] },
+            ],
             /**
              * Font Smoothing
              * @see https://tailwindcss.com/docs/font-smoothing
@@ -819,7 +819,7 @@ export const getDefaultConfig = () => {
              * Font Family
              * @see https://tailwindcss.com/docs/font-family
              */
-            'font-family': [{ font: [themeFont] }],
+            'font-family': [{ font: [isArbitraryVariableFamilyName, isArbitraryValue, themeFont] }],
             /**
              * Font Variant Numeric
              * @see https://tailwindcss.com/docs/font-variant-numeric
@@ -896,12 +896,12 @@ export const getDefaultConfig = () => {
              * @deprecated since Tailwind CSS v3.0.0
              * @see https://v3.tailwindcss.com/docs/placeholder-color
              */
-            'placeholder-color': [{ placeholder: [themeColor] }],
+            'placeholder-color': [{ placeholder: scaleColor() }],
             /**
              * Text Color
              * @see https://tailwindcss.com/docs/text-color
              */
-            'text-color': [{ text: [themeColor] }],
+            'text-color': [{ text: scaleColor() }],
             /**
              * Text Decoration
              * @see https://tailwindcss.com/docs/text-decoration
@@ -931,7 +931,7 @@ export const getDefaultConfig = () => {
              * Text Decoration Color
              * @see https://tailwindcss.com/docs/text-decoration-color
              */
-            'text-decoration-color': [{ decoration: [themeColor] }],
+            'text-decoration-color': [{ decoration: scaleColor() }],
             /**
              * Text Underline Offset
              * @see https://tailwindcss.com/docs/text-underline-offset
@@ -1067,7 +1067,7 @@ export const getDefaultConfig = () => {
              * Background Color
              * @see https://tailwindcss.com/docs/background-color
              */
-            'bg-color': [{ bg: [themeColor] }],
+            'bg-color': [{ bg: scaleColor() }],
             /**
              * Gradient Color Stops From Position
              * @see https://tailwindcss.com/docs/gradient-color-stops
@@ -1087,17 +1087,17 @@ export const getDefaultConfig = () => {
              * Gradient Color Stops From
              * @see https://tailwindcss.com/docs/gradient-color-stops
              */
-            'gradient-from': [{ from: [themeColor] }],
+            'gradient-from': [{ from: scaleColor() }],
             /**
              * Gradient Color Stops Via
              * @see https://tailwindcss.com/docs/gradient-color-stops
              */
-            'gradient-via': [{ via: [themeColor] }],
+            'gradient-via': [{ via: scaleColor() }],
             /**
              * Gradient Color Stops To
              * @see https://tailwindcss.com/docs/gradient-color-stops
              */
-            'gradient-to': [{ to: [themeColor] }],
+            'gradient-to': [{ to: scaleColor() }],
 
             // ---------------
             // --- Borders ---
@@ -1107,77 +1107,77 @@ export const getDefaultConfig = () => {
              * Border Radius
              * @see https://tailwindcss.com/docs/border-radius
              */
-            rounded: [{ rounded: [themeRadius] }],
+            rounded: [{ rounded: scaleRadius() }],
             /**
              * Border Radius Start
              * @see https://tailwindcss.com/docs/border-radius
              */
-            'rounded-s': [{ 'rounded-s': [themeRadius] }],
+            'rounded-s': [{ 'rounded-s': scaleRadius() }],
             /**
              * Border Radius End
              * @see https://tailwindcss.com/docs/border-radius
              */
-            'rounded-e': [{ 'rounded-e': [themeRadius] }],
+            'rounded-e': [{ 'rounded-e': scaleRadius() }],
             /**
              * Border Radius Top
              * @see https://tailwindcss.com/docs/border-radius
              */
-            'rounded-t': [{ 'rounded-t': [themeRadius] }],
+            'rounded-t': [{ 'rounded-t': scaleRadius() }],
             /**
              * Border Radius Right
              * @see https://tailwindcss.com/docs/border-radius
              */
-            'rounded-r': [{ 'rounded-r': [themeRadius] }],
+            'rounded-r': [{ 'rounded-r': scaleRadius() }],
             /**
              * Border Radius Bottom
              * @see https://tailwindcss.com/docs/border-radius
              */
-            'rounded-b': [{ 'rounded-b': [themeRadius] }],
+            'rounded-b': [{ 'rounded-b': scaleRadius() }],
             /**
              * Border Radius Left
              * @see https://tailwindcss.com/docs/border-radius
              */
-            'rounded-l': [{ 'rounded-l': [themeRadius] }],
+            'rounded-l': [{ 'rounded-l': scaleRadius() }],
             /**
              * Border Radius Start Start
              * @see https://tailwindcss.com/docs/border-radius
              */
-            'rounded-ss': [{ 'rounded-ss': [themeRadius] }],
+            'rounded-ss': [{ 'rounded-ss': scaleRadius() }],
             /**
              * Border Radius Start End
              * @see https://tailwindcss.com/docs/border-radius
              */
-            'rounded-se': [{ 'rounded-se': [themeRadius] }],
+            'rounded-se': [{ 'rounded-se': scaleRadius() }],
             /**
              * Border Radius End End
              * @see https://tailwindcss.com/docs/border-radius
              */
-            'rounded-ee': [{ 'rounded-ee': [themeRadius] }],
+            'rounded-ee': [{ 'rounded-ee': scaleRadius() }],
             /**
              * Border Radius End Start
              * @see https://tailwindcss.com/docs/border-radius
              */
-            'rounded-es': [{ 'rounded-es': [themeRadius] }],
+            'rounded-es': [{ 'rounded-es': scaleRadius() }],
             /**
              * Border Radius Top Left
              * @see https://tailwindcss.com/docs/border-radius
              */
-            'rounded-tl': [{ 'rounded-tl': [themeRadius] }],
+            'rounded-tl': [{ 'rounded-tl': scaleRadius() }],
             /**
              * Border Radius Top Right
              * @see https://tailwindcss.com/docs/border-radius
              */
-            'rounded-tr': [{ 'rounded-tr': [themeRadius] }],
+            'rounded-tr': [{ 'rounded-tr': scaleRadius() }],
             /**
              * Border Radius Bottom Right
              * @see https://tailwindcss.com/docs/border-radius
              */
-            'rounded-br': [{ 'rounded-br': [themeRadius] }],
+            'rounded-br': [{ 'rounded-br': scaleRadius() }],
             /**
              * Border Radius Bottom Left
              * @see https://tailwindcss.com/docs/border-radius
              */
-            'rounded-bl': [{ 'rounded-bl': [themeRadius] }],
+            'rounded-bl': [{ 'rounded-bl': scaleRadius() }],
             /**
              * Border Width
              * @see https://tailwindcss.com/docs/border-width
@@ -1257,52 +1257,52 @@ export const getDefaultConfig = () => {
              * Border Color
              * @see https://tailwindcss.com/docs/border-color
              */
-            'border-color': [{ border: [themeColor] }],
+            'border-color': [{ border: scaleColor() }],
             /**
              * Border Color X
              * @see https://tailwindcss.com/docs/border-color
              */
-            'border-color-x': [{ 'border-x': [themeColor] }],
+            'border-color-x': [{ 'border-x': scaleColor() }],
             /**
              * Border Color Y
              * @see https://tailwindcss.com/docs/border-color
              */
-            'border-color-y': [{ 'border-y': [themeColor] }],
+            'border-color-y': [{ 'border-y': scaleColor() }],
             /**
              * Border Color S
              * @see https://tailwindcss.com/docs/border-color
              */
-            'border-color-s': [{ 'border-s': [themeColor] }],
+            'border-color-s': [{ 'border-s': scaleColor() }],
             /**
              * Border Color E
              * @see https://tailwindcss.com/docs/border-color
              */
-            'border-color-e': [{ 'border-e': [themeColor] }],
+            'border-color-e': [{ 'border-e': scaleColor() }],
             /**
              * Border Color Top
              * @see https://tailwindcss.com/docs/border-color
              */
-            'border-color-t': [{ 'border-t': [themeColor] }],
+            'border-color-t': [{ 'border-t': scaleColor() }],
             /**
              * Border Color Right
              * @see https://tailwindcss.com/docs/border-color
              */
-            'border-color-r': [{ 'border-r': [themeColor] }],
+            'border-color-r': [{ 'border-r': scaleColor() }],
             /**
              * Border Color Bottom
              * @see https://tailwindcss.com/docs/border-color
              */
-            'border-color-b': [{ 'border-b': [themeColor] }],
+            'border-color-b': [{ 'border-b': scaleColor() }],
             /**
              * Border Color Left
              * @see https://tailwindcss.com/docs/border-color
              */
-            'border-color-l': [{ 'border-l': [themeColor] }],
+            'border-color-l': [{ 'border-l': scaleColor() }],
             /**
              * Divide Color
              * @see https://tailwindcss.com/docs/divide-color
              */
-            'divide-color': [{ divide: [themeColor] }],
+            'divide-color': [{ divide: scaleColor() }],
             /**
              * Outline Style
              * @see https://tailwindcss.com/docs/outline-style
@@ -1341,7 +1341,10 @@ export const getDefaultConfig = () => {
                     shadow: [
                         // Deprecated since Tailwind CSS v4.0.0
                         '',
+                        'none',
                         themeShadow,
+                        isArbitraryVariableShadow,
+                        isArbitraryShadow,
                     ],
                 },
             ],
@@ -1349,7 +1352,7 @@ export const getDefaultConfig = () => {
              * Box Shadow Color
              * @see https://tailwindcss.com/docs/box-shadow#setting-the-shadow-color
              */
-            'shadow-color': [{ shadow: [themeColor] }],
+            'shadow-color': [{ shadow: scaleColor() }],
             /**
              * Inset Box Shadow
              * @see https://tailwindcss.com/docs/box-shadow#adding-an-inset-shadow
@@ -1368,7 +1371,7 @@ export const getDefaultConfig = () => {
              * Inset Box Shadow Color
              * @see https://tailwindcss.com/docs/box-shadow#setting-the-inset-shadow-color
              */
-            'inset-shadow-color': [{ 'inset-shadow': [themeColor] }],
+            'inset-shadow-color': [{ 'inset-shadow': scaleColor() }],
             /**
              * Ring Width
              * @see https://tailwindcss.com/docs/box-shadow#adding-a-ring
@@ -1385,7 +1388,7 @@ export const getDefaultConfig = () => {
              * Ring Color
              * @see https://tailwindcss.com/docs/box-shadow#setting-the-ring-color
              */
-            'ring-color': [{ ring: [themeColor] }],
+            'ring-color': [{ ring: scaleColor() }],
             /**
              * Ring Offset Width
              * @see https://v3.tailwindcss.com/docs/ring-offset-width
@@ -1399,7 +1402,7 @@ export const getDefaultConfig = () => {
              * @deprecated since Tailwind CSS v4.0.0
              * @see https://github.com/tailwindlabs/tailwindcss/blob/v4.0.0/packages/tailwindcss/src/utilities.ts#L4158
              */
-            'ring-offset-color': [{ 'ring-offset': [themeColor] }],
+            'ring-offset-color': [{ 'ring-offset': scaleColor() }],
             /**
              * Inset Ring Width
              * @see https://tailwindcss.com/docs/box-shadow#adding-an-inset-ring
@@ -1409,7 +1412,7 @@ export const getDefaultConfig = () => {
              * Inset Ring Color
              * @see https://tailwindcss.com/docs/box-shadow#setting-the-inset-ring-color
              */
-            'inset-ring-color': [{ 'inset-ring': [themeColor] }],
+            'inset-ring-color': [{ 'inset-ring': scaleColor() }],
             /**
              * Opacity
              * @see https://tailwindcss.com/docs/opacity
@@ -1449,7 +1452,7 @@ export const getDefaultConfig = () => {
              * Blur
              * @see https://tailwindcss.com/docs/blur
              */
-            blur: [{ blur: [themeBlur] }],
+            blur: [{ blur: scaleBlur() }],
             /**
              * Brightness
              * @see https://tailwindcss.com/docs/brightness
@@ -1464,7 +1467,18 @@ export const getDefaultConfig = () => {
              * Drop Shadow
              * @see https://tailwindcss.com/docs/drop-shadow
              */
-            'drop-shadow': [{ 'drop-shadow': [themeDropShadow] }],
+            'drop-shadow': [
+                {
+                    'drop-shadow': [
+                        // Deprecated since Tailwind CSS v4.0.0
+                        '',
+                        'none',
+                        themeDropShadow,
+                        isArbitraryVariable,
+                        isArbitraryValue,
+                    ],
+                },
+            ],
             /**
              * Grayscale
              * @see https://tailwindcss.com/docs/grayscale
@@ -1509,7 +1523,7 @@ export const getDefaultConfig = () => {
              * Backdrop Blur
              * @see https://tailwindcss.com/docs/backdrop-blur
              */
-            'backdrop-blur': [{ 'backdrop-blur': [themeBlur] }],
+            'backdrop-blur': [{ 'backdrop-blur': scaleBlur() }],
             /**
              * Backdrop Brightness
              * @see https://tailwindcss.com/docs/backdrop-brightness
@@ -1640,7 +1654,7 @@ export const getDefaultConfig = () => {
              * @see https://tailwindcss.com/docs/transition-timing-function
              */
             ease: [
-                { ease: ['linear', 'initial', isArbitraryVariable, isArbitraryValue, themeEase] },
+                { ease: ['linear', 'initial', themeEase, isArbitraryVariable, isArbitraryValue] },
             ],
             /**
              * Transition Delay
@@ -1651,7 +1665,7 @@ export const getDefaultConfig = () => {
              * Animation
              * @see https://tailwindcss.com/docs/animation
              */
-            animate: [{ animate: ['none', isArbitraryVariable, isArbitraryValue, themeAnimate] }],
+            animate: [{ animate: ['none', themeAnimate, isArbitraryVariable, isArbitraryValue] }],
 
             // ------------------
             // --- Transforms ---
@@ -1785,7 +1799,7 @@ export const getDefaultConfig = () => {
              * Accent Color
              * @see https://tailwindcss.com/docs/accent-color
              */
-            accent: [{ accent: [themeColor] }],
+            accent: [{ accent: scaleColor() }],
             /**
              * Appearance
              * @see https://tailwindcss.com/docs/appearance
@@ -1795,7 +1809,7 @@ export const getDefaultConfig = () => {
              * Caret Color
              * @see https://tailwindcss.com/docs/just-in-time-mode#caret-color-utilities
              */
-            'caret-color': [{ caret: [themeColor] }],
+            'caret-color': [{ caret: scaleColor() }],
             /**
              * Color Scheme
              * @see https://tailwindcss.com/docs/color-scheme
@@ -2031,7 +2045,7 @@ export const getDefaultConfig = () => {
              * Fill
              * @see https://tailwindcss.com/docs/fill
              */
-            fill: [{ fill: ['none', themeColor] }],
+            fill: [{ fill: ['none', ...scaleColor()] }],
             /**
              * Stroke Width
              * @see https://tailwindcss.com/docs/stroke-width
@@ -2050,7 +2064,7 @@ export const getDefaultConfig = () => {
              * Stroke
              * @see https://tailwindcss.com/docs/stroke
              */
-            stroke: [{ stroke: ['none', themeColor] }],
+            stroke: [{ stroke: ['none', ...scaleColor()] }],
 
             // ---------------------
             // --- Accessibility ---
