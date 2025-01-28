@@ -44,7 +44,6 @@ const tailwindMergeConfig = {
     separator: '_',
     theme: {
         // Theme scales are defined here
-        // This is not the theme object from your Tailwind config
     },
     classGroups: {
         // Class groups are defined here

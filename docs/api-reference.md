@@ -131,7 +131,6 @@ const twMerge = extendTailwindMerge<AdditionalClassGroupIds, AdditionalThemeGrou
     //   Only elements from the second level onwards are overridden
     override: {
         // ↓ Theme scales to override
-        //   Not all theme keys from the Tailwind config are supported by default.
         theme: {
             colors: ['black', 'white', 'yellow-500'],
         },
@@ -162,7 +161,6 @@ const twMerge = extendTailwindMerge<AdditionalClassGroupIds, AdditionalThemeGrou
     //   Follows same shape as the `override` object.
     extend: {
         // ↓ Theme scales to extend or create
-        //   Not all theme keys from the Tailwind config are supported by default.
         theme: {
             spacing: ['sm', 'md', 'lg'],
         },
@@ -305,43 +303,59 @@ const twMerge = createTailwindMerge(getDefaultConfig, (config) =>
 
 ```ts
 interface Validators {
-    isLength(value: string): boolean
-    isArbitraryLength(value: string): boolean
-    isNumber(value: string): boolean
-    isInteger(value: string): boolean
-    isPercent(value: string): boolean
-    isArbitraryValue(value: string): boolean
-    isTshirtSize(value: string): boolean
-    isArbitrarySize(value: string): boolean
-    isArbitraryPosition(value: string): boolean
-    isArbitraryImage(value: string): boolean
-    isArbitraryNumber(value: string): boolean
-    isArbitraryShadow(value: string): boolean
     isAny(value: string): boolean
+    isAnyNonArbitrary(value: string): boolean
+    isArbitraryImage(value: string): boolean
+    isArbitraryLength(value: string): boolean
+    isArbitraryNumber(value: string): boolean
+    isArbitraryPosition(value: string): boolean
+    isArbitraryShadow(value: string): boolean
+    isArbitrarySize(value: string): boolean
+    isArbitraryValue(value: string): boolean
+    isArbitraryVariable(value: string): boolean
+    isArbitraryVariableFamilyName(value: string): boolean
+    isArbitraryVariableImage(value: string): boolean
+    isArbitraryVariableLength(value: string): boolean
+    isArbitraryVariablePosition(value: string): boolean
+    isArbitraryVariableShadow(value: string): boolean
+    isArbitraryVariableSize(value: string): boolean
+    isFraction(value: string): boolean
+    isInteger(value: string): boolean
+    isNumber(value: string): boolean
+    isPercent(value: string): boolean
+    isTshirtSize(value: string): boolean
 }
 ```
 
 An object containing all the validators used in tailwind-merge. They are useful if you want to use a custom config with [`extendTailwindMerge`](#extendtailwindmerge) or [`createTailwindMerge`](#createtailwindmerge). E.g. the `classGroup` for padding is defined as
 
 ```ts
-const paddingClassGroup = [{ p: [validators.isLength] }]
+const paddingClassGroup = [{ p: [validators.isNumber] }]
 ```
 
 A brief summary for each validator:
 
-- `isLength` checks whether a class part is a number (`3`, `1.5`), a fraction (`3/4`), or one of the strings `px`, `full` or `screen`.
-- `isArbitraryLength` checks for arbitrary length values (`[3%]`, `[4px]`, `[length:var(--my-var)]`).
-- `isNumber` checks for numbers (`3`, `1.5`)
-- `isArbitraryNumber` checks whether class part is an arbitrary value which starts with `number:` or is a number (`[number:var(--value)]`, `[450]`) which is necessary for font-weight and stroke-width classNames.
-- `isInteger` checks for integer values (`3`).
-- `isPercent` checks for percent values (`12.5%`) which is used for color stop positions.
-- `isArbitraryValue` checks whether the class part is enclosed in brackets (`[something]`)
-- `isTshirtSize`checks whether class part is a T-shirt size (`sm`, `xl`), optionally with a preceding number (`2xl`).
-- `isArbitrarySize` checks whether class part is an arbitrary value which starts with `size:` (`[size:200px_100px]`) which is necessary for background-size classNames.
-- `isArbitraryPosition` checks whether class part is an arbitrary value which starts with `position:` (`[position:200px_100px]`) which is necessary for background-position classNames.
-- `isArbitraryImage` checks whether class part is an arbitrary value which is an iamge, e.g. by starting with `image:`, `url:`, `linear-gradient(` or `url(` (`[url('/path-to-image.png')]`, `image:var(--maybe-an-image-at-runtime)]`) which is necessary for background-image classNames.
-- `isArbitraryShadow` checks whether class part is an arbitrary value which starts with the same pattern as a shadow value (`[0_35px_60px_-15px_rgba(0,0,0,0.3)]`), namely with two lengths separated by a underscore, optionally prepended by `inset`.
 - `isAny` always returns true. Be careful with this validator as it might match unwanted classes. I use it primarily to match colors or when I'm certain there are no other class groups in a namespace.
+- `isAnyNonArbitrary` checks if the class part is not an arbitrary value or arbitrary variable.
+- `isArbitraryImage` checks whether class part is an arbitrary value which is an iamge, e.g. by starting with `image:`, `url:`, `linear-gradient(` or `url(` (`[url('/path-to-image.png')]`, `image:var(--maybe-an-image-at-runtime)]`) which is necessary for background-image classNames.
+- `isArbitraryLength` checks for arbitrary length values (`[3%]`, `[4px]`, `[length:var(--my-var)]`).
+- `isArbitraryNumber` checks whether class part is an arbitrary value which starts with `number:` or is a number (`[number:var(--value)]`, `[450]`) which is necessary for font-weight and stroke-width classNames.
+- `isArbitraryPosition` checks whether class part is an arbitrary value which starts with `position:` (`[position:200px_100px]`) which is necessary for background-position classNames.
+- `isArbitraryShadow` checks whether class part is an arbitrary value which starts with the same pattern as a shadow value (`[0_35px_60px_-15px_rgba(0,0,0,0.3)]`), namely with two lengths separated by a underscore, optionally prepended by `inset`.
+- `isArbitrarySize` checks whether class part is an arbitrary value which starts with `size:` (`[size:200px_100px]`) which is necessary for background-size classNames.
+- `isArbitraryValue` checks whether the class part is enclosed in brackets (`[something]`)
+- `isArbitraryVariable` checks whether the class part is an arbitrary variable (`(--my-var)`)
+- `isArbitraryVariableFamilyName` checks whether class part is an arbitrary variable with the `family-name` label (`(family-name:--my-font)`)
+- `isArbitraryVariableImage` checks whether class part is an arbitrary variable with the `image` or `url` label (`(image:--my-image)`)
+- `isArbitraryVariableLength` checks whether class part is an arbitrary variable with the `length` label (`(length:--my-length)`)
+- `isArbitraryVariablePosition` checks whether class part is an arbitrary variable with the `position` label (`(position:--my-position)`)
+- `isArbitraryVariableShadow` checks whether class part is an arbitrary variable with the `shadow` label or not label at all (`(shadow:--my-shadow)`, `(--my-shadow)`)
+- `isArbitraryVariableSize` checks whether class part is an arbitrary variable with the `size`, `length` or `percentage` label (`(size:--my-size)`)
+- `isFraction` checks whether class part is a fraction of two numbers (`1/2`, `127/256`)
+- `isInteger` checks for integer values (`3`).
+- `isNumber` checks for numbers (`3`, `1.5`)
+- `isPercent` checks for percent values (`12.5%`) which is used for color stop positions.
+- `isTshirtSize`checks whether class part is a T-shirt size (`sm`, `xl`), optionally with a preceding number (`2xl`).
 
 ## `Config`
 
