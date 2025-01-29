@@ -2203,5 +2203,18 @@ export const getDefaultConfig = () => {
         conflictingClassGroupModifiers: {
             'font-size': ['leading'],
         },
+        orderSensitiveModifiers: [
+            'before',
+            'after',
+            'placeholder',
+            'file',
+            'marker',
+            'selection',
+            'first-line',
+            'first-letter',
+            'backdrop',
+            '*',
+            '**',
+        ],
     } as const satisfies Config<DefaultClassGroupIds, DefaultThemeGroupIds>
 }

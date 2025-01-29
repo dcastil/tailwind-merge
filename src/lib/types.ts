@@ -93,11 +93,13 @@ export interface ParsedClassName {
 interface ConfigGroupsPart<ClassGroupIds extends string, ThemeGroupIds extends string> {
     /**
      * Theme scales used in classGroups.
+     *
      * The keys are the same as in the Tailwind config but the values are sometimes defined more broadly.
      */
     theme: NoInfer<ThemeObject<ThemeGroupIds>>
     /**
      * Object with groups of classes.
+     *
      * @example
      * {
      *     // Creates group of classes `group`, `of` and `classes`
@@ -109,6 +111,7 @@ interface ConfigGroupsPart<ClassGroupIds extends string, ThemeGroupIds extends s
     classGroups: NoInfer<Record<ClassGroupIds, ClassGroup<ThemeGroupIds>>>
     /**
      * Conflicting classes across groups.
+     *
      * The key is ID of class group which creates conflict, values are IDs of class groups which receive a conflict.
      * A class group ID is the key of a class group in classGroups object.
      * @example { gap: ['gap-x', 'gap-y'] }
@@ -116,12 +119,19 @@ interface ConfigGroupsPart<ClassGroupIds extends string, ThemeGroupIds extends s
     conflictingClassGroups: NoInfer<Partial<Record<ClassGroupIds, readonly ClassGroupIds[]>>>
     /**
      * Postfix modifiers conflicting with other class groups.
+     *
      * A class group ID is the key of a class group in classGroups object.
      * @example { 'font-size': ['leading'] }
      */
     conflictingClassGroupModifiers: NoInfer<
         Partial<Record<ClassGroupIds, readonly ClassGroupIds[]>>
     >
+    /**
+     * Modifiers whose order among multiple modifiers should be preserved because their order changes which element gets targeted.
+     *
+     * tailwind-merge makes sure that classes with these modifiers are not overwritten by classes with the same modifiers with order-sensitive modifiers being in a different position.
+     */
+    orderSensitiveModifiers: string[]
 }
 
 /**
@@ -134,7 +144,7 @@ export interface ConfigExtension<ClassGroupIds extends string, ThemeGroupIds ext
 }
 
 type PartialPartial<T> = {
-    [P in keyof T]?: Partial<T[P]>
+    [P in keyof T]?: T[P] extends any[] ? T[P] : Partial<T[P]>
 }
 
 export type ThemeObject<ThemeGroupIds extends string> = Record<

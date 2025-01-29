@@ -94,49 +94,6 @@ export const createParseClassName = (config: AnyConfig) => {
     return parseClassName
 }
 
-const positionSensitiveModifiers: Record<string, boolean> = {
-    before: true,
-    after: true,
-    placeholder: true,
-    file: true,
-    marker: true,
-    selection: true,
-    'first-line': true,
-    'first-letter': true,
-    backdrop: true,
-    '*': true,
-    '**': true,
-}
-
-/**
- * Sorts modifiers according to following schema:
- * - Predefined modifiers are sorted alphabetically
- * - When an arbitrary variant appears, it must be preserved which modifiers are before and after it
- */
-export const sortModifiers = (modifiers: string[]) => {
-    if (modifiers.length <= 1) {
-        return modifiers
-    }
-
-    const sortedModifiers: string[] = []
-    let unsortedModifiers: string[] = []
-
-    modifiers.forEach((modifier) => {
-        const isPositionSensitive = modifier[0] === '[' || positionSensitiveModifiers[modifier]
-
-        if (isPositionSensitive) {
-            sortedModifiers.push(...unsortedModifiers.sort(), modifier)
-            unsortedModifiers = []
-        } else {
-            unsortedModifiers.push(modifier)
-        }
-    })
-
-    sortedModifiers.push(...unsortedModifiers.sort())
-
-    return sortedModifiers
-}
-
 const stripImportantModifier = (baseClassName: string) => {
     if (baseClassName.endsWith(IMPORTANT_MODIFIER)) {
         return baseClassName.substring(0, baseClassName.length - 1)

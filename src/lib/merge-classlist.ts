@@ -4,7 +4,8 @@ import { IMPORTANT_MODIFIER } from './parse-class-name'
 const SPLIT_CLASSES_REGEX = /\s+/
 
 export const mergeClassList = (classList: string, configUtils: ConfigUtils) => {
-    const { parseClassName, getClassGroupId, getConflictingClassGroupIds } = configUtils
+    const { parseClassName, getClassGroupId, getConflictingClassGroupIds, sortModifiers } =
+        configUtils
 
     /**
      * Set of classGroupIds in following format:
@@ -59,8 +60,7 @@ export const mergeClassList = (classList: string, configUtils: ConfigUtils) => {
             hasPostfixModifier = false
         }
 
-        // TODO: Add back sorting modifiers. Just disabled temporarily.
-        const variantModifier = modifiers.join(':')
+        const variantModifier = sortModifiers(modifiers).join(':')
 
         const modifierId = hasImportantModifier
             ? variantModifier + IMPORTANT_MODIFIER
