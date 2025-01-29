@@ -1,4 +1,4 @@
-# Guide to migrate from v1 to v2
+# Guide to migrate from tailwind-merge v1 to v2
 
 This document is only about breaking changes between v1 and v2. For a full list of changes, see the [v2.0.0 release](./v2-changelog.md#v200).
 
@@ -10,10 +10,10 @@ Over the past one and a half years since the v1 release, the biggest source of i
 
 The highlights:
 
--   No changes to `twMerge` and supported Tailwind CSS versions.
--   You can now override class groups with the object notation in `extendTailwindMerge`.
--   TypeScript types of configuration object passed to `extendTailwindMerge` are stricter and prevent you from using unknown theme groups and class groups unless specified otherwise.
--   The library now exports a bundle using modern JS syntax to further reduce its size. There is also an additional bundle with ES5-only syntax for compatibility with older browsers.
+- No changes to `twMerge` and supported Tailwind CSS versions.
+- You can now override class groups with the object notation in `extendTailwindMerge`.
+- TypeScript types of configuration object passed to `extendTailwindMerge` are stricter and prevent you from using unknown theme groups and class groups unless specified otherwise.
+- The library now exports a bundle using modern JS syntax to further reduce its size. There is also an additional bundle with ES5-only syntax for compatibility with older browsers.
 
 If you have feedback of any kind regarding this release, feel free to [open an issue or discussion](https://github.com/dcastil/tailwind-merge/issues/new/choose). I'm always happy to hear from you!
 
@@ -21,26 +21,26 @@ If you have feedback of any kind regarding this release, feel free to [open an i
 
 By exports:
 
--   All
-    -   [Modern JS syntax](#modern-js-syntax)
-    -   [Module resolution](#module-resolution)
--   `extendTailwindMerge`
-    -   [Object shape changed](#extendtailwindmerge-object-shape-changed)
-    -   [Stricter TypeScript types](#extendtailwindmerge-stricter-typescript-types)
--   `validators`
-    -   [`isLength`: Does not check for arbitrary values anymore](#validatorsislength-does-not-check-for-arbitrary-values-anymore)
-    -   [`isInteger`: Does not check for arbitrary values anymore](#validatorsisinteger-does-not-check-for-arbitrary-values-anymore)
-    -   [`isArbitraryUrl`: Renamed](#validatorsisarbitraryurl-renamed)
-    -   [`isArbitraryWeight`: Removed](#validatorsisarbitraryweight-removed)
--   `createTailwindMerge`
-    -   [Mandatory elements added](#createtailwindmerge-mandatory-elements-added)
--   `fromTheme`
-    -   [Stricter TypeScript types](#fromtheme-stricter-typescript-types)
--   `mergeConfigs`
-    -   [Object shape changed](#mergeconfigs-object-shape-changed)
-    -   [Stricter TypeScript types](#mergeconfigs-stricter-typescript-types)
--   `join`
-    -   [Removed](#join-removed)
+- All
+    - [Modern JS syntax](#modern-js-syntax)
+    - [Module resolution](#module-resolution)
+- `extendTailwindMerge`
+    - [Object shape changed](#extendtailwindmerge-object-shape-changed)
+    - [Stricter TypeScript types](#extendtailwindmerge-stricter-typescript-types)
+- `validators`
+    - [`isLength`: Does not check for arbitrary values anymore](#validatorsislength-does-not-check-for-arbitrary-values-anymore)
+    - [`isInteger`: Does not check for arbitrary values anymore](#validatorsisinteger-does-not-check-for-arbitrary-values-anymore)
+    - [`isArbitraryUrl`: Renamed](#validatorsisarbitraryurl-renamed)
+    - [`isArbitraryWeight`: Removed](#validatorsisarbitraryweight-removed)
+- `createTailwindMerge`
+    - [Mandatory elements added](#createtailwindmerge-mandatory-elements-added)
+- `fromTheme`
+    - [Stricter TypeScript types](#fromtheme-stricter-typescript-types)
+- `mergeConfigs`
+    - [Object shape changed](#mergeconfigs-object-shape-changed)
+    - [Stricter TypeScript types](#mergeconfigs-stricter-typescript-types)
+- `join`
+    - [Removed](#join-removed)
 
 ### Modern JS syntax
 
