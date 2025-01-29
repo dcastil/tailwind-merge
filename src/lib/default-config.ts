@@ -103,7 +103,8 @@ export const getDefaultConfig = () => {
     const scaleAlignSecondaryAxis = () => ['start', 'end', 'center', 'stretch'] as const
     const scaleUnambiguousSpacing = () =>
         [isArbitraryVariable, isArbitraryValue, themeSpacing] as const
-    const scaleMargin = () => ['auto', ...scaleUnambiguousSpacing()] as const
+    const scalePadding = () => ['px', ...scaleUnambiguousSpacing()]
+    const scaleMargin = () => ['px', 'auto', ...scaleUnambiguousSpacing()] as const
     const scaleSizing = () =>
         [
             isFraction,
@@ -610,47 +611,47 @@ export const getDefaultConfig = () => {
              * Padding
              * @see https://tailwindcss.com/docs/padding
              */
-            p: [{ p: scaleUnambiguousSpacing() }],
+            p: [{ p: scalePadding() }],
             /**
              * Padding X
              * @see https://tailwindcss.com/docs/padding
              */
-            px: [{ px: scaleUnambiguousSpacing() }],
+            px: [{ px: scalePadding() }],
             /**
              * Padding Y
              * @see https://tailwindcss.com/docs/padding
              */
-            py: [{ py: scaleUnambiguousSpacing() }],
+            py: [{ py: scalePadding() }],
             /**
              * Padding Start
              * @see https://tailwindcss.com/docs/padding
              */
-            ps: [{ ps: scaleUnambiguousSpacing() }],
+            ps: [{ ps: scalePadding() }],
             /**
              * Padding End
              * @see https://tailwindcss.com/docs/padding
              */
-            pe: [{ pe: scaleUnambiguousSpacing() }],
+            pe: [{ pe: scalePadding() }],
             /**
              * Padding Top
              * @see https://tailwindcss.com/docs/padding
              */
-            pt: [{ pt: scaleUnambiguousSpacing() }],
+            pt: [{ pt: scalePadding() }],
             /**
              * Padding Right
              * @see https://tailwindcss.com/docs/padding
              */
-            pr: [{ pr: scaleUnambiguousSpacing() }],
+            pr: [{ pr: scalePadding() }],
             /**
              * Padding Bottom
              * @see https://tailwindcss.com/docs/padding
              */
-            pb: [{ pb: scaleUnambiguousSpacing() }],
+            pb: [{ pb: scalePadding() }],
             /**
              * Padding Left
              * @see https://tailwindcss.com/docs/padding
              */
-            pl: [{ pl: scaleUnambiguousSpacing() }],
+            pl: [{ pl: scalePadding() }],
             /**
              * Margin
              * @see https://tailwindcss.com/docs/margin
@@ -735,7 +736,17 @@ export const getDefaultConfig = () => {
              * Min-Width
              * @see https://tailwindcss.com/docs/min-width
              */
-            'min-w': [{ 'min-w': [themeContainer, 'screen', 'none', ...scaleSizing()] }],
+            'min-w': [
+                {
+                    'min-w': [
+                        themeContainer,
+                        'screen',
+                        /** Deprecated. @see https://github.com/tailwindlabs/tailwindcss.com/issues/2027#issuecomment-2620152757 */
+                        'none',
+                        ...scaleSizing(),
+                    ],
+                },
+            ],
             /**
              * Max-Width
              * @see https://tailwindcss.com/docs/max-width
@@ -746,7 +757,9 @@ export const getDefaultConfig = () => {
                         themeContainer,
                         'screen',
                         'none',
+                        /** Deprecated since Tailwind CSS v4.0.0. @see https://github.com/tailwindlabs/tailwindcss.com/issues/2027#issuecomment-2620152757 */
                         'prose',
+                        /** Deprecated since Tailwind CSS v4.0.0. @see https://github.com/tailwindlabs/tailwindcss.com/issues/2027#issuecomment-2620152757 */
                         { screen: [themeBreakpoint] },
                         ...scaleSizing(),
                     ],
@@ -867,7 +880,15 @@ export const getDefaultConfig = () => {
              * @see https://tailwindcss.com/docs/line-height
              */
             leading: [
-                { leading: [isArbitraryVariable, isArbitraryValue, themeLeading, themeSpacing] },
+                {
+                    leading: [
+                        isArbitraryVariable,
+                        isArbitraryValue,
+                        /** Deprecated since Tailwind CSS v4.0.0. @see https://github.com/tailwindlabs/tailwindcss.com/issues/2027#issuecomment-2620152757 */
+                        themeLeading,
+                        themeSpacing,
+                    ],
+                },
             ],
             /**
              * List Style Image
