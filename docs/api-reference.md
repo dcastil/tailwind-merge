@@ -155,6 +155,9 @@ const twMerge = extendTailwindMerge<AdditionalClassGroupIds, AdditionalThemeGrou
             // You probably won't need this, but it follows the same shape as
             // `conflictingClassGroups`.
         },
+        // ↓ Modifiers whose order among multiple modifiers should be preserved because their
+        //   order changes which element gets targeted. Overrides default value.
+        orderSensitiveModifiers: ['before'],
     },
 
     // ↓ Optional config extensions
@@ -193,6 +196,9 @@ const twMerge = extendTailwindMerge<AdditionalClassGroupIds, AdditionalThemeGrou
             // You probably won't need this, but it follows the same shape as
             // `conflictingClassGroups`.
         },
+        // ↓ Modifiers whose order among multiple modifiers should be preserved because their
+        //   order changes which element gets targeted. Extends default value.
+        orderSensitiveModifiers: ['before'],
     },
 })
 ```
@@ -246,6 +252,7 @@ const twMerge = createTailwindMerge(() => {
             ...defaultConfig.conflictingClassGroupModifiers,
             baz: ['bar'],
         },
+        orderSensitiveModifiers: [...defaultConfig.orderSensitiveModifiers, 'before'],
     }
 })
 ```

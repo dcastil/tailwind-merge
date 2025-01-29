@@ -54,6 +54,10 @@ const tailwindMergeConfig = {
     conflictingClassGroupModifiers: {
         // Conflicts between postfix modifier of a class group and another class group are defined here
     },
+    orderSensitiveModifiers: [
+        // Modifiers whose order among multiple modifiers should be preserved because their order
+        // changes which element gets targeted.
+    ],
 }
 ```
 
@@ -135,6 +139,16 @@ const conflictingClassGroupModifiers = {
 }
 ```
 
+### Order-sensitive modifiers
+
+In Tailwind CSS, not all modifiers behave the same when you stack them.
+
+In most cases the order of modifiers doesn't matter. E.g. `hover:focus:bg-red-500` and `focus:hover:bg-red-500` behave the same and in the context of tailwind-merge, you'd want them both to override each other. tailwind-merge sorts the modifiers internally to be able to override classes with the same modifiers, even if they are in a different order.
+
+However, there are some modifiers where the order matters, e.g. the direct children modifier `*`. The class `*:hover:text-red-500` modifies the text color of a child if that child is hovered, but the class `hover:*:text-red-500` modifies the text color of all direct children if the parent is hovered. In this case, you would want tailwind-merge to preserve both classes although they have the same modifiers, just in a different order.
+
+To know which modifiers are order-sensitive, tailwind-merge has the `orderSensitiveModifiers` property in its config. `twMerge` is pre-configured with all the order-sensitive modifiers that Tailwind CSS has by default. You'll only need to configure this property if you add your own order-sensitive modifiers or change the meaning of the default order-sensitive modifiers.
+
 ### Theme
 
 In the Tailwind config you can modify your theme variable namespace to add classes with custom values. tailwind-merge follows the same naming scheme as Tailwind CSS for its theme scales:
@@ -209,6 +223,8 @@ const twMerge = extendTailwindMerge<'foo' | 'bar' | 'baz'>({
         conflictingClassGroupModifiers: {
             baz: ['bar'],
         },
+        // ↓ Define order-sensitive modifiers
+        orderSensitiveModifiers: ['my-order-sensitive-modifier'],
     },
 })
 ```
@@ -287,6 +303,7 @@ const twMerge = createTailwindMerge(() => ({
     conflictingClassGroupModifiers: {
         baz: ['bar'],
     },
+    orderSensitiveModifiers: [],
 }))
 ```
 

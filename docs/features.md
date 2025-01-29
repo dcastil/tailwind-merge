@@ -38,7 +38,8 @@ The order of standard modifiers does not matter for tailwind-merge.
 ### Supports arbitrary values
 
 ```ts
-twMerge('bg-black bg-[color:var(--mystery-var)]') // → 'bg-[color:var(--mystery-var)]'
+twMerge('bg-black bg-(--my-color) bg-[color:var(--mystery-var)]')
+// → 'bg-[color:var(--mystery-var)]'
 twMerge('grid-cols-[1fr,auto] grid-cols-2') // → 'grid-cols-2'
 ```
 
