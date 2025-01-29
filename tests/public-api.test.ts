@@ -106,6 +106,7 @@ test('createTailwindMerge() has correct inputs and outputs', () => {
             classGroups: {},
             conflictingClassGroups: {},
             conflictingClassGroupModifiers: {},
+            orderSensitiveModifiers: [],
         })),
     ).toStrictEqual(expect.any(Function))
 
@@ -123,6 +124,7 @@ test('createTailwindMerge() has correct inputs and outputs', () => {
             otherKey: ['fooKey', 'fooKey2'],
         },
         conflictingClassGroupModifiers: {},
+        orderSensitiveModifiers: [],
     }))
 
     expect(tailwindMerge).toStrictEqual(expect.any(Function))
@@ -186,6 +188,7 @@ test('mergeConfigs has correct inputs and outputs', () => {
                 },
                 conflictingClassGroups: {},
                 conflictingClassGroupModifiers: {},
+                orderSensitiveModifiers: [],
             },
             {},
         ),
