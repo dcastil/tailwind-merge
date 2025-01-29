@@ -94,6 +94,20 @@ export const createParseClassName = (config: AnyConfig) => {
     return parseClassName
 }
 
+const positionSensitiveModifiers = new Set([
+    'before',
+    'after',
+    'placeholder',
+    'file',
+    'marker',
+    'selection',
+    'first-line',
+    'first-letter',
+    'backdrop',
+    '*',
+    '**',
+])
+
 /**
  * Sorts modifiers according to following schema:
  * - Predefined modifiers are sorted alphabetically
@@ -108,9 +122,9 @@ export const sortModifiers = (modifiers: string[]) => {
     let unsortedModifiers: string[] = []
 
     modifiers.forEach((modifier) => {
-        const isArbitraryVariant = modifier[0] === '['
+        const isPositionSensitive = modifier[0] === '[' || positionSensitiveModifiers.has(modifier)
 
-        if (isArbitraryVariant) {
+        if (isPositionSensitive) {
             sortedModifiers.push(...unsortedModifiers.sort(), modifier)
             unsortedModifiers = []
         } else {
