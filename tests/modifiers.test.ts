@@ -42,6 +42,13 @@ test('conflicts across postfix modifiers', () => {
 })
 
 test('sorts modifiers correctly', () => {
+    expect(twMerge('c:d:e:block d:c:e:inline')).toBe('d:c:e:inline')
+    expect(twMerge('*:before:block *:before:inline')).toBe('*:before:inline')
+    expect(twMerge('*:before:block before:*:inline')).toBe('*:before:block before:*:inline')
+    expect(twMerge('x:y:*:z:block y:x:*:z:inline')).toBe('y:x:*:z:inline')
+})
+
+test('sorts modifiers correctly according to orderSensitiveModifiers', () => {
     const customTwMerge = createTailwindMerge(() => ({
         cacheSize: 10,
         separator: ':',
