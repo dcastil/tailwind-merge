@@ -1,5 +1,5 @@
 import { ConfigUtils } from './config-utils'
-import { IMPORTANT_MODIFIER, sortModifiers } from './parse-class-name'
+import { IMPORTANT_MODIFIER } from './parse-class-name'
 
 const SPLIT_CLASSES_REGEX = /\s+/
 
@@ -59,7 +59,8 @@ export const mergeClassList = (classList: string, configUtils: ConfigUtils) => {
             hasPostfixModifier = false
         }
 
-        const variantModifier = sortModifiers(modifiers).join(':')
+        // TODO: Add back sorting modifiers. Just disabled temporarily.
+        const variantModifier = modifiers.join(':')
 
         const modifierId = hasImportantModifier
             ? variantModifier + IMPORTANT_MODIFIER
