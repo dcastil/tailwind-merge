@@ -94,19 +94,19 @@ export const createParseClassName = (config: AnyConfig) => {
     return parseClassName
 }
 
-const positionSensitiveModifiers = [
-    'before',
-    'after',
-    'placeholder',
-    'file',
-    'marker',
-    'selection',
-    'first-line',
-    'first-letter',
-    'backdrop',
-    '*',
-    '**',
-]
+const positionSensitiveModifiers: Record<string, boolean> = {
+    before: true,
+    after: true,
+    placeholder: true,
+    file: true,
+    marker: true,
+    selection: true,
+    'first-line': true,
+    'first-letter': true,
+    backdrop: true,
+    '*': true,
+    '**': true,
+}
 
 /**
  * Sorts modifiers according to following schema:
@@ -122,8 +122,7 @@ export const sortModifiers = (modifiers: string[]) => {
     let unsortedModifiers: string[] = []
 
     modifiers.forEach((modifier) => {
-        const isPositionSensitive =
-            modifier[0] === '[' || positionSensitiveModifiers.includes(modifier)
+        const isPositionSensitive = modifier[0] === '[' || positionSensitiveModifiers[modifier]
 
         if (isPositionSensitive) {
             sortedModifiers.push(...unsortedModifiers.sort(), modifier)
