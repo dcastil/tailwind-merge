@@ -94,7 +94,7 @@ export const createParseClassName = (config: AnyConfig) => {
     return parseClassName
 }
 
-const positionSensitiveModifiers = new Set([
+const positionSensitiveModifiers = [
     'before',
     'after',
     'placeholder',
@@ -106,7 +106,7 @@ const positionSensitiveModifiers = new Set([
     'backdrop',
     '*',
     '**',
-])
+]
 
 /**
  * Sorts modifiers according to following schema:
@@ -122,7 +122,8 @@ export const sortModifiers = (modifiers: string[]) => {
     let unsortedModifiers: string[] = []
 
     modifiers.forEach((modifier) => {
-        const isPositionSensitive = modifier[0] === '[' || positionSensitiveModifiers.has(modifier)
+        const isPositionSensitive =
+            modifier[0] === '[' || positionSensitiveModifiers.includes(modifier)
 
         if (isPositionSensitive) {
             sortedModifiers.push(...unsortedModifiers.sort(), modifier)
