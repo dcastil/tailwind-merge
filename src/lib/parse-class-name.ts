@@ -1,12 +1,11 @@
 import { AnyConfig, ParsedClassName } from './types'
 
 export const IMPORTANT_MODIFIER = '!'
+const MODIFIER_SEPARATOR = ':'
+const MODIFIER_SEPARATOR_LENGTH = MODIFIER_SEPARATOR.length
 
 export const createParseClassName = (config: AnyConfig) => {
-    const { prefix, separator, experimentalParseClassName } = config
-    const isSeparatorSingleCharacter = separator.length === 1
-    const firstSeparatorCharacter = separator[0]
-    const separatorLength = separator.length
+    const { prefix, experimentalParseClassName } = config
 
     /**
      * Parse class name into parts.
@@ -26,13 +25,9 @@ export const createParseClassName = (config: AnyConfig) => {
             let currentCharacter = className[index]
 
             if (bracketDepth === 0 && parenDepth === 0) {
-                if (
-                    currentCharacter === firstSeparatorCharacter &&
-                    (isSeparatorSingleCharacter ||
-                        className.slice(index, index + separatorLength) === separator)
-                ) {
+                if (currentCharacter === MODIFIER_SEPARATOR) {
                     modifiers.push(className.slice(modifierStart, index))
-                    modifierStart = index + separatorLength
+                    modifierStart = index + MODIFIER_SEPARATOR_LENGTH
                     continue
                 }
 
@@ -71,7 +66,7 @@ export const createParseClassName = (config: AnyConfig) => {
     }
 
     if (prefix) {
-        const fullPrefix = prefix + separator
+        const fullPrefix = prefix + MODIFIER_SEPARATOR
         const parseClassNameOriginal = parseClassName
         parseClassName = (className) =>
             className.startsWith(fullPrefix)

@@ -5,7 +5,6 @@ import { createTailwindMerge } from '../src'
 test('createTailwindMerge works with single config function', () => {
     const tailwindMerge = createTailwindMerge(() => ({
         cacheSize: 20,
-        separator: ':',
         theme: {},
         classGroups: {
             fooKey: [{ fooKey: ['bar', 'baz'] }],
@@ -47,7 +46,6 @@ test('createTailwindMerge works with multiple config functions', () => {
     const tailwindMerge = createTailwindMerge(
         () => ({
             cacheSize: 20,
-            separator: ':',
             theme: {},
             classGroups: {
                 fooKey: [{ fooKey: ['bar', 'baz'] }],

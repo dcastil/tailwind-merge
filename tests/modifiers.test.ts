@@ -19,7 +19,6 @@ test('conflicts across postfix modifiers', () => {
 
     const customTwMerge = createTailwindMerge(() => ({
         cacheSize: 10,
-        separator: ':',
         theme: {},
         classGroups: {
             foo: ['foo-1/2', 'foo-2/3'],
@@ -51,7 +50,6 @@ test('sorts modifiers correctly', () => {
 test('sorts modifiers correctly according to orderSensitiveModifiers', () => {
     const customTwMerge = createTailwindMerge(() => ({
         cacheSize: 10,
-        separator: ':',
         theme: {},
         classGroups: {
             foo: ['foo-1', 'foo-2'],

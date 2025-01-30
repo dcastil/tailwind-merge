@@ -189,7 +189,6 @@ export const getDefaultConfig = () => {
 
     return {
         cacheSize: 500,
-        separator: ':',
         theme: {
             animate: ['spin', 'ping', 'pulse', 'bounce'],
             aspect: ['video'],

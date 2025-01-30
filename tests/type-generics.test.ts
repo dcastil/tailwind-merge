@@ -101,7 +101,6 @@ test('mergeConfigs type generics work correctly', () => {
         {
             cacheSize: 50,
             prefix: 'tw',
-            separator: ':',
             theme: {
                 hi: ['ho'],
                 themeToOverride: ['to-override'],
@@ -119,9 +118,9 @@ test('mergeConfigs type generics work correctly', () => {
                 hello: ['world'],
                 toOverride: ['groupToOverride-2'],
             },
+            orderSensitiveModifiers: [],
         },
         {
-            separator: '-',
             prefix: undefined,
             override: {
                 theme: {

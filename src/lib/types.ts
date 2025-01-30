@@ -21,11 +21,6 @@ interface ConfigStaticPart {
      */
     prefix?: string
     /**
-     * Custom separator for modifiers in Tailwind classes
-     * @see https://tailwindcss.com/docs/configuration#separator
-     */
-    separator: string
-    /**
      * Allows to customize parsing of individual classes passed to `twMerge`.
      * All classes passed to `twMerge` outside of cache hits are passed to this function before it is determined whether the class is a valid Tailwind CSS class.
      *

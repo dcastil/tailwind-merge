@@ -8,7 +8,6 @@ test('mergeConfigs has correct behavior', () => {
             {
                 cacheSize: 50,
                 prefix: 'tw',
-                separator: ':',
                 theme: {
                     hi: ['ho'],
                     themeToOverride: ['to-override'],
@@ -29,7 +28,6 @@ test('mergeConfigs has correct behavior', () => {
                 orderSensitiveModifiers: ['order-1'],
             },
             {
-                separator: '-',
                 prefix: undefined,
                 override: {
                     theme: {
@@ -68,7 +66,6 @@ test('mergeConfigs has correct behavior', () => {
     ).toEqual({
         cacheSize: 50,
         prefix: 'tw',
-        separator: '-',
         theme: {
             hi: ['ho'],
             themeToOverride: ['overridden'],
