@@ -14,7 +14,7 @@ Check out the [migration guide](./v2-to-v3-migration.md) and if you have any que
 - Prefix defined in config shouldn't include combining `-` character anymore by [@dcastil](https://github.com/dcastil) in [#518](https://github.com/dcastil/tailwind-merge/pull/518)
 - Tailwind CSS v3 prefix position in class not supported anymore in favor of Tailwind CSS v4 position by [@dcastil](https://github.com/dcastil) in [#518](https://github.com/dcastil/tailwind-merge/pull/518)
 - Custom separators are no longer supported by [@dcastil](https://github.com/dcastil) in [#518](https://github.com/dcastil/tailwind-merge/pull/518)
-- New mandatory `orderSensitiveModifiers` property in config when using `createTailwindMerge`, etc. by [@dcastil](https://github.com/dcastil) in [#518](https://github.com/dcastil/tailwind-merge/pull/518)
+- New mandatory `orderSensitiveModifiers` property in config when using `createTailwindMerge` by [@dcastil](https://github.com/dcastil) in [#518](https://github.com/dcastil/tailwind-merge/pull/518)
 - `DefaultThemeGroupIds` type union consists of different string literals than before by [@dcastil](https://github.com/dcastil) in [#518](https://github.com/dcastil/tailwind-merge/pull/518)
 - Classes removed in Tailwind CSS v4 are not supported by tailwind-merge anymore by [@dcastil](https://github.com/dcastil) in [#518](https://github.com/dcastil/tailwind-merge/pull/518)
 

@@ -38,7 +38,7 @@ tailwind-merge v3.0.0 is expected to be used together with Tailwind CSS v4. That
 
 ### `extendTailwindMerge`: Allowed theme keys changed
 
-In Tailwind CSS v3 tailwind-merge was in a difficult position with the Tailwind's theme scales. If tailwind-merge implemented support for all theme scales, the bundle size would become twice as large. If it didn't support any theme scales, users would have had a difficult time extending scales that are used in many class groups, like in the case of the `spacing` scale. tailwind-merge went with an awkward middle ground where it only supported theme scales that were used in multiple class groups.
+In Tailwind CSS v3 tailwind-merge was in a difficult position with Tailwind's theme scales. If tailwind-merge implemented support for all theme scales, the bundle size would become twice as large. If it didn't support any theme scales, users would have had a difficult time extending scales that are used in many class groups, like in the case of the `spacing` scale. tailwind-merge went with an awkward middle ground where it only supported theme scales that were used in multiple class groups.
 
 Tailwind CSS v4 reduced the number of theme scales to only 18 (called [theme variable namespaces](https://tailwindcss.com/docs/theme#theme-variable-namespaces) now) which makes it possible for tailwind-merge to support all of them.
 
@@ -60,29 +60,31 @@ const twMerge = extendTailwindMerge({
 
 Here's how to proceed with upgrading each individual theme scale that got removed or renamed. Just keep in mind that theme scales should only define the custom part of a class (i.e. `deep` for the class `inset-shadow-deep`) whereas class groups should define the whole class (i.e. `inset-shadow-deep` for the class `inset-shadow-deep`). Sometimes you might find that values you configured manually before are now supported by Tailwind CSS v4 by default in which case you can remove them from your tailwind-merge config.
 
-- `borderColor`: Use the theme scale `color` instead
-- `borderRadius`: Use the theme scale `radius` instead
-- `borderSpacing`: Use the theme scale `spacing` or class groups `border-spacing-*` instead
-- `borderWidth`: Use the class groups `border-w-*` instead
-- `brightness`: Use the class groups `brightness` and `backdrop-brightness` instead
-- `colors`: Use the theme scale `color` instead
-- `contrast`: Use the class groups `contrast` and `backdrop-contrast` instead
-- `gap`: Use the class groups `gap-*` instead
-- `gradientColorStopPositions`: Use the class groups `gradient-from-pos`, `gradient-via-pos` and `gradient-to-pos` instead
-- `gradientColorStops`: Use the class groups `gradient-from`, `gradient-via` and `gradient-to` instead
-- `grayscale`: Use the class groups `grayscale` and `backdrop-grayscale` instead
-- `hueRotate`: Use the class groups `hue-rotate` and `backdrop-hue-rotate` instead
-- `inset`: Use the theme scale `spacing` or class groups `inset-*` instead
-- `invert`: Use the class groups `invert` and `backdrop-invert` instead
-- `margin`: Use the theme scale `spacing` or class groups `m-*` instead
-- `opacity`: Use class groups `opacity` and `backdrop-opacity` instead
-- `padding`: Use the theme scale `spacing` or class groups `p-*` instead
-- `saturate`: use the class groups `saturate` and `backdrop-saturate` instead
-- `scale`: Use the class groups `scale-*` instead
-- `sepia`: Use the class groups `sepia` and `backdrop-sepia` instead
-- `skew`: use the class groups `skew-*` instead
-- `space`: Use the theme scale `spacing` or class groups `space-*` instead
-- `translate`: Use the theme scale `spacing` or class groups `translate-*` instead
+| Theme scale in tailwind-merge v2 | What to use in tailwind-merge v3 instead                                   |
+| -------------------------------- | -------------------------------------------------------------------------- |
+| `borderColor`                    | theme scale `color`                                                        |
+| `borderRadius`                   | theme scale `radius`                                                       |
+| `borderSpacing`                  | theme scale `spacing` or class groups `border-spacing-*`                   |
+| `borderWidth`                    | class groups `border-w-*`                                                  |
+| `brightness`                     | class groups `brightness` and `backdrop-brightness`                        |
+| `colors`                         | theme scale `color`                                                        |
+| `contrast`                       | class groups `contrast` and `backdrop-contrast`                            |
+| `gap`                            | class groups `gap-*`                                                       |
+| `gradientColorStopPositions`     | class groups `gradient-from-pos`, `gradient-via-pos` and `gradient-to-pos` |
+| `gradientColorStops`             | class groups `gradient-from`, `gradient-via` and `gradient-to`             |
+| `grayscale`                      | class groups `grayscale` and `backdrop-grayscale`                          |
+| `hueRotate`                      | class groups `hue-rotate` and `backdrop-hue-rotate`                        |
+| `inset`                          | theme scale `spacing` or class groups `inset-*`                            |
+| `invert`                         | class groups `invert` and `backdrop-invert`                                |
+| `margin`                         | theme scale `spacing` or class groups `m-*`                                |
+| `opacity`                        | class groups `opacity` and `backdrop-opacity`                              |
+| `padding`                        | theme scale `spacing` or class groups `p-*`                                |
+| `saturate`                       | class groups `saturate` and `backdrop-saturate`                            |
+| `scale`                          | class groups `scale-*`                                                     |
+| `sepia`                          | class groups `sepia` and `backdrop-sepia`                                  |
+| `skew`                           | class groups `skew-*`                                                      |
+| `space`                          | theme scale `spacing` or class groups `space-*`                            |
+| `translate`                      | theme scale `spacing` or class groups `translate-*`                        |
 
 In case you were modifying class groups in tailwind-merge v2 because their theme scale was previously not implemented, it is highly likely that you can move those definitions to the `theme` object in tailwind-merge v3. E.g. if you previously modified the `font-family` class group to add a custom font class, you can now use `theme.font` instead. Check out the [theme documentation](../configuration.md#theme) for more info.
 
@@ -161,7 +163,7 @@ Add the `orderSensitiveModifiers` field to your tailwind-merge config.
 
 #### Full upgrade
 
-If you have any order-sensitive modifiers in Tailwind, ddd them to the new `orderSensitiveModifiers` field in your tailwind-merge config.
+If you have any order-sensitive modifiers in Tailwind, add them to the new `orderSensitiveModifiers` field in your tailwind-merge config.
 
 ```diff
   import { createTailwindMerge } from 'tailwind-merge'
@@ -176,7 +178,7 @@ If you have any order-sensitive modifiers in Tailwind, ddd them to the new `orde
 
 The validator `isLength` was used to check whether a class part is a number (`3`, `1.5`), a fraction (`3/4`), or one of the strings `px`, `full` or `screen`. This was used for most length-based scales but the name was not really precise in explaining what it allows.
 
-Due to how length-based scales were changed in Tailwind CSS v4, tailwind-merge v3 now uses `isNumber` and `isFraction` instead depending on what each scale supports and strings like `px`, `full` and `screen` are instead specified manually in the scales themselves. That makes it more obvious what those validators do.
+Due to how length-based scales were changed in Tailwind CSS v4, tailwind-merge v3 now uses `isNumber` and `isFraction` instead depending on what each scale supports and strings like `px`, `full` and `screen` are instead specified manually in the scales themselves. This makes it more obvious what those validators do.
 
 #### Minimal upgrade
 
