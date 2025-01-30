@@ -38,7 +38,8 @@ The order of standard modifiers does not matter for tailwind-merge.
 ### Supports arbitrary values
 
 ```ts
-twMerge('bg-black bg-[color:var(--mystery-var)]') // → 'bg-[color:var(--mystery-var)]'
+twMerge('bg-black bg-(--my-color) bg-[color:var(--mystery-var)]')
+// → 'bg-[color:var(--mystery-var)]'
 twMerge('grid-cols-[1fr,auto] grid-cols-2') // → 'grid-cols-2'
 ```
 
@@ -82,8 +83,8 @@ The order of standard modifiers before and after an arbitrary variant in isolati
 ### Supports important modifier
 
 ```ts
-twMerge('!p-3 !p-4 p-5') // → '!p-4 p-5'
-twMerge('!right-2 !-inset-x-1') // → '!-inset-x-1'
+twMerge('p-3! p-4! p-5') // → 'p-4! p-5'
+twMerge('right-2! -inset-x-1!') // → '-inset-x-1!'
 ```
 
 ### Supports postfix modifiers

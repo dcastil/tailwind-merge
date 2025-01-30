@@ -21,10 +21,10 @@ If you're using a custom Tailwind config, you may need to configure tailwind-mer
 
 The default [`twMerge`](./api-reference.md#twmerge) function is configured in a way that you can still use it if all the following points apply to your Tailwind config:
 
--   Only using color names which don't clash with other Tailwind class names
--   Only deviating by number values from number-based Tailwind classes
--   Only using font-family classes which don't clash with default font-weight classes
--   Sticking to default Tailwind config for everything else
+- Only using color names which don't clash with other Tailwind class names
+- Only deviating by number values from number-based Tailwind classes
+- Only using font-family classes which don't clash with default font-weight classes
+- Sticking to default Tailwind config for everything else
 
 If some of these points don't apply to you, you can test whether `twMerge` still works as intended with your custom classes. Otherwise, you need create your own custom merge function by either extending the default tailwind-merge config or using a completely custom one.
 
@@ -39,12 +39,9 @@ const tailwindMergeConfig = {
     // ↓ Set how many values should be stored in cache.
     cacheSize: 500,
     // ↓ Optional prefix from Tailwind config
-    prefix: 'tw-',
-    // ↓ Optional separator from Tailwind config
-    separator: '_',
+    prefix: 'tw',
     theme: {
         // Theme scales are defined here
-        // This is not the theme object from your Tailwind config
     },
     classGroups: {
         // Class groups are defined here
@@ -55,6 +52,10 @@ const tailwindMergeConfig = {
     conflictingClassGroupModifiers: {
         // Conflicts between postfix modifier of a class group and another class group are defined here
     },
+    orderSensitiveModifiers: [
+        // Modifiers whose order among multiple modifiers should be preserved because their order
+        // changes which element gets targeted.
+    ],
 }
 ```
 
@@ -136,37 +137,58 @@ const conflictingClassGroupModifiers = {
 }
 ```
 
+### Order-sensitive modifiers
+
+In Tailwind CSS, not all modifiers behave the same when you stack them.
+
+In most cases the order of modifiers doesn't matter. E.g. `hover:focus:bg-red-500` and `focus:hover:bg-red-500` behave the same and in the context of tailwind-merge, you'd want them both to override each other. tailwind-merge sorts the modifiers internally to be able to override classes with the same modifiers, even if they are in a different order.
+
+However, there are some modifiers where the order matters, e.g. the direct children modifier `*`. The class `*:hover:text-red-500` modifies the text color of a child if that particular child is hovered, but the class `hover:*:text-red-500` modifies the text color of all direct children if the parent is hovered. In this case, you would want tailwind-merge to preserve both classes although they have the same modifiers, just in a different order.
+
+To know which modifiers are order-sensitive, tailwind-merge has the `orderSensitiveModifiers` property in its config. `twMerge` is pre-configured with all the order-sensitive modifiers that Tailwind CSS has by default. You'll only need to configure this property if you add your own order-sensitive modifiers or change the meaning of the default order-sensitive modifiers.
+
 ### Theme
 
-In the Tailwind config you can modify theme scales. tailwind-merge follows the same keys for the theme scales, but doesn't support all of them. tailwind-merge only supports theme scales which are used in multiple class groups to save bundle size (more info to that in [PR 55](https://github.com/dcastil/tailwind-merge/pull/55)). At the moment these are:
+In the Tailwind config you can modify your theme variable namespace to add classes with custom values. tailwind-merge follows the same naming scheme as Tailwind CSS for its theme scales:
 
--   `colors`
--   `spacing`
--   `blur`
--   `brightness`
--   `borderColor`
--   `borderRadius`
--   `borderSpacing`
--   `borderWidth`
--   `contrast`
--   `grayscale`
--   `hueRotate`
--   `invert`
--   `gap`
--   `gradientColorStops`
--   `gradientColorStopPositions`
--   `inset`
--   `margin`
--   `opacity`
--   `padding`
--   `saturate`
--   `scale`
--   `sepia`
--   `skew`
--   `space`
--   `translate`
+| Tailwind CSS namespace | tailwind-merge theme key |
+| ---------------------- | ------------------------ |
+| `--color-*`            | `color`                  |
+| `--font-*`             | `font`                   |
+| `--text-*`             | `text`                   |
+| `--font-weight-*`      | `font-weight`            |
+| `--tracking-*`         | `tracking`               |
+| `--leading-*`          | `leading`                |
+| `--breakpoint-*`       | `breakpoint`             |
+| `--container-*`        | `container`              |
+| `--spacing-*`          | `spacing`                |
+| `--radius-*`           | `radius`                 |
+| `--shadow-*`           | `shadow`                 |
+| `--inset-shadow-*`     | `inset-shadow`           |
+| `--drop-shadow-*`      | `drop-shadow`            |
+| `--blur-*`             | `blur`                   |
+| `--perspective-*`      | `perspective`            |
+| `--aspect-*`           | `aspect`                 |
+| `--ease-*`             | `ease`                   |
+| `--animate-*`          | `animate`                |
 
-If you modified one of these theme scales in your Tailwind config, you can add all your keys right here and tailwind-merge will take care of the rest. If you modified other theme scales, you need to figure out the class group to modify in the [default config](./api-reference.md#getdefaultconfig).
+If you modified one of the theme namespaces in your Tailwind config, you need to add the variable names to the `theme` object in tailwind-merge as well so that tailwind-merge knows about them.
+
+E.g. let's say you added the variable `--text-huge-af: 100px` to your Tailwind config which enables classes like `text-huge-af`. To make sure that tailwind-merge merges these classes correctly, you need to configure tailwind-merge like this:
+
+```ts
+import { extendTailwindMerge } from 'tailwind-merge'
+
+const twMerge = extendTailwindMerge({
+    extend: {
+        theme: {
+            // ↓ `text` is the key of the namespace `--text-*`
+            //      ↓ `huge-af` is the variable name in the namespace
+            text: ['huge-af'],
+        },
+    },
+})
+```
 
 ### Extending the tailwind-merge config
 
@@ -175,7 +197,7 @@ If you only need to slightly modify the default tailwind-merge config, [`extendT
 ```ts
 import { extendTailwindMerge } from 'tailwind-merge'
 
-const customTwMerge = extendTailwindMerge<'foo' | 'bar' | 'baz'>({
+const twMerge = extendTailwindMerge<'foo' | 'bar' | 'baz'>({
     // ↓ Override elements from the default config
     //   It has the same shape as the `extend` object, so we're going to skip it here.
     override: {},
@@ -199,6 +221,8 @@ const customTwMerge = extendTailwindMerge<'foo' | 'bar' | 'baz'>({
         conflictingClassGroupModifiers: {
             baz: ['bar'],
         },
+        // ↓ Define order-sensitive modifiers
+        orderSensitiveModifiers: ['my-order-sensitive-modifier'],
     },
 })
 ```
@@ -263,7 +287,7 @@ The function takes a callback which returns the config you want to use and retur
 ```ts
 import { createTailwindMerge } from 'tailwind-merge'
 
-const customTwMerge = createTailwindMerge(() => ({
+const twMerge = createTailwindMerge(() => ({
     cacheSize: 500,
     theme: {},
     classGroups: {
@@ -277,13 +301,14 @@ const customTwMerge = createTailwindMerge(() => ({
     conflictingClassGroupModifiers: {
         baz: ['bar'],
     },
+    orderSensitiveModifiers: [],
 }))
 ```
 
 > [!Note]
 > The function `createTailwindMerge` computes a large data structure based on the config passed to it. I recommend to call it only once and store the result in a top-level variable instead of calling it inline within another repeatedly called function.
 
-The callback passed to `createTailwindMerge` will be called when `customTwMerge` is called the first time, so you don't need to worry about the computations in it affecting app startup performance in case you aren't using tailwind-merge at app startup.
+The callback passed to `createTailwindMerge` will be called when `twMerge` is called the first time, so you don't need to worry about the computations in it affecting app startup performance in case you aren't using tailwind-merge at app startup.
 
 ### Using tailwind-merge plugins
 

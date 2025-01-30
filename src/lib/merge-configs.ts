@@ -1,4 +1,4 @@
-import { AnyConfig, ConfigExtension } from './types'
+import { AnyConfig, ConfigExtension, NoInfer } from './types'
 
 /**
  * @param baseConfig Config where other config will be merged into. This object will be mutated.
@@ -9,7 +9,6 @@ export const mergeConfigs = <ClassGroupIds extends string, ThemeGroupIds extends
     {
         cacheSize,
         prefix,
-        separator,
         experimentalParseClassName,
         extend = {},
         override = {},
@@ -17,22 +16,25 @@ export const mergeConfigs = <ClassGroupIds extends string, ThemeGroupIds extends
 ) => {
     overrideProperty(baseConfig, 'cacheSize', cacheSize)
     overrideProperty(baseConfig, 'prefix', prefix)
-    overrideProperty(baseConfig, 'separator', separator)
     overrideProperty(baseConfig, 'experimentalParseClassName', experimentalParseClassName)
 
-    for (const configKey in override) {
-        overrideConfigProperties(
-            baseConfig[configKey as keyof typeof override],
-            override[configKey as keyof typeof override],
-        )
-    }
+    overrideConfigProperties(baseConfig.theme, override.theme)
+    overrideConfigProperties(baseConfig.classGroups, override.classGroups)
+    overrideConfigProperties(baseConfig.conflictingClassGroups, override.conflictingClassGroups)
+    overrideConfigProperties(
+        baseConfig.conflictingClassGroupModifiers,
+        override.conflictingClassGroupModifiers,
+    )
+    overrideProperty(baseConfig, 'orderSensitiveModifiers', override.orderSensitiveModifiers)
 
-    for (const key in extend) {
-        mergeConfigProperties(
-            baseConfig[key as keyof typeof extend],
-            extend[key as keyof typeof extend],
-        )
-    }
+    mergeConfigProperties(baseConfig.theme, extend.theme)
+    mergeConfigProperties(baseConfig.classGroups, extend.classGroups)
+    mergeConfigProperties(baseConfig.conflictingClassGroups, extend.conflictingClassGroups)
+    mergeConfigProperties(
+        baseConfig.conflictingClassGroupModifiers,
+        extend.conflictingClassGroupModifiers,
+    )
+    mergeArrayProperties(baseConfig, extend, 'orderSensitiveModifiers')
 
     return baseConfig
 }
@@ -64,11 +66,19 @@ const mergeConfigProperties = (
 ) => {
     if (mergeObject) {
         for (const key in mergeObject) {
-            const mergeValue = mergeObject[key]
-
-            if (mergeValue !== undefined) {
-                baseObject[key] = (baseObject[key] || []).concat(mergeValue)
-            }
+            mergeArrayProperties(baseObject, mergeObject, key)
         }
+    }
+}
+
+const mergeArrayProperties = <Key extends string>(
+    baseObject: Partial<Record<NoInfer<Key>, readonly unknown[]>>,
+    mergeObject: Partial<Record<NoInfer<Key>, readonly unknown[]>>,
+    key: Key,
+) => {
+    const mergeValue = mergeObject[key]
+
+    if (mergeValue !== undefined) {
+        baseObject[key] = baseObject[key] ? baseObject[key].concat(mergeValue) : mergeValue
     }
 }

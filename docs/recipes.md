@@ -13,7 +13,9 @@ First, we need to know whether we want to override or extend the default scale. 
 Then we check whether our particular theme scale is included in tailwind-merge's theme config object [here](./configuration.md#theme). In the hypothetical case that tailwind-merge supported Tailwind's `boxShadow` theme scale, we could add it to the tailwind-merge config like this:
 
 ```js
-const customTwMerge = extendTailwindMerge({
+import { extendTailwindMerge } from 'tailwind-merge'
+
+const twMerge = extendTailwindMerge({
     extend: {
         theme: {
             // The `boxShadow` key isn't actually supported
@@ -26,7 +28,9 @@ const customTwMerge = extendTailwindMerge({
 In the case of the `boxShadow` scale, tailwind-merge doesn't include it in the theme object. Instead, we need to check out the [default config of tailwind-merge](../src/lib/default-config.ts) and search for the class group ID of the box shadow scale. After a quick search we find that tailwind-merge is using the key `shadow` for that group. We can add our custom classes to that group like this:
 
 ```js
-const customTwMerge = extendTailwindMerge({
+import { extendTailwindMerge } from 'tailwind-merge'
+
+const twMerge = extendTailwindMerge({
     extend: {
         classGroups: {
             shadow: [{ shadow: ['100', '200', '300'] }],
@@ -56,6 +60,8 @@ Instead of creating custom CSS classes, I recommend keeping the collection of Ta
 ```jsx
 // React components with JSX syntax used in this example
 
+import { twMerge } from 'tailwind-merge'
+
 const BTN_PRIMARY_CLASSNAMES = 'py-2 px-4 bg-blue-500 text-white rounded-lg hover:bg-blue-700'
 
 function ButtonPrimary(props) {
@@ -70,9 +76,11 @@ function ButtonPrimary(props) {
 You can wrap `twMerge` in another function which can modify the inputs and/or output.
 
 ```js
-function customTwMerge(...inputs) {
+import { twMerge as twMergeOriginal } from 'tailwind-merge'
+
+function twMerge(...inputs) {
     const modifiedInputs = modifyInputs(inputs)
-    return twMerge(modifiedInputs)
+    return twMergeOriginal(modifiedInputs)
 }
 ```
 

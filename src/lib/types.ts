@@ -21,17 +21,12 @@ interface ConfigStaticPart {
      */
     prefix?: string
     /**
-     * Custom separator for modifiers in Tailwind classes
-     * @see https://tailwindcss.com/docs/configuration#separator
-     */
-    separator: string
-    /**
      * Allows to customize parsing of individual classes passed to `twMerge`.
      * All classes passed to `twMerge` outside of cache hits are passed to this function before it is determined whether the class is a valid Tailwind CSS class.
      *
      * This is an experimental feature and may introduce breaking changes in any minor version update.
      */
-    experimentalParseClassName?(param: ExperimentalParseClassNameParam): ExperimentalParsedClassName
+    experimentalParseClassName?(param: ExperimentalParseClassNameParam): ParsedClassName
 }
 
 /**
@@ -41,7 +36,7 @@ interface ConfigStaticPart {
  */
 export interface ExperimentalParseClassNameParam {
     className: string
-    parseClassName(className: string): ExperimentalParsedClassName
+    parseClassName(className: string): ParsedClassName
 }
 
 /**
@@ -49,7 +44,13 @@ export interface ExperimentalParseClassNameParam {
  *
  * This is an experimental feature and may introduce breaking changes in any minor version update.
  */
-export interface ExperimentalParsedClassName {
+export interface ParsedClassName {
+    /**
+     * Whether the class is external and merging logic should be sipped.
+     *
+     * If this is `true`, the class will be treated as if it wasn't a Tailwind class and will be passed through as is.
+     */
+    isExternal?: boolean
     /**
      * Modifiers of the class in the order they appear in the class.
      *
@@ -87,11 +88,13 @@ export interface ExperimentalParsedClassName {
 interface ConfigGroupsPart<ClassGroupIds extends string, ThemeGroupIds extends string> {
     /**
      * Theme scales used in classGroups.
+     *
      * The keys are the same as in the Tailwind config but the values are sometimes defined more broadly.
      */
     theme: NoInfer<ThemeObject<ThemeGroupIds>>
     /**
      * Object with groups of classes.
+     *
      * @example
      * {
      *     // Creates group of classes `group`, `of` and `classes`
@@ -103,6 +106,7 @@ interface ConfigGroupsPart<ClassGroupIds extends string, ThemeGroupIds extends s
     classGroups: NoInfer<Record<ClassGroupIds, ClassGroup<ThemeGroupIds>>>
     /**
      * Conflicting classes across groups.
+     *
      * The key is ID of class group which creates conflict, values are IDs of class groups which receive a conflict.
      * A class group ID is the key of a class group in classGroups object.
      * @example { gap: ['gap-x', 'gap-y'] }
@@ -110,12 +114,19 @@ interface ConfigGroupsPart<ClassGroupIds extends string, ThemeGroupIds extends s
     conflictingClassGroups: NoInfer<Partial<Record<ClassGroupIds, readonly ClassGroupIds[]>>>
     /**
      * Postfix modifiers conflicting with other class groups.
+     *
      * A class group ID is the key of a class group in classGroups object.
      * @example { 'font-size': ['leading'] }
      */
     conflictingClassGroupModifiers: NoInfer<
         Partial<Record<ClassGroupIds, readonly ClassGroupIds[]>>
     >
+    /**
+     * Modifiers whose order among multiple modifiers should be preserved because their order changes which element gets targeted.
+     *
+     * tailwind-merge makes sure that classes with these modifiers are not overwritten by classes with the same modifiers with order-sensitive modifiers being in a different position.
+     */
+    orderSensitiveModifiers: string[]
 }
 
 /**
@@ -128,7 +139,7 @@ export interface ConfigExtension<ClassGroupIds extends string, ThemeGroupIds ext
 }
 
 type PartialPartial<T> = {
-    [P in keyof T]?: Partial<T[P]>
+    [P in keyof T]?: T[P] extends any[] ? T[P] : Partial<T[P]>
 }
 
 export type ThemeObject<ThemeGroupIds extends string> = Record<
@@ -168,31 +179,24 @@ export type NoInfer<T> = [T][T extends any ? 0 : never]
  *      (the list of supported keys may vary between `tailwind-merge` versions)
  */
 export type DefaultThemeGroupIds =
+    | 'animate'
+    | 'aspect'
     | 'blur'
-    | 'borderColor'
-    | 'borderRadius'
-    | 'borderSpacing'
-    | 'borderWidth'
-    | 'brightness'
-    | 'colors'
-    | 'contrast'
-    | 'gap'
-    | 'gradientColorStopPositions'
-    | 'gradientColorStops'
-    | 'grayscale'
-    | 'hueRotate'
-    | 'inset'
-    | 'invert'
-    | 'margin'
-    | 'opacity'
-    | 'padding'
-    | 'saturate'
-    | 'scale'
-    | 'sepia'
-    | 'skew'
-    | 'space'
+    | 'breakpoint'
+    | 'color'
+    | 'container'
+    | 'drop-shadow'
+    | 'ease'
+    | 'font-weight'
+    | 'font'
+    | 'inset-shadow'
+    | 'leading'
+    | 'perspective'
+    | 'radius'
+    | 'shadow'
     | 'spacing'
-    | 'translate'
+    | 'text'
+    | 'tracking'
 
 /**
  * Class group IDs included in the default configuration of tailwind-merge.
@@ -217,13 +221,13 @@ export type DefaultClassGroupIds =
     | 'backdrop-opacity'
     | 'backdrop-saturate'
     | 'backdrop-sepia'
+    | 'backface'
     | 'basis'
     | 'bg-attachment'
     | 'bg-blend'
     | 'bg-clip'
     | 'bg-color'
     | 'bg-image'
-    | 'bg-opacity'
     | 'bg-origin'
     | 'bg-position'
     | 'bg-repeat'
@@ -239,7 +243,6 @@ export type DefaultClassGroupIds =
     | 'border-color-x'
     | 'border-color-y'
     | 'border-color'
-    | 'border-opacity'
     | 'border-spacing-x'
     | 'border-spacing-y'
     | 'border-spacing'
@@ -267,6 +270,7 @@ export type DefaultClassGroupIds =
     | 'col-end'
     | 'col-start-end'
     | 'col-start'
+    | 'color-scheme'
     | 'columns'
     | 'container'
     | 'content'
@@ -275,7 +279,6 @@ export type DefaultClassGroupIds =
     | 'delay'
     | 'display'
     | 'divide-color'
-    | 'divide-opacity'
     | 'divide-style'
     | 'divide-x-reverse'
     | 'divide-x'
@@ -285,6 +288,7 @@ export type DefaultClassGroupIds =
     | 'duration'
     | 'ease'
     | 'end'
+    | 'field-sizing'
     | 'fill'
     | 'filter'
     | 'flex-direction'
@@ -294,6 +298,7 @@ export type DefaultClassGroupIds =
     | 'font-family'
     | 'font-size'
     | 'font-smoothing'
+    | 'font-stretch'
     | 'font-style'
     | 'font-weight'
     | 'forced-color-adjust'
@@ -321,6 +326,10 @@ export type DefaultClassGroupIds =
     | 'hue-rotate'
     | 'hyphens'
     | 'indent'
+    | 'inset-ring-color'
+    | 'inset-ring-w'
+    | 'inset-shadow-color'
+    | 'inset-shadow'
     | 'inset-x'
     | 'inset-y'
     | 'inset'
@@ -366,12 +375,13 @@ export type DefaultClassGroupIds =
     | 'p'
     | 'pb'
     | 'pe'
+    | 'perspective-origin'
+    | 'perspective'
     | 'pl'
     | 'place-content'
     | 'place-items'
     | 'place-self'
     | 'placeholder-color'
-    | 'placeholder-opacity'
     | 'pointer-events'
     | 'position'
     | 'pr'
@@ -384,9 +394,11 @@ export type DefaultClassGroupIds =
     | 'ring-color'
     | 'ring-offset-color'
     | 'ring-offset-w'
-    | 'ring-opacity'
     | 'ring-w-inset'
     | 'ring-w'
+    | 'rotate-x'
+    | 'rotate-y'
+    | 'rotate-z'
     | 'rotate'
     | 'rounded-b'
     | 'rounded-bl'
@@ -407,8 +419,10 @@ export type DefaultClassGroupIds =
     | 'row-start-end'
     | 'row-start'
     | 'saturate'
+    | 'scale-3d'
     | 'scale-x'
     | 'scale-y'
+    | 'scale-z'
     | 'scale'
     | 'scroll-behavior'
     | 'scroll-m'
@@ -437,6 +451,7 @@ export type DefaultClassGroupIds =
     | 'size'
     | 'skew-x'
     | 'skew-y'
+    | 'skew'
     | 'snap-align'
     | 'snap-stop'
     | 'snap-strictness'
@@ -456,7 +471,6 @@ export type DefaultClassGroupIds =
     | 'text-decoration-style'
     | 'text-decoration-thickness'
     | 'text-decoration'
-    | 'text-opacity'
     | 'text-overflow'
     | 'text-transform'
     | 'text-wrap'
@@ -467,10 +481,15 @@ export type DefaultClassGroupIds =
     | 'touch'
     | 'tracking'
     | 'transform-origin'
+    | 'transform-style'
     | 'transform'
+    | 'transition-behavior'
     | 'transition'
+    | 'translate-none'
     | 'translate-x'
     | 'translate-y'
+    | 'translate-z'
+    | 'translate'
     | 'underline-offset'
     | 'vertical-align'
     | 'visibility'

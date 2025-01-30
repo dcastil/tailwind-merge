@@ -57,3 +57,26 @@ test('supports Tailwind CSS v3.4 features', () => {
     expect(twMerge('float-start float-end clear-start clear-end')).toBe('float-end clear-end')
     expect(twMerge('*:p-10 *:p-20 hover:*:p-10 hover:*:p-20')).toBe('*:p-20 hover:*:p-20')
 })
+
+test('supports Tailwind CSS v4.0 features', () => {
+    expect(twMerge('transform-3d transform-flat')).toBe('transform-flat')
+    expect(twMerge('rotate-12 rotate-x-2 rotate-none rotate-y-3')).toBe(
+        'rotate-x-2 rotate-none rotate-y-3',
+    )
+    expect(twMerge('perspective-dramatic perspective-none perspective-midrange')).toBe(
+        'perspective-midrange',
+    )
+    expect(twMerge('perspective-origin-center perspective-origin-top-left')).toBe(
+        'perspective-origin-top-left',
+    )
+    expect(twMerge('bg-linear-to-r bg-linear-45')).toBe('bg-linear-45')
+    expect(twMerge('bg-linear-to-r bg-radial-[something] bg-conic-10')).toBe('bg-conic-10')
+    expect(twMerge('ring-4 ring-orange inset-ring inset-ring-3 inset-ring-blue')).toBe(
+        'ring-4 ring-orange inset-ring-3 inset-ring-blue',
+    )
+    expect(twMerge('field-sizing-content field-sizing-fixed')).toBe('field-sizing-fixed')
+    expect(twMerge('scheme-normal scheme-dark')).toBe('scheme-dark')
+    expect(twMerge('font-stretch-expanded font-stretch-[66.66%] font-stretch-50%')).toBe(
+        'font-stretch-50%',
+    )
+})

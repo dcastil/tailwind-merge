@@ -19,7 +19,6 @@ test('conflicts across postfix modifiers', () => {
 
     const customTwMerge = createTailwindMerge(() => ({
         cacheSize: 10,
-        separator: ':',
         theme: {},
         classGroups: {
             foo: ['foo-1/2', 'foo-2/3'],
@@ -30,6 +29,7 @@ test('conflicts across postfix modifiers', () => {
         conflictingClassGroupModifiers: {
             baz: ['bar'],
         },
+        orderSensitiveModifiers: [],
     }))
 
     expect(customTwMerge('foo-1/2 foo-2/3')).toBe('foo-2/3')
@@ -38,4 +38,29 @@ test('conflicts across postfix modifiers', () => {
     expect(customTwMerge('bar-1/2 bar-2')).toBe('bar-2')
     expect(customTwMerge('bar-2 bar-1/2')).toBe('bar-1/2')
     expect(customTwMerge('bar-1 baz-1/2')).toBe('baz-1/2')
+})
+
+test('sorts modifiers correctly', () => {
+    expect(twMerge('c:d:e:block d:c:e:inline')).toBe('d:c:e:inline')
+    expect(twMerge('*:before:block *:before:inline')).toBe('*:before:inline')
+    expect(twMerge('*:before:block before:*:inline')).toBe('*:before:block before:*:inline')
+    expect(twMerge('x:y:*:z:block y:x:*:z:inline')).toBe('y:x:*:z:inline')
+})
+
+test('sorts modifiers correctly according to orderSensitiveModifiers', () => {
+    const customTwMerge = createTailwindMerge(() => ({
+        cacheSize: 10,
+        theme: {},
+        classGroups: {
+            foo: ['foo-1', 'foo-2'],
+        },
+        conflictingClassGroups: {},
+        conflictingClassGroupModifiers: {},
+        orderSensitiveModifiers: ['a', 'b'],
+    }))
+
+    expect(customTwMerge('c:d:e:foo-1 d:c:e:foo-2')).toBe('d:c:e:foo-2')
+    expect(customTwMerge('a:b:foo-1 a:b:foo-2')).toBe('a:b:foo-2')
+    expect(customTwMerge('a:b:foo-1 b:a:foo-2')).toBe('a:b:foo-1 b:a:foo-2')
+    expect(customTwMerge('x:y:a:z:foo-1 y:x:a:z:foo-2')).toBe('y:x:a:z:foo-2')
 })

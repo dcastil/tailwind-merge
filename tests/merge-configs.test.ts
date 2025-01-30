@@ -7,8 +7,7 @@ test('mergeConfigs has correct behavior', () => {
         mergeConfigs(
             {
                 cacheSize: 50,
-                prefix: 'tw-',
-                separator: ':',
+                prefix: 'tw',
                 theme: {
                     hi: ['ho'],
                     themeToOverride: ['to-override'],
@@ -26,9 +25,9 @@ test('mergeConfigs has correct behavior', () => {
                     hello: ['world'],
                     toOverride: ['groupToOverride-2'],
                 },
+                orderSensitiveModifiers: ['order-1'],
             },
             {
-                separator: '-',
                 prefix: undefined,
                 override: {
                     theme: {
@@ -44,6 +43,7 @@ test('mergeConfigs has correct behavior', () => {
                     conflictingClassGroupModifiers: {
                         toOverride: ['overridden-2'],
                     },
+                    orderSensitiveModifiers: ['order-2'],
                 },
                 extend: {
                     classGroups: {
@@ -59,13 +59,13 @@ test('mergeConfigs has correct behavior', () => {
                     conflictingClassGroupModifiers: {
                         hello: ['world2'],
                     },
+                    orderSensitiveModifiers: ['order-3'],
                 },
             },
         ),
     ).toEqual({
         cacheSize: 50,
-        prefix: 'tw-',
-        separator: '-',
+        prefix: 'tw',
         theme: {
             hi: ['ho'],
             themeToOverride: ['overridden'],
@@ -87,5 +87,6 @@ test('mergeConfigs has correct behavior', () => {
             hello: ['world', 'world2'],
             toOverride: ['overridden-2'],
         },
+        orderSensitiveModifiers: ['order-2', 'order-3'],
     })
 })

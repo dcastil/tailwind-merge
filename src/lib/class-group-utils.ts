@@ -104,20 +104,15 @@ const getGroupIdForArbitraryProperty = (className: string) => {
  * Exported for testing only
  */
 export const createClassMap = (config: Config<AnyClassGroupIds, AnyThemeGroupIds>) => {
-    const { theme, prefix } = config
+    const { theme, classGroups } = config
     const classMap: ClassPartObject = {
         nextPart: new Map<string, ClassPartObject>(),
         validators: [],
     }
 
-    const prefixedClassGroupEntries = getPrefixedClassGroupEntries(
-        Object.entries(config.classGroups),
-        prefix,
-    )
-
-    prefixedClassGroupEntries.forEach(([classGroupId, classGroup]) => {
-        processClassesRecursively(classGroup, classMap, classGroupId, theme)
-    })
+    for (const classGroupId in classGroups) {
+        processClassesRecursively(classGroups[classGroupId]!, classMap, classGroupId, theme)
+    }
 
     return classMap
 }
@@ -185,30 +180,3 @@ const getPart = (classPartObject: ClassPartObject, path: string) => {
 
 const isThemeGetter = (func: ClassValidator | ThemeGetter): func is ThemeGetter =>
     (func as ThemeGetter).isThemeGetter
-
-const getPrefixedClassGroupEntries = (
-    classGroupEntries: Array<[classGroupId: string, classGroup: ClassGroup<AnyThemeGroupIds>]>,
-    prefix: string | undefined,
-): Array<[classGroupId: string, classGroup: ClassGroup<AnyThemeGroupIds>]> => {
-    if (!prefix) {
-        return classGroupEntries
-    }
-
-    return classGroupEntries.map(([classGroupId, classGroup]) => {
-        const prefixedClassGroup = classGroup.map((classDefinition) => {
-            if (typeof classDefinition === 'string') {
-                return prefix + classDefinition
-            }
-
-            if (typeof classDefinition === 'object') {
-                return Object.fromEntries(
-                    Object.entries(classDefinition).map(([key, value]) => [prefix + key, value]),
-                )
-            }
-
-            return classDefinition
-        })
-
-        return [classGroupId, prefixedClassGroup]
-    })
-}

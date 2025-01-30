@@ -100,8 +100,7 @@ test('mergeConfigs type generics work correctly', () => {
     const config1 = mergeConfigs<'foo' | 'bar', 'baz'>(
         {
             cacheSize: 50,
-            prefix: 'tw-',
-            separator: ':',
+            prefix: 'tw',
             theme: {
                 hi: ['ho'],
                 themeToOverride: ['to-override'],
@@ -119,9 +118,9 @@ test('mergeConfigs type generics work correctly', () => {
                 hello: ['world'],
                 toOverride: ['groupToOverride-2'],
             },
+            orderSensitiveModifiers: [],
         },
         {
-            separator: '-',
             prefix: undefined,
             override: {
                 theme: {
