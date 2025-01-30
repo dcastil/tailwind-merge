@@ -124,8 +124,6 @@ const twMerge = extendTailwindMerge<AdditionalClassGroupIds, AdditionalThemeGrou
     cacheSize: 0,
     // ↓ Optional prefix from TaiLwind config
     prefix: 'tw',
-    // ↓ Optional separator from TaiLwind config
-    separator: '_',
 
     // ↓ Optional config overrides
     //   Only elements from the second level onwards are overridden
