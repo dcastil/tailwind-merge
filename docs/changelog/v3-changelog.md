@@ -32,6 +32,6 @@ Check out the [migration guide](./v2-to-v3-migration.md) and if you have any que
 
 - Added section explaining order-sensitive modifiers to [configuration docs](../configuration.md#order-sensitive-modifiers) by [@dcastil](https://github.com/dcastil) in [#518](https://github.com/dcastil/tailwind-merge/pull/518)
 
-**Full Changelog**: [`v2.6.0...v4.0.0`](https://github.com/dcastil/tailwind-merge/compare/v2.6.0...v4.0.0)
+**Full Changelog**: [`v2.6.0...v3.0.0`](https://github.com/dcastil/tailwind-merge/compare/v2.6.0...v3.0.0)
 
-Thanks to [@brandonmcconnell](https://github.com/brandonmcconnell), [@manavm1990](https://github.com/manavm1990), [@langy](https://github.com/langy), [@jamesreaco](https://github.com/jamesreaco), [@roboflow](https://github.com/roboflow), [@syntaxfm](https://github.com/syntaxfm), [@getsentry](https://github.com/getsentry), [@codecov](https://github.com/codecov), a private sponsor for sponsoring tailwind-merge! ❤️
+Thanks to [@brandonmcconnell](https://github.com/brandonmcconnell), [@manavm1990](https://github.com/manavm1990), [@langy](https://github.com/langy), [@jamesreaco](https://github.com/jamesreaco), [@roboflow](https://github.com/roboflow), [@syntaxfm](https://github.com/syntaxfm), [@getsentry](https://github.com/getsentry), [@codecov](https://github.com/codecov) and a private sponsor for sponsoring tailwind-merge! ❤️
