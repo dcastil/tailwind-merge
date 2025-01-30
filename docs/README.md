@@ -16,21 +16,21 @@ twMerge('px-2 py-1 bg-red hover:bg-dark-red', 'p-3 bg-[#B91C1C]')
 // → 'hover:bg-dark-red p-3 bg-[#B91C1C]'
 ```
 
--   Supports Tailwind v3.0 up to v3.4 (if you use Tailwind v2, use [tailwind-merge v0.9.0](https://github.com/dcastil/tailwind-merge/tree/v0.9.0))
--   Works in all modern browsers and maintained Node versions
--   Fully typed
--   [Check bundle size on Bundlephobia](https://bundlephobia.com/package/tailwind-merge)
+- Supports Tailwind v4.0 (if you use Tailwind v3, use [tailwind-merge v2.6.0](https://github.com/dcastil/tailwind-merge/tree/v2.6.0))
+- Works in all modern browsers and maintained Node versions
+- Fully typed
+- [Check bundle size on Bundlephobia](https://bundlephobia.com/package/tailwind-merge)
 
 ## Get started
 
--   [What is it for](./what-is-it-for.md)
--   [When and how to use it](./when-and-how-to-use-it.md)
--   [Features](./features.md)
--   [Limitations](./limitations.md)
--   [Configuration](./configuration.md)
--   [Recipes](./recipes.md)
--   [API reference](./api-reference.md)
--   [Writing plugins](./writing-plugins.md)
--   [Versioning](./versioning.md)
--   [Contributing](./contributing.md)
--   [Similar packages](./similar-packages.md)
+- [What is it for](./what-is-it-for.md)
+- [When and how to use it](./when-and-how-to-use-it.md)
+- [Features](./features.md)
+- [Limitations](./limitations.md)
+- [Configuration](./configuration.md)
+- [Recipes](./recipes.md)
+- [API reference](./api-reference.md)
+- [Writing plugins](./writing-plugins.md)
+- [Versioning](./versioning.md)
+- [Contributing](./contributing.md)
+- [Similar packages](./similar-packages.md)
