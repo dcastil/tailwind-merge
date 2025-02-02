@@ -10,8 +10,8 @@
         "@actions/core": "^1.11.1",
         "@actions/exec": "^1.1.1",
         "@actions/github": "^6.0.0",
-        "@octokit/types": "^13.6.2",
+        "@octokit/types": "^13.8.0",
         "esbuild": "^0.24.2",
-        "rollup": "^4.29.1"
+        "rollup": "^4.34.0"
     }
 }
