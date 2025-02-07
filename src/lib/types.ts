@@ -472,6 +472,7 @@ export type DefaultClassGroupIds =
     | 'text-decoration-thickness'
     | 'text-decoration'
     | 'text-overflow'
+    | 'text-size'
     | 'text-transform'
     | 'text-wrap'
     | 'top'
