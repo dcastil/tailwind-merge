@@ -722,14 +722,14 @@ export const getDefaultConfig = () => {
             // --------------
 
             /**
-             * Width
-             * @see https://tailwindcss.com/docs/width
-             */
-            /**
              * Size
              * @see https://tailwindcss.com/docs/width#setting-both-width-and-height
              */
             size: [{ size: scaleSizing() }],
+            /**
+             * Width
+             * @see https://tailwindcss.com/docs/width
+             */
             w: [{ w: [themeContainer, 'screen', ...scaleSizing()] }],
             /**
              * Min-Width
