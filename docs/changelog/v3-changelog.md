@@ -1,5 +1,16 @@
 # Changelog for v3 releases
 
+## v3.0.2
+
+### Bug Fixes
+
+- Fix `px` value not being recognized for some class groups by [@dcastil](https://github.com/dcastil) in [#538](https://github.com/dcastil/tailwind-merge/pull/538)
+- Fix doc comment being in incorrect place in default config by [@gjtorikian](https://github.com/gjtorikian) in [#526](https://github.com/dcastil/tailwind-merge/pull/526)
+
+**Full Changelog**: [`v3.0.1...v3.0.2](https://github.com/dcastil/tailwind-merge/compare/v3.0.1...v3.0.2)
+
+Thanks to [@brandonmcconnell](https://github.com/brandonmcconnell), [@manavm1990](https://github.com/manavm1990), [@langy](https://github.com/langy), [@jamesreaco](https://github.com/jamesreaco), [@roboflow](https://github.com/roboflow), [@syntaxfm](https://github.com/syntaxfm), [@getsentry](https://github.com/getsentry), [@codecov](https://github.com/codecov) and a private sponsor for sponsoring tailwind-merge! ❤️
+
 ## v3.0.1
 
 ### Bug Fixes
