@@ -74,16 +74,9 @@ export const getDefaultConfig = () => {
         ] as const
     const scaleOverflow = () => ['auto', 'hidden', 'clip', 'visible', 'scroll'] as const
     const scaleOverscroll = () => ['auto', 'contain', 'none'] as const
-    const scaleInset = () =>
-        [
-            isFraction,
-            'px',
-            'full',
-            'auto',
-            isArbitraryVariable,
-            isArbitraryValue,
-            themeSpacing,
-        ] as const
+    const scaleUnambiguousSpacing = () =>
+        [isArbitraryVariable, isArbitraryValue, themeSpacing] as const
+    const scaleInset = () => [isFraction, 'full', 'auto', ...scaleUnambiguousSpacing()] as const
     const scaleGridTemplateColsRows = () =>
         [isInteger, 'none', 'subgrid', isArbitraryVariable, isArbitraryValue] as const
     const scaleGridColRowStartAndEnd = () =>
@@ -97,19 +90,14 @@ export const getDefaultConfig = () => {
         [isInteger, 'auto', isArbitraryVariable, isArbitraryValue] as const
     const scaleGridAutoColsRows = () =>
         ['auto', 'min', 'max', 'fr', isArbitraryVariable, isArbitraryValue] as const
-    const scaleGap = () => [isArbitraryVariable, isArbitraryValue, themeSpacing] as const
     const scaleAlignPrimaryAxis = () =>
         ['start', 'end', 'center', 'between', 'around', 'evenly', 'stretch', 'baseline'] as const
     const scaleAlignSecondaryAxis = () => ['start', 'end', 'center', 'stretch'] as const
-    const scaleUnambiguousSpacing = () =>
-        [isArbitraryVariable, isArbitraryValue, themeSpacing] as const
-    const scalePadding = () => ['px', ...scaleUnambiguousSpacing()]
-    const scaleMargin = () => ['px', 'auto', ...scaleUnambiguousSpacing()] as const
+    const scaleMargin = () => ['auto', ...scaleUnambiguousSpacing()] as const
     const scaleSizing = () =>
         [
             isFraction,
             'auto',
-            'px',
             'full',
             'dvw',
             'dvh',
@@ -120,9 +108,7 @@ export const getDefaultConfig = () => {
             'min',
             'max',
             'fit',
-            isArbitraryVariable,
-            isArbitraryValue,
-            themeSpacing,
+            ...scaleUnambiguousSpacing(),
         ] as const
     const scaleColor = () => [themeColor, isArbitraryVariable, isArbitraryValue] as const
     const scaleGradientStopPosition = () => [isPercent, isArbitraryLength] as const
@@ -184,8 +170,7 @@ export const getDefaultConfig = () => {
     const scaleRotate = () => ['none', isNumber, isArbitraryVariable, isArbitraryValue] as const
     const scaleScale = () => ['none', isNumber, isArbitraryVariable, isArbitraryValue] as const
     const scaleSkew = () => [isNumber, isArbitraryVariable, isArbitraryValue] as const
-    const scaleTranslate = () =>
-        [isFraction, 'full', 'px', isArbitraryVariable, isArbitraryValue, themeSpacing] as const
+    const scaleTranslate = () => [isFraction, 'full', ...scaleUnambiguousSpacing()] as const
 
     return {
         cacheSize: 500,
@@ -215,7 +200,7 @@ export const getDefaultConfig = () => {
             perspective: ['dramatic', 'near', 'normal', 'midrange', 'distant', 'none'],
             radius: [isTshirtSize],
             shadow: [isTshirtSize],
-            spacing: [isNumber],
+            spacing: ['px', isNumber],
             text: [isTshirtSize],
             tracking: ['tighter', 'tight', 'normal', 'wide', 'wider', 'widest'],
         },
@@ -442,10 +427,8 @@ export const getDefaultConfig = () => {
                         isFraction,
                         'full',
                         'auto',
-                        isArbitraryVariable,
-                        isArbitraryValue,
                         themeContainer,
-                        themeSpacing,
+                        ...scaleUnambiguousSpacing(),
                     ],
                 },
             ],
@@ -549,17 +532,17 @@ export const getDefaultConfig = () => {
              * Gap
              * @see https://tailwindcss.com/docs/gap
              */
-            gap: [{ gap: scaleGap() }],
+            gap: [{ gap: scaleUnambiguousSpacing() }],
             /**
              * Gap X
              * @see https://tailwindcss.com/docs/gap
              */
-            'gap-x': [{ 'gap-x': scaleGap() }],
+            'gap-x': [{ 'gap-x': scaleUnambiguousSpacing() }],
             /**
              * Gap Y
              * @see https://tailwindcss.com/docs/gap
              */
-            'gap-y': [{ 'gap-y': scaleGap() }],
+            'gap-y': [{ 'gap-y': scaleUnambiguousSpacing() }],
             /**
              * Justify Content
              * @see https://tailwindcss.com/docs/justify-content
@@ -610,47 +593,47 @@ export const getDefaultConfig = () => {
              * Padding
              * @see https://tailwindcss.com/docs/padding
              */
-            p: [{ p: scalePadding() }],
+            p: [{ p: scaleUnambiguousSpacing() }],
             /**
              * Padding X
              * @see https://tailwindcss.com/docs/padding
              */
-            px: [{ px: scalePadding() }],
+            px: [{ px: scaleUnambiguousSpacing() }],
             /**
              * Padding Y
              * @see https://tailwindcss.com/docs/padding
              */
-            py: [{ py: scalePadding() }],
+            py: [{ py: scaleUnambiguousSpacing() }],
             /**
              * Padding Start
              * @see https://tailwindcss.com/docs/padding
              */
-            ps: [{ ps: scalePadding() }],
+            ps: [{ ps: scaleUnambiguousSpacing() }],
             /**
              * Padding End
              * @see https://tailwindcss.com/docs/padding
              */
-            pe: [{ pe: scalePadding() }],
+            pe: [{ pe: scaleUnambiguousSpacing() }],
             /**
              * Padding Top
              * @see https://tailwindcss.com/docs/padding
              */
-            pt: [{ pt: scalePadding() }],
+            pt: [{ pt: scaleUnambiguousSpacing() }],
             /**
              * Padding Right
              * @see https://tailwindcss.com/docs/padding
              */
-            pr: [{ pr: scalePadding() }],
+            pr: [{ pr: scaleUnambiguousSpacing() }],
             /**
              * Padding Bottom
              * @see https://tailwindcss.com/docs/padding
              */
-            pb: [{ pb: scalePadding() }],
+            pb: [{ pb: scaleUnambiguousSpacing() }],
             /**
              * Padding Left
              * @see https://tailwindcss.com/docs/padding
              */
-            pl: [{ pl: scalePadding() }],
+            pl: [{ pl: scaleUnambiguousSpacing() }],
             /**
              * Margin
              * @see https://tailwindcss.com/docs/margin
@@ -881,11 +864,9 @@ export const getDefaultConfig = () => {
             leading: [
                 {
                     leading: [
-                        isArbitraryVariable,
-                        isArbitraryValue,
                         /** Deprecated since Tailwind CSS v4.0.0. @see https://github.com/tailwindlabs/tailwindcss.com/issues/2027#issuecomment-2620152757 */
                         themeLeading,
-                        themeSpacing,
+                        ...scaleUnambiguousSpacing(),
                     ],
                 },
             ],
@@ -978,7 +959,7 @@ export const getDefaultConfig = () => {
              * Text Indent
              * @see https://tailwindcss.com/docs/text-indent
              */
-            indent: [{ indent: ['px', ...scaleUnambiguousSpacing()] }],
+            indent: [{ indent: scaleUnambiguousSpacing() }],
             /**
              * Vertical Alignment
              * @see https://tailwindcss.com/docs/vertical-align
