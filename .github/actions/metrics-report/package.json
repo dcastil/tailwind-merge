@@ -12,6 +12,6 @@
         "@actions/github": "^6.0.0",
         "@octokit/types": "^13.8.0",
         "esbuild": "^0.25.0",
-        "rollup": "^4.34.0"
+        "rollup": "^4.34.9"
     }
 }
