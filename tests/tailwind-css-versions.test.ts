@@ -79,4 +79,5 @@ test('supports Tailwind CSS v4.0 features', () => {
     expect(twMerge('font-stretch-expanded font-stretch-[66.66%] font-stretch-50%')).toBe(
         'font-stretch-50%',
     )
+    expect(twMerge('col-span-full col-2 row-span-3 row-4')).toBe('col-2 row-4')
 })
