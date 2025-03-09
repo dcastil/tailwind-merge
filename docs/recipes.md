@@ -6,11 +6,11 @@ How to configure tailwind-merge with some common patterns.
 
 > I have a custom shadow scale with the keys 100, 200 and 300 configured in Tailwind. How do I make tailwind-merge resolve conflicts among those?
 
-We'll be able to do this by creating a custom `twMerge` functon with [`extendTailwindMerge`](./api-reference.md#extendtailwindmerge).
+We'll be able to do this by creating a custom `twMerge` function with [`extendTailwindMerge`](./api-reference.md#extendtailwindmerge).
 
-First, we need to know whether we want to override or extend the default scale. Let's say we extended the default config by putting the scale into the `extend` key in the Tailwind config.
+First, we need to know whether we want to override or extend the default scale. Let's say we extended the default config by adding the CSS variable `--shadow-100`, `--shadow-200` and `--shadow-300` into the `@theme` layer, meaning that the default variables like `--shadow-sm` stay the same.
 
-Then we check whether our particular theme scale is included in tailwind-merge's theme config object [here](./configuration.md#theme). In the hypothetical case that tailwind-merge supported Tailwind's `boxShadow` theme scale, we could add it to the tailwind-merge config like this:
+Then we check whether our particular theme scale is included in tailwind-merge's theme config object [here](./configuration.md#theme). Because tailwind-merge supports Tailwind's `shadow` theme scale, we can add it to the tailwind-merge config like this:
 
 ```js
 import { extendTailwindMerge } from 'tailwind-merge'
@@ -18,14 +18,14 @@ import { extendTailwindMerge } from 'tailwind-merge'
 const twMerge = extendTailwindMerge({
     extend: {
         theme: {
-            // The `boxShadow` key isn't actually supported
-            boxShadow: [{ shadow: ['100', '200', '300'] }],
+            // We only need to define the custom scale values without the `shadow-` prefix when adding them to the theme object
+            shadow: ['100', '200', '300'],
         },
     },
 })
 ```
 
-In the case of the `boxShadow` scale, tailwind-merge doesn't include it in the theme object. Instead, we need to check out the [default config of tailwind-merge](../src/lib/default-config.ts) and search for the class group ID of the box shadow scale. After a quick search we find that tailwind-merge is using the key `shadow` for that group. We can add our custom classes to that group like this:
+In the hypothetical case of the `shadow` theme scale not being supported in tailwind-merge, we would need to check out the [default config of tailwind-merge](../src/lib/default-config.ts) and search for the class group ID of the box shadow scale. After a quick search we would find that tailwind-merge is using the key `shadow` for that group. We could add our custom classes to that group like this:
 
 ```js
 import { extendTailwindMerge } from 'tailwind-merge'
@@ -33,6 +33,8 @@ import { extendTailwindMerge } from 'tailwind-merge'
 const twMerge = extendTailwindMerge({
     extend: {
         classGroups: {
+            // In class groups we always need to define the entire class name like `shadow-100`, `shadow-200` and `shadow-300`
+            // `{ shadow: ['100', '200', '300'] }` is a short-hand syntax for `'shadow-100', 'shadow-200', 'shadow-300'`
             shadow: [{ shadow: ['100', '200', '300'] }],
         },
     },
