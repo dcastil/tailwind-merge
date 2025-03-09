@@ -83,6 +83,7 @@ export const getDefaultConfig = () => {
         [
             'auto',
             { span: ['full', isInteger, isArbitraryVariable, isArbitraryValue] },
+            isInteger,
             isArbitraryVariable,
             isArbitraryValue,
         ] as const
