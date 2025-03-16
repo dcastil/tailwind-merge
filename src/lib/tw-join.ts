@@ -29,19 +29,36 @@ export function twJoin() {
     return string
 }
 
-const toValue = (mix: ClassNameArray | string) => {
+const toValue = (mix: ClassNameValue): string => {
+    // Fast path for strings
     if (typeof mix === 'string') {
         return mix
     }
 
-    let resolvedValue: string
+    // Early return for falsy values
+    if (!mix) {
+        return ''
+    }
+
+    // Iterative approach using a stack
+    const stack: ClassNameValue[] = [mix]
     let string = ''
 
-    for (let k = 0; k < mix.length; k++) {
-        if (mix[k]) {
-            if ((resolvedValue = toValue(mix[k] as ClassNameArray | string))) {
-                string && (string += ' ')
-                string += resolvedValue
+    while (stack.length > 0) {
+        const current = stack.pop()
+
+        if (!current) continue
+
+        if (typeof current === 'string') {
+            // Append string value
+            if (string) string += ' '
+            string += current
+        } else if (Array.isArray(current)) {
+            // Process array items in reverse order to maintain original order when popped
+            for (let i = current.length - 1; i >= 0; i--) {
+                if (current[i]) {
+                    stack.push(current[i])
+                }
             }
         }
     }

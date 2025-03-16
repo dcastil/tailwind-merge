@@ -203,7 +203,7 @@ export const getDefaultConfig = () => {
     const scaleTranslate = () => [isFraction, 'full', ...scaleUnambiguousSpacing()] as const
 
     return {
-        cacheSize: 500,
+        cacheSize: 20000,
         theme: {
             animate: ['spin', 'ping', 'pulse', 'bounce'],
             aspect: ['video'],

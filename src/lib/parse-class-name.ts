@@ -2,32 +2,45 @@ import { AnyConfig, ParsedClassName } from './types'
 
 export const IMPORTANT_MODIFIER = '!'
 const MODIFIER_SEPARATOR = ':'
-const MODIFIER_SEPARATOR_LENGTH = MODIFIER_SEPARATOR.length
+const EMPTY_MODIFIERS: string[] = []
+
+// Pre-allocated result object shape for consistency
+const createResultObject = (
+    modifiers: string[],
+    hasImportantModifier: boolean,
+    baseClassName: string,
+    maybePostfixModifierPosition?: number,
+    isExternal?: boolean,
+): ParsedClassName => ({
+    modifiers,
+    hasImportantModifier,
+    baseClassName,
+    maybePostfixModifierPosition,
+    isExternal,
+})
 
 export const createParseClassName = (config: AnyConfig) => {
     const { prefix, experimentalParseClassName } = config
 
-    /**
-     * Parse class name into parts.
-     *
-     * Inspired by `splitAtTopLevelOnly` used in Tailwind CSS
-     * @see https://github.com/tailwindlabs/tailwindcss/blob/v3.2.2/src/util/splitAtTopLevelOnly.js
-     */
     let parseClassName = (className: string): ParsedClassName => {
-        const modifiers = []
+        // Pre-allocate modifiers array based on likely size
+        const separatorCount = (className.match(/:/g) || []).length
+        const modifiers = new Array(separatorCount)
+        let modifierCount = 0
 
         let bracketDepth = 0
         let parenDepth = 0
         let modifierStart = 0
         let postfixModifierPosition: number | undefined
 
-        for (let index = 0; index < className.length; index++) {
-            let currentCharacter = className[index]
+        const len = className.length
+        for (let index = 0; index < len; index++) {
+            const currentCharacter = className[index]
 
             if (bracketDepth === 0 && parenDepth === 0) {
                 if (currentCharacter === MODIFIER_SEPARATOR) {
-                    modifiers.push(className.slice(modifierStart, index))
-                    modifierStart = index + MODIFIER_SEPARATOR_LENGTH
+                    modifiers[modifierCount++] = className.slice(modifierStart, index)
+                    modifierStart = index + 1
                     continue
                 }
 
@@ -37,70 +50,58 @@ export const createParseClassName = (config: AnyConfig) => {
                 }
             }
 
-            if (currentCharacter === '[') {
-                bracketDepth++
-            } else if (currentCharacter === ']') {
-                bracketDepth--
-            } else if (currentCharacter === '(') {
-                parenDepth++
-            } else if (currentCharacter === ')') {
-                parenDepth--
-            }
+            if (currentCharacter === '[') bracketDepth++
+            else if (currentCharacter === ']') bracketDepth--
+            else if (currentCharacter === '(') parenDepth++
+            else if (currentCharacter === ')') parenDepth--
         }
 
+        // Trim modifiers array to actual size used
+        const finalModifiers =
+            modifierCount > 0 ? modifiers.slice(0, modifierCount) : EMPTY_MODIFIERS
+
         const baseClassNameWithImportantModifier =
-            modifiers.length === 0 ? className : className.substring(modifierStart)
-        const baseClassName = stripImportantModifier(baseClassNameWithImportantModifier)
-        const hasImportantModifier = baseClassName !== baseClassNameWithImportantModifier
+            modifierCount === 0 ? className : className.slice(modifierStart)
+
+        // Inline important modifier check
+        let baseClassName = baseClassNameWithImportantModifier
+        let hasImportantModifier = false
+
+        if (baseClassNameWithImportantModifier.endsWith(IMPORTANT_MODIFIER)) {
+            baseClassName = baseClassNameWithImportantModifier.slice(0, -1)
+            hasImportantModifier = true
+        } else if (baseClassNameWithImportantModifier.startsWith(IMPORTANT_MODIFIER)) {
+            baseClassName = baseClassNameWithImportantModifier.slice(1)
+            hasImportantModifier = true
+        }
+
         const maybePostfixModifierPosition =
             postfixModifierPosition && postfixModifierPosition > modifierStart
                 ? postfixModifierPosition - modifierStart
                 : undefined
 
-        return {
-            modifiers,
+        return createResultObject(
+            finalModifiers,
             hasImportantModifier,
             baseClassName,
             maybePostfixModifierPosition,
-        }
+        )
     }
 
     if (prefix) {
         const fullPrefix = prefix + MODIFIER_SEPARATOR
         const parseClassNameOriginal = parseClassName
-        parseClassName = (className) =>
+        parseClassName = (className: string) =>
             className.startsWith(fullPrefix)
-                ? parseClassNameOriginal(className.substring(fullPrefix.length))
-                : {
-                      isExternal: true,
-                      modifiers: [],
-                      hasImportantModifier: false,
-                      baseClassName: className,
-                      maybePostfixModifierPosition: undefined,
-                  }
+                ? parseClassNameOriginal(className.slice(fullPrefix.length))
+                : createResultObject(EMPTY_MODIFIERS, false, className, undefined, true)
     }
 
     if (experimentalParseClassName) {
         const parseClassNameOriginal = parseClassName
-        parseClassName = (className) =>
+        parseClassName = (className: string) =>
             experimentalParseClassName({ className, parseClassName: parseClassNameOriginal })
     }
 
     return parseClassName
-}
-
-const stripImportantModifier = (baseClassName: string) => {
-    if (baseClassName.endsWith(IMPORTANT_MODIFIER)) {
-        return baseClassName.substring(0, baseClassName.length - 1)
-    }
-
-    /**
-     * In Tailwind CSS v3 the important modifier was at the start of the base class name. This is still supported for legacy reasons.
-     * @see https://github.com/dcastil/tailwind-merge/issues/513#issuecomment-2614029864
-     */
-    if (baseClassName.startsWith(IMPORTANT_MODIFIER)) {
-        return baseClassName.substring(1)
-    }
-
-    return baseClassName
 }
