@@ -11,7 +11,10 @@ import { checkoutBranch } from './utils/git.mjs'
 run()
 
 async function run() {
-    const pullRequest = context.payload.pull_request
+    const pullRequest =
+        /** @type {import('@octokit/webhooks-definitions/schema').PullRequestEvent} */ (
+            context.payload
+        ).pull_request
 
     if (!pullRequest) {
         throw Error('This action can only be run in a pull request')
@@ -35,7 +38,15 @@ async function run() {
         [getSizeMetricsReportContent(entryPointSizesHead, entryPointSizesBase)],
     ])
 
-    await setComment(commentBody)
+    const isPullRequestFromFork =
+        pullRequest.head.repo.full_name !== `${context.repo.owner}/${context.repo.repo}`
+
+    if (isPullRequestFromFork) {
+        core.info('Pull request is from a fork, printing comment instead of posting it')
+        core.info(commentBody)
+    } else {
+        await setComment(commentBody)
+    }
 }
 
 /**
