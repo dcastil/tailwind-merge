@@ -68,7 +68,7 @@ export const mergeClassList = (classList: string, configUtils: ConfigUtils) => {
 
         const classId = modifierId + classGroupId
 
-        if (classGroupsInConflict.includes(classId)) {
+        if (classGroupsInConflict.indexOf(classId) > -1) {
             // Tailwind class omitted due to conflict
             continue
         }
