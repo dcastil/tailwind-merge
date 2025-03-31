@@ -1,5 +1,28 @@
 # Changelog for v3 releases
 
+## v3.1.0
+
+### New Features
+
+- Add support for Tailwind CSS v4.0.10 by [@dcastil](https://github.com/dcastil) in [#546](https://github.com/dcastil/tailwind-merge/pull/546)
+
+### Bug Fixes
+
+- Fix length variable in `via-(length:*)` class being merged with `via-<color>` classes accidentally by [@dcastil](https://github.com/dcastil) in [#559](https://github.com/dcastil/tailwind-merge/pull/559)
+
+### Documentation
+
+- Fix typo in comment in types.ts by [@roottool](https://github.com/roottool) in [#549](https://github.com/dcastil/tailwind-merge/pull/549)
+- Update shadow scale recipe to tailwind merge v3 API by [@dcastil](https://github.com/dcastil) in [#545](https://github.com/dcastil/tailwind-merge/pull/545)
+
+### Other
+
+- Fix metrics report action erroring on PRs from forks by [@dcastil](https://github.com/dcastil) in [#551](https://github.com/dcastil/tailwind-merge/pull/551)
+
+**Full Changelog**: [`v3.0.2...v3.1.0`](https://github.com/dcastil/tailwind-merge/compare/v3.0.2...v3.1.0)
+
+Thanks to [@brandonmcconnell](https://github.com/brandonmcconnell), [@manavm1990](https://github.com/manavm1990), [@langy](https://github.com/langy), [@jamesreaco](https://github.com/jamesreaco), [@roboflow](https://github.com/roboflow), [@syntaxfm](https://github.com/syntaxfm), [@getsentry](https://github.com/getsentry), [@codecov](https://github.com/codecov), [@sourcegraph](https://github.com/sourcegraph) and a private sponsor for sponsoring tailwind-merge! ❤️
+
 ## v3.0.2
 
 ### Bug Fixes
@@ -9,7 +32,7 @@
 
 **Full Changelog**: [`v3.0.1...v3.0.2](https://github.com/dcastil/tailwind-merge/compare/v3.0.1...v3.0.2)
 
-Thanks to [@brandonmcconnell](https://github.com/brandonmcconnell), [@manavm1990](https://github.com/manavm1990), [@langy](https://github.com/langy), [@jamesreaco](https://github.com/jamesreaco), [@roboflow](https://github.com/roboflow), [@syntaxfm](https://github.com/syntaxfm), [@getsentry](https://github.com/getsentry), [@codecov](https://github.com/codecov) and a private sponsor for sponsoring tailwind-merge! ❤️
+Thanks to [@brandonmcconnell](https://github.com/brandonmcconnell), [@manavm1990](https://github.com/manavm1990), [@langy](https://github.com/langy), [@jamesreaco](https://github.com/jamesreaco), [@roboflow](https://github.com/roboflow), [@syntaxfm](https://github.com/syntaxfm), [@getsentry](https://github.com/getsentry), [@codecov](https://github.com/codecov), [@sourcegraph](https://github.com/sourcegraph) and a private sponsor for sponsoring tailwind-merge! ❤️
 
 ## v3.0.1
 
@@ -20,7 +43,7 @@ Thanks to [@brandonmcconnell](https://github.com/brandonmcconnell), [@manavm1990
 
 **Full Changelog**: [`v3.0.0...v3.0.1`](https://github.com/dcastil/tailwind-merge/compare/v3.0.0...v3.0.1)
 
-Thanks to [@brandonmcconnell](https://github.com/brandonmcconnell), [@manavm1990](https://github.com/manavm1990), [@langy](https://github.com/langy), [@jamesreaco](https://github.com/jamesreaco), [@roboflow](https://github.com/roboflow), [@syntaxfm](https://github.com/syntaxfm), [@getsentry](https://github.com/getsentry), [@codecov](https://github.com/codecov) and a private sponsor for sponsoring tailwind-merge! ❤️
+Thanks to [@brandonmcconnell](https://github.com/brandonmcconnell), [@manavm1990](https://github.com/manavm1990), [@langy](https://github.com/langy), [@jamesreaco](https://github.com/jamesreaco), [@roboflow](https://github.com/roboflow), [@syntaxfm](https://github.com/syntaxfm), [@getsentry](https://github.com/getsentry), [@codecov](https://github.com/codecov), [@sourcegraph](https://github.com/sourcegraph) and a private sponsor for sponsoring tailwind-merge! ❤️
 
 ## v3.0.0
 
@@ -58,4 +81,4 @@ Check out the [migration guide](./v2-to-v3-migration.md) and if you have any que
 
 **Full Changelog**: [`v2.6.0...v3.0.0`](https://github.com/dcastil/tailwind-merge/compare/v2.6.0...v3.0.0)
 
-Thanks to [@brandonmcconnell](https://github.com/brandonmcconnell), [@manavm1990](https://github.com/manavm1990), [@langy](https://github.com/langy), [@jamesreaco](https://github.com/jamesreaco), [@roboflow](https://github.com/roboflow), [@syntaxfm](https://github.com/syntaxfm), [@getsentry](https://github.com/getsentry), [@codecov](https://github.com/codecov) and a private sponsor for sponsoring tailwind-merge! ❤️
+Thanks to [@brandonmcconnell](https://github.com/brandonmcconnell), [@manavm1990](https://github.com/manavm1990), [@langy](https://github.com/langy), [@jamesreaco](https://github.com/jamesreaco), [@roboflow](https://github.com/roboflow), [@syntaxfm](https://github.com/syntaxfm), [@getsentry](https://github.com/getsentry), [@codecov](https://github.com/codecov), [@sourcegraph](https://github.com/sourcegraph) and a private sponsor for sponsoring tailwind-merge! ❤️
