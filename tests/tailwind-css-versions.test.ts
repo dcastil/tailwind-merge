@@ -80,4 +80,7 @@ test('supports Tailwind CSS v4.0 features', () => {
         'font-stretch-50%',
     )
     expect(twMerge('col-span-full col-2 row-span-3 row-4')).toBe('col-2 row-4')
+    expect(twMerge('via-red-500 via-(length:--mobile-header-gradient-height)')).toBe(
+        'via-red-500 via-(length:--mobile-header-gradient-height)',
+    )
 })
