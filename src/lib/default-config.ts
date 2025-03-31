@@ -112,7 +112,8 @@ export const getDefaultConfig = () => {
             ...scaleUnambiguousSpacing(),
         ] as const
     const scaleColor = () => [themeColor, isArbitraryVariable, isArbitraryValue] as const
-    const scaleGradientStopPosition = () => [isPercent, isArbitraryLength] as const
+    const scaleGradientStopPosition = () =>
+        [isPercent, isArbitraryVariableLength, isArbitraryLength] as const
     const scaleRadius = () =>
         [
             // Deprecated since Tailwind CSS v4.0.0
