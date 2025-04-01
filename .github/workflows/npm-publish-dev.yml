@@ -14,7 +14,7 @@ jobs:
             - name: Use Node.js 22
               uses: actions/setup-node@v4
               with:
-                  node-version: 22.x
+                  node-version: 22.14.0
                   # More info: https://docs.github.com/en/actions/publishing-packages/publishing-nodejs-packages#publishing-packages-to-the-npm-registry
                   registry-url: 'https://registry.npmjs.org'
             - name: Use node_modules cache
