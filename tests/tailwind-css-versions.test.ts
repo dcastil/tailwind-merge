@@ -96,4 +96,10 @@ test('supports Tailwind CSS v4.1 features', () => {
     )
     expect(twMerge('items-center-safe items-baseline items-end-safe')).toBe('items-end-safe')
     expect(twMerge('wrap-break-word wrap-normal wrap-anywhere')).toBe('wrap-anywhere')
+    expect(twMerge('text-shadow-none text-shadow-2xl')).toBe('text-shadow-2xl')
+    expect(
+        twMerge(
+            'text-shadow-none text-shadow-md text-shadow-red text-shadow-red-500 shadow-red shadow-3xs',
+        ),
+    ).toBe('text-shadow-md text-shadow-red-500 shadow-red shadow-3xs')
 })

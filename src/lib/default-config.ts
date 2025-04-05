@@ -43,6 +43,7 @@ export const getDefaultConfig = () => {
     const themeRadius = fromTheme('radius')
     const themeShadow = fromTheme('shadow')
     const themeInsetShadow = fromTheme('inset-shadow')
+    const themeTextShadow = fromTheme('text-shadow')
     const themeDropShadow = fromTheme('drop-shadow')
     const themeBlur = fromTheme('blur')
     const themePerspective = fromTheme('perspective')
@@ -216,6 +217,7 @@ export const getDefaultConfig = () => {
             shadow: [isTshirtSize],
             spacing: ['px', isNumber],
             text: [isTshirtSize],
+            'text-shadow': [isTshirtSize],
             tracking: ['tighter', 'tight', 'normal', 'wide', 'wider', 'widest'],
         },
         classGroups: {
@@ -1436,9 +1438,24 @@ export const getDefaultConfig = () => {
              */
             'inset-ring-color': [{ 'inset-ring': scaleColor() }],
             /**
-             * Opacity
-             * @see https://tailwindcss.com/docs/opacity
+             * Text Shadow
+             * @see https://tailwindcss.com/docs/text-shadow
              */
+            'text-shadow': [
+                {
+                    'text-shadow': [
+                        'none',
+                        themeTextShadow,
+                        isArbitraryVariableShadow,
+                        isArbitraryShadow,
+                    ],
+                },
+            ],
+            /**
+             * Text Shadow Color
+             * @see https://tailwindcss.com/docs/text-shadow#setting-the-shadow-color
+             */
+            'text-shadow-color': [{ 'text-shadow': scaleColor() }],
             opacity: [{ opacity: [isNumber, isArbitraryVariable, isArbitraryValue] }],
             /**
              * Mix Blend Mode

@@ -196,6 +196,7 @@ export type DefaultThemeGroupIds =
     | 'shadow'
     | 'spacing'
     | 'text'
+    | 'text-shadow'
     | 'tracking'
 
 /**
@@ -472,6 +473,8 @@ export type DefaultClassGroupIds =
     | 'text-decoration-thickness'
     | 'text-decoration'
     | 'text-overflow'
+    | 'text-shadow'
+    | 'text-shadow-color'
     | 'text-transform'
     | 'text-wrap'
     | 'top'
