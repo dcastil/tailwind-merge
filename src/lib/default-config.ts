@@ -92,8 +92,20 @@ export const getDefaultConfig = () => {
     const scaleGridAutoColsRows = () =>
         ['auto', 'min', 'max', 'fr', isArbitraryVariable, isArbitraryValue] as const
     const scaleAlignPrimaryAxis = () =>
-        ['start', 'end', 'center', 'between', 'around', 'evenly', 'stretch', 'baseline'] as const
-    const scaleAlignSecondaryAxis = () => ['start', 'end', 'center', 'stretch'] as const
+        [
+            'start',
+            'end',
+            'center',
+            'between',
+            'around',
+            'evenly',
+            'stretch',
+            'baseline',
+            'center-safe',
+            'end-safe',
+        ] as const
+    const scaleAlignSecondaryAxis = () =>
+        ['start', 'end', 'center', 'stretch', 'center-safe', 'end-safe'] as const
     const scaleMargin = () => ['auto', ...scaleUnambiguousSpacing()] as const
     const scaleSizing = () =>
         [

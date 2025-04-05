@@ -91,4 +91,8 @@ test('supports Tailwind CSS v4.0 features', () => {
 test('supports Tailwind CSS v4.1 features', () => {
     expect(twMerge('items-baseline items-baseline-last')).toBe('items-baseline-last')
     expect(twMerge('self-baseline self-baseline-last')).toBe('self-baseline-last')
+    expect(twMerge('place-content-center place-content-end-safe place-content-center-safe')).toBe(
+        'place-content-center-safe',
+    )
+    expect(twMerge('items-center-safe items-baseline items-end-safe')).toBe('items-end-safe')
 })
