@@ -270,6 +270,7 @@ test('class map has correct class groups at first part', () => {
         w: ['w'],
         whitespace: ['whitespace'],
         will: ['will-change'],
+        wrap: ['wrap'],
         z: ['z'],
     })
 })

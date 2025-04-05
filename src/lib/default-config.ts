@@ -1009,6 +1009,11 @@ export const getDefaultConfig = () => {
              */
             break: [{ break: ['normal', 'words', 'all', 'keep'] }],
             /**
+             * Overflow Wrap
+             * @see https://tailwindcss.com/docs/overflow-wrap
+             */
+            wrap: [{ wrap: ['break-word', 'anywhere', 'normal'] }],
+            /**
              * Hyphens
              * @see https://tailwindcss.com/docs/hyphens
              */

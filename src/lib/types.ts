@@ -496,6 +496,7 @@ export type DefaultClassGroupIds =
     | 'w'
     | 'whitespace'
     | 'will-change'
+    | 'wrap'
     | 'z'
 
 export type AnyClassGroupIds = string

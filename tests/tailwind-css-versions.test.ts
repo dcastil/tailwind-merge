@@ -95,4 +95,5 @@ test('supports Tailwind CSS v4.1 features', () => {
         'place-content-center-safe',
     )
     expect(twMerge('items-center-safe items-baseline items-end-safe')).toBe('items-end-safe')
+    expect(twMerge('wrap-break-word wrap-normal wrap-anywhere')).toBe('wrap-anywhere')
 })
