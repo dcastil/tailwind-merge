@@ -569,12 +569,14 @@ export const getDefaultConfig = () => {
              * Align Items
              * @see https://tailwindcss.com/docs/align-items
              */
-            'align-items': [{ items: [...scaleAlignSecondaryAxis(), 'baseline'] }],
+            'align-items': [{ items: [...scaleAlignSecondaryAxis(), { baseline: ['', 'last'] }] }],
             /**
              * Align Self
              * @see https://tailwindcss.com/docs/align-self
              */
-            'align-self': [{ self: ['auto', ...scaleAlignSecondaryAxis(), 'baseline'] }],
+            'align-self': [
+                { self: ['auto', ...scaleAlignSecondaryAxis(), { baseline: ['', 'last'] }] },
+            ],
             /**
              * Place Content
              * @see https://tailwindcss.com/docs/place-content
