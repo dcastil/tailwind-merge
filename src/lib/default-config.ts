@@ -2282,6 +2282,8 @@ export const getDefaultConfig = () => {
             'rounded-l': ['rounded-tl', 'rounded-bl'],
             'border-spacing': ['border-spacing-x', 'border-spacing-y'],
             'border-w': [
+                'border-w-x',
+                'border-w-y',
                 'border-w-s',
                 'border-w-e',
                 'border-w-t',
@@ -2292,6 +2294,8 @@ export const getDefaultConfig = () => {
             'border-w-x': ['border-w-r', 'border-w-l'],
             'border-w-y': ['border-w-t', 'border-w-b'],
             'border-color': [
+                'border-color-x',
+                'border-color-y',
                 'border-color-s',
                 'border-color-e',
                 'border-color-t',
