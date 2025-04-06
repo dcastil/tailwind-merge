@@ -114,13 +114,10 @@ const getIsArbitraryVariable = (
 
 const isLabelPosition = (label: string) => label === 'position'
 
-const imageLabels = new Set(['image', 'url'])
+const isLabelImage = (label: string) => label === 'image' || label === 'url'
 
-const isLabelImage = (label: string) => imageLabels.has(label)
-
-const sizeLabels = new Set(['length', 'size', 'percentage'])
-
-const isLabelSize = (label: string) => sizeLabels.has(label)
+const isLabelSize = (label: string) =>
+    label === 'length' || label === 'size' || label === 'percentage'
 
 const isLabelLength = (label: string) => label === 'length'
 
