@@ -12,9 +12,9 @@ const imageRegex =
 
 export const isFraction = (value: string) => fractionRegex.test(value)
 
-export const isNumber = (value: string) => Boolean(value) && !Number.isNaN(Number(value))
+export const isNumber = (value: string) => !!value && !Number.isNaN(Number(value))
 
-export const isInteger = (value: string) => Boolean(value) && Number.isInteger(Number(value))
+export const isInteger = (value: string) => !!value && Number.isInteger(Number(value))
 
 export const isPercent = (value: string) => value.endsWith('%') && isNumber(value.slice(0, -1))
 
@@ -112,12 +112,11 @@ const getIsArbitraryVariable = (
 
 // Labels
 
-const isLabelPosition = (label: string) => label === 'position'
+const isLabelPosition = (label: string) => label === 'position' || label === 'percentage'
 
 const isLabelImage = (label: string) => label === 'image' || label === 'url'
 
-const isLabelSize = (label: string) =>
-    label === 'length' || label === 'size' || label === 'percentage'
+const isLabelSize = (label: string) => label === 'length' || label === 'size' || label === 'bg-size'
 
 const isLabelLength = (label: string) => label === 'length'
 
