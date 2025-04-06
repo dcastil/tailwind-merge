@@ -87,3 +87,77 @@ test('supports Tailwind CSS v4.0 features', () => {
         'via-red-500 via-(length:--mobile-header-gradient)',
     )
 })
+
+test('supports Tailwind CSS v4.1 features', () => {
+    expect(twMerge('items-baseline items-baseline-last')).toBe('items-baseline-last')
+    expect(twMerge('self-baseline self-baseline-last')).toBe('self-baseline-last')
+    expect(twMerge('place-content-center place-content-end-safe place-content-center-safe')).toBe(
+        'place-content-center-safe',
+    )
+    expect(twMerge('items-center-safe items-baseline items-end-safe')).toBe('items-end-safe')
+    expect(twMerge('wrap-break-word wrap-normal wrap-anywhere')).toBe('wrap-anywhere')
+    expect(twMerge('text-shadow-none text-shadow-2xl')).toBe('text-shadow-2xl')
+    expect(
+        twMerge(
+            'text-shadow-none text-shadow-md text-shadow-red text-shadow-red-500 shadow-red shadow-3xs',
+        ),
+    ).toBe('text-shadow-md text-shadow-red-500 shadow-red shadow-3xs')
+    expect(twMerge('mask-add mask-subtract')).toBe('mask-subtract')
+    expect(
+        twMerge(
+            // mask-image
+            'mask-(--foo) mask-[foo] mask-none',
+            // mask-image-linear-pos
+            'mask-linear-1 mask-linear-2',
+            // mask-image-linear-from-pos
+            'mask-linear-from-[position:test] mask-linear-from-3',
+            // mask-image-linear-to-pos
+            'mask-linear-to-[position:test] mask-linear-to-3',
+            // mask-image-linear-from-color
+            'mask-linear-from-color-red mask-linear-from-color-3',
+            // mask-image-linear-to-color
+            'mask-linear-to-color-red mask-linear-to-color-3',
+            // mask-image-t-from-pos
+            'mask-t-from-[position:test] mask-t-from-3',
+            // mask-image-t-to-pos
+            'mask-t-to-[position:test] mask-t-to-3',
+            // mask-image-t-from-color
+            'mask-t-from-color-red mask-t-from-color-3',
+            // mask-image-radial
+            'mask-radial-(--test) mask-radial-[test]',
+            // mask-image-radial-from-pos
+            'mask-radial-from-[position:test] mask-radial-from-3',
+            // mask-image-radial-to-pos
+            'mask-radial-to-[position:test] mask-radial-to-3',
+            // mask-image-radial-from-color
+            'mask-radial-from-color-red mask-radial-from-color-3',
+        ),
+    ).toBe(
+        'mask-none mask-linear-2 mask-linear-from-3 mask-linear-to-3 mask-linear-from-color-3 mask-linear-to-color-3 mask-t-from-3 mask-t-to-3 mask-t-from-color-3 mask-radial-[test] mask-radial-from-3 mask-radial-to-3 mask-radial-from-color-3',
+    )
+    expect(
+        twMerge(
+            // mask-image
+            'mask-(--something) mask-[something]',
+            // mask-position
+            'mask-top-left mask-center mask-(position:--var) mask-[position:1px_1px] mask-position-(--var) mask-position-[1px_1px]',
+        ),
+    ).toBe('mask-[something] mask-position-[1px_1px]')
+    expect(
+        twMerge(
+            // mask-image
+            'mask-(--something) mask-[something]',
+            // mask-size
+            'mask-auto mask-[size:foo] mask-(size:--foo) mask-size-[foo] mask-size-(--foo) mask-cover mask-contain',
+        ),
+    ).toBe('mask-[something] mask-contain')
+    expect(twMerge('mask-type-luminance mask-type-alpha')).toBe('mask-type-alpha')
+    expect(twMerge('shadow-md shadow-lg/25 text-shadow-md text-shadow-lg/25')).toBe(
+        'shadow-lg/25 text-shadow-lg/25',
+    )
+    expect(
+        twMerge('drop-shadow-some-color drop-shadow-[#123456] drop-shadow-lg drop-shadow-[10px_0]'),
+    ).toBe('drop-shadow-[#123456] drop-shadow-[10px_0]')
+    expect(twMerge('drop-shadow-[#123456] drop-shadow-some-color')).toBe('drop-shadow-some-color')
+    expect(twMerge('drop-shadow-2xl drop-shadow-[shadow:foo]')).toBe('drop-shadow-[shadow:foo]')
+})

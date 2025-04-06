@@ -33,7 +33,7 @@ twMerge('hover:p-2 hover:p-4') // → 'hover:p-4'
 twMerge('hover:focus:p-2 focus:hover:p-4') // → 'focus:hover:p-4'
 ```
 
-The order of standard modifiers does not matter for tailwind-merge.
+tailwind-merge knows when the order of standard modifiers matters and when not and resolves conflicts accordingly.
 
 ### Supports arbitrary values
 

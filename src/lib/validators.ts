@@ -12,9 +12,9 @@ const imageRegex =
 
 export const isFraction = (value: string) => fractionRegex.test(value)
 
-export const isNumber = (value: string) => Boolean(value) && !Number.isNaN(Number(value))
+export const isNumber = (value: string) => !!value && !Number.isNaN(Number(value))
 
-export const isInteger = (value: string) => Boolean(value) && Number.isInteger(Number(value))
+export const isInteger = (value: string) => !!value && Number.isInteger(Number(value))
 
 export const isPercent = (value: string) => value.endsWith('%') && isNumber(value.slice(0, -1))
 
@@ -52,7 +52,8 @@ export const isArbitraryPosition = (value: string) =>
 
 export const isArbitraryImage = (value: string) => getIsArbitraryValue(value, isLabelImage, isImage)
 
-export const isArbitraryShadow = (value: string) => getIsArbitraryValue(value, isNever, isShadow)
+export const isArbitraryShadow = (value: string) =>
+    getIsArbitraryValue(value, isLabelShadow, isShadow)
 
 export const isArbitraryVariable = (value: string) => arbitraryVariableRegex.test(value)
 
@@ -112,15 +113,11 @@ const getIsArbitraryVariable = (
 
 // Labels
 
-const isLabelPosition = (label: string) => label === 'position'
+const isLabelPosition = (label: string) => label === 'position' || label === 'percentage'
 
-const imageLabels = new Set(['image', 'url'])
+const isLabelImage = (label: string) => label === 'image' || label === 'url'
 
-const isLabelImage = (label: string) => imageLabels.has(label)
-
-const sizeLabels = new Set(['length', 'size', 'percentage'])
-
-const isLabelSize = (label: string) => sizeLabels.has(label)
+const isLabelSize = (label: string) => label === 'length' || label === 'size' || label === 'bg-size'
 
 const isLabelLength = (label: string) => label === 'length'
 

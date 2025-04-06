@@ -107,8 +107,10 @@ interface ConfigGroupsPart<ClassGroupIds extends string, ThemeGroupIds extends s
     /**
      * Conflicting classes across groups.
      *
-     * The key is ID of class group which creates conflict, values are IDs of class groups which receive a conflict.
-     * A class group ID is the key of a class group in classGroups object.
+     * The key is the ID of a class group which creates a conflict, values are IDs of class groups which receive a conflict. That means if a class from from the key ID is present, all preceding classes from the values are removed.
+     *
+     * A class group ID is the key of a class group in the classGroups object.
+     *
      * @example { gap: ['gap-x', 'gap-y'] }
      */
     conflictingClassGroups: NoInfer<Partial<Record<ClassGroupIds, readonly ClassGroupIds[]>>>
@@ -116,6 +118,7 @@ interface ConfigGroupsPart<ClassGroupIds extends string, ThemeGroupIds extends s
      * Postfix modifiers conflicting with other class groups.
      *
      * A class group ID is the key of a class group in classGroups object.
+     *
      * @example { 'font-size': ['leading'] }
      */
     conflictingClassGroupModifiers: NoInfer<
@@ -196,6 +199,7 @@ export type DefaultThemeGroupIds =
     | 'shadow'
     | 'spacing'
     | 'text'
+    | 'text-shadow'
     | 'tracking'
 
 /**
@@ -285,6 +289,7 @@ export type DefaultClassGroupIds =
     | 'divide-y-reverse'
     | 'divide-y'
     | 'drop-shadow'
+    | 'drop-shadow-color'
     | 'duration'
     | 'ease'
     | 'end'
@@ -345,6 +350,57 @@ export type DefaultClassGroupIds =
     | 'list-style-position'
     | 'list-style-type'
     | 'm'
+    | 'mask-clip'
+    | 'mask-composite'
+    | 'mask-image-b-from-color'
+    | 'mask-image-b-from-pos'
+    | 'mask-image-b-to-color'
+    | 'mask-image-b-to-pos'
+    | 'mask-image-conic-from-color'
+    | 'mask-image-conic-from-pos'
+    | 'mask-image-conic-pos'
+    | 'mask-image-conic-to-color'
+    | 'mask-image-conic-to-pos'
+    | 'mask-image-l-from-color'
+    | 'mask-image-l-from-pos'
+    | 'mask-image-l-to-color'
+    | 'mask-image-l-to-pos'
+    | 'mask-image-linear-from-color'
+    | 'mask-image-linear-from-pos'
+    | 'mask-image-linear-pos'
+    | 'mask-image-linear-to-color'
+    | 'mask-image-linear-to-pos'
+    | 'mask-image-r-from-color'
+    | 'mask-image-r-from-pos'
+    | 'mask-image-r-to-color'
+    | 'mask-image-r-to-pos'
+    | 'mask-image-radial-from-color'
+    | 'mask-image-radial-from-pos'
+    | 'mask-image-radial-pos'
+    | 'mask-image-radial-shape'
+    | 'mask-image-radial-size'
+    | 'mask-image-radial-to-color'
+    | 'mask-image-radial-to-pos'
+    | 'mask-image-radial'
+    | 'mask-image-t-from-color'
+    | 'mask-image-t-from-pos'
+    | 'mask-image-t-to-color'
+    | 'mask-image-t-to-pos'
+    | 'mask-image-x-from-color'
+    | 'mask-image-x-from-pos'
+    | 'mask-image-x-to-color'
+    | 'mask-image-x-to-pos'
+    | 'mask-image-y-from-color'
+    | 'mask-image-y-from-pos'
+    | 'mask-image-y-to-color'
+    | 'mask-image-y-to-pos'
+    | 'mask-image'
+    | 'mask-mode'
+    | 'mask-origin'
+    | 'mask-position'
+    | 'mask-repeat'
+    | 'mask-size'
+    | 'mask-type'
     | 'max-h'
     | 'max-w'
     | 'mb'
@@ -472,6 +528,8 @@ export type DefaultClassGroupIds =
     | 'text-decoration-thickness'
     | 'text-decoration'
     | 'text-overflow'
+    | 'text-shadow'
+    | 'text-shadow-color'
     | 'text-transform'
     | 'text-wrap'
     | 'top'
@@ -496,6 +554,7 @@ export type DefaultClassGroupIds =
     | 'w'
     | 'whitespace'
     | 'will-change'
+    | 'wrap'
     | 'z'
 
 export type AnyClassGroupIds = string

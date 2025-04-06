@@ -43,6 +43,7 @@ export const getDefaultConfig = () => {
     const themeRadius = fromTheme('radius')
     const themeShadow = fromTheme('shadow')
     const themeInsetShadow = fromTheme('inset-shadow')
+    const themeTextShadow = fromTheme('text-shadow')
     const themeDropShadow = fromTheme('drop-shadow')
     const themeBlur = fromTheme('blur')
     const themePerspective = fromTheme('perspective')
@@ -62,16 +63,26 @@ export const getDefaultConfig = () => {
         ['auto', 'avoid', 'all', 'avoid-page', 'page', 'left', 'right', 'column'] as const
     const scalePosition = () =>
         [
-            'bottom',
             'center',
-            'left',
-            'left-bottom',
-            'left-top',
-            'right',
-            'right-bottom',
-            'right-top',
             'top',
+            'bottom',
+            'left',
+            'right',
+            'top-left',
+            // Deprecated since Tailwind CSS v4.1.0, see https://github.com/tailwindlabs/tailwindcss/pull/17378
+            'left-top',
+            'top-right',
+            // Deprecated since Tailwind CSS v4.1.0, see https://github.com/tailwindlabs/tailwindcss/pull/17378
+            'right-top',
+            'bottom-right',
+            // Deprecated since Tailwind CSS v4.1.0, see https://github.com/tailwindlabs/tailwindcss/pull/17378
+            'right-bottom',
+            'bottom-left',
+            // Deprecated since Tailwind CSS v4.1.0, see https://github.com/tailwindlabs/tailwindcss/pull/17378
+            'left-bottom',
         ] as const
+    const scalePositionWithArbitrary = () =>
+        [...scalePosition(), isArbitraryVariable, isArbitraryValue] as const
     const scaleOverflow = () => ['auto', 'hidden', 'clip', 'visible', 'scroll'] as const
     const scaleOverscroll = () => ['auto', 'contain', 'none'] as const
     const scaleUnambiguousSpacing = () =>
@@ -92,8 +103,20 @@ export const getDefaultConfig = () => {
     const scaleGridAutoColsRows = () =>
         ['auto', 'min', 'max', 'fr', isArbitraryVariable, isArbitraryValue] as const
     const scaleAlignPrimaryAxis = () =>
-        ['start', 'end', 'center', 'between', 'around', 'evenly', 'stretch', 'baseline'] as const
-    const scaleAlignSecondaryAxis = () => ['start', 'end', 'center', 'stretch'] as const
+        [
+            'start',
+            'end',
+            'center',
+            'between',
+            'around',
+            'evenly',
+            'stretch',
+            'baseline',
+            'center-safe',
+            'end-safe',
+        ] as const
+    const scaleAlignSecondaryAxis = () =>
+        ['start', 'end', 'center', 'stretch', 'center-safe', 'end-safe'] as const
     const scaleMargin = () => ['auto', ...scaleUnambiguousSpacing()] as const
     const scaleSizing = () =>
         [
@@ -112,6 +135,23 @@ export const getDefaultConfig = () => {
             ...scaleUnambiguousSpacing(),
         ] as const
     const scaleColor = () => [themeColor, isArbitraryVariable, isArbitraryValue] as const
+    const scaleBgPosition = () =>
+        [
+            ...scalePosition(),
+            isArbitraryVariablePosition,
+            isArbitraryPosition,
+            { position: [isArbitraryVariable, isArbitraryValue] },
+        ] as const
+    const scaleBgRepeat = () => ['no-repeat', { repeat: ['', 'x', 'y', 'space', 'round'] }] as const
+    const scaleBgSize = () =>
+        [
+            'auto',
+            'cover',
+            'contain',
+            isArbitraryVariableSize,
+            isArbitrarySize,
+            { size: [isArbitraryVariable, isArbitraryValue] },
+        ] as const
     const scaleGradientStopPosition = () =>
         [isPercent, isArbitraryVariableLength, isArbitraryLength] as const
     const scaleRadius = () =>
@@ -146,26 +186,14 @@ export const getDefaultConfig = () => {
             'color',
             'luminosity',
         ] as const
+    const scaleMaskImagePosition = () =>
+        [isNumber, isPercent, isArbitraryVariablePosition, isArbitraryPosition] as const
     const scaleBlur = () =>
         [
             // Deprecated since Tailwind CSS v4.0.0
             '',
             'none',
             themeBlur,
-            isArbitraryVariable,
-            isArbitraryValue,
-        ] as const
-    const scaleOrigin = () =>
-        [
-            'center',
-            'top',
-            'top-right',
-            'right',
-            'bottom-right',
-            'bottom',
-            'bottom-left',
-            'left',
-            'top-left',
             isArbitraryVariable,
             isArbitraryValue,
         ] as const
@@ -204,6 +232,7 @@ export const getDefaultConfig = () => {
             shadow: [isTshirtSize],
             spacing: ['px', isNumber],
             text: [isTshirtSize],
+            'text-shadow': [isTshirtSize],
             tracking: ['tighter', 'tight', 'normal', 'wide', 'wider', 'widest'],
         },
         classGroups: {
@@ -321,9 +350,7 @@ export const getDefaultConfig = () => {
              * Object Position
              * @see https://tailwindcss.com/docs/object-position
              */
-            'object-position': [
-                { object: [...scalePosition(), isArbitraryValue, isArbitraryVariable] },
-            ],
+            'object-position': [{ object: scalePositionWithArbitrary() }],
             /**
              * Overflow
              * @see https://tailwindcss.com/docs/overflow
@@ -569,12 +596,14 @@ export const getDefaultConfig = () => {
              * Align Items
              * @see https://tailwindcss.com/docs/align-items
              */
-            'align-items': [{ items: [...scaleAlignSecondaryAxis(), 'baseline'] }],
+            'align-items': [{ items: [...scaleAlignSecondaryAxis(), { baseline: ['', 'last'] }] }],
             /**
              * Align Self
              * @see https://tailwindcss.com/docs/align-self
              */
-            'align-self': [{ self: ['auto', ...scaleAlignSecondaryAxis(), 'baseline'] }],
+            'align-self': [
+                { self: ['auto', ...scaleAlignSecondaryAxis(), { baseline: ['', 'last'] }] },
+            ],
             /**
              * Place Content
              * @see https://tailwindcss.com/docs/place-content
@@ -995,6 +1024,11 @@ export const getDefaultConfig = () => {
              */
             break: [{ break: ['normal', 'words', 'all', 'keep'] }],
             /**
+             * Overflow Wrap
+             * @see https://tailwindcss.com/docs/overflow-wrap
+             */
+            wrap: [{ wrap: ['break-word', 'anywhere', 'normal'] }],
+            /**
              * Hyphens
              * @see https://tailwindcss.com/docs/hyphens
              */
@@ -1028,21 +1062,17 @@ export const getDefaultConfig = () => {
              * Background Position
              * @see https://tailwindcss.com/docs/background-position
              */
-            'bg-position': [
-                { bg: [...scalePosition(), isArbitraryVariablePosition, isArbitraryPosition] },
-            ],
+            'bg-position': [{ bg: scaleBgPosition() }],
             /**
              * Background Repeat
              * @see https://tailwindcss.com/docs/background-repeat
              */
-            'bg-repeat': [{ bg: ['no-repeat', { repeat: ['', 'x', 'y', 'space', 'round'] }] }],
+            'bg-repeat': [{ bg: scaleBgRepeat() }],
             /**
              * Background Size
              * @see https://tailwindcss.com/docs/background-size
              */
-            'bg-size': [
-                { bg: ['auto', 'cover', 'contain', isArbitraryVariableSize, isArbitrarySize] },
-            ],
+            'bg-size': [{ bg: scaleBgSize() }],
             /**
              * Background Image
              * @see https://tailwindcss.com/docs/background-image
@@ -1329,7 +1359,7 @@ export const getDefaultConfig = () => {
              * Outline Color
              * @see https://tailwindcss.com/docs/outline-color
              */
-            'outline-color': [{ outline: [themeColor] }],
+            'outline-color': [{ outline: scaleColor() }],
 
             // ---------------
             // --- Effects ---
@@ -1364,9 +1394,9 @@ export const getDefaultConfig = () => {
                 {
                     'inset-shadow': [
                         'none',
-                        isArbitraryVariable,
-                        isArbitraryValue,
                         themeInsetShadow,
+                        isArbitraryVariableShadow,
+                        isArbitraryShadow,
                     ],
                 },
             ],
@@ -1417,6 +1447,25 @@ export const getDefaultConfig = () => {
              */
             'inset-ring-color': [{ 'inset-ring': scaleColor() }],
             /**
+             * Text Shadow
+             * @see https://tailwindcss.com/docs/text-shadow
+             */
+            'text-shadow': [
+                {
+                    'text-shadow': [
+                        'none',
+                        themeTextShadow,
+                        isArbitraryVariableShadow,
+                        isArbitraryShadow,
+                    ],
+                },
+            ],
+            /**
+             * Text Shadow Color
+             * @see https://tailwindcss.com/docs/text-shadow#setting-the-shadow-color
+             */
+            'text-shadow-color': [{ 'text-shadow': scaleColor() }],
+            /**
              * Opacity
              * @see https://tailwindcss.com/docs/opacity
              */
@@ -1431,6 +1480,104 @@ export const getDefaultConfig = () => {
              * @see https://tailwindcss.com/docs/background-blend-mode
              */
             'bg-blend': [{ 'bg-blend': scaleBlendMode() }],
+            /**
+             * Mask Clip
+             * @see https://tailwindcss.com/docs/mask-clip
+             */
+            'mask-clip': [
+                { 'mask-clip': ['border', 'padding', 'content', 'fill', 'stroke', 'view'] },
+                'mask-no-clip',
+            ],
+            /**
+             * Mask Composite
+             * @see https://tailwindcss.com/docs/mask-composite
+             */
+            'mask-composite': [{ mask: ['add', 'subtract', 'intersect', 'exclude'] }],
+            /**
+             * Mask Image
+             * @see https://tailwindcss.com/docs/mask-image
+             */
+            'mask-image-linear-pos': [{ 'mask-linear': [isNumber] }],
+            'mask-image-linear-from-pos': [{ 'mask-linear-from': scaleMaskImagePosition() }],
+            'mask-image-linear-to-pos': [{ 'mask-linear-to': scaleMaskImagePosition() }],
+            'mask-image-linear-from-color': [{ 'mask-linear-from': scaleColor() }],
+            'mask-image-linear-to-color': [{ 'mask-linear-to': scaleColor() }],
+            'mask-image-t-from-pos': [{ 'mask-t-from': scaleMaskImagePosition() }],
+            'mask-image-t-to-pos': [{ 'mask-t-to': scaleMaskImagePosition() }],
+            'mask-image-t-from-color': [{ 'mask-t-from': scaleColor() }],
+            'mask-image-t-to-color': [{ 'mask-t-to': scaleColor() }],
+            'mask-image-r-from-pos': [{ 'mask-r-from': scaleMaskImagePosition() }],
+            'mask-image-r-to-pos': [{ 'mask-r-to': scaleMaskImagePosition() }],
+            'mask-image-r-from-color': [{ 'mask-r-from': scaleColor() }],
+            'mask-image-r-to-color': [{ 'mask-r-to': scaleColor() }],
+            'mask-image-b-from-pos': [{ 'mask-b-from': scaleMaskImagePosition() }],
+            'mask-image-b-to-pos': [{ 'mask-b-to': scaleMaskImagePosition() }],
+            'mask-image-b-from-color': [{ 'mask-b-from': scaleColor() }],
+            'mask-image-b-to-color': [{ 'mask-b-to': scaleColor() }],
+            'mask-image-l-from-pos': [{ 'mask-l-from': scaleMaskImagePosition() }],
+            'mask-image-l-to-pos': [{ 'mask-l-to': scaleMaskImagePosition() }],
+            'mask-image-l-from-color': [{ 'mask-l-from': scaleColor() }],
+            'mask-image-l-to-color': [{ 'mask-l-to': scaleColor() }],
+            'mask-image-x-from-pos': [{ 'mask-x-from': scaleMaskImagePosition() }],
+            'mask-image-x-to-pos': [{ 'mask-x-to': scaleMaskImagePosition() }],
+            'mask-image-x-from-color': [{ 'mask-x-from': scaleColor() }],
+            'mask-image-x-to-color': [{ 'mask-x-to': scaleColor() }],
+            'mask-image-y-from-pos': [{ 'mask-y-from': scaleMaskImagePosition() }],
+            'mask-image-y-to-pos': [{ 'mask-y-to': scaleMaskImagePosition() }],
+            'mask-image-y-from-color': [{ 'mask-y-from': scaleColor() }],
+            'mask-image-y-to-color': [{ 'mask-y-to': scaleColor() }],
+            'mask-image-radial': [{ 'mask-radial': [isArbitraryVariable, isArbitraryValue] }],
+            'mask-image-radial-from-pos': [{ 'mask-radial-from': scaleMaskImagePosition() }],
+            'mask-image-radial-to-pos': [{ 'mask-radial-to': scaleMaskImagePosition() }],
+            'mask-image-radial-from-color': [{ 'mask-radial-from': scaleColor() }],
+            'mask-image-radial-to-color': [{ 'mask-radial-to': scaleColor() }],
+            'mask-image-radial-shape': [{ 'mask-radial': ['circle', 'ellipse'] }],
+            'mask-image-radial-size': [
+                { 'mask-radial': [{ closest: ['side', 'corner'], farthest: ['side', 'corner'] }] },
+            ],
+            'mask-image-radial-pos': [{ 'mask-radial-at': scalePosition() }],
+            'mask-image-conic-pos': [{ 'mask-conic': [isNumber] }],
+            'mask-image-conic-from-pos': [{ 'mask-conic-from': scaleMaskImagePosition() }],
+            'mask-image-conic-to-pos': [{ 'mask-conic-to': scaleMaskImagePosition() }],
+            'mask-image-conic-from-color': [{ 'mask-conic-from': scaleColor() }],
+            'mask-image-conic-to-color': [{ 'mask-conic-to': scaleColor() }],
+            /**
+             * Mask Mode
+             * @see https://tailwindcss.com/docs/mask-mode
+             */
+            'mask-mode': [{ mask: ['alpha', 'luminance', 'match'] }],
+            /**
+             * Mask Origin
+             * @see https://tailwindcss.com/docs/mask-origin
+             */
+            'mask-origin': [
+                { 'mask-origin': ['border', 'padding', 'content', 'fill', 'stroke', 'view'] },
+            ],
+            /**
+             * Mask Position
+             * @see https://tailwindcss.com/docs/mask-position
+             */
+            'mask-position': [{ mask: scaleBgPosition() }],
+            /**
+             * Mask Repeat
+             * @see https://tailwindcss.com/docs/mask-repeat
+             */
+            'mask-repeat': [{ mask: scaleBgRepeat() }],
+            /**
+             * Mask Size
+             * @see https://tailwindcss.com/docs/mask-size
+             */
+            'mask-size': [{ mask: scaleBgSize() }],
+            /**
+             * Mask Type
+             * @see https://tailwindcss.com/docs/mask-type
+             */
+            'mask-type': [{ 'mask-type': ['alpha', 'luminance'] }],
+            /**
+             * Mask Image
+             * @see https://tailwindcss.com/docs/mask-image
+             */
+            'mask-image': [{ mask: ['none', isArbitraryVariable, isArbitraryValue] }],
 
             // ---------------
             // --- Filters ---
@@ -1477,11 +1624,16 @@ export const getDefaultConfig = () => {
                         '',
                         'none',
                         themeDropShadow,
-                        isArbitraryVariable,
-                        isArbitraryValue,
+                        isArbitraryVariableShadow,
+                        isArbitraryShadow,
                     ],
                 },
             ],
+            /**
+             * Drop Shadow Color
+             * @see https://tailwindcss.com/docs/filter-drop-shadow#setting-the-shadow-color
+             */
+            'drop-shadow-color': [{ 'drop-shadow': scaleColor() }],
             /**
              * Grayscale
              * @see https://tailwindcss.com/docs/grayscale
@@ -1690,7 +1842,7 @@ export const getDefaultConfig = () => {
              * Perspective Origin
              * @see https://tailwindcss.com/docs/perspective-origin
              */
-            'perspective-origin': [{ 'perspective-origin': scaleOrigin() }],
+            'perspective-origin': [{ 'perspective-origin': scalePositionWithArbitrary() }],
             /**
              * Rotate
              * @see https://tailwindcss.com/docs/rotate
@@ -1762,7 +1914,7 @@ export const getDefaultConfig = () => {
              * Transform Origin
              * @see https://tailwindcss.com/docs/transform-origin
              */
-            'transform-origin': [{ origin: scaleOrigin() }],
+            'transform-origin': [{ origin: scalePositionWithArbitrary() }],
             /**
              * Transform Style
              * @see https://tailwindcss.com/docs/transform-style
@@ -2132,6 +2284,8 @@ export const getDefaultConfig = () => {
             'rounded-l': ['rounded-tl', 'rounded-bl'],
             'border-spacing': ['border-spacing-x', 'border-spacing-y'],
             'border-w': [
+                'border-w-x',
+                'border-w-y',
                 'border-w-s',
                 'border-w-e',
                 'border-w-t',
@@ -2142,6 +2296,8 @@ export const getDefaultConfig = () => {
             'border-w-x': ['border-w-r', 'border-w-l'],
             'border-w-y': ['border-w-t', 'border-w-b'],
             'border-color': [
+                'border-color-x',
+                'border-color-y',
                 'border-color-s',
                 'border-color-e',
                 'border-color-t',
@@ -2186,17 +2342,18 @@ export const getDefaultConfig = () => {
             'font-size': ['leading'],
         },
         orderSensitiveModifiers: [
-            'before',
-            'after',
-            'placeholder',
-            'file',
-            'marker',
-            'selection',
-            'first-line',
-            'first-letter',
-            'backdrop',
             '*',
             '**',
+            'after',
+            'backdrop',
+            'before',
+            'details-content',
+            'file',
+            'first-letter',
+            'first-line',
+            'marker',
+            'placeholder',
+            'selection',
         ],
     } as const satisfies Config<DefaultClassGroupIds, DefaultThemeGroupIds>
 }

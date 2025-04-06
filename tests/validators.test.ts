@@ -95,6 +95,7 @@ test('isArbitraryNumber', () => {
 test('isArbitraryPosition', () => {
     expect(isArbitraryPosition('[position:2px]')).toBe(true)
     expect(isArbitraryPosition('[position:bla]')).toBe(true)
+    expect(isArbitraryPosition('[percentage:bla]')).toBe(true)
 
     expect(isArbitraryPosition('[2px]')).toBe(false)
     expect(isArbitraryPosition('[bla]')).toBe(false)
@@ -120,11 +121,11 @@ test('isArbitrarySize', () => {
     expect(isArbitrarySize('[size:2px]')).toBe(true)
     expect(isArbitrarySize('[size:bla]')).toBe(true)
     expect(isArbitrarySize('[length:bla]')).toBe(true)
-    expect(isArbitrarySize('[percentage:bla]')).toBe(true)
 
     expect(isArbitrarySize('[2px]')).toBe(false)
     expect(isArbitrarySize('[bla]')).toBe(false)
     expect(isArbitrarySize('size:2px')).toBe(false)
+    expect(isArbitrarySize('[percentage:bla]')).toBe(false)
 })
 
 test('isArbitraryValue', () => {
@@ -187,6 +188,7 @@ test('isArbitraryVariablePosition', () => {
     expect(isArbitraryVariablePosition('(other:test)')).toBe(false)
     expect(isArbitraryVariablePosition('(test)')).toBe(false)
     expect(isArbitraryVariablePosition('position:test')).toBe(false)
+    expect(isArbitraryVariablePosition('percentage:test')).toBe(false)
 })
 
 test('isArbitraryVariableShadow', () => {
@@ -200,11 +202,11 @@ test('isArbitraryVariableShadow', () => {
 test('isArbitraryVariableSize', () => {
     expect(isArbitraryVariableSize('(size:test)')).toBe(true)
     expect(isArbitraryVariableSize('(length:test)')).toBe(true)
-    expect(isArbitraryVariableSize('(percentage:test)')).toBe(true)
 
     expect(isArbitraryVariableSize('(other:test)')).toBe(false)
     expect(isArbitraryVariableSize('(test)')).toBe(false)
     expect(isArbitraryVariableSize('size:test')).toBe(false)
+    expect(isArbitraryVariableSize('(percentage:test)')).toBe(false)
 })
 
 test('isFraction', () => {

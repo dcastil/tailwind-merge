@@ -67,9 +67,9 @@ test('handles ambiguous arbitrary values correctly', () => {
     expect(twMerge('text-2xl text-[calc(theme(fontSize.4xl)/1.125)]')).toBe(
         'text-[calc(theme(fontSize.4xl)/1.125)]',
     )
-    expect(twMerge('bg-cover bg-[percentage:30%] bg-[length:200px_100px]')).toBe(
-        'bg-[length:200px_100px]',
-    )
+    expect(
+        twMerge('bg-cover bg-[percentage:30%] bg-[size:200px_100px] bg-[length:200px_100px]'),
+    ).toBe('bg-[percentage:30%] bg-[length:200px_100px]')
     expect(
         twMerge(
             'bg-none bg-[url(.)] bg-[image:.] bg-[url:.] bg-[linear-gradient(.)] bg-linear-to-r',
