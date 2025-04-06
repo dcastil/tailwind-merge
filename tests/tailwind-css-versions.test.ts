@@ -111,5 +111,13 @@ test('supports Tailwind CSS v4.1 features', () => {
             'mask-top-left mask-center mask-(position:--var) mask-[position:1px_1px] mask-position-(--var) mask-position-[1px_1px]',
         ),
     ).toBe('mask-[something] mask-position-[1px_1px]')
+    expect(
+        twMerge(
+            // mask-image
+            'mask-[something]',
+            // mask-size
+            'mask-auto mask-[size:foo] mask-(size:--foo) mask-size-[foo] mask-size-(--foo) mask-cover mask-contain',
+        ),
+    ).toBe('mask-[something] mask-contain')
     expect(twMerge('mask-type-luminance mask-type-alpha')).toBe('mask-type-alpha')
 })

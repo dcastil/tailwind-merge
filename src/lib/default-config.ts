@@ -131,7 +131,16 @@ export const getDefaultConfig = () => {
             ...scaleUnambiguousSpacing(),
         ] as const
     const scaleColor = () => [themeColor, isArbitraryVariable, isArbitraryValue] as const
-    const scaleRepeat = () => ['no-repeat', { repeat: ['', 'x', 'y', 'space', 'round'] }]
+    const scaleRepeat = () => ['no-repeat', { repeat: ['', 'x', 'y', 'space', 'round'] }] as const
+    const scaleSize = () =>
+        [
+            'auto',
+            'cover',
+            'contain',
+            isArbitraryVariableSize,
+            isArbitrarySize,
+            { size: [isArbitraryVariable, isArbitraryValue] },
+        ] as const
     const scaleGradientStopPosition = () =>
         [isPercent, isArbitraryVariableLength, isArbitraryLength] as const
     const scaleRadius = () =>
@@ -1059,18 +1068,7 @@ export const getDefaultConfig = () => {
              * Background Size
              * @see https://tailwindcss.com/docs/background-size
              */
-            'bg-size': [
-                {
-                    bg: [
-                        'auto',
-                        'cover',
-                        'contain',
-                        isArbitraryVariableSize,
-                        isArbitrarySize,
-                        { size: [isArbitraryVariable, isArbitraryValue] },
-                    ],
-                },
-            ],
+            'bg-size': [{ bg: scaleSize() }],
             /**
              * Background Image
              * @see https://tailwindcss.com/docs/background-image
@@ -1518,6 +1516,11 @@ export const getDefaultConfig = () => {
              * @see https://tailwindcss.com/docs/mask-repeat
              */
             'mask-repeat': [{ mask: scaleRepeat() }],
+            /**
+             * Mask Size
+             * @see https://tailwindcss.com/docs/mask-size
+             */
+            'mask-size': [{ mask: scaleSize() }],
             /**
              * Mask Type
              * @see https://tailwindcss.com/docs/mask-type
