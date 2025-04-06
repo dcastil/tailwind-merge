@@ -152,4 +152,7 @@ test('supports Tailwind CSS v4.1 features', () => {
         ),
     ).toBe('mask-[something] mask-contain')
     expect(twMerge('mask-type-luminance mask-type-alpha')).toBe('mask-type-alpha')
+    expect(twMerge('shadow-md shadow-lg/25 text-shadow-md text-shadow-lg/25')).toBe(
+        'shadow-lg/25 text-shadow-lg/25',
+    )
 })
