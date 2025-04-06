@@ -1490,49 +1490,111 @@ export const getDefaultConfig = () => {
              * @see https://tailwindcss.com/docs/mask-image
              */
             'mask-image-linear-pos': [{ 'mask-linear': [isNumber] }],
-            'mask-image-linear-from-pos': [{ 'mask-linear-from': scaleMaskImagePosition() }],
-            'mask-image-linear-to-pos': [{ 'mask-linear-to': scaleMaskImagePosition() }],
-            'mask-image-linear-from-color': [{ 'mask-linear-from': scaleColor() }],
-            'mask-image-linear-to-color': [{ 'mask-linear-to': scaleColor() }],
-            'mask-image-t-from-pos': [{ 'mask-t-from': scaleMaskImagePosition() }],
-            'mask-image-t-to-pos': [{ 'mask-t-to': scaleMaskImagePosition() }],
-            'mask-image-t-from-color': [{ 'mask-t-from': scaleColor() }],
-            'mask-image-t-to-color': [{ 'mask-t-to': scaleColor() }],
-            'mask-image-r-from-pos': [{ 'mask-r-from': scaleMaskImagePosition() }],
-            'mask-image-r-to-pos': [{ 'mask-r-to': scaleMaskImagePosition() }],
-            'mask-image-r-from-color': [{ 'mask-r-from': scaleColor() }],
-            'mask-image-r-to-color': [{ 'mask-r-to': scaleColor() }],
-            'mask-image-b-from-pos': [{ 'mask-b-from': scaleMaskImagePosition() }],
-            'mask-image-b-to-pos': [{ 'mask-b-to': scaleMaskImagePosition() }],
-            'mask-image-b-from-color': [{ 'mask-b-from': scaleColor() }],
-            'mask-image-b-to-color': [{ 'mask-b-to': scaleColor() }],
-            'mask-image-l-from-pos': [{ 'mask-l-from': scaleMaskImagePosition() }],
-            'mask-image-l-to-pos': [{ 'mask-l-to': scaleMaskImagePosition() }],
-            'mask-image-l-from-color': [{ 'mask-l-from': scaleColor() }],
-            'mask-image-l-to-color': [{ 'mask-l-to': scaleColor() }],
-            'mask-image-x-from-pos': [{ 'mask-x-from': scaleMaskImagePosition() }],
-            'mask-image-x-to-pos': [{ 'mask-x-to': scaleMaskImagePosition() }],
-            'mask-image-x-from-color': [{ 'mask-x-from': scaleColor() }],
-            'mask-image-x-to-color': [{ 'mask-x-to': scaleColor() }],
-            'mask-image-y-from-pos': [{ 'mask-y-from': scaleMaskImagePosition() }],
-            'mask-image-y-to-pos': [{ 'mask-y-to': scaleMaskImagePosition() }],
-            'mask-image-y-from-color': [{ 'mask-y-from': scaleColor() }],
-            'mask-image-y-to-color': [{ 'mask-y-to': scaleColor() }],
             'mask-image-radial': [{ 'mask-radial': [isArbitraryVariable, isArbitraryValue] }],
-            'mask-image-radial-from-pos': [{ 'mask-radial-from': scaleMaskImagePosition() }],
-            'mask-image-radial-to-pos': [{ 'mask-radial-to': scaleMaskImagePosition() }],
-            'mask-image-radial-from-color': [{ 'mask-radial-from': scaleColor() }],
-            'mask-image-radial-to-color': [{ 'mask-radial-to': scaleColor() }],
             'mask-image-radial-shape': [{ 'mask-radial': ['circle', 'ellipse'] }],
             'mask-image-radial-size': [
                 { 'mask-radial': [{ closest: ['side', 'corner'], farthest: ['side', 'corner'] }] },
             ],
             'mask-image-radial-pos': [{ 'mask-radial-at': scalePosition() }],
             'mask-image-conic-pos': [{ 'mask-conic': [isNumber] }],
-            'mask-image-conic-from-pos': [{ 'mask-conic-from': scaleMaskImagePosition() }],
-            'mask-image-conic-to-pos': [{ 'mask-conic-to': scaleMaskImagePosition() }],
-            'mask-image-conic-from-color': [{ 'mask-conic-from': scaleColor() }],
-            'mask-image-conic-to-color': [{ 'mask-conic-to': scaleColor() }],
+            ...(Object.fromEntries(
+                ['linear', 't', 'r', 'b', 'l', 'x', 'y', 'radial', 'conic'].flatMap((value) => [
+                    [
+                        `mask-image-${value}-from-pos`,
+                        [{ [`mask-${value}-from`]: scaleMaskImagePosition() }],
+                    ],
+                    [
+                        `mask-image-${value}-to-pos`,
+                        [{ [`mask-${value}-to`]: scaleMaskImagePosition() }],
+                    ],
+                    [`mask-image-${value}-from-color`, [{ [`mask-${value}-from`]: scaleColor() }]],
+                    [`mask-image-${value}-to-color`, [{ [`mask-${value}-to`]: scaleColor() }]],
+                ]),
+            ) as {
+                // linear
+                'mask-image-linear-from-pos': [
+                    { 'mask-linear-from': ReturnType<typeof scaleMaskImagePosition> },
+                ]
+                'mask-image-linear-to-pos': [
+                    { 'mask-linear-to': ReturnType<typeof scaleMaskImagePosition> },
+                ]
+                'mask-image-linear-from-color': [
+                    { 'mask-linear-from': ReturnType<typeof scaleColor> },
+                ]
+                'mask-image-linear-to-color': [{ 'mask-linear-to': ReturnType<typeof scaleColor> }]
+
+                // t
+                'mask-image-t-from-pos': [
+                    { 'mask-t-from': ReturnType<typeof scaleMaskImagePosition> },
+                ]
+                'mask-image-t-to-pos': [{ 'mask-t-to': ReturnType<typeof scaleMaskImagePosition> }]
+                'mask-image-t-from-color': [{ 'mask-t-from': ReturnType<typeof scaleColor> }]
+                'mask-image-t-to-color': [{ 'mask-t-to': ReturnType<typeof scaleColor> }]
+
+                // r
+                'mask-image-r-from-pos': [
+                    { 'mask-r-from': ReturnType<typeof scaleMaskImagePosition> },
+                ]
+                'mask-image-r-to-pos': [{ 'mask-r-to': ReturnType<typeof scaleMaskImagePosition> }]
+                'mask-image-r-from-color': [{ 'mask-r-from': ReturnType<typeof scaleColor> }]
+                'mask-image-r-to-color': [{ 'mask-r-to': ReturnType<typeof scaleColor> }]
+
+                // b
+                'mask-image-b-from-pos': [
+                    { 'mask-b-from': ReturnType<typeof scaleMaskImagePosition> },
+                ]
+                'mask-image-b-to-pos': [{ 'mask-b-to': ReturnType<typeof scaleMaskImagePosition> }]
+                'mask-image-b-from-color': [{ 'mask-b-from': ReturnType<typeof scaleColor> }]
+                'mask-image-b-to-color': [{ 'mask-b-to': ReturnType<typeof scaleColor> }]
+
+                // l
+                'mask-image-l-from-pos': [
+                    { 'mask-l-from': ReturnType<typeof scaleMaskImagePosition> },
+                ]
+                'mask-image-l-to-pos': [{ 'mask-l-to': ReturnType<typeof scaleMaskImagePosition> }]
+                'mask-image-l-from-color': [{ 'mask-l-from': ReturnType<typeof scaleColor> }]
+                'mask-image-l-to-color': [{ 'mask-l-to': ReturnType<typeof scaleColor> }]
+
+                // x
+                'mask-image-x-from-pos': [
+                    { 'mask-x-from': ReturnType<typeof scaleMaskImagePosition> },
+                ]
+                'mask-image-x-to-pos': [{ 'mask-x-to': ReturnType<typeof scaleMaskImagePosition> }]
+                'mask-image-x-from-color': [{ 'mask-x-from': ReturnType<typeof scaleColor> }]
+                'mask-image-x-to-color': [{ 'mask-x-to': ReturnType<typeof scaleColor> }]
+
+                // y
+                'mask-image-y-from-pos': [
+                    { 'mask-y-from': ReturnType<typeof scaleMaskImagePosition> },
+                ]
+                'mask-image-y-to-pos': [{ 'mask-y-to': ReturnType<typeof scaleMaskImagePosition> }]
+                'mask-image-y-from-color': [{ 'mask-y-from': ReturnType<typeof scaleColor> }]
+                'mask-image-y-to-color': [{ 'mask-y-to': ReturnType<typeof scaleColor> }]
+
+                // radial
+                'mask-image-radial-from-pos': [
+                    { 'mask-radial-from': ReturnType<typeof scaleMaskImagePosition> },
+                ]
+                'mask-image-radial-to-pos': [
+                    { 'mask-radial-to': ReturnType<typeof scaleMaskImagePosition> },
+                ]
+                'mask-image-radial-from-color': [
+                    { 'mask-radial-from': ReturnType<typeof scaleColor> },
+                ]
+                'mask-image-radial-to-color': [{ 'mask-radial-to': ReturnType<typeof scaleColor> }]
+
+                // conic
+                'mask-image-conic-from-pos': [
+                    { 'mask-conic-from': ReturnType<typeof scaleMaskImagePosition> },
+                ]
+                'mask-image-conic-to-pos': [
+                    { 'mask-conic-to': ReturnType<typeof scaleMaskImagePosition> },
+                ]
+                'mask-image-conic-from-color': [
+                    { 'mask-conic-from': ReturnType<typeof scaleColor> },
+                ]
+                'mask-image-conic-to-color': [{ 'mask-conic-to': ReturnType<typeof scaleColor> }]
+            }),
             /**
              * Mask Mode
              * @see https://tailwindcss.com/docs/mask-mode
