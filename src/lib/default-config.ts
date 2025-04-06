@@ -131,8 +131,15 @@ export const getDefaultConfig = () => {
             ...scaleUnambiguousSpacing(),
         ] as const
     const scaleColor = () => [themeColor, isArbitraryVariable, isArbitraryValue] as const
-    const scaleRepeat = () => ['no-repeat', { repeat: ['', 'x', 'y', 'space', 'round'] }] as const
-    const scaleSize = () =>
+    const scaleBgPosition = () =>
+        [
+            ...scalePosition(),
+            isArbitraryVariablePosition,
+            isArbitraryPosition,
+            { position: [isArbitraryVariable, isArbitraryValue] },
+        ] as const
+    const scaleBgRepeat = () => ['no-repeat', { repeat: ['', 'x', 'y', 'space', 'round'] }] as const
+    const scaleBgSize = () =>
         [
             'auto',
             'cover',
@@ -1051,26 +1058,17 @@ export const getDefaultConfig = () => {
              * Background Position
              * @see https://tailwindcss.com/docs/background-position
              */
-            'bg-position': [
-                {
-                    bg: [
-                        ...scalePosition(),
-                        isArbitraryVariablePosition,
-                        isArbitraryPosition,
-                        { position: [isArbitraryVariable, isArbitraryValue] },
-                    ],
-                },
-            ],
+            'bg-position': [{ bg: scaleBgPosition() }],
             /**
              * Background Repeat
              * @see https://tailwindcss.com/docs/background-repeat
              */
-            'bg-repeat': [{ bg: scaleRepeat() }],
+            'bg-repeat': [{ bg: scaleBgRepeat() }],
             /**
              * Background Size
              * @see https://tailwindcss.com/docs/background-size
              */
-            'bg-size': [{ bg: scaleSize() }],
+            'bg-size': [{ bg: scaleBgSize() }],
             /**
              * Background Image
              * @see https://tailwindcss.com/docs/background-image
@@ -1551,31 +1549,22 @@ export const getDefaultConfig = () => {
              * Mask Position
              * @see https://tailwindcss.com/docs/mask-position
              */
-            'mask-position': [
-                {
-                    mask: [
-                        ...scalePosition(),
-                        isArbitraryVariablePosition,
-                        isArbitraryPosition,
-                        { position: [isArbitraryVariable, isArbitraryValue] },
-                    ],
-                },
-            ],
+            'mask-position': [{ mask: scaleBgPosition() }],
             /**
              * Mask Repeat
              * @see https://tailwindcss.com/docs/mask-repeat
              */
-            'mask-repeat': [{ mask: scaleRepeat() }],
+            'mask-repeat': [{ mask: scaleBgRepeat() }],
             /**
              * Mask Size
              * @see https://tailwindcss.com/docs/mask-size
              */
-            'mask-size': [{ mask: scaleSize() }],
+            'mask-size': [{ mask: scaleBgSize() }],
             /**
              * Mask Type
              * @see https://tailwindcss.com/docs/mask-type
              */
-            'mask-type': [{ 'mask-type': ['luminance', 'alpha'] }],
+            'mask-type': [{ 'mask-type': ['alpha', 'luminance'] }],
             /**
              * Mask Image
              * @see https://tailwindcss.com/docs/mask-image
