@@ -103,7 +103,7 @@ test('class map has correct class groups at first part', () => {
             'divide-y',
             'divide-y-reverse',
         ],
-        drop: ['drop-shadow'],
+        drop: ['drop-shadow', 'drop-shadow-color'],
         duration: ['duration'],
         ease: ['ease'],
         end: ['end'],

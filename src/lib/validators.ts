@@ -52,7 +52,8 @@ export const isArbitraryPosition = (value: string) =>
 
 export const isArbitraryImage = (value: string) => getIsArbitraryValue(value, isLabelImage, isImage)
 
-export const isArbitraryShadow = (value: string) => getIsArbitraryValue(value, isNever, isShadow)
+export const isArbitraryShadow = (value: string) =>
+    getIsArbitraryValue(value, isLabelShadow, isShadow)
 
 export const isArbitraryVariable = (value: string) => arbitraryVariableRegex.test(value)
 

@@ -155,4 +155,9 @@ test('supports Tailwind CSS v4.1 features', () => {
     expect(twMerge('shadow-md shadow-lg/25 text-shadow-md text-shadow-lg/25')).toBe(
         'shadow-lg/25 text-shadow-lg/25',
     )
+    expect(
+        twMerge('drop-shadow-some-color drop-shadow-[#123456] drop-shadow-lg drop-shadow-[10px_0]'),
+    ).toBe('drop-shadow-[#123456] drop-shadow-[10px_0]')
+    expect(twMerge('drop-shadow-[#123456] drop-shadow-some-color')).toBe('drop-shadow-some-color')
+    expect(twMerge('drop-shadow-2xl drop-shadow-[shadow:foo]')).toBe('drop-shadow-[shadow:foo]')
 })

@@ -289,6 +289,7 @@ export type DefaultClassGroupIds =
     | 'divide-y-reverse'
     | 'divide-y'
     | 'drop-shadow'
+    | 'drop-shadow-color'
     | 'duration'
     | 'ease'
     | 'end'

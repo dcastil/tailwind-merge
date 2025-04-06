@@ -1390,9 +1390,9 @@ export const getDefaultConfig = () => {
                 {
                     'inset-shadow': [
                         'none',
-                        isArbitraryVariable,
-                        isArbitraryValue,
                         themeInsetShadow,
+                        isArbitraryVariableShadow,
+                        isArbitraryShadow,
                     ],
                 },
             ],
@@ -1616,11 +1616,16 @@ export const getDefaultConfig = () => {
                         '',
                         'none',
                         themeDropShadow,
-                        isArbitraryVariable,
-                        isArbitraryValue,
+                        isArbitraryVariableShadow,
+                        isArbitraryShadow,
                     ],
                 },
             ],
+            /**
+             * Drop Shadow Color
+             * @see https://tailwindcss.com/docs/filter-drop-shadow#setting-the-shadow-color
+             */
+            'drop-shadow-color': [{ 'drop-shadow': scaleColor() }],
             /**
              * Grayscale
              * @see https://tailwindcss.com/docs/grayscale
