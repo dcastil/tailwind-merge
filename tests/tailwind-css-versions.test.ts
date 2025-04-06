@@ -106,7 +106,39 @@ test('supports Tailwind CSS v4.1 features', () => {
     expect(
         twMerge(
             // mask-image
-            'mask-[something]',
+            'mask-(--foo) mask-[foo] mask-none',
+            // mask-image-linear-pos
+            'mask-linear-1 mask-linear-2',
+            // mask-image-linear-from-pos
+            'mask-linear-from-[position:test] mask-linear-from-3',
+            // mask-image-linear-to-pos
+            'mask-linear-to-[position:test] mask-linear-to-3',
+            // mask-image-linear-from-color
+            'mask-linear-from-color-red mask-linear-from-color-3',
+            // mask-image-linear-to-color
+            'mask-linear-to-color-red mask-linear-to-color-3',
+            // mask-image-t-from-pos
+            'mask-t-from-[position:test] mask-t-from-3',
+            // mask-image-t-to-pos
+            'mask-t-to-[position:test] mask-t-to-3',
+            // mask-image-t-from-color
+            'mask-t-from-color-red mask-t-from-color-3',
+            // mask-image-radial
+            'mask-radial-(--test) mask-radial-[test]',
+            // mask-image-radial-from-pos
+            'mask-radial-from-[position:test] mask-radial-from-3',
+            // mask-image-radial-to-pos
+            'mask-radial-to-[position:test] mask-radial-to-3',
+            // mask-image-radial-from-color
+            'mask-radial-from-color-red mask-radial-from-color-3',
+        ),
+    ).toBe(
+        'mask-none mask-linear-2 mask-linear-from-3 mask-linear-to-3 mask-linear-from-color-3 mask-linear-to-color-3 mask-t-from-3 mask-t-to-3 mask-t-from-color-3 mask-radial-[test] mask-radial-from-3 mask-radial-to-3 mask-radial-from-color-3',
+    )
+    expect(
+        twMerge(
+            // mask-image
+            'mask-(--something) mask-[something]',
             // mask-position
             'mask-top-left mask-center mask-(position:--var) mask-[position:1px_1px] mask-position-(--var) mask-position-[1px_1px]',
         ),
@@ -114,7 +146,7 @@ test('supports Tailwind CSS v4.1 features', () => {
     expect(
         twMerge(
             // mask-image
-            'mask-[something]',
+            'mask-(--something) mask-[something]',
             // mask-size
             'mask-auto mask-[size:foo] mask-(size:--foo) mask-size-[foo] mask-size-(--foo) mask-cover mask-contain',
         ),

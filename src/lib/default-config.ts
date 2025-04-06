@@ -175,6 +175,8 @@ export const getDefaultConfig = () => {
             'color',
             'luminosity',
         ] as const
+    const scaleMaskImagePosition = () =>
+        [isNumber, isPercent, isArbitraryVariablePosition, isArbitraryPosition] as const
     const scaleBlur = () =>
         [
             // Deprecated since Tailwind CSS v4.0.0
@@ -1355,7 +1357,7 @@ export const getDefaultConfig = () => {
              * Outline Color
              * @see https://tailwindcss.com/docs/outline-color
              */
-            'outline-color': [{ outline: [themeColor] }],
+            'outline-color': [{ outline: scaleColor() }],
 
             // ---------------
             // --- Effects ---
@@ -1486,6 +1488,54 @@ export const getDefaultConfig = () => {
              */
             'mask-composite': [{ mask: ['add', 'subtract', 'intersect', 'exclude'] }],
             /**
+             * Mask Image
+             * @see https://tailwindcss.com/docs/mask-image
+             */
+            'mask-image-linear-pos': [{ 'mask-linear': [isNumber] }],
+            'mask-image-linear-from-pos': [{ 'mask-linear-from': scaleMaskImagePosition() }],
+            'mask-image-linear-to-pos': [{ 'mask-linear-to': scaleMaskImagePosition() }],
+            'mask-image-linear-from-color': [{ 'mask-linear-from': scaleColor() }],
+            'mask-image-linear-to-color': [{ 'mask-linear-to': scaleColor() }],
+            'mask-image-t-from-pos': [{ 'mask-t-from': scaleMaskImagePosition() }],
+            'mask-image-t-to-pos': [{ 'mask-t-to': scaleMaskImagePosition() }],
+            'mask-image-t-from-color': [{ 'mask-t-from': scaleColor() }],
+            'mask-image-t-to-color': [{ 'mask-t-to': scaleColor() }],
+            'mask-image-r-from-pos': [{ 'mask-r-from': scaleMaskImagePosition() }],
+            'mask-image-r-to-pos': [{ 'mask-r-to': scaleMaskImagePosition() }],
+            'mask-image-r-from-color': [{ 'mask-r-from': scaleColor() }],
+            'mask-image-r-to-color': [{ 'mask-r-to': scaleColor() }],
+            'mask-image-b-from-pos': [{ 'mask-b-from': scaleMaskImagePosition() }],
+            'mask-image-b-to-pos': [{ 'mask-b-to': scaleMaskImagePosition() }],
+            'mask-image-b-from-color': [{ 'mask-b-from': scaleColor() }],
+            'mask-image-b-to-color': [{ 'mask-b-to': scaleColor() }],
+            'mask-image-l-from-pos': [{ 'mask-l-from': scaleMaskImagePosition() }],
+            'mask-image-l-to-pos': [{ 'mask-l-to': scaleMaskImagePosition() }],
+            'mask-image-l-from-color': [{ 'mask-l-from': scaleColor() }],
+            'mask-image-l-to-color': [{ 'mask-l-to': scaleColor() }],
+            'mask-image-x-from-pos': [{ 'mask-x-from': scaleMaskImagePosition() }],
+            'mask-image-x-to-pos': [{ 'mask-x-to': scaleMaskImagePosition() }],
+            'mask-image-x-from-color': [{ 'mask-x-from': scaleColor() }],
+            'mask-image-x-to-color': [{ 'mask-x-to': scaleColor() }],
+            'mask-image-y-from-pos': [{ 'mask-y-from': scaleMaskImagePosition() }],
+            'mask-image-y-to-pos': [{ 'mask-y-to': scaleMaskImagePosition() }],
+            'mask-image-y-from-color': [{ 'mask-y-from': scaleColor() }],
+            'mask-image-y-to-color': [{ 'mask-y-to': scaleColor() }],
+            'mask-image-radial': [{ 'mask-radial': [isArbitraryVariable, isArbitraryValue] }],
+            'mask-image-radial-from-pos': [{ 'mask-radial-from': scaleMaskImagePosition() }],
+            'mask-image-radial-to-pos': [{ 'mask-radial-to': scaleMaskImagePosition() }],
+            'mask-image-radial-from-color': [{ 'mask-radial-from': scaleColor() }],
+            'mask-image-radial-to-color': [{ 'mask-radial-to': scaleColor() }],
+            'mask-image-radial-shape': [{ 'mask-radial': ['circle', 'ellipse'] }],
+            'mask-image-radial-size': [
+                { 'mask-radial': [{ closest: ['side', 'corner'], farthest: ['side', 'corner'] }] },
+            ],
+            'mask-image-radial-pos': [{ 'mask-radial-at': scalePosition() }],
+            'mask-image-conic-pos': [{ 'mask-conic': [isNumber] }],
+            'mask-image-conic-from-pos': [{ 'mask-conic-from': scaleMaskImagePosition() }],
+            'mask-image-conic-to-pos': [{ 'mask-conic-to': scaleMaskImagePosition() }],
+            'mask-image-conic-from-color': [{ 'mask-conic-from': scaleColor() }],
+            'mask-image-conic-to-color': [{ 'mask-conic-to': scaleColor() }],
+            /**
              * Mask Mode
              * @see https://tailwindcss.com/docs/mask-mode
              */
@@ -1526,6 +1576,11 @@ export const getDefaultConfig = () => {
              * @see https://tailwindcss.com/docs/mask-type
              */
             'mask-type': [{ 'mask-type': ['luminance', 'alpha'] }],
+            /**
+             * Mask Image
+             * @see https://tailwindcss.com/docs/mask-image
+             */
+            'mask-image': [{ mask: ['none', isArbitraryVariable, isArbitraryValue] }],
 
             // ---------------
             // --- Filters ---
