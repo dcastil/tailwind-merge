@@ -1465,6 +1465,10 @@ export const getDefaultConfig = () => {
              * @see https://tailwindcss.com/docs/text-shadow#setting-the-shadow-color
              */
             'text-shadow-color': [{ 'text-shadow': scaleColor() }],
+            /**
+             * Opacity
+             * @see https://tailwindcss.com/docs/opacity
+             */
             opacity: [{ opacity: [isNumber, isArbitraryVariable, isArbitraryValue] }],
             /**
              * Mix Blend Mode
