@@ -103,5 +103,13 @@ test('supports Tailwind CSS v4.1 features', () => {
         ),
     ).toBe('text-shadow-md text-shadow-red-500 shadow-red shadow-3xs')
     expect(twMerge('mask-add mask-subtract')).toBe('mask-subtract')
+    expect(
+        twMerge(
+            // mask-image
+            'mask-[something]',
+            // mask-position
+            'mask-top-left mask-center mask-(position:--var) mask-[position:1px_1px] mask-position-(--var) mask-position-[1px_1px]',
+        ),
+    ).toBe('mask-[something] mask-position-[1px_1px]')
     expect(twMerge('mask-type-luminance mask-type-alpha')).toBe('mask-type-alpha')
 })

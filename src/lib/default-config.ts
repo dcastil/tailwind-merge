@@ -63,16 +63,22 @@ export const getDefaultConfig = () => {
         ['auto', 'avoid', 'all', 'avoid-page', 'page', 'left', 'right', 'column'] as const
     const scalePosition = () =>
         [
-            'bottom',
             'center',
-            'left',
-            'left-bottom',
-            'left-top',
-            'right',
-            'right-bottom',
-            'right-top',
             'top',
+            'bottom',
+            'left',
+            'right',
+            'top-left',
+            'left-top',
+            'top-right',
+            'right-top',
+            'bottom-right',
+            'right-bottom',
+            'bottom-left',
+            'left-bottom',
         ] as const
+    const scalePositionWithArbitrary = () =>
+        [...scalePosition(), isArbitraryVariable, isArbitraryValue] as const
     const scaleOverflow = () => ['auto', 'hidden', 'clip', 'visible', 'scroll'] as const
     const scaleOverscroll = () => ['auto', 'contain', 'none'] as const
     const scaleUnambiguousSpacing = () =>
@@ -166,20 +172,6 @@ export const getDefaultConfig = () => {
             '',
             'none',
             themeBlur,
-            isArbitraryVariable,
-            isArbitraryValue,
-        ] as const
-    const scaleOrigin = () =>
-        [
-            'center',
-            'top',
-            'top-right',
-            'right',
-            'bottom-right',
-            'bottom',
-            'bottom-left',
-            'left',
-            'top-left',
             isArbitraryVariable,
             isArbitraryValue,
         ] as const
@@ -336,9 +328,7 @@ export const getDefaultConfig = () => {
              * Object Position
              * @see https://tailwindcss.com/docs/object-position
              */
-            'object-position': [
-                { object: [...scalePosition(), isArbitraryValue, isArbitraryVariable] },
-            ],
+            'object-position': [{ object: scalePositionWithArbitrary() }],
             /**
              * Overflow
              * @see https://tailwindcss.com/docs/overflow
@@ -1051,7 +1041,14 @@ export const getDefaultConfig = () => {
              * @see https://tailwindcss.com/docs/background-position
              */
             'bg-position': [
-                { bg: [...scalePosition(), isArbitraryVariablePosition, isArbitraryPosition] },
+                {
+                    bg: [
+                        ...scalePosition(),
+                        isArbitraryVariablePosition,
+                        isArbitraryPosition,
+                        { position: [isArbitraryVariable, isArbitraryValue] },
+                    ],
+                },
             ],
             /**
              * Background Repeat
@@ -1063,7 +1060,16 @@ export const getDefaultConfig = () => {
              * @see https://tailwindcss.com/docs/background-size
              */
             'bg-size': [
-                { bg: ['auto', 'cover', 'contain', isArbitraryVariableSize, isArbitrarySize] },
+                {
+                    bg: [
+                        'auto',
+                        'cover',
+                        'contain',
+                        isArbitraryVariableSize,
+                        isArbitrarySize,
+                        { size: [isArbitraryVariable, isArbitraryValue] },
+                    ],
+                },
             ],
             /**
              * Background Image
@@ -1494,6 +1500,20 @@ export const getDefaultConfig = () => {
                 { 'mask-origin': ['border', 'padding', 'content', 'fill', 'stroke', 'view'] },
             ],
             /**
+             * Mask Position
+             * @see https://tailwindcss.com/docs/mask-position
+             */
+            'mask-position': [
+                {
+                    mask: [
+                        ...scalePosition(),
+                        isArbitraryVariablePosition,
+                        isArbitraryPosition,
+                        { position: [isArbitraryVariable, isArbitraryValue] },
+                    ],
+                },
+            ],
+            /**
              * Mask Repeat
              * @see https://tailwindcss.com/docs/mask-repeat
              */
@@ -1762,7 +1782,7 @@ export const getDefaultConfig = () => {
              * Perspective Origin
              * @see https://tailwindcss.com/docs/perspective-origin
              */
-            'perspective-origin': [{ 'perspective-origin': scaleOrigin() }],
+            'perspective-origin': [{ 'perspective-origin': scalePositionWithArbitrary() }],
             /**
              * Rotate
              * @see https://tailwindcss.com/docs/rotate
@@ -1834,7 +1854,7 @@ export const getDefaultConfig = () => {
              * Transform Origin
              * @see https://tailwindcss.com/docs/transform-origin
              */
-            'transform-origin': [{ origin: scaleOrigin() }],
+            'transform-origin': [{ origin: scalePositionWithArbitrary() }],
             /**
              * Transform Style
              * @see https://tailwindcss.com/docs/transform-style

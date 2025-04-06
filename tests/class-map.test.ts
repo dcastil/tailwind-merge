@@ -155,6 +155,7 @@ test('class map has correct class groups at first part', () => {
             'mask-composite',
             'mask-mode',
             'mask-origin',
+            'mask-position',
             'mask-repeat',
             'mask-type',
         ],

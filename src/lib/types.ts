@@ -350,6 +350,7 @@ export type DefaultClassGroupIds =
     | 'mask-composite'
     | 'mask-mode'
     | 'mask-origin'
+    | 'mask-position'
     | 'mask-repeat'
     | 'mask-type'
     | 'max-h'
