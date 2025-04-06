@@ -102,4 +102,6 @@ test('supports Tailwind CSS v4.1 features', () => {
             'text-shadow-none text-shadow-md text-shadow-red text-shadow-red-500 shadow-red shadow-3xs',
         ),
     ).toBe('text-shadow-md text-shadow-red-500 shadow-red shadow-3xs')
+    expect(twMerge('mask-add mask-subtract')).toBe('mask-subtract')
+    expect(twMerge('mask-type-luminance mask-type-alpha')).toBe('mask-type-alpha')
 })

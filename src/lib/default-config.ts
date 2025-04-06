@@ -125,6 +125,7 @@ export const getDefaultConfig = () => {
             ...scaleUnambiguousSpacing(),
         ] as const
     const scaleColor = () => [themeColor, isArbitraryVariable, isArbitraryValue] as const
+    const scaleRepeat = () => ['no-repeat', { repeat: ['', 'x', 'y', 'space', 'round'] }]
     const scaleGradientStopPosition = () =>
         [isPercent, isArbitraryVariableLength, isArbitraryLength] as const
     const scaleRadius = () =>
@@ -1056,7 +1057,7 @@ export const getDefaultConfig = () => {
              * Background Repeat
              * @see https://tailwindcss.com/docs/background-repeat
              */
-            'bg-repeat': [{ bg: ['no-repeat', { repeat: ['', 'x', 'y', 'space', 'round'] }] }],
+            'bg-repeat': [{ bg: scaleRepeat() }],
             /**
              * Background Size
              * @see https://tailwindcss.com/docs/background-size
@@ -1467,6 +1468,41 @@ export const getDefaultConfig = () => {
              * @see https://tailwindcss.com/docs/background-blend-mode
              */
             'bg-blend': [{ 'bg-blend': scaleBlendMode() }],
+            /**
+             * Mask Clip
+             * @see https://tailwindcss.com/docs/mask-clip
+             */
+            'mask-clip': [
+                { 'mask-clip': ['border', 'padding', 'content', 'fill', 'stroke', 'view'] },
+                'mask-no-clip',
+            ],
+            /**
+             * Mask Composite
+             * @see https://tailwindcss.com/docs/mask-composite
+             */
+            'mask-composite': [{ mask: ['add', 'subtract', 'intersect', 'exclude'] }],
+            /**
+             * Mask Mode
+             * @see https://tailwindcss.com/docs/mask-mode
+             */
+            'mask-mode': [{ mask: ['alpha', 'luminance', 'match'] }],
+            /**
+             * Mask Origin
+             * @see https://tailwindcss.com/docs/mask-origin
+             */
+            'mask-origin': [
+                { 'mask-origin': ['border', 'padding', 'content', 'fill', 'stroke', 'view'] },
+            ],
+            /**
+             * Mask Repeat
+             * @see https://tailwindcss.com/docs/mask-repeat
+             */
+            'mask-repeat': [{ mask: scaleRepeat() }],
+            /**
+             * Mask Type
+             * @see https://tailwindcss.com/docs/mask-type
+             */
+            'mask-type': [{ 'mask-type': ['luminance', 'alpha'] }],
 
             // ---------------
             // --- Filters ---
