@@ -12,7 +12,7 @@
         "@actions/github": "^6.0.0",
         "@octokit/types": "^13.10.0",
         "@octokit/webhooks-definitions": "^3.67.3",
-        "esbuild": "^0.25.2",
-        "rollup": "^4.38.0"
+        "esbuild": "^0.25.3",
+        "rollup": "^4.40.1"
     }
 }
