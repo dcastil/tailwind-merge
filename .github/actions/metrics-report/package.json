@@ -10,7 +10,7 @@
         "@actions/core": "^1.11.1",
         "@actions/exec": "^1.1.1",
         "@actions/github": "^6.0.0",
-        "@octokit/types": "^13.10.0",
+        "@octokit/types": "^14.0.0",
         "@octokit/webhooks-definitions": "^3.67.3",
         "esbuild": "^0.25.2",
         "rollup": "^4.38.0"
