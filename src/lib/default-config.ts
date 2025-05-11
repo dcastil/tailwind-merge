@@ -782,17 +782,17 @@ export const getDefaultConfig = () => {
              * Height
              * @see https://tailwindcss.com/docs/height
              */
-            h: [{ h: ['screen', ...scaleSizing()] }],
+            h: [{ h: ['screen', 'lh', ...scaleSizing()] }],
             /**
              * Min-Height
              * @see https://tailwindcss.com/docs/min-height
              */
-            'min-h': [{ 'min-h': ['screen', 'none', ...scaleSizing()] }],
+            'min-h': [{ 'min-h': ['screen', 'lh', 'none', ...scaleSizing()] }],
             /**
              * Max-Height
              * @see https://tailwindcss.com/docs/max-height
              */
-            'max-h': [{ 'max-h': ['screen', ...scaleSizing()] }],
+            'max-h': [{ 'max-h': ['screen', 'lh', ...scaleSizing()] }],
 
             // ------------------
             // --- Typography ---
