@@ -3,7 +3,7 @@
  */
 export interface Config<ClassGroupIds extends string, ThemeGroupIds extends string>
     extends ConfigStaticPart,
-        ConfigGroupsPart<ClassGroupIds, ThemeGroupIds> {}
+    ConfigGroupsPart<ClassGroupIds, ThemeGroupIds> { }
 
 /**
  * The static part of the tailwind-merge configuration. When merging multiple configurations, the properties of this interface are always overridden.
@@ -201,6 +201,9 @@ export type DefaultThemeGroupIds =
     | 'text'
     | 'text-shadow'
     | 'tracking'
+    | 'opacity'
+    | 'text-opacity'
+    | 'bg-opacity'
 
 /**
  * Class group IDs included in the default configuration of tailwind-merge.
@@ -231,6 +234,7 @@ export type DefaultClassGroupIds =
     | 'bg-blend'
     | 'bg-clip'
     | 'bg-color'
+    | 'bg-opacity'
     | 'bg-image'
     | 'bg-origin'
     | 'bg-position'
@@ -523,6 +527,7 @@ export type DefaultClassGroupIds =
     | 'table-layout'
     | 'text-alignment'
     | 'text-color'
+    | 'text-opacity'
     | 'text-decoration-color'
     | 'text-decoration-style'
     | 'text-decoration-thickness'
