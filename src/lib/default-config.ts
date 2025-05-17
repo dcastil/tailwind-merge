@@ -50,6 +50,9 @@ export const getDefaultConfig = () => {
     const themeAspect = fromTheme('aspect')
     const themeEase = fromTheme('ease')
     const themeAnimate = fromTheme('animate')
+    const themeOpacity = fromTheme('opacity')
+    const themeTextOpacity = fromTheme('text-opacity')
+    const themeBgOpacity = fromTheme('bg-opacity')
 
     /**
      * Helpers to avoid repeating the same scales
@@ -135,6 +138,30 @@ export const getDefaultConfig = () => {
             ...scaleUnambiguousSpacing(),
         ] as const
     const scaleColor = () => [themeColor, isArbitraryVariable, isArbitraryValue] as const
+    const scaleBgOpacity = () =>
+        [
+            {
+                opacity:
+                    [
+                        themeOpacity,
+                        themeBgOpacity,
+                        isArbitraryValue,
+                        isArbitraryVariable
+                    ]
+            }
+        ]
+    const scaleTextOpacity = () =>
+        [
+            {
+                opacity:
+                    [
+                        themeOpacity,
+                        themeTextOpacity,
+                        isArbitraryValue,
+                        isArbitraryVariable
+                    ]
+            }
+        ]
     const scaleBgPosition = () =>
         [
             ...scalePosition(),
@@ -234,6 +261,26 @@ export const getDefaultConfig = () => {
             text: [isTshirtSize],
             'text-shadow': [isTshirtSize],
             tracking: ['tighter', 'tight', 'normal', 'wide', 'wider', 'widest'],
+            opacity:
+                [
+                    '0',
+                    '5',
+                    '10',
+                    '20',
+                    '25',
+                    '30',
+                    '40',
+                    '50',
+                    '60',
+                    '70',
+                    '75',
+                    '80',
+                    '90',
+                    '95',
+                    '100',
+                ],
+            "text-opacity": [],
+            'bg-opacity': []
         },
         classGroups: {
             // --------------
@@ -935,6 +982,12 @@ export const getDefaultConfig = () => {
              */
             'text-color': [{ text: scaleColor() }],
             /**
+             * Text Opacity
+             * @deprecated since Tailwind CSS v3.0.0
+             * @see https://v2.tailwindcss.com/docs/text-opacity
+             */
+            'text-opacity': [{ text: scaleTextOpacity() }],
+            /**
              * Text Decoration
              * @see https://tailwindcss.com/docs/text-decoration
              */
@@ -1101,6 +1154,12 @@ export const getDefaultConfig = () => {
              * @see https://tailwindcss.com/docs/background-color
              */
             'bg-color': [{ bg: scaleColor() }],
+            /**
+             * Background Opacity
+             * @deprecated since Tailwind CSS v3.0.0
+             * @see https://v2.tailwindcss.com/docs/background-opacity
+             */
+            'bg-opacity': [{ bg: scaleBgOpacity() }],
             /**
              * Gradient Color Stops From Position
              * @see https://tailwindcss.com/docs/gradient-color-stops
@@ -2340,6 +2399,8 @@ export const getDefaultConfig = () => {
         },
         conflictingClassGroupModifiers: {
             'font-size': ['leading'],
+            'bg-color': ['bg-opacity'],
+            'text-color': ['text-opacity']
         },
         orderSensitiveModifiers: [
             '*',
