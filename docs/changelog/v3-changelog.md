@@ -1,5 +1,15 @@
 # Changelog for v3 releases
 
+## v3.3.1
+
+### Bug Fixes
+
+- Fix arbitrary value using `color-mix()` not being detected as color by [@dcastil](https://github.com/dcastil) in [#591](https://github.com/dcastil/tailwind-merge/pull/591)
+
+**Full Changelog**: [`v3.3.0...v3.3.1`](https://github.com/dcastil/tailwind-merge/compare/v3.3.0...v3.3.1)
+
+Thanks to [@brandonmcconnell](https://github.com/brandonmcconnell), [@manavm1990](https://github.com/manavm1990), [@langy](https://github.com/langy), [@roboflow](https://github.com/roboflow), [@syntaxfm](https://github.com/syntaxfm), [@getsentry](https://github.com/getsentry), [@codecov](https://github.com/codecov), [@sourcegraph](https://github.com/sourcegraph), a private sponsor, [@block](https://github.com/block) and [shawt3000](https://github.com/shawt3000) for sponsoring tailwind-merge! ❤️
+
 ## v3.3.0
 
 ### New Features
