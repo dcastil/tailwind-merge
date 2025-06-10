@@ -75,4 +75,7 @@ test('handles ambiguous arbitrary values correctly', () => {
             'bg-none bg-[url(.)] bg-[image:.] bg-[url:.] bg-[linear-gradient(.)] bg-gradient-to-r',
         ),
     ).toBe('bg-gradient-to-r')
+    expect(
+        twMerge('border-[color-mix(in_oklab,var(--background),var(--calendar-color)_30%)] border'),
+    ).toBe('border-[color-mix(in_oklab,var(--background),var(--calendar-color)_30%)] border')
 })
