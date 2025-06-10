@@ -75,6 +75,9 @@ test('handles ambiguous arbitrary values correctly', () => {
             'bg-none bg-[url(.)] bg-[image:.] bg-[url:.] bg-[linear-gradient(.)] bg-linear-to-r',
         ),
     ).toBe('bg-linear-to-r')
+    expect(
+        twMerge('border-[color-mix(in_oklab,var(--background),var(--calendar-color)_30%)] border'),
+    ).toBe('border-[color-mix(in_oklab,var(--background),var(--calendar-color)_30%)] border')
 })
 
 test('handles arbitrary custom properties correctly', () => {
