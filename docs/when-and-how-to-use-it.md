@@ -180,7 +180,7 @@ function MyComponent() {
     return (
         <>
             <Button className="w-full">No danger</Button>
-            // .bg-red-500 works as expected since it has higher specificity
+            {/* .bg-red-500 works as expected since it has higher specificity */}
             <Button className="w-full bg-red-500">Danger!</Button>
         </>
     )
