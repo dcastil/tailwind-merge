@@ -160,6 +160,41 @@ function join(...args) {
 
 The main downside of this approach is that it only works one level deep (you can't override the `bg-red-500!` class in the example above). But if you don't need to be able to override styles through multiple levels of composition, this might be the most lightweight approach possible.
 
+
+### Using Tailwind's custom variant
+
+Instead of increasing specificity with important modifier, you can also decrease specificity of base classes using Tailwind's [custom variant](https://tailwindcss.com/docs/adding-custom-styles#adding-custom-variants).
+
+For example, you can create a custom variant that wraps the selector with [`:where()`](https://developer.mozilla.org/en-US/docs/Web/CSS/:where):
+
+```css
+@custom-variant component (:where(&));
+```
+
+And use the variant in the component's base classes:
+
+```jsx
+// React components with JSX syntax used in this example
+
+function MyComponent() {
+    return (
+        <>
+            <Button className="w-full">No danger</Button>
+            // .bg-red-500 works as expected since it has higher specificity
+            <Button className="w-full bg-red-500">Danger!</Button>
+        </>
+    )
+}
+
+function Button({ className ...props }) {
+    return <button {...props} className={join('component:bg-blue-500 component:text-white', className)} />
+}
+
+function join(...args) {
+    return args.filter(Boolean).join(' ')
+}
+```
+
 ---
 
 Next: [Features](./features.md)
