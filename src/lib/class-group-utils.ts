@@ -8,11 +8,12 @@ import {
     ThemeGetter,
     ThemeObject,
 } from './types'
+import { createLruCache } from './lru-cache'
 
 export interface ClassPartObject {
     nextPart: Map<string, ClassPartObject>
     validators: ClassValidatorObject[]
-    classGroupId?: AnyClassGroupIds
+    classGroupId: AnyClassGroupIds | undefined // Always define optional props for consistent shape
 }
 
 interface ClassValidatorObject {
@@ -20,34 +21,84 @@ interface ClassValidatorObject {
     validator: ClassValidator
 }
 
+// Factory function ensures consistent object shapes
+const createClassValidatorObject = (
+    classGroupId: AnyClassGroupIds,
+    validator: ClassValidator,
+): ClassValidatorObject => ({
+    classGroupId,
+    validator,
+})
+
+// Factory ensures consistent ClassPartObject shape
+const createClassPartObject = (
+    nextPart: Map<string, ClassPartObject> = new Map(),
+    validators: ClassValidatorObject[] = [],
+    classGroupId?: AnyClassGroupIds,
+): ClassPartObject => ({
+    nextPart,
+    validators,
+    classGroupId,
+})
+
 const CLASS_PART_SEPARATOR = '-'
+const EMPTY_VALIDATORS: readonly ClassValidatorObject[] = []
+const EMPTY_CONFLICTS: readonly AnyClassGroupIds[] = []
+const ARBITRARY_PROPERTY_PREFIX = 'arbitrary..'
+const ARBITRARY_PROPERTY_REGEX = /^\[(.+)\]$/
 
 export const createClassGroupUtils = (config: AnyConfig) => {
     const classMap = createClassMap(config)
     const { conflictingClassGroups, conflictingClassGroupModifiers } = config
 
-    const getClassGroupId = (className: string) => {
-        const classParts = className.split(CLASS_PART_SEPARATOR)
+    // Use the existing LRU cache implementation
+    const classGroupCache = createLruCache<string, AnyClassGroupIds | undefined>(config.cacheSize)
 
-        // Classes like `-inset-1` produce an empty string as first classPart. We assume that classes for negative values are used correctly and remove it from classParts.
-        if (classParts[0] === '' && classParts.length !== 1) {
-            classParts.shift()
+    const getClassGroupId = (className: string) => {
+        // Check cache first for efficiency
+        const cachedResult = classGroupCache.get(className)
+        if (cachedResult !== undefined) {
+            return cachedResult
         }
 
-        return getGroupRecursive(classParts, classMap) || getGroupIdForArbitraryProperty(className)
+        let result: AnyClassGroupIds | undefined
+
+        if (className.startsWith('[')) {
+            result = getGroupIdForArbitraryProperty(className)
+        } else {
+            const classParts = className.split(CLASS_PART_SEPARATOR)
+            if (classParts[0] === '' && classParts.length > 1) {
+                classParts.shift()
+            }
+            result = getGroupRecursive(classParts, classMap)
+        }
+
+        // Cache result to avoid repeated computation
+        classGroupCache.set(className, result)
+        return result
     }
 
     const getConflictingClassGroupIds = (
         classGroupId: AnyClassGroupIds,
         hasPostfixModifier: boolean,
-    ) => {
-        const conflicts = conflictingClassGroups[classGroupId] || []
-
-        if (hasPostfixModifier && conflictingClassGroupModifiers[classGroupId]) {
-            return [...conflicts, ...conflictingClassGroupModifiers[classGroupId]!]
+    ): readonly AnyClassGroupIds[] => {
+        const conflicts = conflictingClassGroups[classGroupId]
+        if (!hasPostfixModifier || !conflictingClassGroupModifiers[classGroupId]) {
+            return conflicts || EMPTY_CONFLICTS
         }
 
-        return conflicts
+        const modifierConflicts = conflictingClassGroupModifiers[classGroupId]!
+        if (!conflicts) return modifierConflicts
+
+        // Pre-allocate for better V8 optimization
+        const result = new Array(conflicts.length + modifierConflicts.length)
+        for (let i = 0; i < conflicts.length; i++) {
+            result[i] = conflicts[i]
+        }
+        for (let i = 0; i < modifierConflicts.length; i++) {
+            result[conflicts.length + i] = modifierConflicts[i]
+        }
+        return result
     }
 
     return {
@@ -60,58 +111,65 @@ const getGroupRecursive = (
     classParts: string[],
     classPartObject: ClassPartObject,
 ): AnyClassGroupIds | undefined => {
-    if (classParts.length === 0) {
+    const len = classParts.length
+    if (len === 0) {
         return classPartObject.classGroupId
     }
 
     const currentClassPart = classParts[0]!
     const nextClassPartObject = classPartObject.nextPart.get(currentClassPart)
-    const classGroupFromNextClassPart = nextClassPartObject
-        ? getGroupRecursive(classParts.slice(1), nextClassPartObject)
-        : undefined
 
-    if (classGroupFromNextClassPart) {
-        return classGroupFromNextClassPart
+    if (nextClassPartObject) {
+        const result = getGroupRecursive(classParts.slice(1), nextClassPartObject)
+        if (result) return result
     }
 
-    if (classPartObject.validators.length === 0) {
+    const validators = classPartObject.validators
+    if (validators.length === 0) {
         return undefined
     }
 
     const classRest = classParts.join(CLASS_PART_SEPARATOR)
+    const len2 = validators.length
 
-    return classPartObject.validators.find(({ validator }) => validator(classRest))?.classGroupId
-}
-
-const arbitraryPropertyRegex = /^\[(.+)\]$/
-
-const getGroupIdForArbitraryProperty = (className: string) => {
-    if (arbitraryPropertyRegex.test(className)) {
-        const arbitraryPropertyClassName = arbitraryPropertyRegex.exec(className)![1]
-        const property = arbitraryPropertyClassName?.substring(
-            0,
-            arbitraryPropertyClassName.indexOf(':'),
-        )
-
-        if (property) {
-            // I use two dots here because one dot is used as prefix for class groups in plugins
-            return 'arbitrary..' + property
+    for (let i = 0; i < len2; i++) {
+        const validatorObj = validators[i]!
+        if (validatorObj.validator(classRest)) {
+            return validatorObj.classGroupId
         }
     }
+
+    return undefined
 }
 
-/**
- * Exported for testing only
- */
+const getGroupIdForArbitraryProperty = (className: string): AnyClassGroupIds | undefined => {
+    const match = ARBITRARY_PROPERTY_REGEX.exec(className)
+    if (!match?.[1]) return undefined
+
+    const colonIndex = match[1].indexOf(':')
+    if (colonIndex === -1) return undefined
+
+    const property = match[1].slice(0, colonIndex)
+    return property ? ARBITRARY_PROPERTY_PREFIX + property : undefined
+}
+
 export const createClassMap = (config: Config<AnyClassGroupIds, AnyThemeGroupIds>) => {
     const { theme, classGroups } = config
-    const classMap: ClassPartObject = {
-        nextPart: new Map<string, ClassPartObject>(),
-        validators: [],
-    }
+    return processClassGroups(classGroups, theme)
+}
+
+// Split into separate functions to maintain monomorphic call sites
+const processClassGroups = (
+    classGroups: Record<AnyClassGroupIds, ClassGroup<AnyThemeGroupIds>>,
+    theme: ThemeObject<AnyThemeGroupIds>,
+): ClassPartObject => {
+    const classMap = createClassPartObject()
 
     for (const classGroupId in classGroups) {
-        processClassesRecursively(classGroups[classGroupId]!, classMap, classGroupId, theme)
+        const group = classGroups[classGroupId]
+        if (group) {
+            processClassesRecursively(group, classMap, classGroupId, theme)
+        }
     }
 
     return classMap
@@ -123,60 +181,103 @@ const processClassesRecursively = (
     classGroupId: AnyClassGroupIds,
     theme: ThemeObject<AnyThemeGroupIds>,
 ) => {
-    classGroup.forEach((classDefinition) => {
-        if (typeof classDefinition === 'string') {
-            const classPartObjectToEdit =
-                classDefinition === '' ? classPartObject : getPart(classPartObject, classDefinition)
-            classPartObjectToEdit.classGroupId = classGroupId
-            return
-        }
-
-        if (typeof classDefinition === 'function') {
-            if (isThemeGetter(classDefinition)) {
-                processClassesRecursively(
-                    classDefinition(theme),
-                    classPartObject,
-                    classGroupId,
-                    theme,
-                )
-                return
-            }
-
-            classPartObject.validators.push({
-                validator: classDefinition,
-                classGroupId,
-            })
-
-            return
-        }
-
-        Object.entries(classDefinition).forEach(([key, classGroup]) => {
-            processClassesRecursively(
-                classGroup,
-                getPart(classPartObject, key),
-                classGroupId,
-                theme,
-            )
-        })
-    })
+    const len = classGroup.length
+    for (let i = 0; i < len; i++) {
+        const classDefinition = classGroup[i]!
+        processClassDefinition(classDefinition, classPartObject, classGroupId, theme)
+    }
 }
 
-const getPart = (classPartObject: ClassPartObject, path: string) => {
-    let currentClassPartObject = classPartObject
+// Split into separate functions for each type to maintain monomorphic call sites
+const processClassDefinition = (
+    classDefinition: ClassGroup<AnyThemeGroupIds>[number],
+    classPartObject: ClassPartObject,
+    classGroupId: AnyClassGroupIds,
+    theme: ThemeObject<AnyThemeGroupIds>,
+) => {
+    if (typeof classDefinition === 'string') {
+        processStringDefinition(classDefinition, classPartObject, classGroupId)
+        return
+    }
 
-    path.split(CLASS_PART_SEPARATOR).forEach((pathPart) => {
-        if (!currentClassPartObject.nextPart.has(pathPart)) {
-            currentClassPartObject.nextPart.set(pathPart, {
-                nextPart: new Map(),
-                validators: [],
-            })
-        }
+    if (typeof classDefinition === 'function') {
+        processFunctionDefinition(classDefinition, classPartObject, classGroupId, theme)
+        return
+    }
 
-        currentClassPartObject = currentClassPartObject.nextPart.get(pathPart)!
-    })
-
-    return currentClassPartObject
+    if (classDefinition) {
+        processObjectDefinition(
+            classDefinition as Record<string, ClassGroup<AnyThemeGroupIds>>,
+            classPartObject,
+            classGroupId,
+            theme,
+        )
+    }
 }
 
-const isThemeGetter = (func: ClassValidator | ThemeGetter): func is ThemeGetter =>
-    (func as ThemeGetter).isThemeGetter
+const processStringDefinition = (
+    classDefinition: string,
+    classPartObject: ClassPartObject,
+    classGroupId: AnyClassGroupIds,
+) => {
+    const classPartObjectToEdit =
+        classDefinition === '' ? classPartObject : getPart(classPartObject, classDefinition)
+    classPartObjectToEdit.classGroupId = classGroupId
+}
+
+const processFunctionDefinition = (
+    classDefinition: Function,
+    classPartObject: ClassPartObject,
+    classGroupId: AnyClassGroupIds,
+    theme: ThemeObject<AnyThemeGroupIds>,
+) => {
+    if (isThemeGetter(classDefinition)) {
+        processClassesRecursively(classDefinition(theme), classPartObject, classGroupId, theme)
+        return
+    }
+
+    if (classPartObject.validators === EMPTY_VALIDATORS) {
+        classPartObject.validators = []
+    }
+    classPartObject.validators.push(
+        createClassValidatorObject(classGroupId, classDefinition as ClassValidator),
+    )
+}
+
+const processObjectDefinition = (
+    classDefinition: Record<string, ClassGroup<AnyThemeGroupIds>>,
+    classPartObject: ClassPartObject,
+    classGroupId: AnyClassGroupIds,
+    theme: ThemeObject<AnyThemeGroupIds>,
+) => {
+    const entries = Object.entries(classDefinition)
+    const len = entries.length
+    for (let i = 0; i < len; i++) {
+        const [key, value] = entries[i]!
+        processClassesRecursively(value, getPart(classPartObject, key), classGroupId, theme)
+    }
+}
+
+const getPart = (classPartObject: ClassPartObject, path: string): ClassPartObject => {
+    let current = classPartObject
+    const parts = path.split(CLASS_PART_SEPARATOR)
+    const len = parts.length
+
+    for (let i = 0; i < len; i++) {
+        const part = parts[i]
+        if (!part) continue
+
+        let next = current.nextPart.get(part)
+        if (!next) {
+            next = createClassPartObject()
+            current.nextPart.set(part, next)
+        }
+        current = next
+    }
+
+    return current
+}
+
+// Type guard maintains monomorphic check
+const isThemeGetter = (func: Function): func is ThemeGetter =>
+    'isThemeGetter' in func && (func as ThemeGetter).isThemeGetter === true
