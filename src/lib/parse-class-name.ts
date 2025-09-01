@@ -1,6 +1,7 @@
 import { AnyConfig, ParsedClassName } from './types'
 
 export const IMPORTANT_MODIFIER = '!'
+
 const MODIFIER_SEPARATOR = ':'
 const EMPTY_MODIFIERS: string[] = []
 
@@ -70,7 +71,13 @@ export const createParseClassName = (config: AnyConfig) => {
         if (baseClassNameWithImportantModifier.endsWith(IMPORTANT_MODIFIER)) {
             baseClassName = baseClassNameWithImportantModifier.slice(0, -1)
             hasImportantModifier = true
-        } else if (baseClassNameWithImportantModifier.startsWith(IMPORTANT_MODIFIER)) {
+        } else if (
+            /**
+             * In Tailwind CSS v3 the important modifier was at the start of the base class name. This is still supported for legacy reasons.
+             * @see https://github.com/dcastil/tailwind-merge/issues/513#issuecomment-2614029864
+             */
+            baseClassNameWithImportantModifier.startsWith(IMPORTANT_MODIFIER)
+        ) {
             baseClassName = baseClassNameWithImportantModifier.slice(1)
             hasImportantModifier = true
         }
