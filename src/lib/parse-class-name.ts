@@ -23,6 +23,12 @@ const createResultObject = (
 export const createParseClassName = (config: AnyConfig) => {
     const { prefix, experimentalParseClassName } = config
 
+    /**
+     * Parse class name into parts.
+     *
+     * Inspired by `splitAtTopLevelOnly` used in Tailwind CSS
+     * @see https://github.com/tailwindlabs/tailwindcss/blob/v3.2.2/src/util/splitAtTopLevelOnly.js
+     */
     let parseClassName = (className: string): ParsedClassName => {
         // Use simple array with push for better performance
         const modifiers: string[] = []
