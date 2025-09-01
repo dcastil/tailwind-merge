@@ -51,7 +51,6 @@ export const createClassGroupUtils = (config: AnyConfig) => {
     const classMap = createClassMap(config)
     const { conflictingClassGroups, conflictingClassGroupModifiers } = config
 
-    // Use the existing LRU cache implementation
     const classGroupCache = createLruCache<string, AnyClassGroupIds | undefined>(config.cacheSize)
 
     const getClassGroupId = (className: string) => {
