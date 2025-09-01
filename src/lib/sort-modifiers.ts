@@ -14,7 +14,7 @@ export const createSortModifiers = (config: AnyConfig) => {
         modifierWeights.set(mod, 1000000 + index) // High weights for sensitive mods
     })
 
-    return function sortModifiers(modifiers: readonly string[]): string[] {
+    return (modifiers: readonly string[]): string[] => {
         // Fast path for common cases
         if (modifiers.length <= 1) return [...modifiers]
 

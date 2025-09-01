@@ -8,16 +8,16 @@ type CreateConfigSubsequent = (config: AnyConfig) => AnyConfig
 type TailwindMerge = (...classLists: ClassNameValue[]) => string
 type ConfigUtils = ReturnType<typeof createConfigUtils>
 
-export function createTailwindMerge(
+export const createTailwindMerge = (
     createConfigFirst: CreateConfigFirst,
     ...createConfigRest: CreateConfigSubsequent[]
-): TailwindMerge {
+): TailwindMerge => {
     let configUtils: ConfigUtils
     let cacheGet: ConfigUtils['cache']['get']
     let cacheSet: ConfigUtils['cache']['set']
-    let functionToCall = initTailwindMerge
+    let functionToCall: (classList: string) => string
 
-    function initTailwindMerge(classList: string) {
+    const initTailwindMerge = (classList: string) => {
         const config = createConfigRest.reduce(
             (previousConfig, createConfigCurrent) => createConfigCurrent(previousConfig),
             createConfigFirst() as AnyConfig,
@@ -31,7 +31,7 @@ export function createTailwindMerge(
         return tailwindMerge(classList)
     }
 
-    function tailwindMerge(classList: string) {
+    const tailwindMerge = (classList: string) => {
         const cachedResult = cacheGet(classList)
 
         if (cachedResult) {
@@ -44,7 +44,7 @@ export function createTailwindMerge(
         return result
     }
 
-    return function callTailwindMerge() {
-        return functionToCall(twJoin.apply(null, arguments as any))
-    }
+    functionToCall = initTailwindMerge
+
+    return (...args: ClassNameValue[]) => functionToCall(twJoin(...args))
 }

@@ -125,16 +125,15 @@ const getGroupRecursive = (
     return undefined
 }
 
-const getGroupIdForArbitraryProperty = (className: string): AnyClassGroupIds | undefined => {
-    // Since we already checked startsWith('[') and endsWith(']'), we can safely extract content
-    const content = className.slice(1, -1)
-
-    const colonIndex = content.indexOf(':')
-    if (colonIndex === -1) return undefined
-
-    const property = content.slice(0, colonIndex)
-    return property ? ARBITRARY_PROPERTY_PREFIX + property : undefined
-}
+const getGroupIdForArbitraryProperty = (className: string): AnyClassGroupIds | undefined =>
+    className.slice(1, -1).indexOf(':') === -1
+        ? undefined
+        : (() => {
+              const content = className.slice(1, -1)
+              const colonIndex = content.indexOf(':')
+              const property = content.slice(0, colonIndex)
+              return property ? ARBITRARY_PROPERTY_PREFIX + property : undefined
+          })()
 
 export const createClassMap = (config: Config<AnyClassGroupIds, AnyThemeGroupIds>) => {
     const { theme, classGroups } = config
