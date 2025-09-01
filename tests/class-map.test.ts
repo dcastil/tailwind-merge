@@ -14,7 +14,7 @@ test('class map has correct class groups at first part', () => {
     )
 
     expect(classMap.classGroupId).toBeUndefined()
-    expect(classMap.validators).toBeUndefined()
+    expect(classMap.validators).toBeNull()
     expect(classGroupsByFirstPart).toEqual({
         absolute: ['position'],
         accent: ['accent'],

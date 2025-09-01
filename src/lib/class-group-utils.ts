@@ -11,7 +11,7 @@ import {
 
 export interface ClassPartObject {
     nextPart: Map<string, ClassPartObject>
-    validators?: ClassValidatorObject[]
+    validators: ClassValidatorObject[] | null
     classGroupId: AnyClassGroupIds | undefined // Always define optional props for consistent shape
 }
 
@@ -32,7 +32,7 @@ const createClassValidatorObject = (
 // Factory ensures consistent ClassPartObject shape
 const createClassPartObject = (
     nextPart: Map<string, ClassPartObject> = new Map(),
-    validators?: ClassValidatorObject[],
+    validators: ClassValidatorObject[] | null = null,
     classGroupId?: AnyClassGroupIds,
 ): ClassPartObject => ({
     nextPart,
@@ -108,7 +108,7 @@ const getGroupRecursive = (
     }
 
     const validators = classPartObject.validators
-    if (!validators) {
+    if (validators === null) {
         return undefined
     }
 
@@ -217,7 +217,7 @@ const processFunctionDefinition = (
         return
     }
 
-    if (!classPartObject.validators) {
+    if (classPartObject.validators === null) {
         classPartObject.validators = [
             createClassValidatorObject(classGroupId, classDefinition as ClassValidator),
         ]

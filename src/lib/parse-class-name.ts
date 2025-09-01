@@ -24,10 +24,8 @@ export const createParseClassName = (config: AnyConfig) => {
     const { prefix, experimentalParseClassName } = config
 
     let parseClassName = (className: string): ParsedClassName => {
-        // Pre-allocate modifiers array based on likely size
-        const separatorCount = (className.match(/:/g) || []).length
-        const modifiers = new Array(separatorCount)
-        let modifierCount = 0
+        // Use simple array with push for better performance
+        const modifiers: string[] = []
 
         let bracketDepth = 0
         let parenDepth = 0
@@ -40,7 +38,7 @@ export const createParseClassName = (config: AnyConfig) => {
 
             if (bracketDepth === 0 && parenDepth === 0) {
                 if (currentCharacter === MODIFIER_SEPARATOR) {
-                    modifiers[modifierCount++] = className.slice(modifierStart, index)
+                    modifiers.push(className.slice(modifierStart, index))
                     modifierStart = index + 1
                     continue
                 }
@@ -57,12 +55,11 @@ export const createParseClassName = (config: AnyConfig) => {
             else if (currentCharacter === ')') parenDepth--
         }
 
-        // Trim modifiers array to actual size used
-        const finalModifiers =
-            modifierCount > 0 ? modifiers.slice(0, modifierCount) : EMPTY_MODIFIERS
+        // Use modifiers array directly or empty array
+        const finalModifiers = modifiers.length > 0 ? modifiers : EMPTY_MODIFIERS
 
         const baseClassNameWithImportantModifier =
-            modifierCount === 0 ? className : className.slice(modifierStart)
+            modifiers.length === 0 ? className : className.slice(modifierStart)
 
         // Inline important modifier check
         let baseClassName = baseClassNameWithImportantModifier

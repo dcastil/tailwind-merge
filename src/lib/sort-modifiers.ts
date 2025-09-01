@@ -6,20 +6,13 @@ import { AnyConfig } from './types'
  * - When an arbitrary variant appears, it must be preserved which modifiers are before and after it
  */
 export const createSortModifiers = (config: AnyConfig) => {
-    // Create a lookup Map for O(1) access
-    const sensitiveModifiers = new Map(config.orderSensitiveModifiers.map((mod) => [mod, true]))
+    // Pre-compute weights for all known modifiers for O(1) comparison
+    const modifierWeights = new Map<string, number>()
 
-    // Binary search insertion point
-    function findInsertionIndex(arr: string[], val: string, start: number, end: number): number {
-        if (start >= end) return start
-
-        const mid = Math.floor((start + end) / 2)
-        if (arr[mid]! < val) {
-            return findInsertionIndex(arr, val, mid + 1, end)
-        } else {
-            return findInsertionIndex(arr, val, start, mid)
-        }
-    }
+    // Assign weights to sensitive modifiers (highest priority, but preserve order)
+    config.orderSensitiveModifiers.forEach((mod, index) => {
+        modifierWeights.set(mod, 1000000 + index) // High weights for sensitive mods
+    })
 
     return function sortModifiers(modifiers: readonly string[]): string[] {
         // Fast path for common cases
@@ -28,36 +21,49 @@ export const createSortModifiers = (config: AnyConfig) => {
         const result: string[] = []
         let currentSegment: string[] = []
 
-        // Process modifiers in one pass with binary insertion
+        // Process modifiers in one pass
         for (let i = 0; i < modifiers.length; i++) {
             const modifier = modifiers[i]!
-            const isSensitive = modifier[0] === '[' || sensitiveModifiers.has(modifier)
 
-            if (isSensitive) {
-                // Sort and flush current segment
+            // Check if modifier is sensitive (starts with '[' or in orderSensitiveModifiers)
+            const isArbitrary = modifier[0] === '['
+            const isOrderSensitive = modifierWeights.has(modifier)
+
+            if (isArbitrary || isOrderSensitive) {
+                // Sort and flush current segment using numeric weights
                 if (currentSegment.length > 0) {
-                    result.push(...currentSegment.sort())
+                    currentSegment.sort((a, b) => {
+                        const weightA = modifierWeights.get(a)
+                        const weightB = modifierWeights.get(b)
+                        if (weightA !== undefined && weightB !== undefined) {
+                            return weightA - weightB
+                        }
+                        if (weightA !== undefined) return -1
+                        if (weightB !== undefined) return 1
+                        return a.localeCompare(b)
+                    })
+                    result.push(...currentSegment)
                     currentSegment = []
                 }
                 result.push(modifier)
             } else {
-                // Use binary search insertion for ongoing sorted segment
-                if (currentSegment.length === 0) {
-                    currentSegment.push(modifier)
-                } else {
-                    const pos = findInsertionIndex(
-                        currentSegment,
-                        modifier,
-                        0,
-                        currentSegment.length,
-                    )
-                    currentSegment.splice(pos, 0, modifier)
-                }
+                // Regular modifier - add to current segment for batch sorting
+                currentSegment.push(modifier)
             }
         }
 
-        // Add any remaining segment items
+        // Sort and add any remaining segment items
         if (currentSegment.length > 0) {
+            currentSegment.sort((a, b) => {
+                const weightA = modifierWeights.get(a)
+                const weightB = modifierWeights.get(b)
+                if (weightA !== undefined && weightB !== undefined) {
+                    return weightA - weightB
+                }
+                if (weightA !== undefined) return -1
+                if (weightB !== undefined) return 1
+                return a.localeCompare(b)
+            })
             result.push(...currentSegment)
         }
 
