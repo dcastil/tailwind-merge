@@ -9,7 +9,7 @@ test('default config has correct types', () => {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const genericConfig: Config<DefaultClassGroupIds, DefaultThemeGroupIds> = defaultConfig
 
-    expect(defaultConfig.cacheSize).toBe(20000)
+    expect(defaultConfig.cacheSize).toBe(500)
     // @ts-expect-error
     expect(defaultConfig.nonExistent).toBeUndefined()
     expect(defaultConfig.classGroups.display[0]).toBe('block')

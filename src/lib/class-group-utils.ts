@@ -11,7 +11,7 @@ import {
 
 export interface ClassPartObject {
     nextPart: Map<string, ClassPartObject>
-    validators: ClassValidatorObject[]
+    validators?: ClassValidatorObject[]
     classGroupId: AnyClassGroupIds | undefined // Always define optional props for consistent shape
 }
 
@@ -32,7 +32,7 @@ const createClassValidatorObject = (
 // Factory ensures consistent ClassPartObject shape
 const createClassPartObject = (
     nextPart: Map<string, ClassPartObject> = new Map(),
-    validators: ClassValidatorObject[] = [],
+    validators?: ClassValidatorObject[],
     classGroupId?: AnyClassGroupIds,
 ): ClassPartObject => ({
     nextPart,
@@ -41,17 +41,16 @@ const createClassPartObject = (
 })
 
 const CLASS_PART_SEPARATOR = '-'
-const EMPTY_VALIDATORS: readonly ClassValidatorObject[] = []
+
 const EMPTY_CONFLICTS: readonly AnyClassGroupIds[] = []
 const ARBITRARY_PROPERTY_PREFIX = 'arbitrary..'
-const ARBITRARY_PROPERTY_REGEX = /^\[(.+)\]$/
 
 export const createClassGroupUtils = (config: AnyConfig) => {
     const classMap = createClassMap(config)
     const { conflictingClassGroups, conflictingClassGroupModifiers } = config
 
     const getClassGroupId = (className: string) => {
-        if (className.startsWith('[')) {
+        if (className.startsWith('[') && className.endsWith(']')) {
             return getGroupIdForArbitraryProperty(className)
         } else {
             const classParts = className.split(CLASS_PART_SEPARATOR)
@@ -95,8 +94,8 @@ const getGroupRecursive = (
     classParts: string[],
     classPartObject: ClassPartObject,
 ): AnyClassGroupIds | undefined => {
-    const len = classParts.length
-    if (len === 0) {
+    const classPathsLength = classParts.length
+    if (classPathsLength === 0) {
         return classPartObject.classGroupId
     }
 
@@ -109,14 +108,14 @@ const getGroupRecursive = (
     }
 
     const validators = classPartObject.validators
-    if (validators.length === 0) {
+    if (!validators) {
         return undefined
     }
 
     const classRest = classParts.join(CLASS_PART_SEPARATOR)
-    const len2 = validators.length
+    const validatorsLength = validators.length
 
-    for (let i = 0; i < len2; i++) {
+    for (let i = 0; i < validatorsLength; i++) {
         const validatorObj = validators[i]!
         if (validatorObj.validator(classRest)) {
             return validatorObj.classGroupId
@@ -127,13 +126,13 @@ const getGroupRecursive = (
 }
 
 const getGroupIdForArbitraryProperty = (className: string): AnyClassGroupIds | undefined => {
-    const match = ARBITRARY_PROPERTY_REGEX.exec(className)
-    if (!match?.[1]) return undefined
+    // Since we already checked startsWith('[') and endsWith(']'), we can safely extract content
+    const content = className.slice(1, -1)
 
-    const colonIndex = match[1].indexOf(':')
+    const colonIndex = content.indexOf(':')
     if (colonIndex === -1) return undefined
 
-    const property = match[1].slice(0, colonIndex)
+    const property = content.slice(0, colonIndex)
     return property ? ARBITRARY_PROPERTY_PREFIX + property : undefined
 }
 
@@ -189,14 +188,12 @@ const processClassDefinition = (
         return
     }
 
-    if (classDefinition) {
-        processObjectDefinition(
-            classDefinition as Record<string, ClassGroup<AnyThemeGroupIds>>,
-            classPartObject,
-            classGroupId,
-            theme,
-        )
-    }
+    processObjectDefinition(
+        classDefinition as Record<string, ClassGroup<AnyThemeGroupIds>>,
+        classPartObject,
+        classGroupId,
+        theme,
+    )
 }
 
 const processStringDefinition = (
@@ -220,12 +217,15 @@ const processFunctionDefinition = (
         return
     }
 
-    if (classPartObject.validators === EMPTY_VALIDATORS) {
-        classPartObject.validators = []
+    if (!classPartObject.validators) {
+        classPartObject.validators = [
+            createClassValidatorObject(classGroupId, classDefinition as ClassValidator),
+        ]
+    } else {
+        classPartObject.validators.push(
+            createClassValidatorObject(classGroupId, classDefinition as ClassValidator),
+        )
     }
-    classPartObject.validators.push(
-        createClassValidatorObject(classGroupId, classDefinition as ClassValidator),
-    )
 }
 
 const processObjectDefinition = (

@@ -14,7 +14,7 @@ test('class map has correct class groups at first part', () => {
     )
 
     expect(classMap.classGroupId).toBeUndefined()
-    expect(classMap.validators).toHaveLength(0)
+    expect(classMap.validators).toBeUndefined()
     expect(classGroupsByFirstPart).toEqual({
         absolute: ['position'],
         accent: ['accent'],
@@ -345,7 +345,9 @@ function getClassGroupsInClassPart(classPart: ClassPartObject): Set<string> {
         classGroups.add(classGroupId)
     }
 
-    validators.forEach((validator) => classGroups.add(validator.classGroupId))
+    if (validators) {
+        validators.forEach((validator) => classGroups.add(validator.classGroupId))
+    }
 
     nextPart.forEach((nextClassPart) => {
         getClassGroupsInClassPart(nextClassPart).forEach((classGroup) => {
