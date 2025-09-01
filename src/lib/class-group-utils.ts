@@ -8,7 +8,6 @@ import {
     ThemeGetter,
     ThemeObject,
 } from './types'
-import { createLruCache } from './lru-cache'
 
 export interface ClassPartObject {
     nextPart: Map<string, ClassPartObject>
@@ -51,30 +50,16 @@ export const createClassGroupUtils = (config: AnyConfig) => {
     const classMap = createClassMap(config)
     const { conflictingClassGroups, conflictingClassGroupModifiers } = config
 
-    const classGroupCache = createLruCache<string, AnyClassGroupIds | undefined>(config.cacheSize)
-
     const getClassGroupId = (className: string) => {
-        // Check cache first for efficiency
-        const cachedResult = classGroupCache.get(className)
-        if (cachedResult !== undefined) {
-            return cachedResult
-        }
-
-        let result: AnyClassGroupIds | undefined
-
         if (className.startsWith('[')) {
-            result = getGroupIdForArbitraryProperty(className)
+            return getGroupIdForArbitraryProperty(className)
         } else {
             const classParts = className.split(CLASS_PART_SEPARATOR)
             if (classParts[0] === '' && classParts.length > 1) {
                 classParts.shift()
             }
-            result = getGroupRecursive(classParts, classMap)
+            return getGroupRecursive(classParts, classMap)
         }
-
-        // Cache result to avoid repeated computation
-        classGroupCache.set(className, result)
-        return result
     }
 
     const getConflictingClassGroupIds = (
