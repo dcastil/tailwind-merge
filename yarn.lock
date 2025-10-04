@@ -1011,22 +1011,22 @@
   resolved "https://registry.yarnpkg.com/@bcoe/v8-coverage/-/v8-coverage-1.0.2.tgz#bbe12dca5b4ef983a0d0af4b07b9bc90ea0ababa"
   integrity sha512-6zABk/ECA/QYSCQ1NGiVwwbQerUCZ+TQbp64Q3AgmfNvurHH0j8TtXa1qbShXA6qqkpAj4V5W8pP6mLe1mcMqA==
 
-"@codspeed/core@^4.0.1":
-  version "4.0.1"
-  resolved "https://registry.yarnpkg.com/@codspeed/core/-/core-4.0.1.tgz#91049cce17b8c1d1b4b6cbc481f5ddc1145d6e1e"
-  integrity sha512-fJ53arfgtzCDZa8DuGJhpTZ3Ll9A1uW5nQ2jSJnfO4Hl5MRD2cP8P4vPvIUAGbdbjwCxR1jat6cW8OloMJkJXw==
+"@codspeed/core@^5.0.1":
+  version "5.0.1"
+  resolved "https://registry.yarnpkg.com/@codspeed/core/-/core-5.0.1.tgz#6145c898a86a6d56a169611c3e9657a8b97c7642"
+  integrity sha512-4g5ZyFAin8QywK4+0FK1uXG3GLRPu0oc3xbP+7OUhhFxbwpzFuaJtKmnTofMqLy9/pHH6Bl/7H0/DTVH3cpFkA==
   dependencies:
     axios "^1.4.0"
     find-up "^6.3.0"
-    form-data "^4.0.0"
+    form-data "^4.0.4"
     node-gyp-build "^4.6.0"
 
-"@codspeed/vitest-plugin@^4.0.1":
-  version "4.0.1"
-  resolved "https://registry.yarnpkg.com/@codspeed/vitest-plugin/-/vitest-plugin-4.0.1.tgz#b102747e423b3c64cb1f81570939d44f56b280ce"
-  integrity sha512-aqmrPJzX9cD50UWDsOyih5L5WcEYlNQg3u84sJJ9ZuuLApA51w+LGxk6Xbyb8LJF9n/CwM94HKHV/qArfnvDoQ==
+"@codspeed/vitest-plugin@^5.0.1":
+  version "5.0.1"
+  resolved "https://registry.yarnpkg.com/@codspeed/vitest-plugin/-/vitest-plugin-5.0.1.tgz#94684681164e207cd7acf5a01ea4bff287b49e39"
+  integrity sha512-RQLy8AGI16oTtmTyBIS2iKzD4AQQzJP7waurrYkUlnOlCa5Yp/7KXVZuZVzhqwYmPcH984xzFtsC2CENYbpRHQ==
   dependencies:
-    "@codspeed/core" "^4.0.1"
+    "@codspeed/core" "^5.0.1"
 
 "@esbuild/aix-ppc64@0.25.1":
   version "0.25.1"
@@ -2825,7 +2825,7 @@ foreground-child@^3.1.0:
     cross-spawn "^7.0.0"
     signal-exit "^4.0.1"
 
-form-data@^4.0.0:
+form-data@^4.0.0, form-data@^4.0.4:
   version "4.0.4"
   resolved "https://registry.yarnpkg.com/form-data/-/form-data-4.0.4.tgz#784cdcce0669a9d68e94d11ac4eea98088edd2c4"
   integrity sha512-KrGhL9Q4zjj0kiUt5OO4Mr/A/jlI2jDYs5eHBpYHPcBEVSiipAvn2Ko2HnPe20rmcuuvMHNdZFp+4IlGTMF0Ow==
