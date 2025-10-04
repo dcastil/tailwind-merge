@@ -74,7 +74,7 @@
         "babel-plugin-polyfill-regenerator": "^0.6.5",
         "eslint": "^9.37.0",
         "eslint-plugin-import": "^2.32.0",
-        "globby": "^11.1.0",
+        "globby": "^15.0.0",
         "prettier": "^3.6.2",
         "rollup": "^4.52.4",
         "rollup-plugin-delete": "^3.0.1",
