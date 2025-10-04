@@ -24,7 +24,8 @@ jobs:
                       yarn-node-22-lock-
             - run: yarn install --frozen-lockfile
             - name: Run benchmark
-              uses: CodSpeedHQ/action@v3
+              uses: CodSpeedHQ/action@v4
               with:
                   token: ${{ secrets.CODSPEED_TOKEN }}
+                  mode: instrumentation
                   run: yarn bench
