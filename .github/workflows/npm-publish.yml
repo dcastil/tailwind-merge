@@ -34,6 +34,6 @@ jobs:
             - run: yarn test:exports
               # npm install -g npm@latest is necessary to make provenance available (available since v9.6.5 or so). More info: https://docs.npmjs.com/generating-provenance-statements
             - run: npm install -g npm@latest
-            - uses: JS-DevTools/npm-publish@v4
+            - uses: JS-DevTools/npm-publish@v4.1.1
               with:
                   token: ${{ secrets.NPM_TOKEN }}
