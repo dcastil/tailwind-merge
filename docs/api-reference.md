@@ -284,14 +284,14 @@ const twMerge = createTailwindMerge(getDefaultConfig, (config) =>
                 // ↓ Overriding existing class group
                 shadow: [{ shadow: ['100', '200', '300', '400', '500'] }],
             },
-        }
+        },
         extend: {
             classGroups: {
                 // ↓ Adding value to existing class group
                 animate: ['animate-shimmer'],
                 // ↓ Adding new class group
                 prose: [{ prose: ['', validators.isTshirtSize] }],
-            }
+            },
         },
     }),
 )
@@ -335,7 +335,7 @@ A brief summary for each validator:
 
 - `isAny` always returns true. Be careful with this validator as it might match unwanted classes. I use it primarily to match colors or when I'm certain there are no other class groups in a namespace.
 - `isAnyNonArbitrary` checks if the class part is not an arbitrary value or arbitrary variable.
-- `isArbitraryImage` checks whether class part is an arbitrary value which is an iamge, e.g. by starting with `image:`, `url:`, `linear-gradient(` or `url(` (`[url('/path-to-image.png')]`, `image:var(--maybe-an-image-at-runtime)]`) which is necessary for background-image classNames.
+- `isArbitraryImage` checks whether class part is an arbitrary value which is an image, e.g. by starting with `image:`, `url:`, `linear-gradient(` or `url(` (`[url('/path-to-image.png')]`, `image:var(--maybe-an-image-at-runtime)]`) which is necessary for background-image classNames.
 - `isArbitraryLength` checks for arbitrary length values (`[3%]`, `[4px]`, `[length:var(--my-var)]`).
 - `isArbitraryNumber` checks whether class part is an arbitrary value which starts with `number:` or is a number (`[number:var(--value)]`, `[450]`) which is necessary for font-weight and stroke-width classNames.
 - `isArbitraryPosition` checks whether class part is an arbitrary value which starts with `position:` (`[position:200px_100px]`) which is necessary for background-position classNames.
@@ -353,7 +353,7 @@ A brief summary for each validator:
 - `isInteger` checks for integer values (`3`).
 - `isNumber` checks for numbers (`3`, `1.5`)
 - `isPercent` checks for percent values (`12.5%`) which is used for color stop positions.
-- `isTshirtSize`checks whether class part is a T-shirt size (`sm`, `xl`), optionally with a preceding number (`2xl`).
+- `isTshirtSize` checks whether class part is a T-shirt size (`sm`, `xl`), optionally with a preceding number (`2xl`).
 
 ## `Config`
 

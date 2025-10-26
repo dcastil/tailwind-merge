@@ -149,7 +149,7 @@ function MyComponent() {
     )
 }
 
-function Button({ className ...props }) {
+function Button({ className, ...props }) {
     return <button {...props} className={join('bg-blue-500 text-white', className)} />
 }
 
@@ -186,7 +186,7 @@ function MyComponent() {
     )
 }
 
-function Button({ className ...props }) {
+function Button({ className, ...props }) {
     return <button {...props} className={join('component:bg-blue-500 component:text-white', className)} />
 }
 
