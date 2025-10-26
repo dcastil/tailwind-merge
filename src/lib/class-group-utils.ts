@@ -149,10 +149,8 @@ const processClassGroups = (
     const classMap = createClassPartObject()
 
     for (const classGroupId in classGroups) {
-        const group = classGroups[classGroupId]
-        if (group) {
-            processClassesRecursively(group, classMap, classGroupId, theme)
-        }
+        const group = classGroups[classGroupId]!
+        processClassesRecursively(group, classMap, classGroupId, theme)
     }
 
     return classMap
