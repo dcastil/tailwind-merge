@@ -325,35 +325,80 @@ interface Validators {
 }
 ```
 
-An object containing all the validators used in tailwind-merge. They are useful if you want to use a custom config with [`extendTailwindMerge`](#extendtailwindmerge) or [`createTailwindMerge`](#createtailwindmerge). E.g. the `classGroup` for padding is defined as
+An object containing all the validators used in tailwind-merge. They are useful if you want to use a custom config with [`extendTailwindMerge`](#extendtailwindmerge) or [`createTailwindMerge`](#createtailwindmerge).
+
+**Example usage**:
 
 ```ts
 const paddingClassGroup = [{ p: [validators.isNumber] }]
+const customImageGroup = [{ 'custom-img': [validators.isArbitraryImage] }]
 ```
 
-A brief summary for each validator:
+### Simple Type Validators
 
-- `isAny` always returns true. Be careful with this validator as it might match unwanted classes. I use it primarily to match colors or when I'm certain there are no other class groups in a namespace.
-- `isAnyNonArbitrary` checks if the class part is not an arbitrary value or arbitrary variable.
-- `isArbitraryImage` checks whether class part is an arbitrary value which is an image, e.g. by starting with `image:`, `url:`, `linear-gradient(` or `url(` (`[url('/path-to-image.png')]`, `image:var(--maybe-an-image-at-runtime)]`) which is necessary for background-image classNames.
-- `isArbitraryLength` checks for arbitrary length values (`[3%]`, `[4px]`, `[length:var(--my-var)]`).
-- `isArbitraryNumber` checks whether class part is an arbitrary value which starts with `number:` or is a number (`[number:var(--value)]`, `[450]`) which is necessary for font-weight and stroke-width classNames.
-- `isArbitraryPosition` checks whether class part is an arbitrary value which starts with `position:` (`[position:200px_100px]`) which is necessary for background-position classNames.
-- `isArbitraryShadow` checks whether class part is an arbitrary value which starts with the same pattern as a shadow value (`[0_35px_60px_-15px_rgba(0,0,0,0.3)]`), namely with two lengths separated by a underscore, optionally prepended by `inset`.
-- `isArbitrarySize` checks whether class part is an arbitrary value which starts with `size:` (`[size:200px_100px]`) which is necessary for background-size classNames.
-- `isArbitraryValue` checks whether the class part is enclosed in brackets (`[something]`)
-- `isArbitraryVariable` checks whether the class part is an arbitrary variable (`(--my-var)`)
-- `isArbitraryVariableFamilyName` checks whether class part is an arbitrary variable with the `family-name` label (`(family-name:--my-font)`)
-- `isArbitraryVariableImage` checks whether class part is an arbitrary variable with the `image` or `url` label (`(image:--my-image)`)
-- `isArbitraryVariableLength` checks whether class part is an arbitrary variable with the `length` label (`(length:--my-length)`)
-- `isArbitraryVariablePosition` checks whether class part is an arbitrary variable with the `position` label (`(position:--my-position)`)
-- `isArbitraryVariableShadow` checks whether class part is an arbitrary variable with the `shadow` label or not label at all (`(shadow:--my-shadow)`, `(--my-shadow)`)
-- `isArbitraryVariableSize` checks whether class part is an arbitrary variable with the `size`, `length` or `percentage` label (`(size:--my-size)`)
-- `isFraction` checks whether class part is a fraction of two numbers (`1/2`, `127/256`)
-- `isInteger` checks for integer values (`3`).
-- `isNumber` checks for numbers (`3`, `1.5`)
-- `isPercent` checks for percent values (`12.5%`) which is used for color stop positions.
-- `isTshirtSize` checks whether class part is a T-shirt size (`sm`, `xl`), optionally with a preceding number (`2xl`).
+These validators check for basic patterns and types:
+
+| Validator           | Description                                                                                                              | Example Match      |
+| ------------------- | ------------------------------------------------------------------------------------------------------------------------ | ------------------ |
+| `isAny`             | Always returns `true`. Use carefully - matches everything. Best when certain no other class groups exist in a namespace. | Matches any value  |
+| `isAnyNonArbitrary` | Checks if class part is NOT an arbitrary value or variable                                                               | `red`, `lg`, `4`   |
+| `isInteger`         | Matches integer values                                                                                                   | `3`, `100`         |
+| `isNumber`          | Matches any number (integer or decimal)                                                                                  | `3`, `1.5`, `0.25` |
+| `isFraction`        | Matches fraction patterns                                                                                                | `1/2`, `127/256`   |
+| `isPercent`         | Matches percentage values                                                                                                | `12.5%`, `50%`     |
+| `isTshirtSize`      | Matches T-shirt sizes, optionally with number prefix                                                                     | `sm`, `xl`, `2xl`  |
+
+### Arbitrary Value Validators
+
+These validators check arbitrary values (values in square brackets `[...]`):
+
+| Validator             | Description                                                                               | Example Match                                                              | Common Use                        |
+| --------------------- | ----------------------------------------------------------------------------------------- | -------------------------------------------------------------------------- | --------------------------------- |
+| `isArbitraryValue`    | Checks if value is enclosed in brackets                                                   | `[something]`                                                              | Generic arbitrary value detection |
+| `isArbitraryLength`   | Checks for arbitrary length values                                                        | `[3%]`, `[4px]`, `[length:var(--my-var)]`                                  | Width, height, spacing            |
+| `isArbitraryNumber`   | Checks for arbitrary numbers or `number:` labeled values                                  | `[450]`, `[number:var(--value)]`                                           | Font-weight, z-index              |
+| `isArbitraryPosition` | Checks for `position:` labeled values                                                     | `[position:200px_100px]`                                                   | Background-position               |
+| `isArbitrarySize`     | Checks for `size:` labeled values                                                         | `[size:200px_100px]`                                                       | Background-size                   |
+| `isArbitraryImage`    | Checks for image-like values (starts with `image:`, `url:`, `linear-gradient(`, etc.)     | `[url('/path.png')]`, `[image:var(--img)]`                                 | Background-image                  |
+| `isArbitraryShadow`   | Checks for shadow patterns (two lengths separated by underscore, optionally with `inset`) | `[0_35px_60px_-15px_rgba(0,0,0,0.3)]`, `[inset_0_4px_8px_rgba(0,0,0,0.1)]` | Box-shadow, text-shadow           |
+
+### Arbitrary Variable Validators
+
+These validators check arbitrary CSS variables (values in parentheses `(...)`):
+
+| Validator                       | Description                                                       | Example Match                           | Common Use           |
+| ------------------------------- | ----------------------------------------------------------------- | --------------------------------------- | -------------------- |
+| `isArbitraryVariable`           | Checks if value is a CSS variable in parentheses                  | `(--my-var)`                            | Generic CSS variable |
+| `isArbitraryVariableLength`     | Checks for variables with `length` label                          | `(length:--my-length)`                  | Length properties    |
+| `isArbitraryVariableSize`       | Checks for variables with `size`, `length`, or `percentage` label | `(size:--my-size)`                      | Size properties      |
+| `isArbitraryVariablePosition`   | Checks for variables with `position` label                        | `(position:--my-position)`              | Position properties  |
+| `isArbitraryVariableImage`      | Checks for variables with `image` or `url` label                  | `(image:--my-image)`                    | Image properties     |
+| `isArbitraryVariableFamilyName` | Checks for variables with `family-name` label                     | `(family-name:--my-font)`               | Font-family          |
+| `isArbitraryVariableShadow`     | Checks for variables with `shadow` label or no label              | `(shadow:--my-shadow)`, `(--my-shadow)` | Shadow properties    |
+
+### Usage Examples
+
+```ts
+import { extendTailwindMerge, validators } from 'tailwind-merge'
+
+const twMerge = extendTailwindMerge({
+    extend: {
+        classGroups: {
+            // Custom size classes that accept numbers or fractions
+            'custom-size': [{ size: [validators.isNumber, validators.isFraction] }],
+
+            // Custom image classes
+            'hero-image': [{ 'hero-img': [validators.isArbitraryImage] }],
+
+            // Custom spacing with T-shirt sizes
+            'custom-gap': [{ gap: [validators.isTshirtSize] }],
+
+            // Accept any value (use with caution)
+            'theme-color': [{ theme: [validators.isAny] }],
+        },
+    },
+})
+```
 
 ## `Config`
 
