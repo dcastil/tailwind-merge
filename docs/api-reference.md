@@ -63,24 +63,17 @@ When using TypeScript, the function only allows passing the default theme group 
 `fromTheme` can be used like this:
 
 ```ts
-type AdditionalClassGroupIds = 'my-group' | 'my-group-x'
-type AdditionalThemeGroupIds = 'my-scale'
+type AdditionalClassGroupIds = 'badge' | 'badge-color'
+type AdditionalThemeGroupIds = 'custom-color'
 
 extendTailwindMerge<AdditionalClassGroupIds, AdditionalThemeGroupIds>({
     extend: {
         theme: {
-            'my-scale': ['foo', 'bar'],
+            'custom-color': ['primary', 'secondary'],
         },
         classGroups: {
-            'my-group': [
-                {
-                    'my-group': [
-                        fromTheme<AdditionalThemeGroupIds>('my-scale'),
-                        fromTheme('spacing'),
-                    ],
-                },
-            ],
-            'my-group-x': [{ 'my-group-x': [fromTheme<AdditionalThemeGroupIds>('my-scale')] }],
+            badge: [{ badge: [fromTheme('text')] }],
+            'badge-color': [{ badge: [fromTheme<AdditionalThemeGroupIds>('custom-color')] }],
         },
     },
 })
@@ -238,17 +231,17 @@ const twMerge = createTailwindMerge(() => {
         cacheSize: 0,
         classGroups: {
             ...defaultConfig.classGroups,
-            foo: ['foo', 'foo-2', { 'bar-baz': ['', '1', '2'] }],
-            bar: [{ qux: ['auto', (value) => Number(value) >= 1000] }],
-            baz: ['baz-sm', 'baz-md', 'baz-lg'],
+            badge: ['badge', 'badge-pill', { 'badge-dot': ['', 'sm', 'lg'] }],
+            'icon-size': [{ icon: ['auto', (value) => Number(value) >= 16] }],
+            card: ['card-sm', 'card-md', 'card-lg'],
         },
         conflictingClassGroups: {
             ...defaultConfig.conflictingClassGroups,
-            foo: ['bar'],
+            badge: ['icon-size'],
         },
         conflictingClassGroupModifiers: {
             ...defaultConfig.conflictingClassGroupModifiers,
-            baz: ['bar'],
+            card: ['icon-size'],
         },
         orderSensitiveModifiers: [...defaultConfig.orderSensitiveModifiers, 'before'],
     }

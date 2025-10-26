@@ -197,7 +197,7 @@ If you only need to slightly modify the default tailwind-merge config, [`extendT
 ```ts
 import { extendTailwindMerge } from 'tailwind-merge'
 
-const twMerge = extendTailwindMerge<'foo' | 'bar' | 'baz'>({
+const twMerge = extendTailwindMerge<'badge' | 'icon-size' | 'card'>({
     // ↓ Override elements from the default config
     //   It has the same shape as the `extend` object, so we're going to skip it here.
     override: {},
@@ -209,20 +209,20 @@ const twMerge = extendTailwindMerge<'foo' | 'bar' | 'baz'>({
         },
         // ↓ Add values to existing class groups or define new ones
         classGroups: {
-            foo: ['foo', 'foo-2', { 'bar-baz': ['', '1', '2'] }],
-            bar: [{ qux: ['auto', (value) => Number(value) >= 1000] }],
-            baz: ['baz-sm', 'baz-md', 'baz-lg'],
+            badge: ['badge', 'badge-pill', { 'badge-dot': ['', 'sm', 'lg'] }],
+            'icon-size': [{ icon: ['auto', (value) => Number(value) >= 16] }],
+            card: ['card-sm', 'card-md', 'card-lg'],
         },
         // ↓ Here you can define additional conflicts across class groups
         conflictingClassGroups: {
-            foo: ['bar'],
+            badge: ['icon-size'],
         },
         // ↓ Define conflicts between postfix modifiers and class groups
         conflictingClassGroupModifiers: {
-            baz: ['bar'],
+            card: ['icon-size'],
         },
         // ↓ Define order-sensitive modifiers
-        orderSensitiveModifiers: ['my-order-sensitive-modifier'],
+        orderSensitiveModifiers: ['custom-variant'],
     },
 })
 ```
@@ -291,15 +291,15 @@ const twMerge = createTailwindMerge(() => ({
     cacheSize: 500,
     theme: {},
     classGroups: {
-        foo: ['foo', 'foo-2', { 'bar-baz': ['', '1', '2'] }],
-        bar: [{ qux: ['auto', (value) => Number(value) >= 1000] }],
-        baz: ['baz-sm', 'baz-md', 'baz-lg'],
+        badge: ['badge', 'badge-pill', { 'badge-dot': ['', 'sm', 'lg'] }],
+        'icon-size': [{ icon: ['auto', (value) => Number(value) >= 16] }],
+        card: ['card-sm', 'card-md', 'card-lg'],
     },
     conflictingClassGroups: {
-        foo: ['bar'],
+        badge: ['icon-size'],
     },
     conflictingClassGroupModifiers: {
-        baz: ['bar'],
+        card: ['icon-size'],
     },
     orderSensitiveModifiers: [],
 }))
