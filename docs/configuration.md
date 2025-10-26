@@ -107,16 +107,28 @@ Sometimes there are conflicts across Tailwind classes which are more complex tha
 
 One example is the combination of the classes `px-3` (setting `padding-left` and `padding-right`) and `pr-4` (setting `padding-right`).
 
-If they are passed to `twMerge` as `pr-4 px-3`, you most likely intend to apply `padding-left` and `padding-right` from the `px-3` class and want `pr-4` to be removed, indicating that both these classes should belong to a single class group.
+**Scenario 1**: When classes are ordered as `pr-4 px-3`:
 
-But if they are passed to `twMerge` as `px-3 pr-4`, you want to set the `padding-right` from `pr-4` but still want to apply the `padding-left` from `px-3`, so `px-3` shouldn't be removed when inserting the classes in this order, indicating they shouldn't be in the same class group.
+- You want `px-3` to apply both `padding-left` and `padding-right`
+- The earlier `pr-4` should be removed since `px-3` also sets `padding-right`
+- Result: `twMerge('pr-4 px-3') // → 'px-3'`
 
-To summarize, `px-3` should stand in conflict with `pr-4`, but `pr-4` should not stand in conflict with `px-3`. To achieve this, we need to define asymmetric conflicts across class groups.
+**Scenario 2**: When classes are ordered as `px-3 pr-4`:
 
-This is what the `conflictingClassGroups` object in the tailwind-merge config is for. You define a key in it which is the ID of a class group which _creates_ a conflict and the value is an array of IDs of class group which _receive_ a conflict.
+- You want `px-3` to set `padding-left`
+- You want `pr-4` to override just the `padding-right` from `px-3`
+- The `px-3` class should NOT be removed
+- Result: `twMerge('px-3 pr-4') // → 'px-3 pr-4'`
+
+To summarize, `px-3` should stand in conflict with `pr-4`, but `pr-4` should not stand in conflict with `px-3`. To achieve this, we need to define **asymmetric conflicts** across class groups.
+
+#### Defining asymmetric conflicts
+
+This is what the `conflictingClassGroups` object in the tailwind-merge config is for. You define a key in it which is the ID of a class group which _creates_ a conflict and the value is an array of IDs of class groups which _receive_ a conflict.
 
 ```ts
 const conflictingClassGroups = {
+    // ↓ px creates a conflict with pr and pl
     px: ['pr', 'pl'],
 }
 ```
@@ -124,6 +136,17 @@ const conflictingClassGroups = {
 If a class group _creates_ a conflict, it means that if it appears in a class list string passed to `twMerge`, all preceding class groups in the string which _receive_ the conflict will be removed.
 
 When we think of our example, the `px` class group creates a conflict which is received by the class groups `pr` and `pl`. This way `px-3` removes a preceding `pr-4`, but not the other way around.
+
+**Common conflict patterns**:
+
+| Creates Conflict → | Receives Conflict ←                                    | Example                                         |
+| ------------------ | ------------------------------------------------------ | ----------------------------------------------- |
+| `px`               | `pl`, `pr`                                             | `twMerge('pr-2 px-4') // → 'px-4'`              |
+| `py`               | `pt`, `pb`                                             | `twMerge('pt-2 py-4') // → 'py-4'`              |
+| `p`                | `px`, `py`, `pt`, `pr`, `pb`, `pl`                     | `twMerge('px-2 py-2 p-4') // → 'p-4'`           |
+| `inset`            | `top`, `right`, `bottom`, `left`, `inset-x`, `inset-y` | `twMerge('top-0 inset-0') // → 'inset-0'`       |
+| `inset-x`          | `left`, `right`                                        | `twMerge('right-0 inset-x-0') // → 'inset-x-0'` |
+| `inset-y`          | `top`, `bottom`                                        | `twMerge('top-0 inset-y-0') // → 'inset-y-0'`   |
 
 ### Postfix modifiers conflicting with class groups
 
@@ -174,21 +197,90 @@ In the Tailwind config you can modify your theme variable namespace to add class
 
 If you modified one of the theme namespaces in your Tailwind config, you need to add the variable names to the `theme` object in tailwind-merge as well so that tailwind-merge knows about them.
 
-E.g. let's say you added the variable `--text-huge-af: 100px` to your Tailwind config which enables classes like `text-huge-af`. To make sure that tailwind-merge merges these classes correctly, you need to configure tailwind-merge like this:
+#### Example: Adding custom font sizes
+
+Let's say you added a custom font size variable `--text-huge: 100px` to your Tailwind config:
+
+```css
+/* In your CSS or Tailwind config */
+@theme {
+    --text-huge: 100px;
+}
+```
+
+This enables the class `text-huge` in your HTML. To make sure tailwind-merge merges these classes correctly, you need to configure tailwind-merge like this:
 
 ```ts
 import { extendTailwindMerge } from 'tailwind-merge'
 
-const twMerge = extendTailwindMerge({
+const customTwMerge = extendTailwindMerge({
     extend: {
         theme: {
             // ↓ `text` is the key of the namespace `--text-*`
-            //      ↓ `huge-af` is the variable name in the namespace
-            text: ['huge-af'],
+            //      ↓ `huge` is the variable name without the namespace prefix
+            text: ['huge'],
         },
     },
 })
+
+// Now tailwind-merge correctly handles your custom font size
+customTwMerge('text-lg text-huge') // → 'text-huge'
+customTwMerge('text-huge text-sm') // → 'text-sm'
 ```
+
+#### Example: Adding custom spacing values
+
+For custom spacing in the `--spacing-*` namespace:
+
+```css
+/* In your CSS or Tailwind config */
+@theme {
+    --spacing-gutter: 1.5rem;
+    --spacing-section: 5rem;
+}
+```
+
+Configure tailwind-merge:
+
+```ts
+const customTwMerge = extendTailwindMerge({
+    extend: {
+        theme: {
+            spacing: ['gutter', 'section'],
+        },
+    },
+})
+
+// Now works with custom spacing values across all spacing utilities
+customTwMerge('p-4 p-gutter') // → 'p-gutter'
+customTwMerge('mt-section mt-4') // → 'mt-4'
+customTwMerge('gap-2 gap-gutter') // → 'gap-gutter'
+```
+
+**Note**: The `spacing` theme scale is used by many utilities including padding (`p-*`), margin (`m-*`), gap (`gap-*`), top/right/bottom/left positioning, and more. Adding a value to the `spacing` theme makes it available across all these utilities.
+
+#### Note about custom colors
+
+Custom colors in the `--color-*` namespace **do not need to be configured** in tailwind-merge. The library uses a permissive validator that accepts any color name, so custom colors work out of the box:
+
+```css
+/* In your CSS or Tailwind config */
+@theme {
+    --color-brand-primary: #3b82f6;
+    --color-brand-secondary: #8b5cf6;
+}
+```
+
+```ts
+import { twMerge } from 'tailwind-merge'
+
+// Works without any configuration
+twMerge('bg-blue-500 bg-brand-primary') // → 'bg-brand-primary'
+twMerge('text-brand-primary text-brand-secondary') // → 'text-brand-secondary'
+twMerge('border-custom-color border-brand-primary') // → 'border-brand-primary'
+```
+
+This applies to all color utilities: `bg-*`, `text-*`, `border-*`, `ring-*`, etc.
 
 ### Extending the tailwind-merge config
 
