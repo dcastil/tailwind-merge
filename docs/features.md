@@ -43,12 +43,48 @@ twMerge('bg-black bg-(--my-color) bg-[color:var(--mystery-var)]')
 twMerge('grid-cols-[1fr,auto] grid-cols-2') // → 'grid-cols-2'
 ```
 
-> [!Note]
-> Labels necessary in ambiguous cases
->
-> When using arbitrary values in ambiguous classes like `text-[calc(var(--rebecca)-1rem)]` tailwind-merge looks at the arbitrary value for clues to determine what type of class it is. In this case, like in most ambiguous classes, it would try to figure out whether `calc(var(--rebecca)-1rem)` is a length (making it a font-size class) or a color (making it a text-color class). For lengths it takes clues into account like the presence of the `calc()` function or a digit followed by a length unit like `1rem`.
->
-> But it isn't always possible to figure out the type by looking at the arbitrary value. E.g. in the class `text-[theme(myCustomScale.rebecca)]` tailwind-merge can't know the type of the arbitrary value and will default to a text-color class. To make tailwind-merge understand the correct type of the arbitrary value in those cases, you can use CSS data type labels [which are used by Tailwind CSS to disambiguate classes](https://tailwindcss.com/docs/adding-custom-styles#resolving-ambiguities): `text-[length:theme(myCustomScale.rebecca)]`.
+#### Type detection for arbitrary values
+
+tailwind-merge automatically detects the type of arbitrary values in most cases, but sometimes explicit labels are needed.
+
+**Automatic detection (works out of the box)**:
+
+```ts
+// Length detected by calc() function
+twMerge('text-[calc(1rem+2px)] text-lg') // → 'text-lg'
+
+// Length detected by unit
+twMerge('text-[14px] text-[16px]') // → 'text-[16px]'
+
+// Color detected by hex format
+twMerge('text-[#ff0000] text-[#00ff00]') // → 'text-[#00ff00]'
+
+// Color detected by color function
+twMerge('bg-[rgb(255,0,0)] bg-[hsl(0,100%,50%)]') // → 'bg-[hsl(0,100%,50%)]'
+```
+
+**When labels are necessary**:
+
+For ambiguous classes where tailwind-merge cannot determine the type from context (like `text-*` which can be font-size OR color), you need to use [CSS data type labels](https://tailwindcss.com/docs/adding-custom-styles#resolving-ambiguities):
+
+```ts
+// ❌ Without label - defaults to color
+twMerge('text-[theme(myCustomScale.rebecca)] text-lg')
+// → 'text-[theme(myCustomScale.rebecca)] text-lg' (both kept, treated as different types)
+
+// ✅ With label - correctly identified as length/font-size
+twMerge('text-[length:theme(myCustomScale.rebecca)] text-lg')
+// → 'text-lg' (conflicting font-size classes)
+```
+
+Common labels you might need:
+- `length:` - for sizes/lengths (font-size, width, etc.)
+- `color:` - for colors
+- `position:` - for background-position
+- `size:` - for background-size
+- `number:` - for numeric values (font-weight, z-index, etc.)
+
+See [Limitations](./limitations.md#you-need-to-use-labels-in-ambiguous-arbitrary-value-classes) for more details on when labels are required.
 
 ### Supports arbitrary properties
 
