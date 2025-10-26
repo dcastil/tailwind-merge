@@ -12,7 +12,7 @@ run()
 
 async function run() {
     const pullRequest =
-        /** @type {import('@octokit/webhooks-definitions/schema').PullRequestEvent} */ (
+        /** @type {import('@octokit/webhooks-types').PullRequestEvent} */ (
             context.payload
         ).pull_request
 
