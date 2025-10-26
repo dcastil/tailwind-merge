@@ -6,10 +6,10 @@ import { expect, test } from 'vitest'
 import { twMerge } from '../src'
 
 const twMergeExampleRegex =
-    /twMerge\((?<arguments>[\w\s\-:[\]#(),!&\n'"]+?)\)(?!.*(?<!\/\/.*)')\s*\n?\s*\/\/\s*→\s*['"](?<result>.+)['"]/g
+    /twMerge\((?<arguments>[\w\s\-:[\]#(),!&%\n'"]+?)\)(?!.*(?<!\/\/.*)')\s*\n?\s*\/\/\s*→\s*['"](?<result>.+)['"]/g
 
 test('docs examples', () => {
-    expect.assertions(42)
+    expect.assertions(57)
 
     return forEachFile(['README.md', 'docs/**/*.md'], (fileContent) => {
         Array.from(fileContent.matchAll(twMergeExampleRegex)).forEach((match) => {
