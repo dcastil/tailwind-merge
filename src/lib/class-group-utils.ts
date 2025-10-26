@@ -246,8 +246,7 @@ const getPart = (classPartObject: ClassPartObject, path: string): ClassPartObjec
     const len = parts.length
 
     for (let i = 0; i < len; i++) {
-        const part = parts[i]
-        if (!part) continue
+        const part = parts[i]!
 
         let next = current.nextPart.get(part)
         if (!next) {
