@@ -8,6 +8,7 @@ import {
     ThemeGetter,
     ThemeObject,
 } from './types'
+import { concatArrays } from './utils'
 
 export interface ClassPartObject {
     nextPart: Map<string, ClassPartObject>
@@ -43,6 +44,7 @@ const createClassPartObject = (
 const CLASS_PART_SEPARATOR = '-'
 
 const EMPTY_CONFLICTS: readonly AnyClassGroupIds[] = []
+// I use two dots here because one dot is used as prefix for class groups in plugins
 const ARBITRARY_PROPERTY_PREFIX = 'arbitrary..'
 
 export const createClassGroupUtils = (config: AnyConfig) => {
@@ -52,14 +54,14 @@ export const createClassGroupUtils = (config: AnyConfig) => {
     const getClassGroupId = (className: string) => {
         if (className.startsWith('[') && className.endsWith(']')) {
             return getGroupIdForArbitraryProperty(className)
-        } else {
-            const classParts = className.split(CLASS_PART_SEPARATOR)
-            // Classes like `-inset-1` produce an empty string as first classPart. We assume that classes for negative values are used correctly and remove it from classParts.
-            if (classParts[0] === '' && classParts.length > 1) {
-                classParts.shift()
-            }
-            return getGroupRecursive(classParts, classMap)
         }
+
+        const classParts = className.split(CLASS_PART_SEPARATOR)
+        // Classes like `-inset-1` produce an empty string as first classPart. We assume that classes for negative values are used correctly and remove it from classParts.
+        if (classParts[0] === '' && classParts.length > 1) {
+            classParts.shift()
+        }
+        return getGroupRecursive(classParts, classMap)
     }
 
     const getConflictingClassGroupIds = (
@@ -74,15 +76,7 @@ export const createClassGroupUtils = (config: AnyConfig) => {
         const modifierConflicts = conflictingClassGroupModifiers[classGroupId]!
         if (!conflicts) return modifierConflicts
 
-        // Pre-allocate for better V8 optimization
-        const result = new Array(conflicts.length + modifierConflicts.length)
-        for (let i = 0; i < conflicts.length; i++) {
-            result[i] = conflicts[i]
-        }
-        for (let i = 0; i < modifierConflicts.length; i++) {
-            result[conflicts.length + i] = modifierConflicts[i]
-        }
-        return result
+        return concatArrays(conflicts, modifierConflicts)
     }
 
     return {
@@ -126,6 +120,11 @@ const getGroupRecursive = (
     return undefined
 }
 
+/**
+ * Get the class group ID for an arbitrary property.
+ *
+ * @param className - The class name to get the group ID for. Is expected to be string starting with `[` and ending with `]`.
+ */
 const getGroupIdForArbitraryProperty = (className: string): AnyClassGroupIds | undefined =>
     className.slice(1, -1).indexOf(':') === -1
         ? undefined
@@ -136,6 +135,9 @@ const getGroupIdForArbitraryProperty = (className: string): AnyClassGroupIds | u
               return property ? ARBITRARY_PROPERTY_PREFIX + property : undefined
           })()
 
+/**
+ * Exported for testing only
+ */
 export const createClassMap = (config: Config<AnyClassGroupIds, AnyThemeGroupIds>) => {
     const { theme, classGroups } = config
     return processClassGroups(classGroups, theme)
@@ -216,14 +218,11 @@ const processFunctionDefinition = (
     }
 
     if (classPartObject.validators === null) {
-        classPartObject.validators = [
-            createClassValidatorObject(classGroupId, classDefinition as ClassValidator),
-        ]
-    } else {
-        classPartObject.validators.push(
-            createClassValidatorObject(classGroupId, classDefinition as ClassValidator),
-        )
+        classPartObject.validators = []
     }
+    classPartObject.validators.push(
+        createClassValidatorObject(classGroupId, classDefinition as ClassValidator),
+    )
 }
 
 const processObjectDefinition = (

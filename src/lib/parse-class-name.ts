@@ -40,7 +40,7 @@ export const createParseClassName = (config: AnyConfig) => {
 
         const len = className.length
         for (let index = 0; index < len; index++) {
-            const currentCharacter = className[index]
+            const currentCharacter = className[index]!
 
             if (bracketDepth === 0 && parenDepth === 0) {
                 if (currentCharacter === MODIFIER_SEPARATOR) {
