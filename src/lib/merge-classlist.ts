@@ -60,7 +60,13 @@ export const mergeClassList = (classList: string, configUtils: ConfigUtils) => {
             hasPostfixModifier = false
         }
 
-        const variantModifier = sortModifiers(modifiers).join(':')
+        // Fast path: skip sorting for empty or single modifier
+        const variantModifier =
+            modifiers.length === 0
+                ? ''
+                : modifiers.length === 1
+                  ? modifiers[0]!
+                  : sortModifiers(modifiers).join(':')
 
         const modifierId = hasImportantModifier
             ? variantModifier + IMPORTANT_MODIFIER
