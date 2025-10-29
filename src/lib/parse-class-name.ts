@@ -61,9 +61,6 @@ export const createParseClassName = (config: AnyConfig) => {
             else if (currentCharacter === ')') parenDepth--
         }
 
-        // Use modifiers array directly or empty array
-        const finalModifiers = modifiers.length > 0 ? modifiers : EMPTY_MODIFIERS
-
         const baseClassNameWithImportantModifier =
             modifiers.length === 0 ? className : className.slice(modifierStart)
 
@@ -91,7 +88,7 @@ export const createParseClassName = (config: AnyConfig) => {
                 : undefined
 
         return createResultObject(
-            finalModifiers,
+            modifiers,
             hasImportantModifier,
             baseClassName,
             maybePostfixModifierPosition,

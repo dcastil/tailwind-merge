@@ -30,18 +30,9 @@ export const createSortModifiers = (config: AnyConfig) => {
             const isOrderSensitive = modifierWeights.has(modifier)
 
             if (isArbitrary || isOrderSensitive) {
-                // Sort and flush current segment using numeric weights
+                // Sort and flush current segment alphabetically
                 if (currentSegment.length > 0) {
-                    currentSegment.sort((a, b) => {
-                        const weightA = modifierWeights.get(a)
-                        const weightB = modifierWeights.get(b)
-                        if (weightA !== undefined && weightB !== undefined) {
-                            return weightA - weightB
-                        }
-                        if (weightA !== undefined) return -1
-                        if (weightB !== undefined) return 1
-                        return a.localeCompare(b)
-                    })
+                    currentSegment.sort((a, b) => a.localeCompare(b))
                     result.push(...currentSegment)
                     currentSegment = []
                 }
@@ -54,16 +45,7 @@ export const createSortModifiers = (config: AnyConfig) => {
 
         // Sort and add any remaining segment items
         if (currentSegment.length > 0) {
-            currentSegment.sort((a, b) => {
-                const weightA = modifierWeights.get(a)
-                const weightB = modifierWeights.get(b)
-                if (weightA !== undefined && weightB !== undefined) {
-                    return weightA - weightB
-                }
-                if (weightA !== undefined) return -1
-                if (weightB !== undefined) return 1
-                return a.localeCompare(b)
-            })
+            currentSegment.sort((a, b) => a.localeCompare(b))
             result.push(...currentSegment)
         }
 
