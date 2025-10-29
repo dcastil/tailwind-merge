@@ -11,15 +11,14 @@
 export type ClassNameValue = ClassNameArray | string | null | undefined | 0 | 0n | false
 type ClassNameArray = ClassNameValue[]
 
-export function twJoin(...classLists: ClassNameValue[]): string
-export function twJoin() {
+export const twJoin = (...classLists: ClassNameValue[]): string => {
     let index = 0
     let argument: ClassNameValue
     let resolvedValue: string
     let string = ''
 
-    while (index < arguments.length) {
-        if ((argument = arguments[index++])) {
+    while (index < classLists.length) {
+        if ((argument = classLists[index++])) {
             if ((resolvedValue = toValue(argument))) {
                 string && (string += ' ')
                 string += resolvedValue
@@ -29,7 +28,8 @@ export function twJoin() {
     return string
 }
 
-const toValue = (mix: ClassNameArray | string) => {
+const toValue = (mix: ClassNameArray | string): string => {
+    // Fast path for strings
     if (typeof mix === 'string') {
         return mix
     }

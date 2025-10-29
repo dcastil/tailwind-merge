@@ -60,7 +60,13 @@ export const mergeClassList = (classList: string, configUtils: ConfigUtils) => {
             hasPostfixModifier = false
         }
 
-        const variantModifier = sortModifiers(modifiers).join(':')
+        // Fast path: skip sorting for empty or single modifier
+        const variantModifier =
+            modifiers.length === 0
+                ? ''
+                : modifiers.length === 1
+                  ? modifiers[0]!
+                  : sortModifiers(modifiers).join(':')
 
         const modifierId = hasImportantModifier
             ? variantModifier + IMPORTANT_MODIFIER
@@ -68,7 +74,7 @@ export const mergeClassList = (classList: string, configUtils: ConfigUtils) => {
 
         const classId = modifierId + classGroupId
 
-        if (classGroupsInConflict.includes(classId)) {
+        if (classGroupsInConflict.indexOf(classId) > -1) {
             // Tailwind class omitted due to conflict
             continue
         }
