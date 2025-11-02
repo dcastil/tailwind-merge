@@ -46,11 +46,6 @@ async function forceGarbageCollection(): Promise<void> {
     }
 }
 
-// Guard to ensure memory summary is printed exactly once. teardown() runs after every
-// benchmark iteration, so without this guard the summary would be printed multiple times
-// (once per iteration of the last benchmark).
-let summaryPrinted = false
-
 const memoryData = new Map<string, { before: MemoryStats; after: MemoryStats }>()
 
 const benchmarkNames: string[] = []
