@@ -48,16 +48,12 @@ async function forceGarbageCollection(): Promise<void> {
 
 const memoryData = new Map<string, { before: MemoryStats; after: MemoryStats }>()
 
-const benchmarkNames: string[] = []
-
 describe('twMerge', () => {
     function benchWithMemory(
         name: string,
         fn: () => void,
         options?: { iterations?: number; time?: number },
     ) {
-        benchmarkNames.push(name)
-
         let iterationBefore: MemoryStats | null = null
         let peakMemoryDelta = 0
 
