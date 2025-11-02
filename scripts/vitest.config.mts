@@ -10,5 +10,10 @@ export default defineConfig({
         coverage: {
             include: ['src/**/*.ts'],
         },
+        poolOptions: {
+            forks: {
+                execArgv: ['--expose-gc'],
+            },
+        },
     },
 })

@@ -2,6 +2,7 @@
     "extends": "../tsconfig.json",
     "include": ["./**/*"],
     "compilerOptions": {
-        "resolveJsonModule": true
+        "resolveJsonModule": true,
+        "types": ["vitest/globals"]
     }
 }
