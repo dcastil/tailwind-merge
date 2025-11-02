@@ -135,7 +135,7 @@ describe('twMerge', () => {
         )
     })
 
-    bench('collection with cache', () => {
+    benchWithMemory('collection with cache', () => {
         const twMerge = extendTailwindMerge({})
 
         for (let index = 0; index < testDataCollection.length; ++index) {
@@ -143,7 +143,7 @@ describe('twMerge', () => {
         }
     })
 
-    bench('collection without cache', () => {
+    benchWithMemory('collection without cache', () => {
         const twMerge = extendTailwindMerge({ cacheSize: 0 })
 
         for (let index = 0; index < testDataCollection.length; ++index) {
