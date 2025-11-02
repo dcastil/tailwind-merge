@@ -1,4 +1,4 @@
-import { bench as vitestBench, describe, afterAll } from 'vitest'
+import { afterAll, bench, describe } from 'vitest'
 
 import { extendTailwindMerge } from '../src'
 
@@ -39,6 +39,7 @@ async function forceGarbageCollection(): Promise<void> {
     if (typeof globalThis.gc === 'function') {
         await globalThis.gc()
     } else {
+        // eslint-disable-next-line no-console -- This is a warning that will be printed to the console if garbage collection is not exposed.
         console.warn(
             'Garbage collection not exposed. Run with --expose-gc for accurate memory measurements.',
         )
@@ -55,13 +56,18 @@ const memoryData = new Map<string, { before: MemoryStats; after: MemoryStats }>(
 const benchmarkNames: string[] = []
 
 describe('twMerge', () => {
-    function bench(name: string, fn: () => void, options?: { iterations?: number; time?: number }) {
+    function benchWithMemory(
+        name: string,
+        fn: () => void,
+        options?: { iterations?: number; time?: number },
+    ) {
         benchmarkNames.push(name)
 
         let iterationBefore: MemoryStats | null = null
         let peakMemoryDelta = 0
 
-        vitestBench(
+        bench(
+            // eslint-disable-next-line vitest/valid-title -- This is a valid title.
             name,
             () => {
                 const beforeExecution = getMemoryUsage()
@@ -105,19 +111,19 @@ describe('twMerge', () => {
         )
     }
 
-    bench('init', () => {
+    benchWithMemory('init', () => {
         const twMerge = extendTailwindMerge({})
 
         twMerge()
     })
 
-    bench('simple', () => {
+    benchWithMemory('simple', () => {
         const twMerge = extendTailwindMerge({})
 
         twMerge('flex mx-10 px-10', 'mr-5 pr-5')
     })
 
-    bench('heavy', () => {
+    benchWithMemory('heavy', () => {
         const twMerge = extendTailwindMerge({})
 
         twMerge(
@@ -161,5 +167,6 @@ afterAll(() => {
             lines.push(`    Operations: ${testDataCollection.length}`)
         }
     }
+    // eslint-disable-next-line no-console -- This is a summary that will be printed to the console.
     console.log(lines.join('\n'))
 })
