@@ -51,30 +51,6 @@ export const createClassGroupUtils = (config: AnyConfig) => {
     const classMap = createClassMap(config)
     const { conflictingClassGroups, conflictingClassGroupModifiers } = config
 
-    // Pre-compute conflict arrays at initialization to avoid runtime concatenation
-    const conflictsWithoutPostfix = new Map<AnyClassGroupIds, readonly AnyClassGroupIds[]>()
-    const conflictsWithPostfix = new Map<AnyClassGroupIds, readonly AnyClassGroupIds[]>()
-
-    // Build lookup maps for all class groups that have conflicts
-    for (const classGroupId in conflictingClassGroups) {
-        const conflicts = conflictingClassGroups[classGroupId]!
-        conflictsWithoutPostfix.set(classGroupId, conflicts)
-    }
-
-    // Pre-compute merged conflicts for classes with modifier conflicts
-    for (const classGroupId in conflictingClassGroupModifiers) {
-        const modifierConflicts = conflictingClassGroupModifiers[classGroupId]!
-        const baseConflicts = conflictingClassGroups[classGroupId]
-
-        if (baseConflicts) {
-            // Merge base conflicts with modifier conflicts
-            conflictsWithPostfix.set(classGroupId, concatArrays(baseConflicts, modifierConflicts))
-        } else {
-            // Only modifier conflicts
-            conflictsWithPostfix.set(classGroupId, modifierConflicts)
-        }
-    }
-
     const getClassGroupId = (className: string) => {
         if (className.startsWith('[') && className.endsWith(']')) {
             return getGroupIdForArbitraryProperty(className)
@@ -91,13 +67,22 @@ export const createClassGroupUtils = (config: AnyConfig) => {
         hasPostfixModifier: boolean,
     ): readonly AnyClassGroupIds[] => {
         if (hasPostfixModifier) {
-            const withPostfix = conflictsWithPostfix.get(classGroupId)
-            if (withPostfix) return withPostfix
+            const modifierConflicts = conflictingClassGroupModifiers[classGroupId]
+            const baseConflicts = conflictingClassGroups[classGroupId]
+
+            if (modifierConflicts) {
+                if (baseConflicts) {
+                    // Merge base conflicts with modifier conflicts
+                    return concatArrays(baseConflicts, modifierConflicts)
+                }
+                // Only modifier conflicts
+                return modifierConflicts
+            }
             // Fall back to without postfix if no modifier conflicts
-            return conflictsWithoutPostfix.get(classGroupId) || EMPTY_CONFLICTS
+            return baseConflicts || EMPTY_CONFLICTS
         }
 
-        return conflictsWithoutPostfix.get(classGroupId) || EMPTY_CONFLICTS
+        return conflictingClassGroups[classGroupId] || EMPTY_CONFLICTS
     }
 
     return {

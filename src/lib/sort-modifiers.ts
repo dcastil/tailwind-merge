@@ -32,7 +32,7 @@ export const createSortModifiers = (config: AnyConfig) => {
             if (isArbitrary || isOrderSensitive) {
                 // Sort and flush current segment alphabetically
                 if (currentSegment.length > 0) {
-                    currentSegment.sort((a, b) => (a < b ? -1 : a > b ? 1 : 0))
+                    currentSegment.sort()
                     result.push(...currentSegment)
                     currentSegment = []
                 }
@@ -45,7 +45,7 @@ export const createSortModifiers = (config: AnyConfig) => {
 
         // Sort and add any remaining segment items
         if (currentSegment.length > 0) {
-            currentSegment.sort((a, b) => (a < b ? -1 : a > b ? 1 : 0))
+            currentSegment.sort()
             result.push(...currentSegment)
         }
 
