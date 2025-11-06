@@ -15,9 +15,6 @@ export const createSortModifiers = (config: AnyConfig) => {
     })
 
     return (modifiers: readonly string[]): string[] => {
-        // Fast path for common cases
-        if (modifiers.length <= 1) return [...modifiers]
-
         const result: string[] = []
         let currentSegment: string[] = []
 
