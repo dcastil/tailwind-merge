@@ -1,5 +1,27 @@
 # Changelog for v3 releases
 
+## v3.4.0
+
+### New Features
+
+- Performance optimizations which make tailwind-merge >10% faster
+    - Vibe optimization by [@quantizor](https://github.com/quantizor) in [#547](https://github.com/dcastil/tailwind-merge/pull/547)
+    - Additional optimizations by [@quantizor](https://github.com/quantizor) in [#619](https://github.com/dcastil/tailwind-merge/pull/619)
+
+### Documentation
+
+- Improve docs by clarifying things, adding more examples by [@dcastil](https://github.com/dcastil) in [#618](https://github.com/dcastil/tailwind-merge/pull/618)
+- Make examples more realistic by [@dcastil](https://github.com/dcastil) in [#617](https://github.com/dcastil/tailwind-merge/pull/617)
+- Add custom variant as an alternative to docs by [@kidonng](https://github.com/kidonng) in [#592](https://github.com/dcastil/tailwind-merge/pull/592)
+
+### Other
+
+- Improve benchmarking suite by [@quantizor](https://github.com/quantizor) in [#620](https://github.com/dcastil/tailwind-merge/pull/620)
+
+**Full Changelog**: [`v3.3.1...v3.4.0`](https://github.com/dcastil/tailwind-merge/compare/v3.3.1...v3.4.0)
+
+Thanks to [@brandonmcconnell](https://github.com/brandonmcconnell), [@manavm1990](https://github.com/manavm1990), [@langy](https://github.com/langy), [@roboflow](https://github.com/roboflow), [@syntaxfm](https://github.com/syntaxfm), [@getsentry](https://github.com/getsentry), [@codecov](https://github.com/codecov) and a private sponsor for sponsoring tailwind-merge! ❤️
+
 ## v3.3.1
 
 ### Bug Fixes
