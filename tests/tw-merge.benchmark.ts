@@ -67,13 +67,13 @@ describe('twMerge', () => {
         }
     })
 
-    benchWithMemory('ultra long class list with many conflicts', () => {
+    benchWithMemory('ultra long class list with many conflicts without cache', () => {
         const twMerge = extendTailwindMerge({ cacheSize: 0 })
 
         twMerge(...ultraLongClassList)
     })
 
-    benchWithMemory('ultra long class list with many conflicts (cached)', () => {
+    benchWithMemory('ultra long class list with many conflicts with cache', () => {
         const twMerge = extendTailwindMerge({})
 
         twMerge(...ultraLongClassList)
