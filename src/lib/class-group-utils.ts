@@ -57,26 +57,32 @@ export const createClassGroupUtils = (config: AnyConfig) => {
         }
 
         const classParts = className.split(CLASS_PART_SEPARATOR)
-        // Classes like `-inset-1` produce an empty string as first classPart. We assume that classes for negative values are used correctly and remove it from classParts.
-        if (classParts[0] === '' && classParts.length > 1) {
-            classParts.shift()
-        }
-        return getGroupRecursive(classParts, classMap)
+        // Classes like `-inset-1` produce an empty string as first classPart. We assume that classes for negative values are used correctly and skip it.
+        const startIndex = classParts[0] === '' && classParts.length > 1 ? 1 : 0
+        return getGroupRecursive(classParts, startIndex, classMap)
     }
 
     const getConflictingClassGroupIds = (
         classGroupId: AnyClassGroupIds,
         hasPostfixModifier: boolean,
     ): readonly AnyClassGroupIds[] => {
-        const conflicts = conflictingClassGroups[classGroupId]
-        if (!hasPostfixModifier || !conflictingClassGroupModifiers[classGroupId]) {
-            return conflicts || EMPTY_CONFLICTS
+        if (hasPostfixModifier) {
+            const modifierConflicts = conflictingClassGroupModifiers[classGroupId]
+            const baseConflicts = conflictingClassGroups[classGroupId]
+
+            if (modifierConflicts) {
+                if (baseConflicts) {
+                    // Merge base conflicts with modifier conflicts
+                    return concatArrays(baseConflicts, modifierConflicts)
+                }
+                // Only modifier conflicts
+                return modifierConflicts
+            }
+            // Fall back to without postfix if no modifier conflicts
+            return baseConflicts || EMPTY_CONFLICTS
         }
 
-        const modifierConflicts = conflictingClassGroupModifiers[classGroupId]!
-        if (!conflicts) return modifierConflicts
-
-        return concatArrays(conflicts, modifierConflicts)
+        return conflictingClassGroups[classGroupId] || EMPTY_CONFLICTS
     }
 
     return {
@@ -87,18 +93,19 @@ export const createClassGroupUtils = (config: AnyConfig) => {
 
 const getGroupRecursive = (
     classParts: string[],
+    startIndex: number,
     classPartObject: ClassPartObject,
 ): AnyClassGroupIds | undefined => {
-    const classPathsLength = classParts.length
+    const classPathsLength = classParts.length - startIndex
     if (classPathsLength === 0) {
         return classPartObject.classGroupId
     }
 
-    const currentClassPart = classParts[0]!
+    const currentClassPart = classParts[startIndex]!
     const nextClassPartObject = classPartObject.nextPart.get(currentClassPart)
 
     if (nextClassPartObject) {
-        const result = getGroupRecursive(classParts.slice(1), nextClassPartObject)
+        const result = getGroupRecursive(classParts, startIndex + 1, nextClassPartObject)
         if (result) return result
     }
 
@@ -107,7 +114,11 @@ const getGroupRecursive = (
         return undefined
     }
 
-    const classRest = classParts.join(CLASS_PART_SEPARATOR)
+    // Build classRest string efficiently by joining from startIndex onwards
+    const classRest =
+        startIndex === 0
+            ? classParts.join(CLASS_PART_SEPARATOR)
+            : classParts.slice(startIndex).join(CLASS_PART_SEPARATOR)
     const validatorsLength = validators.length
 
     for (let i = 0; i < validatorsLength; i++) {

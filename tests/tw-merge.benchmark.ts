@@ -4,6 +4,23 @@ import { extendTailwindMerge } from '../src'
 
 import testDataCollection from './tw-merge-benchmark-data.json'
 
+// Create a long class list with many conflicts (padding, margin, width, height, etc.)
+const ultraLongClassList: string[] = []
+for (let i = 0; i < 200; i++) {
+    // Add padding classes that conflict
+    ultraLongClassList.push(`p-${i % 20}`, `px-${i % 20}`, `py-${i % 20}`)
+    // Add margin classes that conflict
+    ultraLongClassList.push(`m-${i % 20}`, `mx-${i % 20}`, `my-${i % 20}`)
+    // Add width/height classes that conflict
+    ultraLongClassList.push(`w-${i % 20}`, `h-${i % 20}`)
+    // Add some non-conflicting classes
+    ultraLongClassList.push(`text-${i % 10}`, `bg-${i % 10}`)
+    // Add some with modifiers
+    if (i % 10 === 0) {
+        ultraLongClassList.push(`hover:p-${i % 20}`, `focus:m-${i % 20}`)
+    }
+}
+
 describe('twMerge', () => {
     benchWithMemory('init', () => {
         const twMerge = extendTailwindMerge({})
@@ -48,6 +65,18 @@ describe('twMerge', () => {
         for (let index = 0; index < testDataCollection.length; ++index) {
             twMerge(...(testDataCollection[index] as TestDataItem))
         }
+    })
+
+    benchWithMemory('ultra long class list with many conflicts without cache', () => {
+        const twMerge = extendTailwindMerge({ cacheSize: 0 })
+
+        twMerge(...ultraLongClassList)
+    })
+
+    benchWithMemory('ultra long class list with many conflicts with cache', () => {
+        const twMerge = extendTailwindMerge({})
+
+        twMerge(...ultraLongClassList)
     })
 })
 

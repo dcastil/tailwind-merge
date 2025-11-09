@@ -15,9 +15,6 @@ export const createSortModifiers = (config: AnyConfig) => {
     })
 
     return (modifiers: readonly string[]): string[] => {
-        // Fast path for common cases
-        if (modifiers.length <= 1) return [...modifiers]
-
         const result: string[] = []
         let currentSegment: string[] = []
 
@@ -32,7 +29,7 @@ export const createSortModifiers = (config: AnyConfig) => {
             if (isArbitrary || isOrderSensitive) {
                 // Sort and flush current segment alphabetically
                 if (currentSegment.length > 0) {
-                    currentSegment.sort((a, b) => a.localeCompare(b))
+                    currentSegment.sort()
                     result.push(...currentSegment)
                     currentSegment = []
                 }
@@ -45,7 +42,7 @@ export const createSortModifiers = (config: AnyConfig) => {
 
         // Sort and add any remaining segment items
         if (currentSegment.length > 0) {
-            currentSegment.sort((a, b) => a.localeCompare(b))
+            currentSegment.sort()
             result.push(...currentSegment)
         }
 
