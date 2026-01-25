@@ -86,7 +86,7 @@ export const getDefaultConfig = () => {
     const scaleOverflow = () => ['auto', 'hidden', 'clip', 'visible', 'scroll'] as const
     const scaleOverscroll = () => ['auto', 'contain', 'none'] as const
     const scaleUnambiguousSpacing = () =>
-        [isArbitraryVariable, isArbitraryValue, themeSpacing] as const
+        [isArbitraryVariable, isArbitraryValue, themeSpacing, isTshirtSize] as const
     const scaleInset = () => [isFraction, 'full', 'auto', ...scaleUnambiguousSpacing()] as const
     const scaleGridTemplateColsRows = () =>
         [isInteger, 'none', 'subgrid', isArbitraryVariable, isArbitraryValue] as const
