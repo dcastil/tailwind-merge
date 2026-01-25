@@ -15,6 +15,10 @@ test('merges classes from same group correctly', () => {
     ).toBe('hover:overflow-x-auto overflow-x-scroll')
     expect(twMerge('col-span-1 col-span-full')).toBe('col-span-full')
     expect(twMerge('gap-2 gap-px basis-px basis-3')).toBe('gap-px basis-3')
+    expect(twMerge('gap-2xs gap-3')).toBe('gap-3')
+    expect(twMerge('p-2xs p-3')).toBe('p-3')
+    expect(twMerge('m-2xs m-3')).toBe('m-3')
+    expect(twMerge('w-2xs w-3')).toBe('w-3')
 })
 
 test('merges classes from Font Variant Numeric section correctly', () => {
