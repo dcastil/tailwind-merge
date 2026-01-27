@@ -10,6 +10,7 @@ import {
     isArbitraryShadow,
     isArbitrarySize,
     isArbitraryValue,
+    isArbitraryValueWeight,
     isArbitraryVariable,
     isArbitraryVariableFamilyName,
     isArbitraryVariableImage,
@@ -17,6 +18,7 @@ import {
     isArbitraryVariablePosition,
     isArbitraryVariableShadow,
     isArbitraryVariableSize,
+    isArbitraryVariableWeight,
     isFraction,
     isInteger,
     isNumber,
@@ -819,7 +821,16 @@ export const getDefaultConfig = () => {
              * Font Weight
              * @see https://tailwindcss.com/docs/font-weight
              */
-            'font-weight': [{ font: [themeFontWeight, isArbitraryVariable, isArbitraryNumber] }],
+            'font-weight': [
+                {
+                    font: [
+                        themeFontWeight,
+                        isArbitraryVariableWeight,
+                        isArbitraryNumber,
+                        isArbitraryValueWeight,
+                    ],
+                },
+            ],
             /**
              * Font Stretch
              * @see https://tailwindcss.com/docs/font-stretch
