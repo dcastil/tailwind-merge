@@ -3,6 +3,7 @@ import { Config, DefaultClassGroupIds, DefaultThemeGroupIds } from './types'
 import {
     isAny,
     isAnyNonArbitrary,
+    isArbitraryFamilyName,
     isArbitraryImage,
     isArbitraryLength,
     isArbitraryNumber,
@@ -11,7 +12,6 @@ import {
     isArbitrarySize,
     isArbitraryValue,
     isArbitraryVariable,
-    isArbitraryValueWeight,
     isArbitraryVariableFamilyName,
     isArbitraryVariableImage,
     isArbitraryVariableLength,
@@ -19,6 +19,7 @@ import {
     isArbitraryVariableShadow,
     isArbitraryVariableSize,
     isArbitraryVariableWeight,
+    isArbitraryWeightInternal,
     isFraction,
     isInteger,
     isNumber,
@@ -823,12 +824,7 @@ export const getDefaultConfig = () => {
              */
             'font-weight': [
                 {
-                    font: [
-                        themeFontWeight,
-                        isArbitraryVariableWeight,
-                        isArbitraryNumber,
-                        isArbitraryValueWeight,
-                    ],
+                    font: [themeFontWeight, isArbitraryVariableWeight, isArbitraryWeightInternal],
                 },
             ],
             /**
@@ -856,7 +852,9 @@ export const getDefaultConfig = () => {
              * Font Family
              * @see https://tailwindcss.com/docs/font-family
              */
-            'font-family': [{ font: [isArbitraryVariableFamilyName, isArbitraryValue, themeFont] }],
+            'font-family': [
+                { font: [isArbitraryVariableFamilyName, isArbitraryFamilyName, themeFont] },
+            ],
             /**
              * Font Variant Numeric
              * @see https://tailwindcss.com/docs/font-variant-numeric

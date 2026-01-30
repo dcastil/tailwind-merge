@@ -47,8 +47,14 @@ export const isArbitraryLength = (value: string) =>
 export const isArbitraryNumber = (value: string) =>
     getIsArbitraryValue(value, isLabelNumber, isNumber)
 
-export const isArbitraryValueWeight = (value: string) =>
-    getIsArbitraryValue(value, isLabelWeight, isNever)
+/**
+ * Not exposed to public API because it uses `isAny` matcher for value.
+ */
+export const isArbitraryWeightInternal = (value: string) =>
+    getIsArbitraryValue(value, isLabelWeight, isAny)
+
+export const isArbitraryFamilyName = (value: string) =>
+    getIsArbitraryValue(value, isLabelFamilyName, isNever)
 
 export const isArbitraryPosition = (value: string) =>
     getIsArbitraryValue(value, isLabelPosition, isNever)
