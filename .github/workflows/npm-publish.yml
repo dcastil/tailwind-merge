@@ -8,6 +8,7 @@ jobs:
     publish:
         runs-on: ubuntu-latest
         permissions:
+            # Necessary for IODC permissions for trusted publishing
             id-token: write
         steps:
             - uses: actions/checkout@v5
@@ -15,6 +16,8 @@ jobs:
               uses: actions/setup-node@v5
               with:
                   node-version: 22.20.0
+                  # More info: https://docs.github.com/en/actions/publishing-packages/publishing-nodejs-packages#publishing-packages-to-the-npm-registry
+                  registry-url: 'https://registry.npmjs.org'
             - name: Use node_modules cache
               uses: actions/cache@v4
               with:
@@ -34,6 +37,4 @@ jobs:
             - run: yarn test:exports
               # npm install -g npm@latest is necessary to make provenance available (available since v9.6.5 or so). More info: https://docs.npmjs.com/generating-provenance-statements
             - run: npm install -g npm@latest
-            - uses: JS-DevTools/npm-publish@v4.1.1
-              with:
-                  token: ${{ secrets.NPM_TOKEN }}
+            - run: npm publish
