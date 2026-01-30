@@ -1,3 +1,27 @@
+import {
+    isAny,
+    isAnyNonArbitrary,
+    isArbitraryImage,
+    isArbitraryLength,
+    isArbitraryNumber,
+    isArbitraryPosition,
+    isArbitraryShadow,
+    isArbitrarySize,
+    isArbitraryValue,
+    isArbitraryVariable,
+    isArbitraryVariableFamilyName,
+    isArbitraryVariableImage,
+    isArbitraryVariableLength,
+    isArbitraryVariablePosition,
+    isArbitraryVariableShadow,
+    isArbitraryVariableSize,
+    isFraction,
+    isInteger,
+    isNumber,
+    isPercent,
+    isTshirtSize,
+} from './lib/validators'
+
 export { createTailwindMerge } from './lib/create-tailwind-merge'
 export { getDefaultConfig } from './lib/default-config'
 export { extendTailwindMerge } from './lib/extend-tailwind-merge'
@@ -14,4 +38,27 @@ export {
     type ExperimentalParseClassNameParam,
     type ParsedClassName as ExperimentalParsedClassName,
 } from './lib/types'
-export * as validators from './lib/validators'
+
+export const validators = {
+    isAny,
+    isAnyNonArbitrary,
+    isArbitraryImage,
+    isArbitraryLength,
+    isArbitraryNumber,
+    isArbitraryPosition,
+    isArbitraryShadow,
+    isArbitrarySize,
+    isArbitraryValue,
+    isArbitraryVariable,
+    isArbitraryVariableFamilyName,
+    isArbitraryVariableImage,
+    isArbitraryVariableLength,
+    isArbitraryVariablePosition,
+    isArbitraryVariableShadow,
+    isArbitraryVariableSize,
+    isFraction,
+    isInteger,
+    isNumber,
+    isPercent,
+    isTshirtSize,
+}
