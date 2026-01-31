@@ -78,6 +78,14 @@ test('handles ambiguous arbitrary values correctly', () => {
     expect(
         twMerge('border-[color-mix(in_oklab,var(--background),var(--calendar-color)_30%)] border'),
     ).toBe('border-[color-mix(in_oklab,var(--background),var(--calendar-color)_30%)] border')
+    expect(twMerge('font-[400] font-[600]')).toBe('font-[600]')
+    expect(twMerge('font-[var(--a)] font-[var(--b)]')).toBe('font-[var(--b)]')
+    expect(twMerge('font-[weight:var(--a)] font-[var(--b)]')).toBe('font-[var(--b)]')
+    expect(twMerge('font-[400] font-[weight:var(--b)]')).toBe('font-[weight:var(--b)]')
+    expect(twMerge('font-[weight:var(--a)] font-[weight:var(--b)]')).toBe('font-[weight:var(--b)]')
+    expect(twMerge('font-[family-name:var(--a)] font-[var(--b)]')).toBe(
+        'font-[family-name:var(--a)] font-[var(--b)]',
+    )
 })
 
 test('handles arbitrary custom properties correctly', () => {
@@ -89,4 +97,7 @@ test('handles arbitrary custom properties correctly', () => {
             'shadow-xs shadow-(shadow:--something) shadow-red shadow-(--some-other-shadow) shadow-(color:--some-color)',
         ),
     ).toBe('shadow-(--some-other-shadow) shadow-(color:--some-color)')
+    expect(twMerge('font-(--a) font-(--b)')).toBe('font-(--b)')
+    expect(twMerge('font-(weight:--a) font-(--b)')).toBe('font-(--b)')
+    expect(twMerge('font-(family-name:--a) font-(--b)')).toBe('font-(family-name:--a) font-(--b)')
 })

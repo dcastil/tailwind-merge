@@ -24,6 +24,7 @@ test('has correct export types', () => {
     expect(validators).toMatchObject({
         isAny: expect.any(Function),
         isAnyNonArbitrary: expect.any(Function),
+        isArbitraryFamilyName: expect.any(Function),
         isArbitraryImage: expect.any(Function),
         isArbitraryLength: expect.any(Function),
         isArbitraryNumber: expect.any(Function),
@@ -33,18 +34,20 @@ test('has correct export types', () => {
         isArbitraryValue: expect.any(Function),
         isArbitraryVariable: expect.any(Function),
         isArbitraryVariableFamilyName: expect.any(Function),
+        isArbitraryVariableWeight: expect.any(Function),
         isArbitraryVariableImage: expect.any(Function),
         isArbitraryVariableLength: expect.any(Function),
         isArbitraryVariablePosition: expect.any(Function),
         isArbitraryVariableShadow: expect.any(Function),
         isArbitraryVariableSize: expect.any(Function),
+        isArbitraryWeight: expect.any(Function),
         isFraction: expect.any(Function),
         isInteger: expect.any(Function),
         isNumber: expect.any(Function),
         isPercent: expect.any(Function),
         isTshirtSize: expect.any(Function),
     })
-    expect(Object.keys(validators)).toHaveLength(21)
+    expect(Object.keys(validators)).toHaveLength(24)
     expect(mergeConfigs).toStrictEqual(expect.any(Function))
     expect(extendTailwindMerge).toStrictEqual(expect.any(Function))
     expect(twJoin).toStrictEqual(expect.any(Function))

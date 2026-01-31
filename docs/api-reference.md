@@ -303,6 +303,7 @@ const twMerge = createTailwindMerge(getDefaultConfig, (config) =>
 interface Validators {
     isAny(value: string): boolean
     isAnyNonArbitrary(value: string): boolean
+    isArbitraryFamilyName(value: string): boolean
     isArbitraryImage(value: string): boolean
     isArbitraryLength(value: string): boolean
     isArbitraryNumber(value: string): boolean
@@ -317,6 +318,8 @@ interface Validators {
     isArbitraryVariablePosition(value: string): boolean
     isArbitraryVariableShadow(value: string): boolean
     isArbitraryVariableSize(value: string): boolean
+    isArbitraryVariableWeight(value: string): boolean
+    isArbitraryWeight(value: string): boolean
     isFraction(value: string): boolean
     isInteger(value: string): boolean
     isNumber(value: string): boolean
@@ -352,15 +355,17 @@ These validators check for basic patterns and types:
 
 These validators check arbitrary values (values in square brackets `[...]`):
 
-| Validator             | Description                                                                               | Example Match                                                              | Common Use                        |
-| --------------------- | ----------------------------------------------------------------------------------------- | -------------------------------------------------------------------------- | --------------------------------- |
-| `isArbitraryValue`    | Checks if value is enclosed in brackets                                                   | `[something]`                                                              | Generic arbitrary value detection |
-| `isArbitraryLength`   | Checks for arbitrary length values                                                        | `[3%]`, `[4px]`, `[length:var(--my-var)]`                                  | Width, height, spacing            |
-| `isArbitraryNumber`   | Checks for arbitrary numbers or `number:` labeled values                                  | `[450]`, `[number:var(--value)]`                                           | Font-weight, z-index              |
-| `isArbitraryPosition` | Checks for `position:` labeled values                                                     | `[position:200px_100px]`                                                   | Background-position               |
-| `isArbitrarySize`     | Checks for `size:` labeled values                                                         | `[size:200px_100px]`                                                       | Background-size                   |
-| `isArbitraryImage`    | Checks for image-like values (starts with `image:`, `url:`, `linear-gradient(`, etc.)     | `[url('/path.png')]`, `[image:var(--img)]`                                 | Background-image                  |
-| `isArbitraryShadow`   | Checks for shadow patterns (two lengths separated by underscore, optionally with `inset`) | `[0_35px_60px_-15px_rgba(0,0,0,0.3)]`, `[inset_0_4px_8px_rgba(0,0,0,0.1)]` | Box-shadow, text-shadow           |
+| Validator               | Description                                                                               | Example Match                                                              | Common Use                        |
+| ----------------------- | ----------------------------------------------------------------------------------------- | -------------------------------------------------------------------------- | --------------------------------- |
+| `isArbitraryValue`      | Checks if value is enclosed in brackets                                                   | `[something]`                                                              | Generic arbitrary value detection |
+| `isArbitraryLength`     | Checks for arbitrary length values                                                        | `[3%]`, `[4px]`, `[length:var(--my-var)]`                                  | Width, height, spacing            |
+| `isArbitraryNumber`     | Checks for arbitrary numbers or `number:` labeled values                                  | `[450]`, `[number:var(--value)]`                                           | Font-weight, z-index              |
+| `isArbitraryWeight`     | Checks for arbitrary font weight values or `weight:`/`number:` labeled values             | `[400]`, `[bold]`, `[weight:var(--fw)]`                                    | Font-weight                       |
+| `isArbitraryFamilyName` | Checks for `family-name:` labeled values                                                  | `[family-name:Open_Sans]`                                                  | Font-family                       |
+| `isArbitraryPosition`   | Checks for `position:` labeled values                                                     | `[position:200px_100px]`                                                   | Background-position               |
+| `isArbitrarySize`       | Checks for `size:` labeled values                                                         | `[size:200px_100px]`                                                       | Background-size                   |
+| `isArbitraryImage`      | Checks for image-like values (starts with `image:`, `url:`, `linear-gradient(`, etc.)     | `[url('/path.png')]`, `[image:var(--img)]`                                 | Background-image                  |
+| `isArbitraryShadow`     | Checks for shadow patterns (two lengths separated by underscore, optionally with `inset`) | `[0_35px_60px_-15px_rgba(0,0,0,0.3)]`, `[inset_0_4px_8px_rgba(0,0,0,0.1)]` | Box-shadow, text-shadow           |
 
 ### Arbitrary Variable Validators
 
@@ -374,6 +379,7 @@ These validators check arbitrary CSS variables (values in parentheses `(...)`):
 | `isArbitraryVariablePosition`   | Checks for variables with `position` label                        | `(position:--my-position)`              | Position properties  |
 | `isArbitraryVariableImage`      | Checks for variables with `image` or `url` label                  | `(image:--my-image)`                    | Image properties     |
 | `isArbitraryVariableFamilyName` | Checks for variables with `family-name` label                     | `(family-name:--my-font)`               | Font-family          |
+| `isArbitraryVariableWeight`     | Checks for variables with `weight` or `number` label, or no label | `(weight:--my-fw)`, `(--my-weight)`     | Font-weight          |
 | `isArbitraryVariableShadow`     | Checks for variables with `shadow` label or no label              | `(shadow:--my-shadow)`, `(--my-shadow)` | Shadow properties    |
 
 ### Usage Examples

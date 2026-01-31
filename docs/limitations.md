@@ -46,6 +46,37 @@ twMerge('text-sm ui-text-special') // → 'text-sm ui-text-special'
 
 tailwind-merge detects the type of class by parsing the class name. Some arbitrary value patterns are ambiguous and need explicit labels.
 
+### Arbitrary `font-weight` and `font-family` classes
+
+Both `font-weight` and `font-family` use the `font-*` prefix in Tailwind CSS. When using arbitrary variables without labels, tailwind-merge cannot determine whether the class sets font-weight or font-family, so it defaults to treating unlabeled arbitrary variables as font-weight. This matches Tailwind CSS behavior, which also defaults to font-weight for ambiguous `font-*` classes.
+
+```ts
+// ⚠️ Unlabeled arbitrary variables default to font-weight
+twMerge('font-(--my-family) font-(--my-weight)')
+// → 'font-(--my-weight)' (both treated as font-weight, first one removed)
+
+// ✅ Use `family-name:` label for font-family
+twMerge('font-(family-name:--my-family) font-(--my-weight)')
+// → 'font-(family-name:--my-family) font-(--my-weight)' (both kept)
+```
+
+Required labels:
+
+- `font-family`: use `family-name:` prefix (e.g., `font-(family-name:--my-font)`)
+- `font-weight`: no label needed, but you can use `weight:` or `number:` for clarity (e.g., `font-(weight:--my-weight)`)
+
+The same applies to arbitrary values with square brackets:
+
+```ts
+// ⚠️ Unlabeled arbitrary values default to font-weight
+twMerge('font-[var(--family)] font-[var(--weight)]')
+// → 'font-[var(--weight)]'
+
+// ✅ Use explicit labels
+twMerge('font-[family-name:var(--family)] font-[var(--weight)]')
+// → 'font-[family-name:var(--family)] font-[var(--weight)]'
+```
+
 ### Arbitrary `background-position` and `background-size` classes
 
 When using a class like `bg-[30%_30%]`, tailwind-merge can't determine whether the class is a `background-position` or `background-size` class.

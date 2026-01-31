@@ -47,6 +47,11 @@ export const isArbitraryLength = (value: string) =>
 export const isArbitraryNumber = (value: string) =>
     getIsArbitraryValue(value, isLabelNumber, isNumber)
 
+export const isArbitraryWeight = (value: string) => getIsArbitraryValue(value, isLabelWeight, isAny)
+
+export const isArbitraryFamilyName = (value: string) =>
+    getIsArbitraryValue(value, isLabelFamilyName, isNever)
+
 export const isArbitraryPosition = (value: string) =>
     getIsArbitraryValue(value, isLabelPosition, isNever)
 
@@ -73,6 +78,9 @@ export const isArbitraryVariableImage = (value: string) =>
 
 export const isArbitraryVariableShadow = (value: string) =>
     getIsArbitraryVariable(value, isLabelShadow, true)
+
+export const isArbitraryVariableWeight = (value: string) =>
+    getIsArbitraryVariable(value, isLabelWeight, true)
 
 // Helpers
 
@@ -124,5 +132,7 @@ const isLabelLength = (label: string) => label === 'length'
 const isLabelNumber = (label: string) => label === 'number'
 
 const isLabelFamilyName = (label: string) => label === 'family-name'
+
+const isLabelWeight = (label: string) => label === 'number' || label === 'weight'
 
 const isLabelShadow = (label: string) => label === 'shadow'

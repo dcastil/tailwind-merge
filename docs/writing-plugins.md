@@ -16,7 +16,7 @@ export function withMagic(config: Config): Config {
     return mergeConfigs<'magic.my-group'>(config, {
         extend: {
             classGroups: {
-                'magic.my-group': [{ magic: [validators.isLength, 'wow'] }],
+                'magic.my-group': [{ magic: [validators.isNumber, 'wow'] }],
             },
         },
     })

@@ -5,6 +5,7 @@ import { validators } from '../src'
 const {
     isAny,
     isAnyNonArbitrary,
+    isArbitraryFamilyName,
     isArbitraryImage,
     isArbitraryLength,
     isArbitraryNumber,
@@ -19,6 +20,8 @@ const {
     isArbitraryVariablePosition,
     isArbitraryVariableShadow,
     isArbitraryVariableSize,
+    isArbitraryVariableWeight,
+    isArbitraryWeight,
     isFraction,
     isInteger,
     isNumber,
@@ -46,6 +49,17 @@ test('isAnyNonArbitrary', () => {
     expect(isAnyNonArbitrary('[label:test]')).toBe(false)
     expect(isAnyNonArbitrary('(test)')).toBe(false)
     expect(isAnyNonArbitrary('(label:test)')).toBe(false)
+})
+
+test('isArbitraryFamilyName', () => {
+    expect(isArbitraryFamilyName('[family-name:Open_Sans]')).toBe(true)
+    expect(isArbitraryFamilyName('[family-name:var(--my-font)]')).toBe(true)
+
+    expect(isArbitraryFamilyName('[Open_Sans]')).toBe(false)
+    expect(isArbitraryFamilyName('[number:400]')).toBe(false)
+    expect(isArbitraryFamilyName('[weight:400]')).toBe(false)
+    expect(isArbitraryFamilyName('family-name:test')).toBe(false)
+    expect(isArbitraryFamilyName('(family-name:test)')).toBe(false)
 })
 
 test('isArbitraryImage', () => {
@@ -115,6 +129,19 @@ test('isArbitraryShadow', () => {
     expect(isArbitraryShadow('[rgba(5,5,5,5)]')).toBe(false)
     expect(isArbitraryShadow('[#00f]')).toBe(false)
     expect(isArbitraryShadow('[something-else]')).toBe(false)
+})
+
+test('isArbitraryWeight', () => {
+    expect(isArbitraryWeight('[weight:400]')).toBe(true)
+    expect(isArbitraryWeight('[weight:bold]')).toBe(true)
+    expect(isArbitraryWeight('[number:400]')).toBe(true)
+    expect(isArbitraryWeight('[number:var(--my-weight)]')).toBe(true)
+    expect(isArbitraryWeight('[400]')).toBe(true)
+    expect(isArbitraryWeight('[bold]')).toBe(true)
+
+    expect(isArbitraryWeight('[family-name:test]')).toBe(false)
+    expect(isArbitraryWeight('weight:400')).toBe(false)
+    expect(isArbitraryWeight('(weight:400)')).toBe(false)
 })
 
 test('isArbitrarySize', () => {
@@ -207,6 +234,16 @@ test('isArbitraryVariableSize', () => {
     expect(isArbitraryVariableSize('(test)')).toBe(false)
     expect(isArbitraryVariableSize('size:test')).toBe(false)
     expect(isArbitraryVariableSize('(percentage:test)')).toBe(false)
+})
+
+test('isArbitraryVariableWeight', () => {
+    expect(isArbitraryVariableWeight('(weight:test)')).toBe(true)
+    expect(isArbitraryVariableWeight('(number:test)')).toBe(true)
+    expect(isArbitraryVariableWeight('(--my-weight)')).toBe(true)
+
+    expect(isArbitraryVariableWeight('(other:test)')).toBe(false)
+    expect(isArbitraryVariableWeight('weight:test')).toBe(false)
+    expect(isArbitraryVariableWeight('[weight:test]')).toBe(false)
 })
 
 test('isFraction', () => {
