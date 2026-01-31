@@ -19,7 +19,7 @@ import {
     isArbitraryVariableShadow,
     isArbitraryVariableSize,
     isArbitraryVariableWeight,
-    isArbitraryWeightInternal,
+    isArbitraryWeight,
     isFraction,
     isInteger,
     isNumber,
@@ -824,7 +824,7 @@ export const getDefaultConfig = () => {
              */
             'font-weight': [
                 {
-                    font: [themeFontWeight, isArbitraryVariableWeight, isArbitraryWeightInternal],
+                    font: [themeFontWeight, isArbitraryVariableWeight, isArbitraryWeight],
                 },
             ],
             /**
