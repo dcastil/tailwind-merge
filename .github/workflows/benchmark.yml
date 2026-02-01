@@ -11,17 +11,17 @@ jobs:
         runs-on: ubuntu-latest
         steps:
             - uses: actions/checkout@v6
-            - name: Use Node.js 22
+            - name: Use Node.js 24
               uses: actions/setup-node@v6
               with:
-                  node-version: 22.20.0
+                  node-version: 24.13.0
             - name: Use node_modules cache
               uses: actions/cache@v5
               with:
                   path: node_modules
-                  key: yarn-node-22-lock-${{ hashFiles('yarn.lock') }}
+                  key: yarn-node-24-lock-${{ hashFiles('yarn.lock') }}
                   restore-keys: |
-                      yarn-node-22-lock-
+                      yarn-node-24-lock-
             - run: yarn install --frozen-lockfile
             - name: Run benchmark
               uses: CodSpeedHQ/action@v4
