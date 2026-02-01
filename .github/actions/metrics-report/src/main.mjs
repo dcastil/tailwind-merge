@@ -39,7 +39,7 @@ async function run() {
     ])
 
     const isPullRequestFromFork =
-        pullRequest.head.repo.full_name !== `${context.repo.owner}/${context.repo.repo}`
+        pullRequest.head.repo?.full_name !== `${context.repo.owner}/${context.repo.repo}`
 
     if (isPullRequestFromFork) {
         core.info('Pull request is from a fork, printing comment instead of posting it')
