@@ -1,6 +1,6 @@
 // @ts-check
 
-import core from '@actions/core'
+import * as core from '@actions/core'
 import { context } from '@actions/github'
 
 import { getPackageSize } from './get-package-size.mjs'
@@ -11,10 +11,9 @@ import { checkoutBranch } from './utils/git.mjs'
 run()
 
 async function run() {
-    const pullRequest =
-        /** @type {import('@octokit/webhooks-types').PullRequestEvent} */ (
-            context.payload
-        ).pull_request
+    const pullRequest = /** @type {import('@octokit/webhooks-types').PullRequestEvent} */ (
+        context.payload
+    ).pull_request
 
     if (!pullRequest) {
         throw Error('This action can only be run in a pull request')
@@ -39,7 +38,7 @@ async function run() {
     ])
 
     const isPullRequestFromFork =
-        pullRequest.head.repo.full_name !== `${context.repo.owner}/${context.repo.repo}`
+        pullRequest.head.repo?.full_name !== `${context.repo.owner}/${context.repo.repo}`
 
     if (isPullRequestFromFork) {
         core.info('Pull request is from a fork, printing comment instead of posting it')
