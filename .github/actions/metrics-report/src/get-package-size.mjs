@@ -5,7 +5,7 @@ import path from 'path'
 import { promisify } from 'util'
 import zlib from 'zlib'
 
-import core from '@actions/core'
+import * as core from '@actions/core'
 import { exec } from '@actions/exec'
 import { transform } from 'esbuild'
 import { rollup } from 'rollup'
