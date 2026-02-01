@@ -17,7 +17,7 @@ jobs:
         steps:
             - uses: actions/checkout@v5
             - name: Use Node.js 22
-              uses: actions/setup-node@v5
+              uses: actions/setup-node@v6
               with:
                   node-version: 22.20.0
                   # More info: https://docs.github.com/en/actions/publishing-packages/publishing-nodejs-packages#publishing-packages-to-the-npm-registry
@@ -49,7 +49,7 @@ jobs:
         steps:
             - uses: actions/checkout@v5
             - name: Use Node.js 22
-              uses: actions/setup-node@v5
+              uses: actions/setup-node@v6
               with:
                   node-version: 22.20.0
                   # More info: https://docs.github.com/en/actions/publishing-packages/publishing-nodejs-packages#publishing-packages-to-the-npm-registry
