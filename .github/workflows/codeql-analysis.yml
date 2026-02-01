@@ -29,10 +29,10 @@ jobs:
                   restore-keys: |
                       yarn-node-22-lock-
             - name: Initialize CodeQL
-              uses: github/codeql-action/init@v3
+              uses: github/codeql-action/init@v4
               with:
                   languages: javascript
             - run: yarn install --frozen-lockfile
             - run: yarn build
             - name: Perform CodeQL Analysis
-              uses: github/codeql-action/analyze@v3
+              uses: github/codeql-action/analyze@v4
