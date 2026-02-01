@@ -16,7 +16,7 @@ jobs:
               with:
                   node-version: 22.20.0
             - name: Use node_modules cache
-              uses: actions/cache@v4
+              uses: actions/cache@v5
               with:
                   path: node_modules
                   key: yarn-node-22-lock-${{ hashFiles('yarn.lock') }}
