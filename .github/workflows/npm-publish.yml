@@ -19,7 +19,7 @@ jobs:
             - name: Use Node.js 22
               uses: actions/setup-node@v6
               with:
-                  node-version: 22.20.0
+                  node-version: 24.13.0
                   # More info: https://docs.github.com/en/actions/publishing-packages/publishing-nodejs-packages#publishing-packages-to-the-npm-registry
                   registry-url: 'https://registry.npmjs.org'
             - name: Use node_modules cache
@@ -51,7 +51,7 @@ jobs:
             - name: Use Node.js 22
               uses: actions/setup-node@v6
               with:
-                  node-version: 22.20.0
+                  node-version: 24.13.0
                   # More info: https://docs.github.com/en/actions/publishing-packages/publishing-nodejs-packages#publishing-packages-to-the-npm-registry
                   registry-url: 'https://registry.npmjs.org'
             - name: Use node_modules cache
