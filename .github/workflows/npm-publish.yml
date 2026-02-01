@@ -15,7 +15,7 @@ jobs:
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         runs-on: ubuntu-latest
         steps:
-            - uses: actions/checkout@v5
+            - uses: actions/checkout@v6
             - name: Use Node.js 22
               uses: actions/setup-node@v6
               with:
@@ -47,7 +47,7 @@ jobs:
         if: github.event_name == 'release' && github.event.action == 'published'
         runs-on: ubuntu-latest
         steps:
-            - uses: actions/checkout@v5
+            - uses: actions/checkout@v6
             - name: Use Node.js 22
               uses: actions/setup-node@v6
               with:
