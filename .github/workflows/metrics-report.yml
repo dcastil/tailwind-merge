@@ -9,7 +9,7 @@ jobs:
             pull-requests: write
         steps:
             - uses: actions/checkout@v6
-            - name: Use Node.js 22
+            - name: Use Node.js 24
               uses: actions/setup-node@v6
               with:
                   node-version: 24.13.0
@@ -17,21 +17,21 @@ jobs:
               uses: actions/cache/restore@v5
               with:
                   path: node_modules
-                  key: yarn-node-22-lock-${{ hashFiles('yarn.lock') }}
+                  key: yarn-node-24-lock-${{ hashFiles('yarn.lock') }}
                   restore-keys: |
-                      yarn-node-22-lock-
+                      yarn-node-24-lock-
             - run: yarn --frozen-lockfile
             - name: Save node_modules cache
               uses: actions/cache/save@v5
               with:
                   path: node_modules
-                  key: yarn-node-22-lock-${{ hashFiles('yarn.lock') }}
+                  key: yarn-node-24-lock-${{ hashFiles('yarn.lock') }}
             - name: Use node_modules cache for metrics-report-action
               uses: actions/cache@v5
               with:
                   path: .github/actions/metrics-report/node_modules
-                  key: yarn-node-22-metrics-report-action-lock-${{ hashFiles('.github/actions/metrics-report/yarn.lock') }}
+                  key: yarn-node-24-metrics-report-action-lock-${{ hashFiles('.github/actions/metrics-report/yarn.lock') }}
                   restore-keys: |
-                      yarn-node-22-metrics-report-action-lock-
+                      yarn-node-24-metrics-report-action-lock-
             - run: yarn --cwd .github/actions/metrics-report install --frozen-lockfile
             - uses: ./.github/actions/metrics-report
