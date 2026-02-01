@@ -1,6 +1,6 @@
 // @ts-check
 
-import core from '@actions/core'
+import * as core from '@actions/core'
 import { context } from '@actions/github'
 
 import { octokit } from './utils/github.mjs'
