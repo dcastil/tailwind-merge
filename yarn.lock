@@ -1039,22 +1039,22 @@
   resolved "https://registry.yarnpkg.com/@bcoe/v8-coverage/-/v8-coverage-1.0.2.tgz#bbe12dca5b4ef983a0d0af4b07b9bc90ea0ababa"
   integrity sha512-6zABk/ECA/QYSCQ1NGiVwwbQerUCZ+TQbp64Q3AgmfNvurHH0j8TtXa1qbShXA6qqkpAj4V5W8pP6mLe1mcMqA==
 
-"@codspeed/core@^5.0.1":
-  version "5.0.1"
-  resolved "https://registry.yarnpkg.com/@codspeed/core/-/core-5.0.1.tgz#6145c898a86a6d56a169611c3e9657a8b97c7642"
-  integrity sha512-4g5ZyFAin8QywK4+0FK1uXG3GLRPu0oc3xbP+7OUhhFxbwpzFuaJtKmnTofMqLy9/pHH6Bl/7H0/DTVH3cpFkA==
+"@codspeed/core@^5.2.0":
+  version "5.2.0"
+  resolved "https://registry.yarnpkg.com/@codspeed/core/-/core-5.2.0.tgz#9eb986a978774717aab4d12ef21f11605b99bd67"
+  integrity sha512-CmDhpWjcOJg2iBOQ/BmBnSBq8qxlM3r4h8uvYDkoUaba+EKRT3T73BZtKuml/48jZMsB+4/FG2UbTBinDWtuvw==
   dependencies:
     axios "^1.4.0"
     find-up "^6.3.0"
     form-data "^4.0.4"
     node-gyp-build "^4.6.0"
 
-"@codspeed/vitest-plugin@^5.0.1":
-  version "5.0.1"
-  resolved "https://registry.yarnpkg.com/@codspeed/vitest-plugin/-/vitest-plugin-5.0.1.tgz#94684681164e207cd7acf5a01ea4bff287b49e39"
-  integrity sha512-RQLy8AGI16oTtmTyBIS2iKzD4AQQzJP7waurrYkUlnOlCa5Yp/7KXVZuZVzhqwYmPcH984xzFtsC2CENYbpRHQ==
+"@codspeed/vitest-plugin@^5.1.0":
+  version "5.2.0"
+  resolved "https://registry.yarnpkg.com/@codspeed/vitest-plugin/-/vitest-plugin-5.2.0.tgz#38dda5cef2942acf134b052194e23c16a2745d93"
+  integrity sha512-soXKIQBqJzjVQyWRwe2HNfhCaBgxhG25m8+PI3F5zFFsV3FQxMJXHsMECNtrgm+SRiCiWv/OFTcfCMZRy4nKtw==
   dependencies:
-    "@codspeed/core" "^5.0.1"
+    "@codspeed/core" "^5.2.0"
 
 "@esbuild/aix-ppc64@0.27.3":
   version "0.27.3"
