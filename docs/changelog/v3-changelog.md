@@ -1,5 +1,15 @@
 # Changelog for v3 releases
 
+## v3.4.1
+
+### Bug Fixes
+
+- Prevent arbitrary font-family and font-weight from merging by [@roneymoon](https://github.com/roneymoon) in [#635](https://github.com/dcastil/tailwind-merge/pull/635)
+
+**Full Changelog**: [`v3.4.0...v3.4.1`](https://github.com/dcastil/tailwind-merge/compare/v3.4.0...v3.4.1)
+
+Thanks to [@brandonmcconnell](https://github.com/brandonmcconnell), [@manavm1990](https://github.com/manavm1990), [@langy](https://github.com/langy), [@roboflow](https://github.com/roboflow), [@syntaxfm](https://github.com/syntaxfm), [@getsentry](https://github.com/getsentry), [@codecov](https://github.com/codecov), a private sponsor, [@block](https://github.com/block), [@openclaw](https://github.com/openclaw), [@sourcegraph](https://github.com/sourcegraph) and more via [@thnxdev](https://github.com/thnxdev) for sponsoring tailwind-merge! ❤️
+
 ## v3.4.0
 
 ### New Features
