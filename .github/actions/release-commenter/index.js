@@ -15,6 +15,8 @@ const eventPath = process.env.GITHUB_EVENT_PATH
 const repository = process.env.GITHUB_REPOSITORY
 const apiUrl = process.env.GITHUB_API_URL || 'https://api.github.com'
 const graphqlUrl = process.env.GITHUB_GRAPHQL_URL || `${apiUrl}/graphql`
+const githubServerUrl = process.env.GITHUB_SERVER_URL || 'https://github.com'
+const githubRunId = process.env.GITHUB_RUN_ID || ''
 
 main().catch((error) => {
     const message = error instanceof Error ? error.message : String(error)
@@ -284,6 +286,7 @@ async function main() {
         commentBody = `${resolvedComment}\n\n${releaseCommentMarker(
             currentTag,
             currentVersion.isPrerelease,
+            getCurrentRunUrl(),
         )}`
     }
 
@@ -888,10 +891,22 @@ function extractReleaseTagFromComment(body) {
  *
  * @param {string} tag
  * @param {boolean} isPrerelease
+ * @param {string | null} runUrl
  * @returns {string}
  */
-function releaseCommentMarker(tag, isPrerelease) {
-    return `<!-- release-commenter: tag=${tag}; prerelease=${isPrerelease} -->`
+function releaseCommentMarker(tag, isPrerelease, runUrl) {
+    const runFragment = runUrl ? `; run_url=${runUrl}` : ''
+    return `<!-- release-commenter: tag=${tag}; prerelease=${isPrerelease}${runFragment} -->`
+}
+
+/**
+ * Builds the URL for the current workflow run when available.
+ *
+ * @returns {string | null}
+ */
+function getCurrentRunUrl() {
+    if (!repository || !githubRunId) return null
+    return `${githubServerUrl}/${repository}/actions/runs/${githubRunId}`
 }
 
 /**
