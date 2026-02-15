@@ -49,7 +49,9 @@ jobs:
               uses: actions/checkout@v6
             - if: github.event_name == 'workflow_run'
               id: dev_head_tag
-              run: echo "head_tag=v$(node -p \"require('./package.json').version\")-dev.${{ github.event.workflow_run.head_sha }}" >> "$GITHUB_OUTPUT"
+              run: |
+                  version="$(node -p 'require("./package.json").version')"
+                  echo "head_tag=v${version}-dev.${{ github.event.workflow_run.head_sha }}" >> "$GITHUB_OUTPUT"
             - uses: ./.github/actions/release-commenter
               with:
                   github-token: ${{ secrets.GITHUB_TOKEN }}
