@@ -10,6 +10,7 @@ Use this guide when preparing release changelog entries and GitHub release text.
   - Changelog updates in `docs/changelog/*-changelog.md`.
   - Sponsor section generation and ordering.
   - GitHub Releases UI text formatting.
+  - Release comments on PRs/issues via `.github/actions/release-commenter`.
 
 ## Inputs to collect first
 
@@ -19,6 +20,29 @@ Use this guide when preparing release changelog entries and GitHub release text.
 4. Sponsor payout input from thanks.dev for the relevant time window.
 
 `thanks.dev` input must come from the user. Do not infer or invent this data.
+
+## Release commenter behavior
+
+The workflow `.github/workflows/comment-released-prs-and-issues.yml` uses the local action `.github/actions/release-commenter`.
+
+- Automatic base-tag selection is semver-aware:
+  - Stable release tags compare to the previous stable semver tag.
+  - Prerelease tags compare to the previous semver tag (including prereleases).
+- If no valid base tag is found, the action fails.
+- The action fails before posting if any target issue/PR already has a previous stable release-comment.
+- For prereleases, duplicate/previous-comment guard checks are skipped so `-dev.*` and later stable releases can both comment.
+- Manual trigger supports optional overrides:
+  - `head_tag`
+  - `base_tag`
+  - `dry_run`
+
+Manual dry run example:
+
+```bash
+gh workflow run comment-released-prs-and-issues.yml \
+  -f head_tag=v3.4.1 \
+  -f dry_run=true
+```
 
 ## Commands
 

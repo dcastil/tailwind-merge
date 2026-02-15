@@ -97,6 +97,9 @@ Detailed release-specific agent workflow lives in:
 - `.github/workflows/npm-publish.yml`:
   - publishes `dev` tag on `main` pushes,
   - publishes production on release events.
+- `.github/workflows/comment-released-prs-and-issues.yml`:
+  - runs local action `.github/actions/release-commenter`,
+  - supports manual `workflow_dispatch` with optional `head_tag`, `base_tag`, and `dry_run`.
 
 ## Practical guardrails
 

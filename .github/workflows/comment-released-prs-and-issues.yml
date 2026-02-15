@@ -3,16 +3,35 @@ name: Comment released PRs and issues
 on:
     release:
         types: [published]
+    workflow_dispatch:
+        inputs:
+            head_tag:
+                description: 'Optional head tag override'
+                required: false
+                type: string
+            base_tag:
+                description: 'Optional base tag override'
+                required: false
+                type: string
+            dry_run:
+                description: 'Run without posting comments'
+                required: false
+                type: boolean
+                default: false
 
 jobs:
     release:
         runs-on: ubuntu-latest
         permissions:
+            contents: read
             issues: write
             pull-requests: write
         steps:
-            - uses: apexskier/github-release-commenter@v1
+            - uses: ./.github/actions/release-commenter
               with:
-                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+                  github-token: ${{ secrets.GITHUB_TOKEN }}
                   comment-template: This was addressed in release {release_link}.
                   skip-label: skip-release-comment
+                  head-tag: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.head_tag || '' }}
+                  base-tag: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.base_tag || '' }}
+                  dry-run: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.dry_run || false }}

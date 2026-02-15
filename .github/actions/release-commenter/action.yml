@@ -1,0 +1,32 @@
+name: 'release-commenter'
+author: 'Dany Castillo'
+description: 'Comments on released PRs/issues with semver-aware range selection'
+inputs:
+    github-token:
+        description: 'GitHub token with issues and pull-request write permissions'
+        default: '${{ github.token }}'
+        required: false
+    comment-template:
+        description: 'Comment body template'
+        required: false
+        default: 'This was addressed in release {release_link}.'
+    label-template:
+        description: 'Comma-separated labels to add'
+        required: false
+    skip-label:
+        description: 'Comma-separated labels that skip associated PR processing'
+        required: false
+        default: 'dependencies'
+    base-tag:
+        description: 'Optional manual base tag for compare range'
+        required: false
+    head-tag:
+        description: 'Optional manual head tag for compare range'
+        required: false
+    dry-run:
+        description: 'When true, log planned changes without posting'
+        required: false
+        default: 'false'
+runs:
+    using: 'node20'
+    main: 'index.js'
