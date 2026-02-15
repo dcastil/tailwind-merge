@@ -16,6 +16,12 @@ const repository = process.env.GITHUB_REPOSITORY
 const apiUrl = process.env.GITHUB_API_URL || 'https://api.github.com'
 const graphqlUrl = process.env.GITHUB_GRAPHQL_URL || `${apiUrl}/graphql`
 
+main().catch((error) => {
+    const message = error instanceof Error ? error.message : String(error)
+    logError(message)
+    process.exit(1)
+})
+
 /**
  * @typedef {{
  *   major: number
@@ -150,6 +156,453 @@ const graphqlUrl = process.env.GITHUB_GRAPHQL_URL || `${apiUrl}/graphql`
  *   aheadBy: number
  * }} ShaBaseResolution
  */
+
+/**
+ * @typedef {{
+ *   baseRef: string
+ *   headRef: string
+ * }} CompareRefs
+ */
+
+/**
+ * Action entrypoint.
+ *
+ * @returns {Promise<void>}
+ */
+async function main() {
+    if (!repository) {
+        throw new Error('Missing GITHUB_REPOSITORY')
+    }
+
+    const [owner, repo] = repository.split('/')
+    if (!owner || !repo) {
+        throw new Error(`Invalid GITHUB_REPOSITORY value: "${repository}"`)
+    }
+
+    const payload = readEventPayload()
+    const token = getInput('github-token') || process.env.GITHUB_TOKEN
+    if (!token) {
+        throw new Error('Missing github-token input')
+    }
+
+    const headTagInput = getInput('head-tag')
+    const baseTagInput = getInput('base-tag')
+    const npmPackageNameInput = getInput('npm-package-name')
+    const dryRun = parseBooleanInput(getInput('dry-run', 'false'))
+
+    const currentTag = headTagInput || payload?.release?.tag_name
+    if (!currentTag) {
+        throw new Error(
+            'Could not determine current tag. Set head-tag input or trigger from release.published',
+        )
+    }
+
+    const currentVersion = parseTag(currentTag)
+    if (!currentVersion) {
+        throw new Error(`Current tag "${currentTag}" is not semver-compatible`)
+    }
+    const shaPrereleaseContext = getShaPrereleaseContext(currentVersion)
+
+    log(`Current tag: ${currentTag}`)
+    log(`Dry run: ${dryRun}`)
+
+    const currentRelease = await getCurrentRelease(token, owner, repo, currentTag, payload?.release)
+    const releaseLabel = currentRelease.name || currentRelease.tag
+    const releaseUrl = currentRelease.htmlUrl
+
+    const commentTemplate = getInput('comment-template', defaultCommentTemplate)
+    const labelTemplate = getInput('label-template')
+    const skipLabelTemplate = getInput('skip-label')
+
+    const resolvedComment = commentTemplate
+        ? resolveTemplate(commentTemplate, releaseLabel, currentRelease.tag, releaseUrl).trim()
+        : ''
+    const labels = parseTemplateList(labelTemplate, releaseLabel, currentRelease.tag, releaseUrl)
+    const skipLabels = parseTemplateList(
+        skipLabelTemplate,
+        releaseLabel,
+        currentRelease.tag,
+        releaseUrl,
+    )
+
+    const { baseRef, headRef } = await resolveCompareRefs(
+        token,
+        owner,
+        repo,
+        currentTag,
+        currentVersion,
+        shaPrereleaseContext,
+        baseTagInput,
+        npmPackageNameInput,
+    )
+
+    log(`Base ref: ${baseRef}`)
+    log(`Head ref: ${headRef}`)
+    log(`Compare range: ${baseRef}...${headRef}`)
+
+    const compareData = await requestJson(
+        token,
+        'GET',
+        `/repos/${owner}/${repo}/compare/${encodeURIComponent(baseRef)}...${encodeURIComponent(headRef)}`,
+    )
+    /** @type {CompareData} */
+    const comparePayload = compareData
+    const commits = comparePayload.commits || []
+    log(`Compare status: ${comparePayload.status}`)
+    log(`Commits in range: ${commits.length}`)
+
+    if (!commits.length) {
+        log('No commits found in compare range. Nothing to do.')
+        return
+    }
+
+    const targets = await collectLinkedIssuesAndPrs(token, owner, repo, commits, skipLabels)
+    log(`Resolved targets: ${targets.length}`)
+
+    if (!targets.length) {
+        log('No linked issues/PRs found. Nothing to do.')
+        return
+    }
+
+    const guardViolations = await checkGuardViolations(token, owner, repo, targets, currentVersion)
+    if (guardViolations.length > 0) {
+        const details = guardViolations
+            .slice(0, 20)
+            .map(
+                (violation) =>
+                    `#${violation.issueNumber} (${violation.kind}, existing ${violation.existingTag}) ${violation.commentUrl}`,
+            )
+            .join('\n')
+
+        throw new Error(
+            `Guard check failed. Found ${guardViolations.length} target(s) with existing release comments.\n${details}`,
+        )
+    }
+
+    let commentBody = ''
+    if (resolvedComment) {
+        commentBody = `${resolvedComment}\n\n${releaseCommentMarker(
+            currentTag,
+            currentVersion.isPrerelease,
+        )}`
+    }
+
+    if (dryRun && commentBody) {
+        log(`Dry run comment body:\n${commentBody}`)
+    }
+
+    await postCommentsAndLabels(token, owner, repo, targets, commentBody, labels, dryRun)
+
+    if (dryRun) {
+        log('Dry run complete; no comments/labels were posted.')
+    } else {
+        log('Completed posting release comments/labels.')
+    }
+}
+
+/**
+ * Resolves the compare refs for this run from manual input, SHA-prerelease npm strategy,
+ * or semver-stable release history strategy.
+ *
+ * @param {string} token
+ * @param {string} owner
+ * @param {string} repo
+ * @param {string} currentTag
+ * @param {ParsedTag} currentVersion
+ * @param {ShaPrereleaseContext | null} shaPrereleaseContext
+ * @param {string} baseTagInput
+ * @param {string} npmPackageNameInput
+ * @returns {Promise<CompareRefs>}
+ */
+async function resolveCompareRefs(
+    token,
+    owner,
+    repo,
+    currentTag,
+    currentVersion,
+    shaPrereleaseContext,
+    baseTagInput,
+    npmPackageNameInput,
+) {
+    let baseRef = ''
+    let headRef = currentTag
+
+    if (baseTagInput) {
+        baseRef = baseTagInput
+        if (shaPrereleaseContext) {
+            headRef = shaPrereleaseContext.currentSha
+        }
+        log(`Using manual base ref input: ${baseRef}`)
+    } else if (shaPrereleaseContext) {
+        const npmPackageName = npmPackageNameInput || repo
+        const shaResolution = await resolveShaPrereleaseBaseRef(
+            token,
+            owner,
+            repo,
+            npmPackageName,
+            currentVersion,
+            shaPrereleaseContext,
+        )
+        baseRef = shaResolution.baseRef
+        headRef = shaResolution.headRef
+        log(
+            `Resolved SHA compare range from npm: version=${shaResolution.sourceVersion} base_sha=${baseRef} head_sha=${headRef} ahead_by=${shaResolution.aheadBy}`,
+        )
+    } else {
+        const releases = await requestPaginated(token, `/repos/${owner}/${repo}/releases`)
+        /** @type {ReleaseRecord[]} */
+        const publishedReleases = releases.filter((release) => !release.draft)
+        baseRef = pickBaseTag(currentTag, currentVersion, publishedReleases, '')
+    }
+
+    return { baseRef, headRef }
+}
+
+/**
+ * Resolves linked issue/PR numbers from commits and associated PR metadata.
+ *
+ * @param {string} token
+ * @param {string} owner
+ * @param {string} repo
+ * @param {CommitRecord[]} commits
+ * @param {string[]} skipLabels
+ * @returns {Promise<number[]>}
+ */
+async function collectLinkedIssuesAndPrs(token, owner, repo, commits, skipLabels) {
+    /** @type {Set<number>} */
+    const linkedIssuesPrs = new Set()
+
+    for (const commit of commits) {
+        const commitUrl = `https://github.com/${owner}/${repo}/commit/${commit.sha}`
+
+        const data = await requestGraphQL(
+            token,
+            `
+            query($url: URI!) {
+              resource(url: $url) {
+                ... on Commit {
+                  messageHeadlineHTML
+                  messageBodyHTML
+                  associatedPullRequests(first: 20) {
+                    pageInfo {
+                      hasNextPage
+                    }
+                    edges {
+                      node {
+                        bodyHTML
+                        number
+                        labels(first: 50) {
+                          pageInfo {
+                            hasNextPage
+                          }
+                          nodes {
+                            name
+                          }
+                        }
+                        timelineItems(itemTypes: [CONNECTED_EVENT, DISCONNECTED_EVENT], first: 100) {
+                          pageInfo {
+                            hasNextPage
+                          }
+                          nodes {
+                            ... on ConnectedEvent {
+                              __typename
+                              isCrossRepository
+                              subject {
+                                __typename
+                                ... on Issue {
+                                  number
+                                }
+                                ... on PullRequest {
+                                  number
+                                }
+                              }
+                            }
+                            ... on DisconnectedEvent {
+                              __typename
+                              isCrossRepository
+                              subject {
+                                __typename
+                                ... on Issue {
+                                  number
+                                }
+                                ... on PullRequest {
+                                  number
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+            `,
+            { url: commitUrl },
+        )
+        /** @type {GraphQLCommitQueryData} */
+        const queryData = data
+
+        const resource = queryData.resource
+        if (!resource) continue
+
+        const commitHtmlSegments = [
+            resource.messageHeadlineHTML || '',
+            resource.messageBodyHTML || '',
+            ...(resource.associatedPullRequests?.edges || []).map(
+                (edge) => edge?.node?.bodyHTML || '',
+            ),
+        ].join(' ')
+
+        for (const match of commitHtmlSegments.matchAll(closesMatcher)) {
+            const issueNumber = Number.parseInt(match[1], 10)
+            if (Number.isInteger(issueNumber)) {
+                linkedIssuesPrs.add(issueNumber)
+            }
+        }
+
+        for (const edge of resource.associatedPullRequests?.edges || []) {
+            const pr = edge.node
+            const prLabels = (pr.labels?.nodes || []).map((label) => label.name)
+            if (shouldSkipPr(skipLabels, prLabels)) {
+                log(`Skipping PR #${pr.number} because skip-label matched`)
+                continue
+            }
+
+            linkedIssuesPrs.add(pr.number)
+
+            const timelineNodes = (pr.timelineItems?.nodes || [])
+                .filter(
+                    (node) =>
+                        !node.isCrossRepository &&
+                        node.subject &&
+                        (node.subject.__typename === 'Issue' ||
+                            node.subject.__typename === 'PullRequest') &&
+                        Number.isInteger(node.subject.number),
+                )
+                .slice()
+                .reverse()
+
+            /** @type {Set<number>} */
+            const seenTargets = new Set()
+            for (const node of timelineNodes) {
+                if (!node.subject) continue
+                const targetNumber = node.subject.number
+                if (seenTargets.has(targetNumber)) continue
+                if (node.__typename === 'ConnectedEvent') {
+                    linkedIssuesPrs.add(targetNumber)
+                }
+                seenTargets.add(targetNumber)
+            }
+        }
+    }
+
+    return [...linkedIssuesPrs].sort((left, right) => left - right)
+}
+
+/**
+ * Validates that targets do not already have release comments that would make this run unsafe.
+ *
+ * @param {string} token
+ * @param {string} owner
+ * @param {string} repo
+ * @param {number[]} targetNumbers
+ * @param {ParsedTag} currentVersion
+ * @returns {Promise<GuardViolation[]>}
+ */
+async function checkGuardViolations(token, owner, repo, targetNumbers, currentVersion) {
+    if (currentVersion.isPrerelease) {
+        log('Current release is a prerelease, skipping duplicate/previous-release comment guard')
+        return []
+    }
+
+    /** @type {GuardViolation[]} */
+    const violations = []
+
+    for (const issueNumber of targetNumbers) {
+        const comments = await requestPaginated(
+            token,
+            `/repos/${owner}/${repo}/issues/${issueNumber}/comments`,
+        )
+        /** @type {IssueComment[]} */
+        const issueComments = comments
+
+        for (const comment of issueComments) {
+            const existingTag = extractReleaseTagFromComment(comment.body || '')
+            if (!existingTag) continue
+
+            const existingVersion = parseTag(existingTag)
+            if (!existingVersion) continue
+
+            if (compareSemver(existingVersion, currentVersion) === 0) {
+                violations.push({
+                    issueNumber,
+                    kind: 'duplicate',
+                    existingTag,
+                    commentUrl: comment.html_url,
+                })
+                break
+            }
+
+            if (!existingVersion.isPrerelease) {
+                violations.push({
+                    issueNumber,
+                    kind: 'previous-release',
+                    existingTag,
+                    commentUrl: comment.html_url,
+                })
+                break
+            }
+        }
+    }
+
+    return violations
+}
+
+/**
+ * Posts comments and/or labels for all resolved targets, or logs them in dry-run mode.
+ *
+ * @param {string} token
+ * @param {string} owner
+ * @param {string} repo
+ * @param {number[]} targets
+ * @param {string} commentBody
+ * @param {string[]} labels
+ * @param {boolean} dryRun
+ * @returns {Promise<void>}
+ */
+async function postCommentsAndLabels(token, owner, repo, targets, commentBody, labels, dryRun) {
+    for (const issueNumber of targets) {
+        if (commentBody) {
+            if (dryRun) {
+                log(`Dry run: would comment on #${issueNumber}`)
+            } else {
+                await requestJson(
+                    token,
+                    'POST',
+                    `/repos/${owner}/${repo}/issues/${issueNumber}/comments`,
+                    undefined,
+                    { body: commentBody },
+                )
+            }
+        }
+
+        if (labels.length > 0) {
+            if (dryRun) {
+                log(`Dry run: would add labels [${labels.join(', ')}] to #${issueNumber}`)
+            } else {
+                await requestJson(
+                    token,
+                    'POST',
+                    `/repos/${owner}/${repo}/issues/${issueNumber}/labels`,
+                    undefined,
+                    { labels },
+                )
+            }
+        }
+    }
+}
 
 /**
  * Writes a namespaced log line for easier workflow debugging.
@@ -815,411 +1268,3 @@ function shouldSkipPr(skipLabels, prLabels) {
     if (!skipLabels.length) return false
     return skipLabels.some((skipLabel) => prLabels.includes(skipLabel))
 }
-
-/**
- * Resolves linked issue/PR numbers from commits and associated PR metadata.
- *
- * @param {string} token
- * @param {string} owner
- * @param {string} repo
- * @param {CommitRecord[]} commits
- * @param {string[]} skipLabels
- * @returns {Promise<number[]>}
- */
-async function collectLinkedIssuesAndPrs(token, owner, repo, commits, skipLabels) {
-    /** @type {Set<number>} */
-    const linkedIssuesPrs = new Set()
-
-    for (const commit of commits) {
-        const commitUrl = `https://github.com/${owner}/${repo}/commit/${commit.sha}`
-
-        const data = await requestGraphQL(
-            token,
-            `
-            query($url: URI!) {
-              resource(url: $url) {
-                ... on Commit {
-                  messageHeadlineHTML
-                  messageBodyHTML
-                  associatedPullRequests(first: 20) {
-                    pageInfo {
-                      hasNextPage
-                    }
-                    edges {
-                      node {
-                        bodyHTML
-                        number
-                        labels(first: 50) {
-                          pageInfo {
-                            hasNextPage
-                          }
-                          nodes {
-                            name
-                          }
-                        }
-                        timelineItems(itemTypes: [CONNECTED_EVENT, DISCONNECTED_EVENT], first: 100) {
-                          pageInfo {
-                            hasNextPage
-                          }
-                          nodes {
-                            ... on ConnectedEvent {
-                              __typename
-                              isCrossRepository
-                              subject {
-                                __typename
-                                ... on Issue {
-                                  number
-                                }
-                                ... on PullRequest {
-                                  number
-                                }
-                              }
-                            }
-                            ... on DisconnectedEvent {
-                              __typename
-                              isCrossRepository
-                              subject {
-                                __typename
-                                ... on Issue {
-                                  number
-                                }
-                                ... on PullRequest {
-                                  number
-                                }
-                              }
-                            }
-                          }
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-            }
-            `,
-            { url: commitUrl },
-        )
-        /** @type {GraphQLCommitQueryData} */
-        const queryData = data
-
-        const resource = queryData.resource
-        if (!resource) continue
-
-        const commitHtmlSegments = [
-            resource.messageHeadlineHTML || '',
-            resource.messageBodyHTML || '',
-            ...(resource.associatedPullRequests?.edges || []).map(
-                (edge) => edge?.node?.bodyHTML || '',
-            ),
-        ].join(' ')
-
-        for (const match of commitHtmlSegments.matchAll(closesMatcher)) {
-            const issueNumber = Number.parseInt(match[1], 10)
-            if (Number.isInteger(issueNumber)) {
-                linkedIssuesPrs.add(issueNumber)
-            }
-        }
-
-        for (const edge of resource.associatedPullRequests?.edges || []) {
-            const pr = edge.node
-            const prLabels = (pr.labels?.nodes || []).map((label) => label.name)
-            if (shouldSkipPr(skipLabels, prLabels)) {
-                log(`Skipping PR #${pr.number} because skip-label matched`)
-                continue
-            }
-
-            linkedIssuesPrs.add(pr.number)
-
-            const timelineNodes = (pr.timelineItems?.nodes || [])
-                .filter(
-                    (node) =>
-                        !node.isCrossRepository &&
-                        node.subject &&
-                        (node.subject.__typename === 'Issue' ||
-                            node.subject.__typename === 'PullRequest') &&
-                        Number.isInteger(node.subject.number),
-                )
-                .slice()
-                .reverse()
-
-            /** @type {Set<number>} */
-            const seenTargets = new Set()
-            for (const node of timelineNodes) {
-                if (!node.subject) continue
-                const targetNumber = node.subject.number
-                if (seenTargets.has(targetNumber)) continue
-                if (node.__typename === 'ConnectedEvent') {
-                    linkedIssuesPrs.add(targetNumber)
-                }
-                seenTargets.add(targetNumber)
-            }
-        }
-    }
-
-    return [...linkedIssuesPrs].sort((left, right) => left - right)
-}
-
-/**
- * Validates that targets do not already have release comments that would make this run unsafe.
- *
- * @param {string} token
- * @param {string} owner
- * @param {string} repo
- * @param {number[]} targetNumbers
- * @param {ParsedTag} currentVersion
- * @returns {Promise<GuardViolation[]>}
- */
-async function checkGuardViolations(token, owner, repo, targetNumbers, currentVersion) {
-    if (currentVersion.isPrerelease) {
-        log('Current release is a prerelease, skipping duplicate/previous-release comment guard')
-        return []
-    }
-
-    /** @type {GuardViolation[]} */
-    const violations = []
-
-    for (const issueNumber of targetNumbers) {
-        const comments = await requestPaginated(
-            token,
-            `/repos/${owner}/${repo}/issues/${issueNumber}/comments`,
-        )
-        /** @type {IssueComment[]} */
-        const issueComments = comments
-
-        for (const comment of issueComments) {
-            const existingTag = extractReleaseTagFromComment(comment.body || '')
-            if (!existingTag) continue
-
-            const existingVersion = parseTag(existingTag)
-            if (!existingVersion) continue
-
-            if (compareSemver(existingVersion, currentVersion) === 0) {
-                violations.push({
-                    issueNumber,
-                    kind: 'duplicate',
-                    existingTag,
-                    commentUrl: comment.html_url,
-                })
-                break
-            }
-
-            if (!existingVersion.isPrerelease) {
-                violations.push({
-                    issueNumber,
-                    kind: 'previous-release',
-                    existingTag,
-                    commentUrl: comment.html_url,
-                })
-                break
-            }
-        }
-    }
-
-    return violations
-}
-
-/**
- * Posts comments and/or labels for all resolved targets, or logs them in dry-run mode.
- *
- * @param {string} token
- * @param {string} owner
- * @param {string} repo
- * @param {number[]} targets
- * @param {string} commentBody
- * @param {string[]} labels
- * @param {boolean} dryRun
- * @returns {Promise<void>}
- */
-async function postCommentsAndLabels(token, owner, repo, targets, commentBody, labels, dryRun) {
-    for (const issueNumber of targets) {
-        if (commentBody) {
-            if (dryRun) {
-                log(`Dry run: would comment on #${issueNumber}`)
-            } else {
-                await requestJson(
-                    token,
-                    'POST',
-                    `/repos/${owner}/${repo}/issues/${issueNumber}/comments`,
-                    undefined,
-                    { body: commentBody },
-                )
-            }
-        }
-
-        if (labels.length > 0) {
-            if (dryRun) {
-                log(`Dry run: would add labels [${labels.join(', ')}] to #${issueNumber}`)
-            } else {
-                await requestJson(
-                    token,
-                    'POST',
-                    `/repos/${owner}/${repo}/issues/${issueNumber}/labels`,
-                    undefined,
-                    { labels },
-                )
-            }
-        }
-    }
-}
-
-/**
- * Action entrypoint.
- *
- * @returns {Promise<void>}
- */
-async function main() {
-    if (!repository) {
-        throw new Error('Missing GITHUB_REPOSITORY')
-    }
-
-    const [owner, repo] = repository.split('/')
-    if (!owner || !repo) {
-        throw new Error(`Invalid GITHUB_REPOSITORY value: "${repository}"`)
-    }
-
-    const payload = readEventPayload()
-    const token = getInput('github-token') || process.env.GITHUB_TOKEN
-    if (!token) {
-        throw new Error('Missing github-token input')
-    }
-
-    const headTagInput = getInput('head-tag')
-    const baseTagInput = getInput('base-tag')
-    const npmPackageNameInput = getInput('npm-package-name')
-    const dryRun = parseBooleanInput(getInput('dry-run', 'false'))
-
-    const currentTag = headTagInput || payload?.release?.tag_name
-    if (!currentTag) {
-        throw new Error(
-            'Could not determine current tag. Set head-tag input or trigger from release.published',
-        )
-    }
-
-    const currentVersion = parseTag(currentTag)
-    if (!currentVersion) {
-        throw new Error(`Current tag "${currentTag}" is not semver-compatible`)
-    }
-    const shaPrereleaseContext = getShaPrereleaseContext(currentVersion)
-
-    log(`Current tag: ${currentTag}`)
-    log(`Dry run: ${dryRun}`)
-
-    const currentRelease = await getCurrentRelease(token, owner, repo, currentTag, payload?.release)
-    const releaseLabel = currentRelease.name || currentRelease.tag
-    const releaseUrl = currentRelease.htmlUrl
-
-    const commentTemplate = getInput('comment-template', defaultCommentTemplate)
-    const labelTemplate = getInput('label-template')
-    const skipLabelTemplate = getInput('skip-label')
-
-    const resolvedComment = commentTemplate
-        ? resolveTemplate(commentTemplate, releaseLabel, currentRelease.tag, releaseUrl).trim()
-        : ''
-    const labels = parseTemplateList(labelTemplate, releaseLabel, currentRelease.tag, releaseUrl)
-    const skipLabels = parseTemplateList(
-        skipLabelTemplate,
-        releaseLabel,
-        currentRelease.tag,
-        releaseUrl,
-    )
-
-    let baseRef = ''
-    let headRef = currentTag
-
-    if (baseTagInput) {
-        baseRef = baseTagInput
-        if (shaPrereleaseContext) {
-            headRef = shaPrereleaseContext.currentSha
-        }
-        log(`Using manual base ref input: ${baseRef}`)
-    } else if (shaPrereleaseContext) {
-        const npmPackageName = npmPackageNameInput || repo
-        const shaResolution = await resolveShaPrereleaseBaseRef(
-            token,
-            owner,
-            repo,
-            npmPackageName,
-            currentVersion,
-            shaPrereleaseContext,
-        )
-        baseRef = shaResolution.baseRef
-        headRef = shaResolution.headRef
-        log(
-            `Resolved SHA compare range from npm: version=${shaResolution.sourceVersion} base_sha=${baseRef} head_sha=${headRef} ahead_by=${shaResolution.aheadBy}`,
-        )
-    } else {
-        const releases = await requestPaginated(token, `/repos/${owner}/${repo}/releases`)
-        /** @type {ReleaseRecord[]} */
-        const publishedReleases = releases.filter((release) => !release.draft)
-        baseRef = pickBaseTag(currentTag, currentVersion, publishedReleases, '')
-    }
-
-    log(`Base ref: ${baseRef}`)
-    log(`Head ref: ${headRef}`)
-    log(`Compare range: ${baseRef}...${headRef}`)
-
-    const compareData = await requestJson(
-        token,
-        'GET',
-        `/repos/${owner}/${repo}/compare/${encodeURIComponent(baseRef)}...${encodeURIComponent(headRef)}`,
-    )
-    /** @type {CompareData} */
-    const comparePayload = compareData
-    const commits = comparePayload.commits || []
-    log(`Compare status: ${comparePayload.status}`)
-    log(`Commits in range: ${commits.length}`)
-
-    if (!commits.length) {
-        log('No commits found in compare range. Nothing to do.')
-        return
-    }
-
-    const targets = await collectLinkedIssuesAndPrs(token, owner, repo, commits, skipLabels)
-    log(`Resolved targets: ${targets.length}`)
-
-    if (!targets.length) {
-        log('No linked issues/PRs found. Nothing to do.')
-        return
-    }
-
-    const guardViolations = await checkGuardViolations(token, owner, repo, targets, currentVersion)
-    if (guardViolations.length > 0) {
-        const details = guardViolations
-            .slice(0, 20)
-            .map(
-                (violation) =>
-                    `#${violation.issueNumber} (${violation.kind}, existing ${violation.existingTag}) ${violation.commentUrl}`,
-            )
-            .join('\n')
-
-        throw new Error(
-            `Guard check failed. Found ${guardViolations.length} target(s) with existing release comments.\n${details}`,
-        )
-    }
-
-    let commentBody = ''
-    if (resolvedComment) {
-        commentBody = `${resolvedComment}\n\n${releaseCommentMarker(
-            currentTag,
-            currentVersion.isPrerelease,
-        )}`
-    }
-
-    if (dryRun && commentBody) {
-        log(`Dry run comment body:\n${commentBody}`)
-    }
-
-    await postCommentsAndLabels(token, owner, repo, targets, commentBody, labels, dryRun)
-
-    if (dryRun) {
-        log('Dry run complete; no comments/labels were posted.')
-    } else {
-        log('Completed posting release comments/labels.')
-    }
-}
-
-main().catch((error) => {
-    const message = error instanceof Error ? error.message : String(error)
-    logError(message)
-    process.exit(1)
-})
