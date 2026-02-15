@@ -25,6 +25,10 @@ Use this guide when preparing release changelog entries and GitHub release text.
 
 The workflow `.github/workflows/comment-released-prs-and-issues.yml` uses the local action `.github/actions/release-commenter`.
 
+- It runs for:
+  - published GitHub releases,
+  - manual workflow dispatch,
+  - completed successful `npm Publish` runs triggered by `push` on `main` (dev-release comment pass).
 - Automatic base-tag selection is semver-aware:
   - Stable release tags compare to the previous stable semver tag.
   - Prerelease tags with a SHA suffix (for example `v3.4.1-dev.<sha>`) resolve base from npm-published versions with the same prerelease prefix and pick the nearest ancestor commit.

@@ -3,6 +3,9 @@ name: Comment released PRs and issues
 on:
     release:
         types: [published]
+    workflow_run:
+        workflows: ['npm Publish']
+        types: [completed]
     workflow_dispatch:
         inputs:
             head_tag:
@@ -25,19 +28,34 @@ on:
 
 jobs:
     release:
+        if: >-
+            ${{
+                github.event_name != 'workflow_run' ||
+                (github.event.workflow_run.conclusion == 'success' &&
+                github.event.workflow_run.event == 'push' &&
+                github.event.workflow_run.head_branch == 'main')
+            }}
         runs-on: ubuntu-latest
         permissions:
             contents: read
             issues: write
             pull-requests: write
         steps:
-            - uses: actions/checkout@v6
+            - if: github.event_name == 'workflow_run'
+              uses: actions/checkout@v6
+              with:
+                  ref: ${{ github.event.workflow_run.head_sha }}
+            - if: github.event_name != 'workflow_run'
+              uses: actions/checkout@v6
+            - if: github.event_name == 'workflow_run'
+              id: dev_head_tag
+              run: echo "head_tag=v$(node -p \"require('./package.json').version\")-dev.${{ github.event.workflow_run.head_sha }}" >> "$GITHUB_OUTPUT"
             - uses: ./.github/actions/release-commenter
               with:
                   github-token: ${{ secrets.GITHUB_TOKEN }}
                   comment-template: This was addressed in release {release_link}.
                   skip-label: skip-release-comment
-                  head-tag: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.head_tag || '' }}
+                  head-tag: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.head_tag || github.event_name == 'workflow_run' && steps.dev_head_tag.outputs.head_tag || '' }}
                   base-tag: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.base_tag || '' }}
                   dry-run: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.dry_run || false }}
                   npm-package-name: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.npm_package_name || '' }}
