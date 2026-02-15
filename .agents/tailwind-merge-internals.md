@@ -84,6 +84,12 @@ Recommended local sequence for non-trivial changes:
   - `scripts/test-built-package-exports.mjs`
 - `README.md` is generated from `docs/README.md` by `scripts/update-readme.mjs` (run in `version` script via `zx`).
 
+### Release notes playbook
+
+Detailed release-specific agent workflow lives in:
+
+- `.agents/release-workflow.md`
+
 ## CI behavior (what must stay green)
 
 - `.github/workflows/test.yml` runs `yarn lint`, `yarn test`, `yarn build`, and `yarn test:exports`.

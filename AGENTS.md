@@ -19,6 +19,7 @@ This repository is `tailwind-merge`, a TypeScript library that merges Tailwind c
 
 Deeper implementation notes live in:
 - `.agents/tailwind-merge-internals.md`
+- `.agents/release-workflow.md` (release changelog + GitHub release notes workflow)
 
 ## Environment and Commands
 
@@ -65,3 +66,9 @@ Definition of done for every PR/change:
 - Class groups/conflicts/default config: run `tests/default-config.test.ts`, `tests/class-group-conflicts.test.ts`, `tests/tailwind-css-versions.test.ts`.
 - Public API/types: run `tests/public-api.test.ts`, `tests/type-generics.test.ts`.
 - Release/package surface: run `yarn build` and `yarn test:exports`.
+
+## Release Workflow
+
+For release-specific steps (draft release ingestion, changelog entry generation, sponsors handling, and GitHub release text formatting), use:
+
+- `.agents/release-workflow.md`
