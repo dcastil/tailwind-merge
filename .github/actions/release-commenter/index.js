@@ -9,6 +9,7 @@ const releaseTagUrlRegex = /https:\/\/github\.com\/[^/\s]+\/[^/\s]+\/releases\/t
 const defaultCommentTemplate = 'This was addressed in release {release_link}.'
 
 const apiVersionHeader = '2022-11-28'
+const npmRegistryUrl = process.env.NPM_REGISTRY_URL || 'https://registry.npmjs.org'
 
 const eventPath = process.env.GITHUB_EVENT_PATH
 const repository = process.env.GITHUB_REPOSITORY
@@ -57,6 +58,7 @@ const graphqlUrl = process.env.GITHUB_GRAPHQL_URL || `${apiUrl}/graphql`
 /**
  * @typedef {{
  *   status: string
+ *   ahead_by?: number
  *   commits: CommitRecord[]
  * }} CompareData
  */
@@ -128,6 +130,28 @@ const graphqlUrl = process.env.GITHUB_GRAPHQL_URL || `${apiUrl}/graphql`
  */
 
 /**
+ * @typedef {{
+ *   prereleasePrefix: string
+ *   currentSha: string
+ * }} ShaPrereleaseContext
+ */
+
+/**
+ * @typedef {{
+ *   versions?: Record<string, unknown>
+ * }} NpmPackument
+ */
+
+/**
+ * @typedef {{
+ *   baseRef: string
+ *   headRef: string
+ *   sourceVersion: string
+ *   aheadBy: number
+ * }} ShaBaseResolution
+ */
+
+/**
  * Writes a namespaced log line for easier workflow debugging.
  *
  * @param {string} message
@@ -135,6 +159,16 @@ const graphqlUrl = process.env.GITHUB_GRAPHQL_URL || `${apiUrl}/graphql`
 function log(message) {
     // eslint-disable-next-line no-console -- Intentional logging
     console.log(`[release-commenter] ${message}`)
+}
+
+/**
+ * Writes a namespaced error line for easier workflow debugging.
+ *
+ * @param {string} message
+ */
+function logError(message) {
+    // eslint-disable-next-line no-console -- Error logging for action run diagnostics
+    console.error(`[release-commenter] ${message}`)
 }
 
 /**
@@ -244,6 +278,67 @@ function compareSemver(a, b) {
     }
 
     return 0
+}
+
+/**
+ * Normalizes commit SHA casing.
+ *
+ * @param {string} value
+ * @returns {string}
+ */
+function normalizeSha(value) {
+    return value.toLowerCase()
+}
+
+/**
+ * Checks whether a prerelease identifier looks like a git SHA.
+ *
+ * @param {string} value
+ * @returns {boolean}
+ */
+function isShaLike(value) {
+    return /^[0-9a-f]{7,40}$/i.test(value)
+}
+
+/**
+ * Compares only major/minor/patch semver parts.
+ *
+ * @param {ParsedTag} a
+ * @param {ParsedTag} b
+ * @returns {boolean}
+ */
+function sameCoreVersion(a, b) {
+    return a.major === b.major && a.minor === b.minor && a.patch === b.patch
+}
+
+/**
+ * Gets prerelease prefix (everything before the last prerelease segment).
+ *
+ * @param {ParsedTag} version
+ * @returns {string}
+ */
+function getPrereleasePrefix(version) {
+    return version.prerelease.slice(0, -1).join('.')
+}
+
+/**
+ * Detects prerelease tags where the final identifier is a git SHA.
+ *
+ * @param {ParsedTag} version
+ * @returns {ShaPrereleaseContext | null}
+ */
+function getShaPrereleaseContext(version) {
+    if (!version.isPrerelease || version.prerelease.length < 2) return null
+    const maybeSha = version.prerelease[version.prerelease.length - 1]
+    if (!isShaLike(maybeSha)) return null
+
+    const prereleasePrefix = getPrereleasePrefix(version)
+    if (!prereleasePrefix) return null
+
+    return {
+        prereleasePrefix,
+        currentSha: normalizeSha(maybeSha),
+    }
 }
 
 /**
@@ -366,6 +461,17 @@ function readEventPayload() {
  */
 function githubApiPath(pathname) {
     return `${apiUrl}${pathname}`
+}
+
+/**
+ * Builds an npm registry URL path under the current registry base URL.
+ *
+ * @param {string} packageName
+ * @returns {string}
+ */
+function npmRegistryPath(packageName) {
+    const registryRoot = npmRegistryUrl.endsWith('/') ? npmRegistryUrl.slice(0, -1) : npmRegistryUrl
+    return `${registryRoot}/${encodeURIComponent(packageName)}`
 }
 
 /**
@@ -497,6 +603,128 @@ async function requestGraphQL(token, query, variables) {
     }
 
     return payload.data
+}
+
+/**
+ * Fetches all published npm versions for a package.
+ *
+ * @param {string} packageName
+ * @returns {Promise<string[]>}
+ */
+async function fetchNpmVersions(packageName) {
+    const response = await fetch(npmRegistryPath(packageName), {
+        headers: {
+            Accept: 'application/json',
+        },
+    })
+
+    if (!response.ok) {
+        const errorText = await response.text()
+        throw new Error(
+            `npm registry request failed (${response.status}) for ${packageName}: ${errorText}`,
+        )
+    }
+
+    const packument = /** @type {NpmPackument} */ (await response.json())
+    return Object.keys(packument.versions || {})
+}
+
+/**
+ * Resolves a base SHA for SHA-suffixed prerelease tags by using npm-published versions
+ * with the same prerelease prefix and choosing the nearest ancestor in git history.
+ *
+ * @param {string} token
+ * @param {string} owner
+ * @param {string} repo
+ * @param {string} packageName
+ * @param {ParsedTag} currentVersion
+ * @param {ShaPrereleaseContext} currentContext
+ * @returns {Promise<ShaBaseResolution>}
+ */
+async function resolveShaPrereleaseBaseRef(
+    token,
+    owner,
+    repo,
+    packageName,
+    currentVersion,
+    currentContext,
+) {
+    const npmVersions = await fetchNpmVersions(packageName)
+    log(
+        `Using npm SHA prerelease strategy for ${packageName} (${currentContext.prereleasePrefix}), checking ${npmVersions.length} npm version(s)`,
+    )
+
+    /** @type {Map<string, string>} */
+    const shaToVersion = new Map()
+    for (const npmVersion of npmVersions) {
+        const parsedNpmVersion = parseTag(npmVersion)
+        if (!parsedNpmVersion) continue
+        if (!sameCoreVersion(parsedNpmVersion, currentVersion)) continue
+
+        const npmContext = getShaPrereleaseContext(parsedNpmVersion)
+        if (!npmContext) continue
+        if (npmContext.prereleasePrefix !== currentContext.prereleasePrefix) continue
+        if (npmContext.currentSha === currentContext.currentSha) continue
+
+        if (!shaToVersion.has(npmContext.currentSha)) {
+            shaToVersion.set(npmContext.currentSha, npmVersion)
+        }
+    }
+
+    if (!shaToVersion.size) {
+        throw new Error(
+            `No prior npm versions found for ${packageName} with prerelease prefix "${currentContext.prereleasePrefix}" and core version ${currentVersion.major}.${currentVersion.minor}.${currentVersion.patch}`,
+        )
+    }
+
+    /** @type {{baseSha: string, sourceVersion: string, aheadBy: number} | null} */
+    let bestMatch = null
+
+    for (const [candidateSha, sourceVersion] of shaToVersion.entries()) {
+        try {
+            const compareResponse = await requestJson(
+                token,
+                'GET',
+                `/repos/${owner}/${repo}/compare/${encodeURIComponent(candidateSha)}...${encodeURIComponent(currentContext.currentSha)}`,
+            )
+            /** @type {CompareData} */
+            const comparePayload = /** @type {CompareData} */ (compareResponse)
+
+            if (comparePayload.status !== 'ahead') continue
+            const aheadBy = comparePayload.ahead_by ?? Number.POSITIVE_INFINITY
+            if (!Number.isFinite(aheadBy) || aheadBy <= 0) continue
+
+            if (!bestMatch || aheadBy < bestMatch.aheadBy) {
+                bestMatch = {
+                    baseSha: candidateSha,
+                    sourceVersion,
+                    aheadBy,
+                }
+            }
+        } catch (error) {
+            const message = error instanceof Error ? error.message : String(error)
+            log(
+                `Skipping npm candidate ${sourceVersion} (${candidateSha}) because compare failed: ${message}`,
+            )
+        }
+    }
+
+    if (!bestMatch) {
+        throw new Error(
+            `Could not resolve an ancestor prerelease commit for ${currentContext.currentSha} from npm-published versions`,
+        )
+    }
+
+    log(
+        `Selected npm prerelease base: version=${bestMatch.sourceVersion} base_sha=${bestMatch.baseSha} head_sha=${currentContext.currentSha} ahead_by=${bestMatch.aheadBy}`,
+    )
+
+    return {
+        baseRef: bestMatch.baseSha,
+        headRef: currentContext.currentSha,
+        sourceVersion: bestMatch.sourceVersion,
+        aheadBy: bestMatch.aheadBy,
+    }
 }
 
 /**
@@ -857,6 +1085,7 @@ async function main() {
 
     const headTagInput = getInput('head-tag')
     const baseTagInput = getInput('base-tag')
+    const npmPackageNameInput = getInput('npm-package-name')
     const dryRun = parseBooleanInput(getInput('dry-run', 'false'))
 
     const currentTag = headTagInput || payload?.release?.tag_name
@@ -870,6 +1099,7 @@ async function main() {
     if (!currentVersion) {
         throw new Error(`Current tag "${currentTag}" is not semver-compatible`)
     }
+    const shaPrereleaseContext = getShaPrereleaseContext(currentVersion)
 
     log(`Current tag: ${currentTag}`)
     log(`Dry run: ${dryRun}`)
@@ -893,18 +1123,45 @@ async function main() {
         releaseUrl,
     )
 
-    const releases = await requestPaginated(token, `/repos/${owner}/${repo}/releases`)
-    /** @type {ReleaseRecord[]} */
-    const publishedReleases = releases.filter((release) => !release.draft)
+    let baseRef = ''
+    let headRef = currentTag
 
-    const baseTag = pickBaseTag(currentTag, currentVersion, publishedReleases, baseTagInput)
-    log(`Base tag: ${baseTag}`)
-    log(`Compare range: ${baseTag}...${currentTag}`)
+    if (baseTagInput) {
+        baseRef = baseTagInput
+        if (shaPrereleaseContext) {
+            headRef = shaPrereleaseContext.currentSha
+        }
+        log(`Using manual base ref input: ${baseRef}`)
+    } else if (shaPrereleaseContext) {
+        const npmPackageName = npmPackageNameInput || repo
+        const shaResolution = await resolveShaPrereleaseBaseRef(
+            token,
+            owner,
+            repo,
+            npmPackageName,
+            currentVersion,
+            shaPrereleaseContext,
+        )
+        baseRef = shaResolution.baseRef
+        headRef = shaResolution.headRef
+        log(
+            `Resolved SHA compare range from npm: version=${shaResolution.sourceVersion} base_sha=${baseRef} head_sha=${headRef} ahead_by=${shaResolution.aheadBy}`,
+        )
+    } else {
+        const releases = await requestPaginated(token, `/repos/${owner}/${repo}/releases`)
+        /** @type {ReleaseRecord[]} */
+        const publishedReleases = releases.filter((release) => !release.draft)
+        baseRef = pickBaseTag(currentTag, currentVersion, publishedReleases, '')
+    }
+
+    log(`Base ref: ${baseRef}`)
+    log(`Head ref: ${headRef}`)
+    log(`Compare range: ${baseRef}...${headRef}`)
 
     const compareData = await requestJson(
         token,
         'GET',
-        `/repos/${owner}/${repo}/compare/${encodeURIComponent(baseTag)}...${encodeURIComponent(currentTag)}`,
+        `/repos/${owner}/${repo}/compare/${encodeURIComponent(baseRef)}...${encodeURIComponent(headRef)}`,
     )
     /** @type {CompareData} */
     const comparePayload = compareData
@@ -963,6 +1220,6 @@ async function main() {
 
 main().catch((error) => {
     const message = error instanceof Error ? error.message : String(error)
-    console.error(`[release-commenter] ${message}`)
+    logError(message)
     process.exit(1)
 })

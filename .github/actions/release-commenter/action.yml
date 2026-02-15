@@ -27,6 +27,9 @@ inputs:
         description: 'When true, log planned changes without posting'
         required: false
         default: 'false'
+    npm-package-name:
+        description: 'Optional npm package name for SHA-based prerelease base resolution'
+        required: false
 runs:
     using: 'node20'
     main: 'index.js'

@@ -18,6 +18,10 @@ on:
                 required: false
                 type: boolean
                 default: false
+            npm_package_name:
+                description: 'Optional npm package name override'
+                required: false
+                type: string
 
 jobs:
     release:
@@ -27,6 +31,7 @@ jobs:
             issues: write
             pull-requests: write
         steps:
+            - uses: actions/checkout@v6
             - uses: ./.github/actions/release-commenter
               with:
                   github-token: ${{ secrets.GITHUB_TOKEN }}
@@ -35,3 +40,4 @@ jobs:
                   head-tag: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.head_tag || '' }}
                   base-tag: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.base_tag || '' }}
                   dry-run: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.dry_run || false }}
+                  npm-package-name: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.npm_package_name || '' }}
