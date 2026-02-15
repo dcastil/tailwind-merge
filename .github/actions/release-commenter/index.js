@@ -210,7 +210,13 @@ async function main() {
 
     const currentRelease = await getCurrentRelease(token, owner, repo, currentTag, payload?.release)
     const releaseLabel = currentRelease.name || currentRelease.tag
-    const releaseUrl = currentRelease.htmlUrl
+    const npmPackageName = npmPackageNameInput || repo
+    const releaseUrl = shaPrereleaseContext
+        ? npmVersionUrl(npmPackageName, currentTag)
+        : currentRelease.htmlUrl
+    if (shaPrereleaseContext) {
+        log(`Using npm release URL for prerelease tag: ${releaseUrl}`)
+    }
 
     const commentTemplate = getInput('comment-template', defaultCommentTemplate)
     const labelTemplate = getInput('label-template')
@@ -235,7 +241,7 @@ async function main() {
         currentVersion,
         shaPrereleaseContext,
         baseTagInput,
-        npmPackageNameInput,
+        npmPackageName,
     )
 
     log(`Base ref: ${baseRef}`)
@@ -314,7 +320,7 @@ async function main() {
  * @param {ParsedTag} currentVersion
  * @param {ShaPrereleaseContext | null} shaPrereleaseContext
  * @param {string} baseTagInput
- * @param {string} npmPackageNameInput
+ * @param {string} npmPackageName
  * @returns {Promise<CompareRefs>}
  */
 async function resolveCompareRefs(
@@ -325,7 +331,7 @@ async function resolveCompareRefs(
     currentVersion,
     shaPrereleaseContext,
     baseTagInput,
-    npmPackageNameInput,
+    npmPackageName,
 ) {
     let baseRef = ''
     let headRef = currentTag
@@ -337,7 +343,6 @@ async function resolveCompareRefs(
         }
         log(`Using manual base ref input: ${baseRef}`)
     } else if (shaPrereleaseContext) {
-        const npmPackageName = npmPackageNameInput || repo
         const shaResolution = await resolveShaPrereleaseBaseRef(
             token,
             owner,
@@ -943,6 +948,35 @@ function githubApiPath(pathname) {
 function npmRegistryPath(packageName) {
     const registryRoot = npmRegistryUrl.endsWith('/') ? npmRegistryUrl.slice(0, -1) : npmRegistryUrl
     return `${registryRoot}/${encodeURIComponent(packageName)}`
+}
+
+/**
+ * Converts a git-like tag string into an npm version string.
+ *
+ * @param {string} tag
+ * @returns {string}
+ */
+function npmVersionFromTag(tag) {
+    let normalized = tag
+    if (normalized.startsWith('refs/tags/')) {
+        normalized = normalized.slice('refs/tags/'.length)
+    }
+    if (normalized.startsWith('v')) {
+        normalized = normalized.slice(1)
+    }
+    return normalized
+}
+
+/**
+ * Builds the npm package version URL for a given tag.
+ *
+ * @param {string} packageName
+ * @param {string} tag
+ * @returns {string}
+ */
+function npmVersionUrl(packageName, tag) {
+    const version = npmVersionFromTag(tag)
+    return `https://www.npmjs.com/package/${packageName}/v/${encodeURIComponent(version)}`
 }
 
 /**
