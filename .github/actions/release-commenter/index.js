@@ -635,8 +635,11 @@ function logError(message) {
  * @returns {string}
  */
 function getInput(name, fallback = '') {
-    const key = `INPUT_${name.replaceAll('-', '_').toUpperCase()}`
-    return (process.env[key] ?? fallback).trim()
+    // GitHub Actions exposes JS action inputs as INPUT_<NAME> where only spaces are normalized.
+    // For compatibility with local runs and historical code, also support "-" -> "_" fallback.
+    const canonicalKey = `INPUT_${name.replace(/ /g, '_').toUpperCase()}`
+    const legacyKey = canonicalKey.replaceAll('-', '_')
+    return (process.env[canonicalKey] ?? process.env[legacyKey] ?? fallback).trim()
 }
 
 /**
