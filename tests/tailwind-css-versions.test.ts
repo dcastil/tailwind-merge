@@ -208,4 +208,24 @@ test('supports Tailwind CSS v4.2 features', () => {
 
     expect(twMerge('py-1 pbs-2 pbe-3')).toBe('py-1 pbs-2 pbe-3')
     expect(twMerge('my-1 mbs-2 mbe-3')).toBe('my-1 mbs-2 mbe-3')
+
+    // Logical scroll spacing utilities
+
+    expect(twMerge('scroll-pbs-1 scroll-pbs-2')).toBe('scroll-pbs-2')
+    expect(twMerge('scroll-pbe-1 scroll-pbe-2')).toBe('scroll-pbe-2')
+    expect(twMerge('scroll-mbs-1 scroll-mbs-2')).toBe('scroll-mbs-2')
+    expect(twMerge('scroll-mbe-1 scroll-mbe-2')).toBe('scroll-mbe-2')
+
+    expect(twMerge('scroll-pt-1 scroll-pbs-2')).toBe('scroll-pt-1 scroll-pbs-2')
+    expect(twMerge('scroll-pb-1 scroll-pbe-2')).toBe('scroll-pb-1 scroll-pbe-2')
+    expect(twMerge('scroll-mt-1 scroll-mbs-2')).toBe('scroll-mt-1 scroll-mbs-2')
+    expect(twMerge('scroll-mb-1 scroll-mbe-2')).toBe('scroll-mb-1 scroll-mbe-2')
+
+    expect(twMerge('scroll-p-0 scroll-pbs-1 scroll-pbe-1')).toBe('scroll-p-0 scroll-pbs-1 scroll-pbe-1')
+    expect(twMerge('scroll-pbs-1 scroll-pbe-1 scroll-p-0')).toBe('scroll-p-0')
+    expect(twMerge('scroll-m-0 scroll-mbs-1 scroll-mbe-1')).toBe('scroll-m-0 scroll-mbs-1 scroll-mbe-1')
+    expect(twMerge('scroll-mbs-1 scroll-mbe-1 scroll-m-0')).toBe('scroll-m-0')
+
+    expect(twMerge('scroll-py-1 scroll-pbs-2 scroll-pbe-3')).toBe('scroll-py-1 scroll-pbs-2 scroll-pbe-3')
+    expect(twMerge('scroll-my-1 scroll-mbs-2 scroll-mbe-3')).toBe('scroll-my-1 scroll-mbs-2 scroll-mbe-3')
 })

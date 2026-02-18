@@ -2105,25 +2105,35 @@ export const getDefaultConfig = () => {
              */
             'scroll-m': [{ 'scroll-m': scaleUnambiguousSpacing() }],
             /**
-             * Scroll Margin X
+             * Scroll Margin Inline
              * @see https://tailwindcss.com/docs/scroll-margin
              */
             'scroll-mx': [{ 'scroll-mx': scaleUnambiguousSpacing() }],
             /**
-             * Scroll Margin Y
+             * Scroll Margin Block
              * @see https://tailwindcss.com/docs/scroll-margin
              */
             'scroll-my': [{ 'scroll-my': scaleUnambiguousSpacing() }],
             /**
-             * Scroll Margin Start
+             * Scroll Margin Inline Start
              * @see https://tailwindcss.com/docs/scroll-margin
              */
             'scroll-ms': [{ 'scroll-ms': scaleUnambiguousSpacing() }],
             /**
-             * Scroll Margin End
+             * Scroll Margin Inline End
              * @see https://tailwindcss.com/docs/scroll-margin
              */
             'scroll-me': [{ 'scroll-me': scaleUnambiguousSpacing() }],
+            /**
+             * Scroll Margin Block Start
+             * @see https://tailwindcss.com/docs/scroll-margin
+             */
+            'scroll-mbs': [{ 'scroll-mbs': scaleUnambiguousSpacing() }],
+            /**
+             * Scroll Margin Block End
+             * @see https://tailwindcss.com/docs/scroll-margin
+             */
+            'scroll-mbe': [{ 'scroll-mbe': scaleUnambiguousSpacing() }],
             /**
              * Scroll Margin Top
              * @see https://tailwindcss.com/docs/scroll-margin
@@ -2150,25 +2160,35 @@ export const getDefaultConfig = () => {
              */
             'scroll-p': [{ 'scroll-p': scaleUnambiguousSpacing() }],
             /**
-             * Scroll Padding X
+             * Scroll Padding Inline
              * @see https://tailwindcss.com/docs/scroll-padding
              */
             'scroll-px': [{ 'scroll-px': scaleUnambiguousSpacing() }],
             /**
-             * Scroll Padding Y
+             * Scroll Padding Block
              * @see https://tailwindcss.com/docs/scroll-padding
              */
             'scroll-py': [{ 'scroll-py': scaleUnambiguousSpacing() }],
             /**
-             * Scroll Padding Start
+             * Scroll Padding Inline Start
              * @see https://tailwindcss.com/docs/scroll-padding
              */
             'scroll-ps': [{ 'scroll-ps': scaleUnambiguousSpacing() }],
             /**
-             * Scroll Padding End
+             * Scroll Padding Inline End
              * @see https://tailwindcss.com/docs/scroll-padding
              */
             'scroll-pe': [{ 'scroll-pe': scaleUnambiguousSpacing() }],
+            /**
+             * Scroll Padding Block Start
+             * @see https://tailwindcss.com/docs/scroll-padding
+             */
+            'scroll-pbs': [{ 'scroll-pbs': scaleUnambiguousSpacing() }],
+            /**
+             * Scroll Padding Block End
+             * @see https://tailwindcss.com/docs/scroll-padding
+             */
+            'scroll-pbe': [{ 'scroll-pbe': scaleUnambiguousSpacing() }],
             /**
              * Scroll Padding Top
              * @see https://tailwindcss.com/docs/scroll-padding
@@ -2384,6 +2404,8 @@ export const getDefaultConfig = () => {
                 'scroll-my',
                 'scroll-ms',
                 'scroll-me',
+                'scroll-mbs',
+                'scroll-mbe',
                 'scroll-mt',
                 'scroll-mr',
                 'scroll-mb',
@@ -2396,6 +2418,8 @@ export const getDefaultConfig = () => {
                 'scroll-py',
                 'scroll-ps',
                 'scroll-pe',
+                'scroll-pbs',
+                'scroll-pbe',
                 'scroll-pt',
                 'scroll-pr',
                 'scroll-pb',
