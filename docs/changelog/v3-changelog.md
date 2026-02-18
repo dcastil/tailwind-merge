@@ -1,5 +1,15 @@
 # Changelog for v3 releases
 
+## v3.5.0
+
+### New Features
+
+- Add support for Tailwind CSS v4.2 by [@dcastil](https://github.com/dcastil) in [#651](https://github.com/dcastil/tailwind-merge/pull/651)
+
+**Full Changelog**: [`v3.4.1...v3.5.0`](https://github.com/dcastil/tailwind-merge/compare/v3.4.1...v3.5.0)
+
+Thanks to [@brandonmcconnell](https://github.com/brandonmcconnell), [@manavm1990](https://github.com/manavm1990), [@langy](https://github.com/langy), [@roboflow](https://github.com/roboflow), [@syntaxfm](https://github.com/syntaxfm), [@getsentry](https://github.com/getsentry), [@codecov](https://github.com/codecov), a private sponsor, [@block](https://github.com/block), [@openclaw](https://github.com/openclaw), [@sourcegraph](https://github.com/sourcegraph) and more via [@thnxdev](https://github.com/thnxdev) for sponsoring tailwind-merge! ❤️
+
 ## v3.4.1
 
 ### Bug Fixes
