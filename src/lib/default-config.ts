@@ -137,6 +137,33 @@ export const getDefaultConfig = () => {
             'fit',
             ...scaleUnambiguousSpacing(),
         ] as const
+    const scaleSizingInline = () =>
+        [
+            isFraction,
+            'screen',
+            'full',
+            'dvw',
+            'lvw',
+            'svw',
+            'min',
+            'max',
+            'fit',
+            ...scaleUnambiguousSpacing(),
+        ] as const
+    const scaleSizingBlock = () =>
+        [
+            isFraction,
+            'screen',
+            'full',
+            'lh',
+            'dvh',
+            'lvh',
+            'svh',
+            'min',
+            'max',
+            'fit',
+            ...scaleUnambiguousSpacing(),
+        ] as const
     const scaleColor = () => [themeColor, isArbitraryVariable, isArbitraryValue] as const
     const scaleBgPosition = () =>
         [
@@ -793,6 +820,36 @@ export const getDefaultConfig = () => {
              * @see https://tailwindcss.com/docs/width#setting-both-width-and-height
              */
             size: [{ size: scaleSizing() }],
+            /**
+             * Inline Size
+             * @see https://tailwindcss.com/docs/width
+             */
+            'inline-size': [{ inline: ['auto', ...scaleSizingInline()] }],
+            /**
+             * Min-Inline Size
+             * @see https://tailwindcss.com/docs/min-width
+             */
+            'min-inline-size': [{ 'min-inline': ['auto', ...scaleSizingInline()] }],
+            /**
+             * Max-Inline Size
+             * @see https://tailwindcss.com/docs/max-width
+             */
+            'max-inline-size': [{ 'max-inline': ['none', ...scaleSizingInline()] }],
+            /**
+             * Block Size
+             * @see https://tailwindcss.com/docs/height
+             */
+            'block-size': [{ block: ['auto', ...scaleSizingBlock()] }],
+            /**
+             * Min-Block Size
+             * @see https://tailwindcss.com/docs/min-height
+             */
+            'min-block-size': [{ 'min-block': ['auto', ...scaleSizingBlock()] }],
+            /**
+             * Max-Block Size
+             * @see https://tailwindcss.com/docs/max-height
+             */
+            'max-block-size': [{ 'max-block': ['none', ...scaleSizingBlock()] }],
             /**
              * Width
              * @see https://tailwindcss.com/docs/width

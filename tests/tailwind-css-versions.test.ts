@@ -250,4 +250,19 @@ test('supports Tailwind CSS v4.2 features', () => {
     expect(twMerge('border-y-red border-bs-blue border-be-green')).toBe(
         'border-y-red border-bs-blue border-be-green',
     )
+
+    // Logical size utilities
+
+    expect(twMerge('inline-1/2 inline-3/4')).toBe('inline-3/4')
+    expect(twMerge('block-1/2 block-3/4')).toBe('block-3/4')
+    expect(twMerge('min-inline-auto min-inline-full')).toBe('min-inline-full')
+    expect(twMerge('max-inline-none max-inline-10')).toBe('max-inline-10')
+    expect(twMerge('min-block-auto min-block-lh min-block-10')).toBe('min-block-10')
+    expect(twMerge('max-block-none max-block-lh max-block-10')).toBe('max-block-10')
+
+    expect(twMerge('w-10 inline-20')).toBe('w-10 inline-20')
+    expect(twMerge('h-10 block-20')).toBe('h-10 block-20')
+    expect(twMerge('size-10 inline-20 block-30')).toBe('size-10 inline-20 block-30')
+    expect(twMerge('min-w-10 min-inline-20')).toBe('min-w-10 min-inline-20')
+    expect(twMerge('max-h-10 max-block-20')).toBe('max-h-10 max-block-20')
 })
