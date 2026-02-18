@@ -405,7 +405,7 @@ export const getDefaultConfig = () => {
              */
             'inset-y': [{ 'inset-y': scaleInset() }],
             /**
-             * Inset Start
+             * Inset Inline Start
              * @see https://tailwindcss.com/docs/top-right-bottom-left
              * @todo class group will be renamed to `inset-s` in next major release
              */
@@ -420,7 +420,7 @@ export const getDefaultConfig = () => {
                 },
             ],
             /**
-             * Inset End
+             * Inset Inline End
              * @see https://tailwindcss.com/docs/top-right-bottom-left
              * @todo class group will be renamed to `inset-e` in next major release
              */
