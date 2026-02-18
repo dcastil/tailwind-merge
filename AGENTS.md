@@ -4,7 +4,7 @@ This repository is `tailwind-merge`, a TypeScript library that merges Tailwind c
 
 ## Primary Goals
 
-- Keep merge behavior correct for supported Tailwind versions (currently v4.0-v4.1).
+- Keep merge behavior correct for supported Tailwind versions (currently v4.0-v4.2).
 - Keep runtime fast (browser-oriented hot path, lazy init, lightweight cache).
 - Keep API and type contracts stable.
 

@@ -137,6 +137,33 @@ export const getDefaultConfig = () => {
             'fit',
             ...scaleUnambiguousSpacing(),
         ] as const
+    const scaleSizingInline = () =>
+        [
+            isFraction,
+            'screen',
+            'full',
+            'dvw',
+            'lvw',
+            'svw',
+            'min',
+            'max',
+            'fit',
+            ...scaleUnambiguousSpacing(),
+        ] as const
+    const scaleSizingBlock = () =>
+        [
+            isFraction,
+            'screen',
+            'full',
+            'lh',
+            'dvh',
+            'lvh',
+            'svh',
+            'min',
+            'max',
+            'fit',
+            ...scaleUnambiguousSpacing(),
+        ] as const
     const scaleColor = () => [themeColor, isArbitraryVariable, isArbitraryValue] as const
     const scaleBgPosition = () =>
         [
@@ -390,30 +417,60 @@ export const getDefaultConfig = () => {
              */
             position: ['static', 'fixed', 'absolute', 'relative', 'sticky'],
             /**
-             * Top / Right / Bottom / Left
+             * Inset
              * @see https://tailwindcss.com/docs/top-right-bottom-left
              */
             inset: [{ inset: scaleInset() }],
             /**
-             * Right / Left
+             * Inset Inline
              * @see https://tailwindcss.com/docs/top-right-bottom-left
              */
             'inset-x': [{ 'inset-x': scaleInset() }],
             /**
-             * Top / Bottom
+             * Inset Block
              * @see https://tailwindcss.com/docs/top-right-bottom-left
              */
             'inset-y': [{ 'inset-y': scaleInset() }],
             /**
-             * Start
+             * Inset Inline Start
              * @see https://tailwindcss.com/docs/top-right-bottom-left
+             * @todo class group will be renamed to `inset-s` in next major release
              */
-            start: [{ start: scaleInset() }],
+            start: [
+                {
+                    'inset-s': scaleInset(),
+                    /**
+                     * @deprecated since Tailwind CSS v4.2.0 in favor of `inset-s-*` utilities.
+                     * @see https://github.com/tailwindlabs/tailwindcss/pull/19613
+                     */
+                    start: scaleInset(),
+                },
+            ],
             /**
-             * End
+             * Inset Inline End
+             * @see https://tailwindcss.com/docs/top-right-bottom-left
+             * @todo class group will be renamed to `inset-e` in next major release
+             */
+            end: [
+                {
+                    'inset-e': scaleInset(),
+                    /**
+                     * @deprecated since Tailwind CSS v4.2.0 in favor of `inset-e-*` utilities.
+                     * @see https://github.com/tailwindlabs/tailwindcss/pull/19613
+                     */
+                    end: scaleInset(),
+                },
+            ],
+            /**
+             * Inset Block Start
              * @see https://tailwindcss.com/docs/top-right-bottom-left
              */
-            end: [{ end: scaleInset() }],
+            'inset-bs': [{ 'inset-bs': scaleInset() }],
+            /**
+             * Inset Block End
+             * @see https://tailwindcss.com/docs/top-right-bottom-left
+             */
+            'inset-be': [{ 'inset-be': scaleInset() }],
             /**
              * Top
              * @see https://tailwindcss.com/docs/top-right-bottom-left
@@ -629,25 +686,35 @@ export const getDefaultConfig = () => {
              */
             p: [{ p: scaleUnambiguousSpacing() }],
             /**
-             * Padding X
+             * Padding Inline
              * @see https://tailwindcss.com/docs/padding
              */
             px: [{ px: scaleUnambiguousSpacing() }],
             /**
-             * Padding Y
+             * Padding Block
              * @see https://tailwindcss.com/docs/padding
              */
             py: [{ py: scaleUnambiguousSpacing() }],
             /**
-             * Padding Start
+             * Padding Inline Start
              * @see https://tailwindcss.com/docs/padding
              */
             ps: [{ ps: scaleUnambiguousSpacing() }],
             /**
-             * Padding End
+             * Padding Inline End
              * @see https://tailwindcss.com/docs/padding
              */
             pe: [{ pe: scaleUnambiguousSpacing() }],
+            /**
+             * Padding Block Start
+             * @see https://tailwindcss.com/docs/padding
+             */
+            pbs: [{ pbs: scaleUnambiguousSpacing() }],
+            /**
+             * Padding Block End
+             * @see https://tailwindcss.com/docs/padding
+             */
+            pbe: [{ pbe: scaleUnambiguousSpacing() }],
             /**
              * Padding Top
              * @see https://tailwindcss.com/docs/padding
@@ -674,25 +741,35 @@ export const getDefaultConfig = () => {
              */
             m: [{ m: scaleMargin() }],
             /**
-             * Margin X
+             * Margin Inline
              * @see https://tailwindcss.com/docs/margin
              */
             mx: [{ mx: scaleMargin() }],
             /**
-             * Margin Y
+             * Margin Block
              * @see https://tailwindcss.com/docs/margin
              */
             my: [{ my: scaleMargin() }],
             /**
-             * Margin Start
+             * Margin Inline Start
              * @see https://tailwindcss.com/docs/margin
              */
             ms: [{ ms: scaleMargin() }],
             /**
-             * Margin End
+             * Margin Inline End
              * @see https://tailwindcss.com/docs/margin
              */
             me: [{ me: scaleMargin() }],
+            /**
+             * Margin Block Start
+             * @see https://tailwindcss.com/docs/margin
+             */
+            mbs: [{ mbs: scaleMargin() }],
+            /**
+             * Margin Block End
+             * @see https://tailwindcss.com/docs/margin
+             */
+            mbe: [{ mbe: scaleMargin() }],
             /**
              * Margin Top
              * @see https://tailwindcss.com/docs/margin
@@ -743,6 +820,36 @@ export const getDefaultConfig = () => {
              * @see https://tailwindcss.com/docs/width#setting-both-width-and-height
              */
             size: [{ size: scaleSizing() }],
+            /**
+             * Inline Size
+             * @see https://tailwindcss.com/docs/width
+             */
+            'inline-size': [{ inline: ['auto', ...scaleSizingInline()] }],
+            /**
+             * Min-Inline Size
+             * @see https://tailwindcss.com/docs/min-width
+             */
+            'min-inline-size': [{ 'min-inline': ['auto', ...scaleSizingInline()] }],
+            /**
+             * Max-Inline Size
+             * @see https://tailwindcss.com/docs/max-width
+             */
+            'max-inline-size': [{ 'max-inline': ['none', ...scaleSizingInline()] }],
+            /**
+             * Block Size
+             * @see https://tailwindcss.com/docs/height
+             */
+            'block-size': [{ block: ['auto', ...scaleSizingBlock()] }],
+            /**
+             * Min-Block Size
+             * @see https://tailwindcss.com/docs/min-height
+             */
+            'min-block-size': [{ 'min-block': ['auto', ...scaleSizingBlock()] }],
+            /**
+             * Max-Block Size
+             * @see https://tailwindcss.com/docs/max-height
+             */
+            'max-block-size': [{ 'max-block': ['none', ...scaleSizingBlock()] }],
             /**
              * Width
              * @see https://tailwindcss.com/docs/width
@@ -855,6 +962,11 @@ export const getDefaultConfig = () => {
             'font-family': [
                 { font: [isArbitraryVariableFamilyName, isArbitraryFamilyName, themeFont] },
             ],
+            /**
+             * Font Feature Settings
+             * @see https://tailwindcss.com/docs/font-feature-settings
+             */
+            'font-features': [{ 'font-features': [isArbitraryValue] }],
             /**
              * Font Variant Numeric
              * @see https://tailwindcss.com/docs/font-variant-numeric
@@ -1226,25 +1338,35 @@ export const getDefaultConfig = () => {
              */
             'border-w': [{ border: scaleBorderWidth() }],
             /**
-             * Border Width X
+             * Border Width Inline
              * @see https://tailwindcss.com/docs/border-width
              */
             'border-w-x': [{ 'border-x': scaleBorderWidth() }],
             /**
-             * Border Width Y
+             * Border Width Block
              * @see https://tailwindcss.com/docs/border-width
              */
             'border-w-y': [{ 'border-y': scaleBorderWidth() }],
             /**
-             * Border Width Start
+             * Border Width Inline Start
              * @see https://tailwindcss.com/docs/border-width
              */
             'border-w-s': [{ 'border-s': scaleBorderWidth() }],
             /**
-             * Border Width End
+             * Border Width Inline End
              * @see https://tailwindcss.com/docs/border-width
              */
             'border-w-e': [{ 'border-e': scaleBorderWidth() }],
+            /**
+             * Border Width Block Start
+             * @see https://tailwindcss.com/docs/border-width
+             */
+            'border-w-bs': [{ 'border-bs': scaleBorderWidth() }],
+            /**
+             * Border Width Block End
+             * @see https://tailwindcss.com/docs/border-width
+             */
+            'border-w-be': [{ 'border-be': scaleBorderWidth() }],
             /**
              * Border Width Top
              * @see https://tailwindcss.com/docs/border-width
@@ -1301,25 +1423,35 @@ export const getDefaultConfig = () => {
              */
             'border-color': [{ border: scaleColor() }],
             /**
-             * Border Color X
+             * Border Color Inline
              * @see https://tailwindcss.com/docs/border-color
              */
             'border-color-x': [{ 'border-x': scaleColor() }],
             /**
-             * Border Color Y
+             * Border Color Block
              * @see https://tailwindcss.com/docs/border-color
              */
             'border-color-y': [{ 'border-y': scaleColor() }],
             /**
-             * Border Color S
+             * Border Color Inline Start
              * @see https://tailwindcss.com/docs/border-color
              */
             'border-color-s': [{ 'border-s': scaleColor() }],
             /**
-             * Border Color E
+             * Border Color Inline End
              * @see https://tailwindcss.com/docs/border-color
              */
             'border-color-e': [{ 'border-e': scaleColor() }],
+            /**
+             * Border Color Block Start
+             * @see https://tailwindcss.com/docs/border-color
+             */
+            'border-color-bs': [{ 'border-bs': scaleColor() }],
+            /**
+             * Border Color Block End
+             * @see https://tailwindcss.com/docs/border-color
+             */
+            'border-color-be': [{ 'border-be': scaleColor() }],
             /**
              * Border Color Top
              * @see https://tailwindcss.com/docs/border-color
@@ -2055,25 +2187,35 @@ export const getDefaultConfig = () => {
              */
             'scroll-m': [{ 'scroll-m': scaleUnambiguousSpacing() }],
             /**
-             * Scroll Margin X
+             * Scroll Margin Inline
              * @see https://tailwindcss.com/docs/scroll-margin
              */
             'scroll-mx': [{ 'scroll-mx': scaleUnambiguousSpacing() }],
             /**
-             * Scroll Margin Y
+             * Scroll Margin Block
              * @see https://tailwindcss.com/docs/scroll-margin
              */
             'scroll-my': [{ 'scroll-my': scaleUnambiguousSpacing() }],
             /**
-             * Scroll Margin Start
+             * Scroll Margin Inline Start
              * @see https://tailwindcss.com/docs/scroll-margin
              */
             'scroll-ms': [{ 'scroll-ms': scaleUnambiguousSpacing() }],
             /**
-             * Scroll Margin End
+             * Scroll Margin Inline End
              * @see https://tailwindcss.com/docs/scroll-margin
              */
             'scroll-me': [{ 'scroll-me': scaleUnambiguousSpacing() }],
+            /**
+             * Scroll Margin Block Start
+             * @see https://tailwindcss.com/docs/scroll-margin
+             */
+            'scroll-mbs': [{ 'scroll-mbs': scaleUnambiguousSpacing() }],
+            /**
+             * Scroll Margin Block End
+             * @see https://tailwindcss.com/docs/scroll-margin
+             */
+            'scroll-mbe': [{ 'scroll-mbe': scaleUnambiguousSpacing() }],
             /**
              * Scroll Margin Top
              * @see https://tailwindcss.com/docs/scroll-margin
@@ -2100,25 +2242,35 @@ export const getDefaultConfig = () => {
              */
             'scroll-p': [{ 'scroll-p': scaleUnambiguousSpacing() }],
             /**
-             * Scroll Padding X
+             * Scroll Padding Inline
              * @see https://tailwindcss.com/docs/scroll-padding
              */
             'scroll-px': [{ 'scroll-px': scaleUnambiguousSpacing() }],
             /**
-             * Scroll Padding Y
+             * Scroll Padding Block
              * @see https://tailwindcss.com/docs/scroll-padding
              */
             'scroll-py': [{ 'scroll-py': scaleUnambiguousSpacing() }],
             /**
-             * Scroll Padding Start
+             * Scroll Padding Inline Start
              * @see https://tailwindcss.com/docs/scroll-padding
              */
             'scroll-ps': [{ 'scroll-ps': scaleUnambiguousSpacing() }],
             /**
-             * Scroll Padding End
+             * Scroll Padding Inline End
              * @see https://tailwindcss.com/docs/scroll-padding
              */
             'scroll-pe': [{ 'scroll-pe': scaleUnambiguousSpacing() }],
+            /**
+             * Scroll Padding Block Start
+             * @see https://tailwindcss.com/docs/scroll-padding
+             */
+            'scroll-pbs': [{ 'scroll-pbs': scaleUnambiguousSpacing() }],
+            /**
+             * Scroll Padding Block End
+             * @see https://tailwindcss.com/docs/scroll-padding
+             */
+            'scroll-pbe': [{ 'scroll-pbe': scaleUnambiguousSpacing() }],
             /**
              * Scroll Padding Top
              * @see https://tailwindcss.com/docs/scroll-padding
@@ -2243,15 +2395,26 @@ export const getDefaultConfig = () => {
         conflictingClassGroups: {
             overflow: ['overflow-x', 'overflow-y'],
             overscroll: ['overscroll-x', 'overscroll-y'],
-            inset: ['inset-x', 'inset-y', 'start', 'end', 'top', 'right', 'bottom', 'left'],
+            inset: [
+                'inset-x',
+                'inset-y',
+                'inset-bs',
+                'inset-be',
+                'start',
+                'end',
+                'top',
+                'right',
+                'bottom',
+                'left',
+            ],
             'inset-x': ['right', 'left'],
             'inset-y': ['top', 'bottom'],
             flex: ['basis', 'grow', 'shrink'],
             gap: ['gap-x', 'gap-y'],
-            p: ['px', 'py', 'ps', 'pe', 'pt', 'pr', 'pb', 'pl'],
+            p: ['px', 'py', 'ps', 'pe', 'pbs', 'pbe', 'pt', 'pr', 'pb', 'pl'],
             px: ['pr', 'pl'],
             py: ['pt', 'pb'],
-            m: ['mx', 'my', 'ms', 'me', 'mt', 'mr', 'mb', 'ml'],
+            m: ['mx', 'my', 'ms', 'me', 'mbs', 'mbe', 'mt', 'mr', 'mb', 'ml'],
             mx: ['mr', 'ml'],
             my: ['mt', 'mb'],
             size: ['w', 'h'],
@@ -2297,6 +2460,8 @@ export const getDefaultConfig = () => {
                 'border-w-y',
                 'border-w-s',
                 'border-w-e',
+                'border-w-bs',
+                'border-w-be',
                 'border-w-t',
                 'border-w-r',
                 'border-w-b',
@@ -2309,6 +2474,8 @@ export const getDefaultConfig = () => {
                 'border-color-y',
                 'border-color-s',
                 'border-color-e',
+                'border-color-bs',
+                'border-color-be',
                 'border-color-t',
                 'border-color-r',
                 'border-color-b',
@@ -2323,6 +2490,8 @@ export const getDefaultConfig = () => {
                 'scroll-my',
                 'scroll-ms',
                 'scroll-me',
+                'scroll-mbs',
+                'scroll-mbe',
                 'scroll-mt',
                 'scroll-mr',
                 'scroll-mb',
@@ -2335,6 +2504,8 @@ export const getDefaultConfig = () => {
                 'scroll-py',
                 'scroll-ps',
                 'scroll-pe',
+                'scroll-pbs',
+                'scroll-pbe',
                 'scroll-pt',
                 'scroll-pr',
                 'scroll-pb',

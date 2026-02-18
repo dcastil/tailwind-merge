@@ -167,3 +167,128 @@ test('supports Tailwind CSS v4.1.5 features', () => {
     expect(twMerge('min-h-12 min-h-lh')).toBe('min-h-lh')
     expect(twMerge('max-h-12 max-h-lh')).toBe('max-h-lh')
 })
+
+test('supports Tailwind CSS v4.2 features', () => {
+    // Logical inset utilities
+
+    expect(twMerge('inset-s-1 inset-s-2')).toBe('inset-s-2')
+    expect(twMerge('inset-e-1 inset-e-2')).toBe('inset-e-2')
+    expect(twMerge('inset-bs-1 inset-bs-2')).toBe('inset-bs-2')
+    expect(twMerge('inset-be-1 inset-be-2')).toBe('inset-be-2')
+
+    expect(twMerge('start-1 inset-s-2')).toBe('inset-s-2')
+    expect(twMerge('inset-s-1 start-2')).toBe('start-2')
+    expect(twMerge('end-1 inset-e-2')).toBe('inset-e-2')
+    expect(twMerge('inset-e-1 end-2')).toBe('end-2')
+
+    expect(twMerge('inset-s-1 inset-e-2 inset-bs-3 inset-be-4 inset-0')).toBe('inset-0')
+    expect(twMerge('inset-0 inset-s-1 inset-bs-1')).toBe('inset-0 inset-s-1 inset-bs-1')
+
+    expect(twMerge('inset-y-1 inset-bs-2 inset-be-3')).toBe('inset-y-1 inset-bs-2 inset-be-3')
+    expect(twMerge('top-1 inset-bs-2 bottom-3 inset-be-4')).toBe(
+        'top-1 inset-bs-2 bottom-3 inset-be-4',
+    )
+
+    // Logical spacing utilities
+
+    expect(twMerge('pbs-1 pbs-2')).toBe('pbs-2')
+    expect(twMerge('pbe-1 pbe-2')).toBe('pbe-2')
+    expect(twMerge('mbs-1 mbs-2')).toBe('mbs-2')
+    expect(twMerge('mbe-1 mbe-2')).toBe('mbe-2')
+
+    expect(twMerge('pt-1 pbs-2')).toBe('pt-1 pbs-2')
+    expect(twMerge('pb-1 pbe-2')).toBe('pb-1 pbe-2')
+    expect(twMerge('mt-1 mbs-2')).toBe('mt-1 mbs-2')
+    expect(twMerge('mb-1 mbe-2')).toBe('mb-1 mbe-2')
+
+    expect(twMerge('p-0 pbs-1 pbe-1')).toBe('p-0 pbs-1 pbe-1')
+    expect(twMerge('pbs-1 pbe-1 p-0')).toBe('p-0')
+    expect(twMerge('m-0 mbs-1 mbe-1')).toBe('m-0 mbs-1 mbe-1')
+    expect(twMerge('mbs-1 mbe-1 m-0')).toBe('m-0')
+
+    expect(twMerge('py-1 pbs-2 pbe-3')).toBe('py-1 pbs-2 pbe-3')
+    expect(twMerge('my-1 mbs-2 mbe-3')).toBe('my-1 mbs-2 mbe-3')
+
+    // Logical scroll spacing utilities
+
+    expect(twMerge('scroll-pbs-1 scroll-pbs-2')).toBe('scroll-pbs-2')
+    expect(twMerge('scroll-pbe-1 scroll-pbe-2')).toBe('scroll-pbe-2')
+    expect(twMerge('scroll-mbs-1 scroll-mbs-2')).toBe('scroll-mbs-2')
+    expect(twMerge('scroll-mbe-1 scroll-mbe-2')).toBe('scroll-mbe-2')
+
+    expect(twMerge('scroll-pt-1 scroll-pbs-2')).toBe('scroll-pt-1 scroll-pbs-2')
+    expect(twMerge('scroll-pb-1 scroll-pbe-2')).toBe('scroll-pb-1 scroll-pbe-2')
+    expect(twMerge('scroll-mt-1 scroll-mbs-2')).toBe('scroll-mt-1 scroll-mbs-2')
+    expect(twMerge('scroll-mb-1 scroll-mbe-2')).toBe('scroll-mb-1 scroll-mbe-2')
+
+    expect(twMerge('scroll-p-0 scroll-pbs-1 scroll-pbe-1')).toBe(
+        'scroll-p-0 scroll-pbs-1 scroll-pbe-1',
+    )
+    expect(twMerge('scroll-pbs-1 scroll-pbe-1 scroll-p-0')).toBe('scroll-p-0')
+    expect(twMerge('scroll-m-0 scroll-mbs-1 scroll-mbe-1')).toBe(
+        'scroll-m-0 scroll-mbs-1 scroll-mbe-1',
+    )
+    expect(twMerge('scroll-mbs-1 scroll-mbe-1 scroll-m-0')).toBe('scroll-m-0')
+
+    expect(twMerge('scroll-py-1 scroll-pbs-2 scroll-pbe-3')).toBe(
+        'scroll-py-1 scroll-pbs-2 scroll-pbe-3',
+    )
+    expect(twMerge('scroll-my-1 scroll-mbs-2 scroll-mbe-3')).toBe(
+        'scroll-my-1 scroll-mbs-2 scroll-mbe-3',
+    )
+
+    // Logical border block utilities
+
+    expect(twMerge('border-bs-1 border-bs-2')).toBe('border-bs-2')
+    expect(twMerge('border-be-1 border-be-2')).toBe('border-be-2')
+    expect(twMerge('border-bs-red border-bs-blue')).toBe('border-bs-blue')
+    expect(twMerge('border-be-red border-be-blue')).toBe('border-be-blue')
+
+    expect(twMerge('border-2 border-bs-4 border-be-6')).toBe('border-2 border-bs-4 border-be-6')
+    expect(twMerge('border-bs-4 border-be-6 border-2')).toBe('border-2')
+    expect(twMerge('border-red border-bs-blue border-be-green')).toBe(
+        'border-red border-bs-blue border-be-green',
+    )
+    expect(twMerge('border-bs-blue border-be-green border-red')).toBe('border-red')
+
+    expect(twMerge('border-y-2 border-bs-4 border-be-6')).toBe('border-y-2 border-bs-4 border-be-6')
+    expect(twMerge('border-t-2 border-bs-4 border-b-6 border-be-8')).toBe(
+        'border-t-2 border-bs-4 border-b-6 border-be-8',
+    )
+    expect(twMerge('border-y-red border-bs-blue border-be-green')).toBe(
+        'border-y-red border-bs-blue border-be-green',
+    )
+
+    // Logical size utilities
+
+    expect(twMerge('inline-1/2 inline-3/4')).toBe('inline-3/4')
+    expect(twMerge('block-1/2 block-3/4')).toBe('block-3/4')
+    expect(twMerge('min-inline-auto min-inline-full')).toBe('min-inline-full')
+    expect(twMerge('max-inline-none max-inline-10')).toBe('max-inline-10')
+    expect(twMerge('min-block-auto min-block-lh min-block-10')).toBe('min-block-10')
+    expect(twMerge('max-block-none max-block-lh max-block-10')).toBe('max-block-10')
+
+    expect(twMerge('w-10 inline-20')).toBe('w-10 inline-20')
+    expect(twMerge('h-10 block-20')).toBe('h-10 block-20')
+    expect(twMerge('size-10 inline-20 block-30')).toBe('size-10 inline-20 block-30')
+    expect(twMerge('min-w-10 min-inline-20')).toBe('min-w-10 min-inline-20')
+    expect(twMerge('max-h-10 max-block-20')).toBe('max-h-10 max-block-20')
+
+    // Font feature settings utilities
+
+    expect(twMerge('font-features-["smcp"] font-features-["onum"]')).toBe('font-features-["onum"]')
+    expect(twMerge('font-features-[var(--font-features)] font-features-["liga","dlig"]')).toBe(
+        'font-features-["liga","dlig"]',
+    )
+    expect(twMerge('tabular-nums font-features-["smcp"]')).toBe(
+        'tabular-nums font-features-["smcp"]',
+    )
+    expect(twMerge('font-features-["smcp"] normal-nums')).toBe('font-features-["smcp"] normal-nums')
+    expect(twMerge('font-sans font-features-["smcp"]')).toBe('font-sans font-features-["smcp"]')
+
+    // Fractions with decimal numerator/denominator
+
+    expect(twMerge('aspect-8/11 aspect-8.5/11')).toBe('aspect-8.5/11')
+    expect(twMerge('w-8/11 w-8.5/11')).toBe('w-8.5/11')
+    expect(twMerge('inset-1/2 inset-1.25/2.5')).toBe('inset-1.25/2.5')
+})

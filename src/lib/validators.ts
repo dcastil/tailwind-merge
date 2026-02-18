@@ -1,6 +1,6 @@
 const arbitraryValueRegex = /^\[(?:(\w[\w-]*):)?(.+)\]$/i
 const arbitraryVariableRegex = /^\((?:(\w[\w-]*):)?(.+)\)$/i
-const fractionRegex = /^\d+\/\d+$/
+const fractionRegex = /^\d+(?:\.\d+)?\/\d+(?:\.\d+)?$/
 const tshirtUnitRegex = /^(\d+(\.\d+)?)?(xs|sm|md|lg|xl)$/
 const lengthUnitRegex =
     /\d+(%|px|r?em|[sdl]?v([hwib]|min|max)|pt|pc|in|cm|mm|cap|ch|ex|r?lh|cq(w|h|i|b|min|max))|\b(calc|min|max|clamp)\(.+\)|^0$/
