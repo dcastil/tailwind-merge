@@ -335,6 +335,8 @@ export type DefaultClassGroupIds =
     | 'inset-ring-w'
     | 'inset-shadow-color'
     | 'inset-shadow'
+    | 'inset-be'
+    | 'inset-bs'
     | 'inset-x'
     | 'inset-y'
     | 'inset'

@@ -167,3 +167,21 @@ test('supports Tailwind CSS v4.1.5 features', () => {
     expect(twMerge('min-h-12 min-h-lh')).toBe('min-h-lh')
     expect(twMerge('max-h-12 max-h-lh')).toBe('max-h-lh')
 })
+
+test('supports Tailwind CSS v4.2 features', () => {
+    expect(twMerge('inset-s-1 inset-s-2')).toBe('inset-s-2')
+    expect(twMerge('inset-e-1 inset-e-2')).toBe('inset-e-2')
+    expect(twMerge('inset-bs-1 inset-bs-2')).toBe('inset-bs-2')
+    expect(twMerge('inset-be-1 inset-be-2')).toBe('inset-be-2')
+
+    expect(twMerge('start-1 inset-s-2')).toBe('inset-s-2')
+    expect(twMerge('inset-s-1 start-2')).toBe('start-2')
+    expect(twMerge('end-1 inset-e-2')).toBe('inset-e-2')
+    expect(twMerge('inset-e-1 end-2')).toBe('end-2')
+
+    expect(twMerge('inset-s-1 inset-e-2 inset-bs-3 inset-be-4 inset-0')).toBe('inset-0')
+    expect(twMerge('inset-0 inset-s-1 inset-bs-1')).toBe('inset-0 inset-s-1 inset-bs-1')
+
+    expect(twMerge('inset-y-1 inset-bs-2 inset-be-3')).toBe('inset-y-1 inset-bs-2 inset-be-3')
+    expect(twMerge('top-1 inset-bs-2 bottom-3 inset-be-4')).toBe('top-1 inset-bs-2 bottom-3 inset-be-4')
+})

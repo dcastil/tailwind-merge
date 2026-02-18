@@ -390,30 +390,60 @@ export const getDefaultConfig = () => {
              */
             position: ['static', 'fixed', 'absolute', 'relative', 'sticky'],
             /**
-             * Top / Right / Bottom / Left
+             * Inset
              * @see https://tailwindcss.com/docs/top-right-bottom-left
              */
             inset: [{ inset: scaleInset() }],
             /**
-             * Right / Left
+             * Inset Inline
              * @see https://tailwindcss.com/docs/top-right-bottom-left
              */
             'inset-x': [{ 'inset-x': scaleInset() }],
             /**
-             * Top / Bottom
+             * Inset Block
              * @see https://tailwindcss.com/docs/top-right-bottom-left
              */
             'inset-y': [{ 'inset-y': scaleInset() }],
             /**
-             * Start
+             * Inset Start
              * @see https://tailwindcss.com/docs/top-right-bottom-left
+             * @todo class group will be renamed to `inset-s` in next major release
              */
-            start: [{ start: scaleInset() }],
+            start: [
+                {
+                    'inset-s': scaleInset(),
+                    /**
+                     * @deprecated since Tailwind CSS v4.2.0 in favor of `inset-s-*` utilities.
+                     * @see https://github.com/tailwindlabs/tailwindcss/pull/19613
+                     */
+                    start: scaleInset(),
+                },
+            ],
             /**
-             * End
+             * Inset End
+             * @see https://tailwindcss.com/docs/top-right-bottom-left
+             * @todo class group will be renamed to `inset-e` in next major release
+             */
+            end: [
+                {
+                    'inset-e': scaleInset(),
+                    /**
+                     * @deprecated since Tailwind CSS v4.2.0 in favor of `inset-e-*` utilities.
+                     * @see https://github.com/tailwindlabs/tailwindcss/pull/19613
+                     */
+                    end: scaleInset(),
+                },
+            ],
+            /**
+             * Inset Block Start
              * @see https://tailwindcss.com/docs/top-right-bottom-left
              */
-            end: [{ end: scaleInset() }],
+            'inset-bs': [{ 'inset-bs': scaleInset() }],
+            /**
+             * Inset Block End
+             * @see https://tailwindcss.com/docs/top-right-bottom-left
+             */
+            'inset-be': [{ 'inset-be': scaleInset() }],
             /**
              * Top
              * @see https://tailwindcss.com/docs/top-right-bottom-left
@@ -2243,7 +2273,18 @@ export const getDefaultConfig = () => {
         conflictingClassGroups: {
             overflow: ['overflow-x', 'overflow-y'],
             overscroll: ['overscroll-x', 'overscroll-y'],
-            inset: ['inset-x', 'inset-y', 'start', 'end', 'top', 'right', 'bottom', 'left'],
+            inset: [
+                'inset-x',
+                'inset-y',
+                'inset-bs',
+                'inset-be',
+                'start',
+                'end',
+                'top',
+                'right',
+                'bottom',
+                'left',
+            ],
             'inset-x': ['right', 'left'],
             'inset-y': ['top', 'bottom'],
             flex: ['basis', 'grow', 'shrink'],
