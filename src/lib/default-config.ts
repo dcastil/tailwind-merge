@@ -963,6 +963,11 @@ export const getDefaultConfig = () => {
                 { font: [isArbitraryVariableFamilyName, isArbitraryFamilyName, themeFont] },
             ],
             /**
+             * Font Feature Settings
+             * @see https://tailwindcss.com/docs/font-feature-settings
+             */
+            'font-features': [{ 'font-features': [isArbitraryValue] }],
+            /**
              * Font Variant Numeric
              * @see https://tailwindcss.com/docs/font-variant-numeric
              */

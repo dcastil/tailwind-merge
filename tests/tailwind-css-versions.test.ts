@@ -221,13 +221,21 @@ test('supports Tailwind CSS v4.2 features', () => {
     expect(twMerge('scroll-mt-1 scroll-mbs-2')).toBe('scroll-mt-1 scroll-mbs-2')
     expect(twMerge('scroll-mb-1 scroll-mbe-2')).toBe('scroll-mb-1 scroll-mbe-2')
 
-    expect(twMerge('scroll-p-0 scroll-pbs-1 scroll-pbe-1')).toBe('scroll-p-0 scroll-pbs-1 scroll-pbe-1')
+    expect(twMerge('scroll-p-0 scroll-pbs-1 scroll-pbe-1')).toBe(
+        'scroll-p-0 scroll-pbs-1 scroll-pbe-1',
+    )
     expect(twMerge('scroll-pbs-1 scroll-pbe-1 scroll-p-0')).toBe('scroll-p-0')
-    expect(twMerge('scroll-m-0 scroll-mbs-1 scroll-mbe-1')).toBe('scroll-m-0 scroll-mbs-1 scroll-mbe-1')
+    expect(twMerge('scroll-m-0 scroll-mbs-1 scroll-mbe-1')).toBe(
+        'scroll-m-0 scroll-mbs-1 scroll-mbe-1',
+    )
     expect(twMerge('scroll-mbs-1 scroll-mbe-1 scroll-m-0')).toBe('scroll-m-0')
 
-    expect(twMerge('scroll-py-1 scroll-pbs-2 scroll-pbe-3')).toBe('scroll-py-1 scroll-pbs-2 scroll-pbe-3')
-    expect(twMerge('scroll-my-1 scroll-mbs-2 scroll-mbe-3')).toBe('scroll-my-1 scroll-mbs-2 scroll-mbe-3')
+    expect(twMerge('scroll-py-1 scroll-pbs-2 scroll-pbe-3')).toBe(
+        'scroll-py-1 scroll-pbs-2 scroll-pbe-3',
+    )
+    expect(twMerge('scroll-my-1 scroll-mbs-2 scroll-mbe-3')).toBe(
+        'scroll-my-1 scroll-mbs-2 scroll-mbe-3',
+    )
 
     // Logical border block utilities
 
@@ -265,4 +273,16 @@ test('supports Tailwind CSS v4.2 features', () => {
     expect(twMerge('size-10 inline-20 block-30')).toBe('size-10 inline-20 block-30')
     expect(twMerge('min-w-10 min-inline-20')).toBe('min-w-10 min-inline-20')
     expect(twMerge('max-h-10 max-block-20')).toBe('max-h-10 max-block-20')
+
+    // Font feature settings utilities
+
+    expect(twMerge('font-features-["smcp"] font-features-["onum"]')).toBe('font-features-["onum"]')
+    expect(twMerge('font-features-[var(--font-features)] font-features-[\"liga\","dlig"]')).toBe(
+        'font-features-["liga","dlig"]',
+    )
+    expect(twMerge('tabular-nums font-features-["smcp"]')).toBe(
+        'tabular-nums font-features-["smcp"]',
+    )
+    expect(twMerge('font-features-["smcp"] normal-nums')).toBe('font-features-["smcp"] normal-nums')
+    expect(twMerge('font-sans font-features-["smcp"]')).toBe('font-sans font-features-["smcp"]')
 })

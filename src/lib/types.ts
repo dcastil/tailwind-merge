@@ -306,6 +306,7 @@ export type DefaultClassGroupIds =
     | 'flex'
     | 'float'
     | 'font-family'
+    | 'font-features'
     | 'font-size'
     | 'font-smoothing'
     | 'font-stretch'
