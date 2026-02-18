@@ -277,7 +277,7 @@ test('supports Tailwind CSS v4.2 features', () => {
     // Font feature settings utilities
 
     expect(twMerge('font-features-["smcp"] font-features-["onum"]')).toBe('font-features-["onum"]')
-    expect(twMerge('font-features-[var(--font-features)] font-features-[\"liga\","dlig"]')).toBe(
+    expect(twMerge('font-features-[var(--font-features)] font-features-["liga","dlig"]')).toBe(
         'font-features-["liga","dlig"]',
     )
     expect(twMerge('tabular-nums font-features-["smcp"]')).toBe(
