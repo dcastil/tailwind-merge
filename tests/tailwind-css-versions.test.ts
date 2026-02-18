@@ -285,4 +285,10 @@ test('supports Tailwind CSS v4.2 features', () => {
     )
     expect(twMerge('font-features-["smcp"] normal-nums')).toBe('font-features-["smcp"] normal-nums')
     expect(twMerge('font-sans font-features-["smcp"]')).toBe('font-sans font-features-["smcp"]')
+
+    // Fractions with decimal numerator/denominator
+
+    expect(twMerge('aspect-8/11 aspect-8.5/11')).toBe('aspect-8.5/11')
+    expect(twMerge('w-8/11 w-8.5/11')).toBe('w-8.5/11')
+    expect(twMerge('inset-1/2 inset-1.25/2.5')).toBe('inset-1.25/2.5')
 })
