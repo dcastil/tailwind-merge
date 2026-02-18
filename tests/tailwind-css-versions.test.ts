@@ -169,6 +169,8 @@ test('supports Tailwind CSS v4.1.5 features', () => {
 })
 
 test('supports Tailwind CSS v4.2 features', () => {
+    // Logical inset utilities
+
     expect(twMerge('inset-s-1 inset-s-2')).toBe('inset-s-2')
     expect(twMerge('inset-e-1 inset-e-2')).toBe('inset-e-2')
     expect(twMerge('inset-bs-1 inset-bs-2')).toBe('inset-bs-2')
@@ -183,5 +185,27 @@ test('supports Tailwind CSS v4.2 features', () => {
     expect(twMerge('inset-0 inset-s-1 inset-bs-1')).toBe('inset-0 inset-s-1 inset-bs-1')
 
     expect(twMerge('inset-y-1 inset-bs-2 inset-be-3')).toBe('inset-y-1 inset-bs-2 inset-be-3')
-    expect(twMerge('top-1 inset-bs-2 bottom-3 inset-be-4')).toBe('top-1 inset-bs-2 bottom-3 inset-be-4')
+    expect(twMerge('top-1 inset-bs-2 bottom-3 inset-be-4')).toBe(
+        'top-1 inset-bs-2 bottom-3 inset-be-4',
+    )
+
+    // Logical spacing utilities
+
+    expect(twMerge('pbs-1 pbs-2')).toBe('pbs-2')
+    expect(twMerge('pbe-1 pbe-2')).toBe('pbe-2')
+    expect(twMerge('mbs-1 mbs-2')).toBe('mbs-2')
+    expect(twMerge('mbe-1 mbe-2')).toBe('mbe-2')
+
+    expect(twMerge('pt-1 pbs-2')).toBe('pt-1 pbs-2')
+    expect(twMerge('pb-1 pbe-2')).toBe('pb-1 pbe-2')
+    expect(twMerge('mt-1 mbs-2')).toBe('mt-1 mbs-2')
+    expect(twMerge('mb-1 mbe-2')).toBe('mb-1 mbe-2')
+
+    expect(twMerge('p-0 pbs-1 pbe-1')).toBe('p-0 pbs-1 pbe-1')
+    expect(twMerge('pbs-1 pbe-1 p-0')).toBe('p-0')
+    expect(twMerge('m-0 mbs-1 mbe-1')).toBe('m-0 mbs-1 mbe-1')
+    expect(twMerge('mbs-1 mbe-1 m-0')).toBe('m-0')
+
+    expect(twMerge('py-1 pbs-2 pbe-3')).toBe('py-1 pbs-2 pbe-3')
+    expect(twMerge('my-1 mbs-2 mbe-3')).toBe('my-1 mbs-2 mbe-3')
 })

@@ -659,25 +659,35 @@ export const getDefaultConfig = () => {
              */
             p: [{ p: scaleUnambiguousSpacing() }],
             /**
-             * Padding X
+             * Padding Inline
              * @see https://tailwindcss.com/docs/padding
              */
             px: [{ px: scaleUnambiguousSpacing() }],
             /**
-             * Padding Y
+             * Padding Block
              * @see https://tailwindcss.com/docs/padding
              */
             py: [{ py: scaleUnambiguousSpacing() }],
             /**
-             * Padding Start
+             * Padding Inline Start
              * @see https://tailwindcss.com/docs/padding
              */
             ps: [{ ps: scaleUnambiguousSpacing() }],
             /**
-             * Padding End
+             * Padding Inline End
              * @see https://tailwindcss.com/docs/padding
              */
             pe: [{ pe: scaleUnambiguousSpacing() }],
+            /**
+             * Padding Block Start
+             * @see https://tailwindcss.com/docs/padding
+             */
+            pbs: [{ pbs: scaleUnambiguousSpacing() }],
+            /**
+             * Padding Block End
+             * @see https://tailwindcss.com/docs/padding
+             */
+            pbe: [{ pbe: scaleUnambiguousSpacing() }],
             /**
              * Padding Top
              * @see https://tailwindcss.com/docs/padding
@@ -704,25 +714,35 @@ export const getDefaultConfig = () => {
              */
             m: [{ m: scaleMargin() }],
             /**
-             * Margin X
+             * Margin Inline
              * @see https://tailwindcss.com/docs/margin
              */
             mx: [{ mx: scaleMargin() }],
             /**
-             * Margin Y
+             * Margin Block
              * @see https://tailwindcss.com/docs/margin
              */
             my: [{ my: scaleMargin() }],
             /**
-             * Margin Start
+             * Margin Inline Start
              * @see https://tailwindcss.com/docs/margin
              */
             ms: [{ ms: scaleMargin() }],
             /**
-             * Margin End
+             * Margin Inline End
              * @see https://tailwindcss.com/docs/margin
              */
             me: [{ me: scaleMargin() }],
+            /**
+             * Margin Block Start
+             * @see https://tailwindcss.com/docs/margin
+             */
+            mbs: [{ mbs: scaleMargin() }],
+            /**
+             * Margin Block End
+             * @see https://tailwindcss.com/docs/margin
+             */
+            mbe: [{ mbe: scaleMargin() }],
             /**
              * Margin Top
              * @see https://tailwindcss.com/docs/margin
@@ -2289,10 +2309,10 @@ export const getDefaultConfig = () => {
             'inset-y': ['top', 'bottom'],
             flex: ['basis', 'grow', 'shrink'],
             gap: ['gap-x', 'gap-y'],
-            p: ['px', 'py', 'ps', 'pe', 'pt', 'pr', 'pb', 'pl'],
+            p: ['px', 'py', 'ps', 'pe', 'pbs', 'pbe', 'pt', 'pr', 'pb', 'pl'],
             px: ['pr', 'pl'],
             py: ['pt', 'pb'],
-            m: ['mx', 'my', 'ms', 'me', 'mt', 'mr', 'mb', 'ml'],
+            m: ['mx', 'my', 'ms', 'me', 'mbs', 'mbe', 'mt', 'mr', 'mb', 'ml'],
             mx: ['mr', 'ml'],
             my: ['mt', 'mb'],
             size: ['w', 'h'],
