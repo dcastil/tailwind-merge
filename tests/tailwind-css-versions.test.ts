@@ -228,4 +228,26 @@ test('supports Tailwind CSS v4.2 features', () => {
 
     expect(twMerge('scroll-py-1 scroll-pbs-2 scroll-pbe-3')).toBe('scroll-py-1 scroll-pbs-2 scroll-pbe-3')
     expect(twMerge('scroll-my-1 scroll-mbs-2 scroll-mbe-3')).toBe('scroll-my-1 scroll-mbs-2 scroll-mbe-3')
+
+    // Logical border block utilities
+
+    expect(twMerge('border-bs-1 border-bs-2')).toBe('border-bs-2')
+    expect(twMerge('border-be-1 border-be-2')).toBe('border-be-2')
+    expect(twMerge('border-bs-red border-bs-blue')).toBe('border-bs-blue')
+    expect(twMerge('border-be-red border-be-blue')).toBe('border-be-blue')
+
+    expect(twMerge('border-2 border-bs-4 border-be-6')).toBe('border-2 border-bs-4 border-be-6')
+    expect(twMerge('border-bs-4 border-be-6 border-2')).toBe('border-2')
+    expect(twMerge('border-red border-bs-blue border-be-green')).toBe(
+        'border-red border-bs-blue border-be-green',
+    )
+    expect(twMerge('border-bs-blue border-be-green border-red')).toBe('border-red')
+
+    expect(twMerge('border-y-2 border-bs-4 border-be-6')).toBe('border-y-2 border-bs-4 border-be-6')
+    expect(twMerge('border-t-2 border-bs-4 border-b-6 border-be-8')).toBe(
+        'border-t-2 border-bs-4 border-b-6 border-be-8',
+    )
+    expect(twMerge('border-y-red border-bs-blue border-be-green')).toBe(
+        'border-y-red border-bs-blue border-be-green',
+    )
 })

@@ -1276,25 +1276,35 @@ export const getDefaultConfig = () => {
              */
             'border-w': [{ border: scaleBorderWidth() }],
             /**
-             * Border Width X
+             * Border Width Inline
              * @see https://tailwindcss.com/docs/border-width
              */
             'border-w-x': [{ 'border-x': scaleBorderWidth() }],
             /**
-             * Border Width Y
+             * Border Width Block
              * @see https://tailwindcss.com/docs/border-width
              */
             'border-w-y': [{ 'border-y': scaleBorderWidth() }],
             /**
-             * Border Width Start
+             * Border Width Inline Start
              * @see https://tailwindcss.com/docs/border-width
              */
             'border-w-s': [{ 'border-s': scaleBorderWidth() }],
             /**
-             * Border Width End
+             * Border Width Inline End
              * @see https://tailwindcss.com/docs/border-width
              */
             'border-w-e': [{ 'border-e': scaleBorderWidth() }],
+            /**
+             * Border Width Block Start
+             * @see https://tailwindcss.com/docs/border-width
+             */
+            'border-w-bs': [{ 'border-bs': scaleBorderWidth() }],
+            /**
+             * Border Width Block End
+             * @see https://tailwindcss.com/docs/border-width
+             */
+            'border-w-be': [{ 'border-be': scaleBorderWidth() }],
             /**
              * Border Width Top
              * @see https://tailwindcss.com/docs/border-width
@@ -1351,25 +1361,35 @@ export const getDefaultConfig = () => {
              */
             'border-color': [{ border: scaleColor() }],
             /**
-             * Border Color X
+             * Border Color Inline
              * @see https://tailwindcss.com/docs/border-color
              */
             'border-color-x': [{ 'border-x': scaleColor() }],
             /**
-             * Border Color Y
+             * Border Color Block
              * @see https://tailwindcss.com/docs/border-color
              */
             'border-color-y': [{ 'border-y': scaleColor() }],
             /**
-             * Border Color S
+             * Border Color Inline Start
              * @see https://tailwindcss.com/docs/border-color
              */
             'border-color-s': [{ 'border-s': scaleColor() }],
             /**
-             * Border Color E
+             * Border Color Inline End
              * @see https://tailwindcss.com/docs/border-color
              */
             'border-color-e': [{ 'border-e': scaleColor() }],
+            /**
+             * Border Color Block Start
+             * @see https://tailwindcss.com/docs/border-color
+             */
+            'border-color-bs': [{ 'border-bs': scaleColor() }],
+            /**
+             * Border Color Block End
+             * @see https://tailwindcss.com/docs/border-color
+             */
+            'border-color-be': [{ 'border-be': scaleColor() }],
             /**
              * Border Color Top
              * @see https://tailwindcss.com/docs/border-color
@@ -2378,6 +2398,8 @@ export const getDefaultConfig = () => {
                 'border-w-y',
                 'border-w-s',
                 'border-w-e',
+                'border-w-bs',
+                'border-w-be',
                 'border-w-t',
                 'border-w-r',
                 'border-w-b',
@@ -2390,6 +2412,8 @@ export const getDefaultConfig = () => {
                 'border-color-y',
                 'border-color-s',
                 'border-color-e',
+                'border-color-bs',
+                'border-color-be',
                 'border-color-t',
                 'border-color-r',
                 'border-color-b',
