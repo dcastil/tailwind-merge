@@ -32,6 +32,7 @@ The workflow `.github/workflows/comment-released-prs-and-issues.yml` uses the lo
 - Automatic base-tag selection is semver-aware:
   - Stable release tags compare to the previous stable semver tag.
   - Prerelease tags with a SHA suffix (for example `v3.4.1-dev.<sha>`) resolve base from npm-published versions with the same prerelease prefix and pick the nearest ancestor commit.
+  - For SHA-suffixed prereleases, if no prior dev release exists for the same core version, resolution falls back to the highest semver lower than the current version (same prerelease prefix).
   - SHA-suffixed prerelease comments link to the npm published version page instead of GitHub release tags.
   - Other prerelease tags compare to the previous semver tag (including prereleases).
 - If no valid base tag is found, the action fails.

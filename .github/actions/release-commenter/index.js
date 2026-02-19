@@ -628,8 +628,9 @@ function log(message) {
  * @param {string} message
  */
 function logError(message) {
+    const normalizedMessage = message.startsWith('Error:') ? message : `Error: ${message}`
     // eslint-disable-next-line no-console -- Error logging for action run diagnostics
-    console.error(`[release-commenter] ${message}`)
+    console.error(`[release-commenter] ${normalizedMessage}`)
 }
 
 /**
@@ -1159,27 +1160,74 @@ async function resolveShaPrereleaseBaseRef(
         `Using npm SHA prerelease strategy for ${packageName} (${currentContext.prereleasePrefix}), checking ${npmVersions.length} npm version(s)`,
     )
 
-    /** @type {Map<string, string>} */
-    const shaToVersion = new Map()
+    /**
+     * @type {Array<{
+     *   npmVersion: string
+     *   parsedVersion: ParsedTag
+     *   sha: string
+     * }>}
+     */
+    const matchingDevCandidates = []
     for (const npmVersion of npmVersions) {
         const parsedNpmVersion = parseTag(npmVersion)
         if (!parsedNpmVersion) continue
-        if (!sameCoreVersion(parsedNpmVersion, currentVersion)) continue
 
         const npmContext = getShaPrereleaseContext(parsedNpmVersion)
         if (!npmContext) continue
         if (npmContext.prereleasePrefix !== currentContext.prereleasePrefix) continue
         if (npmContext.currentSha === currentContext.currentSha) continue
 
-        if (!shaToVersion.has(npmContext.currentSha)) {
-            shaToVersion.set(npmContext.currentSha, npmVersion)
-        }
+        matchingDevCandidates.push({
+            npmVersion,
+            parsedVersion: parsedNpmVersion,
+            sha: npmContext.currentSha,
+        })
     }
 
-    if (!shaToVersion.size) {
+    const sameCoreCandidates = matchingDevCandidates.filter((candidate) =>
+        sameCoreVersion(candidate.parsedVersion, currentVersion),
+    )
+    const fallbackCandidates = matchingDevCandidates.filter(
+        (candidate) => compareSemver(candidate.parsedVersion, currentVersion) < 0,
+    )
+    const highestFallbackVersion = fallbackCandidates.reduce(
+        /**
+         * @param {ParsedTag | null} highest
+         * @param {{parsedVersion: ParsedTag}} candidate
+         * @returns {ParsedTag | null}
+         */
+        (highest, candidate) =>
+            !highest || compareSemver(candidate.parsedVersion, highest) > 0
+                ? candidate.parsedVersion
+                : highest,
+        null,
+    )
+    const narrowedFallbackCandidates = highestFallbackVersion
+        ? fallbackCandidates.filter(
+              (candidate) => compareSemver(candidate.parsedVersion, highestFallbackVersion) === 0,
+          )
+        : []
+    const candidatePool =
+        sameCoreCandidates.length > 0 ? sameCoreCandidates : narrowedFallbackCandidates
+
+    if (!candidatePool.length) {
         throw new Error(
-            `No prior npm versions found for ${packageName} with prerelease prefix "${currentContext.prereleasePrefix}" and core version ${currentVersion.major}.${currentVersion.minor}.${currentVersion.patch}`,
+            `No prior npm versions found for ${packageName} with prerelease prefix "${currentContext.prereleasePrefix}" (same core ${currentVersion.major}.${currentVersion.minor}.${currentVersion.patch} or earlier versions)`,
         )
+    }
+
+    log(
+        sameCoreCandidates.length > 0
+            ? `Found ${sameCoreCandidates.length} prior same-core dev version(s)`
+            : `No same-core prior dev versions found; falling back to highest prior semver (${narrowedFallbackCandidates.length} candidate(s))`,
+    )
+
+    /** @type {Map<string, string>} */
+    const shaToVersion = new Map()
+    for (const candidate of candidatePool) {
+        if (!shaToVersion.has(candidate.sha)) {
+            shaToVersion.set(candidate.sha, candidate.npmVersion)
+        }
     }
 
     /** @type {{baseSha: string, sourceVersion: string, aheadBy: number} | null} */
