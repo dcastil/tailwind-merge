@@ -9,7 +9,7 @@
  */
 
 export type ClassNameValue = ClassNameArray | string | null | undefined | 0 | 0n | false
-type ClassNameArray = ClassNameValue[]
+type ClassNameArray = readonly ClassNameValue[]
 
 export const twJoin = (...classLists: ClassNameValue[]): string => {
     let index = 0
