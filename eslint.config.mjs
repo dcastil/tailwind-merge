@@ -1,6 +1,10 @@
+import { fixupPluginRules } from '@eslint/compat'
 import vitestPlugin from '@vitest/eslint-plugin'
 import importPlugin from 'eslint-plugin-import'
 import typescriptPlugin from 'typescript-eslint'
+
+const compatibleImportPlugin = fixupPluginRules(importPlugin)
+const importTypeScriptConfig = importPlugin.flatConfigs.typescript
 
 export default typescriptPlugin.config(
     {
@@ -8,15 +12,17 @@ export default typescriptPlugin.config(
     },
     {
         files: ['**/*.?(m|c)@(t|j)s'],
+        // Temporary shim until eslint-plugin-import adds native ESLint 10 support.
+        // Without this wrapper, its rules still expect the pre-ESLint-10 rule context API.
+        plugins: {
+            import: compatibleImportPlugin,
+        },
+        settings: importTypeScriptConfig.settings,
+        rules: importTypeScriptConfig.rules,
     },
     typescriptPlugin.configs.base,
-    importPlugin.configs.typescript,
     vitestPlugin.configs.recommended,
     {
-        plugins: {
-            import: importPlugin,
-        },
-
         rules: {
             '@typescript-eslint/consistent-type-assertions': 'warn',
             '@typescript-eslint/no-array-constructor': 'warn',

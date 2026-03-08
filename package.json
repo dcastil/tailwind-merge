@@ -65,6 +65,7 @@
         "@babel/core": "^7.29.0",
         "@babel/preset-env": "^7.29.0",
         "@codspeed/vitest-plugin": "^5.2.0",
+        "@eslint/compat": "^2.0.3",
         "@rollup/plugin-babel": "^6.1.0",
         "@rollup/plugin-node-resolve": "^16.0.3",
         "@rollup/plugin-typescript": "^12.3.0",
