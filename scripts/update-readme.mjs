@@ -47,7 +47,7 @@ function applyStaticLinks(docsOverviewContent) {
         )
         .replace(
             /(["'`(])\.\/([^\s]+\.md)(["'`)])/g,
-            `$1https://github.com/dcastil/tailwind-merge/tree/${version}/docs/$2$3`,
+            `$1https://github.com/dcastil/tailwind-merge/blob/${version}/docs/$2$3`,
         )
 
     if (nextDocsOverviewContent === docsOverviewContent) {
