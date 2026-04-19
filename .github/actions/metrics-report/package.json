@@ -9,10 +9,10 @@
     "dependencies": {
         "@actions/core": "^3.0.0",
         "@actions/exec": "^3.0.0",
-        "@actions/github": "^9.0.0",
+        "@actions/github": "^9.1.0",
         "@octokit/types": "^16.0.0",
         "@octokit/webhooks-types": "^7.6.1",
-        "esbuild": "^0.27.3",
-        "rollup": "^4.59.0"
+        "esbuild": "^0.28.0",
+        "rollup": "^4.60.2"
     }
 }
