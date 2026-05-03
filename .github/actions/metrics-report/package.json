@@ -7,9 +7,9 @@
         "start": "node src/main.mjs"
     },
     "dependencies": {
-        "@actions/core": "^3.0.0",
+        "@actions/core": "^3.0.1",
         "@actions/exec": "^3.0.0",
-        "@actions/github": "^9.1.0",
+        "@actions/github": "^9.1.1",
         "@octokit/types": "^16.0.0",
         "@octokit/webhooks-types": "^7.6.1",
         "esbuild": "^0.28.0",

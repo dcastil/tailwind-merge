@@ -2,10 +2,10 @@
 # yarn lockfile v1
 
 
-"@actions/core@^3.0.0":
-  version "3.0.0"
-  resolved "https://registry.yarnpkg.com/@actions/core/-/core-3.0.0.tgz#89cb07c119e9b46a649ad5f355e77de9b3108cf8"
-  integrity sha512-zYt6cz+ivnTmiT/ksRVriMBOiuoUpDCJJlZ5KPl2/FRdvwU3f7MPh9qftvbkXJThragzUZieit2nyHUyw53Seg==
+"@actions/core@^3.0.1":
+  version "3.0.1"
+  resolved "https://registry.yarnpkg.com/@actions/core/-/core-3.0.1.tgz#0f4d8b14527ee51e0db061eedc24a206c9f98c23"
+  integrity sha512-a6d/Nwahm9fliVGRhdhofo40HjHQasUPusmc7vBfyky+7Z+P2A1J68zyFVaNcEclc/Se+eO595oAr5nwEIoIUA==
   dependencies:
     "@actions/exec" "^3.0.0"
     "@actions/http-client" "^4.0.0"
@@ -17,10 +17,10 @@
   dependencies:
     "@actions/io" "^3.0.2"
 
-"@actions/github@^9.1.0":
-  version "9.1.0"
-  resolved "https://registry.yarnpkg.com/@actions/github/-/github-9.1.0.tgz#06f5b292eb207323d3f4381d30d3a12e3ba7e863"
-  integrity sha512-u0hDGQeCS+7VNoLA8hYG65RLdPLMaPGfka0sZ0up7P0AiShqfX6xcuXNteGkQ7X7Tod7AMNwHd4p7DS63i8zzA==
+"@actions/github@^9.1.1":
+  version "9.1.1"
+  resolved "https://registry.yarnpkg.com/@actions/github/-/github-9.1.1.tgz#b93be4c36a46cc67cc94d6dfd33c1e33b9c59a6f"
+  integrity sha512-tL5JbYOBZHc0ngEnCsaDcryUizIUIlQyIMwy1Wkx93H5HzbBJ7TbiPx2PnFjBwZW0Vh05JmfFZhecE6gglYegA==
   dependencies:
     "@actions/http-client" "^3.0.2"
     "@octokit/core" "^7.0.6"
