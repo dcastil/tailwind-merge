@@ -2193,22 +2193,22 @@ export const getDefaultConfig = () => {
             'scroll-behavior': [{ scroll: ['auto', 'smooth'] }],
             /**
              * Scrollbar Width
-             * @see TBD - new Tailwind website not deployed yet
+             * @see https://tailwindcss.com/docs/scrollbar-width
              */
             'scrollbar-w': [{ scrollbar: ['auto', 'thin', 'none'] }],
             /**
              * Scrollbar Thumb Color
-             * @see TBD - new Tailwind website not deployed yet
+             * @see https://tailwindcss.com/docs/scrollbar-color
              */
             'scrollbar-thumb-color': [{ 'scrollbar-thumb': scaleColor() }],
             /**
              * Scrollbar Track Color
-             * @see TBD - new Tailwind website not deployed yet
+             * @see https://tailwindcss.com/docs/scrollbar-color
              */
             'scrollbar-track-color': [{ 'scrollbar-track': scaleColor() }],
             /**
              * Scrollbar Gutter
-             * @see TBD - new Tailwind website not deployed yet
+             * @see https://tailwindcss.com/docs/scrollbar-gutter
              */
             'scrollbar-gutter': [{ 'scrollbar-gutter': ['auto', 'stable', 'both'] }],
             /**
