@@ -2057,11 +2057,6 @@ export const getDefaultConfig = () => {
                 { transform: [isArbitraryVariable, isArbitraryValue, '', 'none', 'gpu', 'cpu'] },
             ],
             /**
-             * Zoom
-             * @see https://tailwindcss.com/docs/zoom
-             */
-            zoom: [{ zoom: [isInteger, isArbitraryVariable, isArbitraryValue] }],
-            /**
              * Transform Origin
              * @see https://tailwindcss.com/docs/transform-origin
              */
@@ -2096,6 +2091,11 @@ export const getDefaultConfig = () => {
              * @see https://tailwindcss.com/docs/translate
              */
             'translate-none': ['translate-none'],
+            /**
+             * Zoom
+             * @see https://tailwindcss.com/docs/zoom
+             */
+            zoom: [{ zoom: [isInteger, isArbitraryVariable, isArbitraryValue] }],
 
             // ---------------------
             // --- Interactivity ---
