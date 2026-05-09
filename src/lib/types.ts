@@ -580,6 +580,7 @@ export type DefaultClassGroupIds =
     | 'whitespace'
     | 'will-change'
     | 'wrap'
+    | 'zoom'
     | 'z'
 
 export type AnyClassGroupIds = string

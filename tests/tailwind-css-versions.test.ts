@@ -320,3 +320,10 @@ test('supports Tailwind CSS v4.3 scrollbar features', () => {
         'scrollbar-thin scrollbar-thumb-red-500 scrollbar-track-blue-500',
     )
 })
+
+test('supports Tailwind CSS v4.3 zoom features', () => {
+    expect(twMerge('zoom-50 zoom-100')).toBe('zoom-100')
+    expect(twMerge('zoom-100 zoom-[var(--zoom)]')).toBe('zoom-[var(--zoom)]')
+    expect(twMerge('zoom-[1.5] zoom-(--zoom)')).toBe('zoom-(--zoom)')
+    expect(twMerge('zoom-50 scale-125')).toBe('zoom-50 scale-125')
+})

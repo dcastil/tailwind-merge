@@ -2052,6 +2052,11 @@ export const getDefaultConfig = () => {
                 { transform: [isArbitraryVariable, isArbitraryValue, '', 'none', 'gpu', 'cpu'] },
             ],
             /**
+             * Zoom
+             * @see https://tailwindcss.com/docs/zoom
+             */
+            zoom: [{ zoom: [isInteger, isArbitraryVariable, isArbitraryValue] }],
+            /**
              * Transform Origin
              * @see https://tailwindcss.com/docs/transform-origin
              */

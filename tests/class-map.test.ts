@@ -354,6 +354,7 @@ test('class map has correct class groups at first part', () => {
         whitespace: ['whitespace'],
         will: ['will-change'],
         wrap: ['wrap'],
+        zoom: ['zoom'],
         z: ['z'],
     })
 })
