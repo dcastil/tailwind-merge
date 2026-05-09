@@ -304,7 +304,7 @@ export const getDefaultConfig = () => {
              * Container Name
              * @see https://tailwindcss.com/docs/responsive-design#named-containers
              */
-            'container-name': [isNamedContainerQuery],
+            'container-named': [isNamedContainerQuery],
             /**
              * Columns
              * @see https://tailwindcss.com/docs/columns
@@ -2436,7 +2436,7 @@ export const getDefaultConfig = () => {
             'forced-color-adjust': [{ 'forced-color-adjust': ['auto', 'none'] }],
         },
         conflictingClassGroups: {
-            'container-name': ['container-type'],
+            'container-named': ['container-type'],
             overflow: ['overflow-x', 'overflow-y'],
             overscroll: ['overscroll-x', 'overscroll-y'],
             inset: [

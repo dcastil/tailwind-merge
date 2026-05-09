@@ -15,7 +15,7 @@ test('class map has correct class groups at first part', () => {
 
     expect(classMap.classGroupId).toBeUndefined()
     expect(classMap.validators?.map(({ classGroupId }) => classGroupId)).toEqual([
-        'container-name',
+        'container-named',
     ])
     expect(classGroupsByFirstPart).toEqual({
         '@container': ['container-type'],
