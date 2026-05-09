@@ -40,6 +40,26 @@ test('conflicts across postfix modifiers', () => {
     expect(customTwMerge('bar-1 baz-1/2')).toBe('baz-1/2')
 })
 
+test('resolves full class names for configured postfix lookup groups', () => {
+    const customTwMerge = createTailwindMerge(() => ({
+        cacheSize: 10,
+        theme: {},
+        classGroups: {
+            base: [{ foo: ['bar'] }],
+            named: [(value: string) => value === 'foo-bar/baz'],
+        },
+        conflictingClassGroups: {
+            named: ['base'],
+        },
+        conflictingClassGroupModifiers: {},
+        postfixLookupClassGroups: ['base'],
+        orderSensitiveModifiers: [],
+    }))
+
+    expect(customTwMerge('foo-bar foo-bar/baz')).toBe('foo-bar/baz')
+    expect(customTwMerge('foo-bar/baz foo-bar')).toBe('foo-bar/baz foo-bar')
+})
+
 test('sorts modifiers correctly', () => {
     expect(twMerge('c:d:e:block d:c:e:inline')).toBe('d:c:e:inline')
     expect(twMerge('*:before:block *:before:inline')).toBe('*:before:inline')

@@ -146,6 +146,9 @@ const twMerge = extendTailwindMerge<AdditionalClassGroupIds, AdditionalThemeGrou
             // You probably won't need this, but it follows the same shape as
             // `conflictingClassGroups`.
         },
+        // ↓ Class group IDs which should be resolved again with their postfix modifier attached.
+        //   Overrides default value.
+        postfixLookupClassGroups: ['container-type'],
         // ↓ Modifiers whose order among multiple modifiers should be preserved because their
         //   order changes which element gets targeted. Overrides default value.
         orderSensitiveModifiers: ['before'],
@@ -187,6 +190,9 @@ const twMerge = extendTailwindMerge<AdditionalClassGroupIds, AdditionalThemeGrou
             // You probably won't need this, but it follows the same shape as
             // `conflictingClassGroups`.
         },
+        // ↓ Class group IDs which should be resolved again with their postfix modifier attached.
+        //   Extends default value.
+        postfixLookupClassGroups: ['aspect-reset'],
         // ↓ Modifiers whose order among multiple modifiers should be preserved because their
         //   order changes which element gets targeted. Extends default value.
         orderSensitiveModifiers: ['before'],
@@ -243,6 +249,7 @@ const twMerge = createTailwindMerge(() => {
             ...defaultConfig.conflictingClassGroupModifiers,
             card: ['icon-size'],
         },
+        postfixLookupClassGroups: defaultConfig.postfixLookupClassGroups,
         orderSensitiveModifiers: [...defaultConfig.orderSensitiveModifiers, 'before'],
     }
 })

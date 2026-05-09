@@ -2565,6 +2565,7 @@ export const getDefaultConfig = () => {
         conflictingClassGroupModifiers: {
             'font-size': ['leading'],
         },
+        postfixLookupClassGroups: ['container-type'],
         orderSensitiveModifiers: [
             '*',
             '**',

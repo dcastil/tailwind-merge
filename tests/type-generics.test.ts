@@ -28,6 +28,11 @@ test('extendTailwindMerge type generics work correctly', () => {
                     'prr',
                 ],
             },
+            postfixLookupClassGroups: [
+                'px',
+                // @ts-expect-error
+                'prr',
+            ],
         },
     })
 
@@ -64,6 +69,12 @@ test('extendTailwindMerge type generics work correctly', () => {
                 ],
                 test1: ['test2'],
             },
+            postfixLookupClassGroups: [
+                'px',
+                'test1',
+                // @ts-expect-error
+                'prr',
+            ],
         },
     })
 
@@ -146,6 +157,11 @@ test('mergeConfigs type generics work correctly', () => {
                     // @ts-expect-error
                     lel: ['foo'],
                 },
+                postfixLookupClassGroups: [
+                    'foo',
+                    // @ts-expect-error
+                    'nope',
+                ],
             },
             extend: {
                 classGroups: {
@@ -166,6 +182,11 @@ test('mergeConfigs type generics work correctly', () => {
                     // @ts-expect-error
                     lel: ['foo'],
                 },
+                postfixLookupClassGroups: [
+                    'bar',
+                    // @ts-expect-error
+                    'nope',
+                ],
             },
         },
     )
