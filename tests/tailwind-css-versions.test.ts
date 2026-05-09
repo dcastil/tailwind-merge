@@ -321,6 +321,48 @@ test('supports Tailwind CSS v4.3 scrollbar features', () => {
     )
 })
 
+test('supports Tailwind CSS v4.3 container query container features', () => {
+    expect(twMerge('@container @container-normal @container-size')).toBe('@container-size')
+    expect(twMerge('@container-[inline-size] @container-(--container-type)')).toBe(
+        '@container-(--container-type)',
+    )
+
+    expect(twMerge('@container @container-size/sidebar')).toBe('@container-size/sidebar')
+    expect(twMerge('@container-normal @container-size/sidebar')).toBe('@container-size/sidebar')
+    expect(twMerge('@container-size/sidebar @container')).toBe(
+        '@container-size/sidebar @container',
+    )
+    expect(twMerge('@container/sidebar @container-normal')).toBe(
+        '@container/sidebar @container-normal',
+    )
+
+    expect(twMerge('@container/sidebar @container-normal/sidebar @container-size/content')).toBe(
+        '@container-size/content',
+    )
+    expect(twMerge('@container/sidebar @container-normal/content @container-size')).toBe(
+        '@container-normal/content @container-size',
+    )
+    expect(twMerge('@container-size @container/sidebar')).toBe('@container/sidebar')
+
+    expect(twMerge('@container-size/[sidebar] @container-normal/(--container-name)')).toBe(
+        '@container-normal/(--container-name)',
+    )
+    expect(twMerge('hover:@container hover:@container-size/sidebar')).toBe(
+        'hover:@container-size/sidebar',
+    )
+    expect(twMerge('hover:@container-size/sidebar hover:@container')).toBe(
+        'hover:@container-size/sidebar hover:@container',
+    )
+    expect(twMerge('@container! @container-size/sidebar!')).toBe('@container-size/sidebar!')
+    expect(twMerge('@container-size/sidebar! @container!')).toBe(
+        '@container-size/sidebar! @container!',
+    )
+
+    expect(twMerge('@container-foo/sidebar @container-size/sidebar')).toBe(
+        '@container-foo/sidebar @container-size/sidebar',
+    )
+})
+
 test('supports Tailwind CSS v4.3 zoom features', () => {
     expect(twMerge('zoom-50 zoom-100')).toBe('zoom-100')
     expect(twMerge('zoom-100 zoom-[var(--zoom)]')).toBe('zoom-[var(--zoom)]')

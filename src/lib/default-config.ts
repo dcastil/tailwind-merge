@@ -22,6 +22,7 @@ import {
     isArbitraryWeight,
     isFraction,
     isInteger,
+    isNamedContainerQuery,
     isNumber,
     isPercent,
     isTshirtSize,
@@ -292,6 +293,18 @@ export const getDefaultConfig = () => {
              * @deprecated since Tailwind CSS v4.0.0
              */
             container: ['container'],
+            /**
+             * Container Type
+             * @see https://tailwindcss.com/docs/responsive-design#container-queries
+             */
+            'container-type': [
+                { '@container': ['', 'normal', 'size', isArbitraryVariable, isArbitraryValue] },
+            ],
+            /**
+             * Container Name
+             * @see https://tailwindcss.com/docs/responsive-design#named-containers
+             */
+            'container-name': [isNamedContainerQuery],
             /**
              * Columns
              * @see https://tailwindcss.com/docs/columns
@@ -2423,6 +2436,7 @@ export const getDefaultConfig = () => {
             'forced-color-adjust': [{ 'forced-color-adjust': ['auto', 'none'] }],
         },
         conflictingClassGroups: {
+            'container-name': ['container-type'],
             overflow: ['overflow-x', 'overflow-y'],
             overscroll: ['overscroll-x', 'overscroll-y'],
             inset: [

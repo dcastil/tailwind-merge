@@ -36,11 +36,24 @@ export const mergeClassList = (classList: string, configUtils: ConfigUtils) => {
         }
 
         let hasPostfixModifier = !!maybePostfixModifierPosition
-        let classGroupId = getClassGroupId(
-            hasPostfixModifier
-                ? baseClassName.substring(0, maybePostfixModifierPosition)
-                : baseClassName,
-        )
+        let classGroupId: ReturnType<typeof getClassGroupId>
+
+        if (hasPostfixModifier) {
+            const baseClassNameWithoutPostfix = baseClassName.substring(
+                0,
+                maybePostfixModifierPosition,
+            )
+            classGroupId = getClassGroupId(baseClassNameWithoutPostfix)
+
+            const classGroupIdWithPostfix =
+                baseClassName[0] === '@' ? getClassGroupId(baseClassName) : undefined
+            if (classGroupIdWithPostfix && classGroupIdWithPostfix !== classGroupId) {
+                classGroupId = classGroupIdWithPostfix
+                hasPostfixModifier = false
+            }
+        } else {
+            classGroupId = getClassGroupId(baseClassName)
+        }
 
         if (!classGroupId) {
             if (!hasPostfixModifier) {

@@ -37,6 +37,12 @@ const isImage = (value: string) => imageRegex.test(value)
 export const isAnyNonArbitrary = (value: string) =>
     !isArbitraryValue(value) && !isArbitraryVariable(value)
 
+export const isNamedContainerQuery = (value: string) =>
+    value.startsWith('@container') &&
+    ((value[10] === '/' && value[11] !== undefined) ||
+        (value[11] === 's' && value[16] !== undefined && value.startsWith('-size/', 10)) ||
+        (value[11] === 'n' && value[18] !== undefined && value.startsWith('-normal/', 10)))
+
 export const isArbitrarySize = (value: string) => getIsArbitraryValue(value, isLabelSize, isNever)
 
 export const isArbitraryValue = (value: string) => arbitraryValueRegex.test(value)

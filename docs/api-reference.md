@@ -341,15 +341,16 @@ const customImageGroup = [{ 'custom-img': [validators.isArbitraryImage] }]
 
 These validators check for basic patterns and types:
 
-| Validator           | Description                                                                                                              | Example Match      |
-| ------------------- | ------------------------------------------------------------------------------------------------------------------------ | ------------------ |
-| `isAny`             | Always returns `true`. Use carefully - matches everything. Best when certain no other class groups exist in a namespace. | Matches any value  |
-| `isAnyNonArbitrary` | Checks if class part is NOT an arbitrary value or variable                                                               | `red`, `lg`, `4`   |
-| `isInteger`         | Matches integer values                                                                                                   | `3`, `100`         |
-| `isNumber`          | Matches any number (integer or decimal)                                                                                  | `3`, `1.5`, `0.25` |
-| `isFraction`        | Matches fraction patterns                                                                                                | `1/2`, `127/256`   |
-| `isPercent`         | Matches percentage values                                                                                                | `12.5%`, `50%`     |
-| `isTshirtSize`      | Matches T-shirt sizes, optionally with number prefix                                                                     | `sm`, `xl`, `2xl`  |
+| Validator               | Description                                                                                                              | Example Match                                |
+| ----------------------- | ------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------- |
+| `isAny`                 | Always returns `true`. Use carefully - matches everything. Best when certain no other class groups exist in a namespace. | Matches any value                            |
+| `isAnyNonArbitrary`     | Checks if class part is NOT an arbitrary value or variable                                                               | `red`, `lg`, `4`                             |
+| `isNamedContainerQuery` | Checks for named container query classes                                                                                 | `@container/sidebar`, `@container-size/main` |
+| `isInteger`             | Matches integer values                                                                                                   | `3`, `100`                                   |
+| `isNumber`              | Matches any number (integer or decimal)                                                                                  | `3`, `1.5`, `0.25`                           |
+| `isFraction`            | Matches fraction patterns                                                                                                | `1/2`, `127/256`                             |
+| `isPercent`             | Matches percentage values                                                                                                | `12.5%`, `50%`                               |
+| `isTshirtSize`          | Matches T-shirt sizes, optionally with number prefix                                                                     | `sm`, `xl`, `2xl`                            |
 
 ### Arbitrary Value Validators
 

@@ -282,6 +282,8 @@ export type DefaultClassGroupIds =
     | 'color-scheme'
     | 'columns'
     | 'container'
+    | 'container-name'
+    | 'container-type'
     | 'content'
     | 'contrast'
     | 'cursor'

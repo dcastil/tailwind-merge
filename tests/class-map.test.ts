@@ -14,8 +14,11 @@ test('class map has correct class groups at first part', () => {
     )
 
     expect(classMap.classGroupId).toBeUndefined()
-    expect(classMap.validators).toBeNull()
+    expect(classMap.validators?.map(({ classGroupId }) => classGroupId)).toEqual([
+        'container-name',
+    ])
     expect(classGroupsByFirstPart).toEqual({
+        '@container': ['container-type'],
         absolute: ['position'],
         accent: ['accent'],
         align: ['vertical-align'],
