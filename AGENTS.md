@@ -20,6 +20,7 @@ This repository is `tailwind-merge`, a TypeScript library that merges Tailwind c
 
 Deeper implementation notes live in:
 - `.agents/tailwind-merge-internals.md`
+- `.agents/tailwind-css-version-update.md` (Tailwind CSS version support workflow)
 - `.agents/release-workflow.md` (release changelog + GitHub release notes workflow)
 
 ## Environment and Commands
@@ -43,6 +44,7 @@ Core commands:
 4. `README.md` is version-generated from `docs/README.md`; do not regenerate it during normal development changes.
 5. Avoid manual edits to `dist/` and `coverage/`; they are generated artifacts.
 6. Validate packaging paths with `yarn build && yarn test:exports` when touching exports/build tooling.
+7. For Tailwind CSS version support work, follow `.agents/tailwind-css-version-update.md`.
 
 ## Documentation Sync Policy
 
@@ -69,6 +71,10 @@ Definition of done for every PR/change:
 - Release/package surface: run `yarn build` and `yarn test:exports`.
 
 ## Release Workflow
+
+For Tailwind CSS version support work, use:
+
+- `.agents/tailwind-css-version-update.md`
 
 For release-specific steps (draft release ingestion, changelog entry generation, sponsors handling, and GitHub release text formatting), use:
 

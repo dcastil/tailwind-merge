@@ -32,6 +32,7 @@ This file is a practical map for agent-driven changes in this repo.
 - Add or change Tailwind utility support:
   - `src/lib/default-config.ts`
   - Usually paired with tests in `tests/tailwind-css-versions.test.ts` and focused utility tests.
+  - For a full Tailwind CSS version update, follow `.agents/tailwind-css-version-update.md`.
 
 - Change conflict behavior:
   - `src/lib/default-config.ts` (`conflictingClassGroups`, `conflictingClassGroupModifiers`)
