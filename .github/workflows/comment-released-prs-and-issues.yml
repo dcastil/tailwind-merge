@@ -6,6 +6,7 @@ on:
     workflow_run:
         workflows: ['npm Publish']
         types: [completed]
+        branches: [main]
     workflow_dispatch:
         inputs:
             head_tag:
@@ -41,17 +42,24 @@ jobs:
             issues: write
             pull-requests: write
         steps:
-            - if: github.event_name == 'workflow_run'
-              uses: actions/checkout@v6
-              with:
-                  ref: ${{ github.event.workflow_run.head_sha }}
-            - if: github.event_name != 'workflow_run'
-              uses: actions/checkout@v6
+            - uses: actions/checkout@v6
             - if: github.event_name == 'workflow_run'
               id: dev_head_tag
+              env:
+                  GH_TOKEN: ${{ github.token }}
+                  HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
               run: |
-                  version="$(node -p 'require("./package.json").version')"
-                  echo "head_tag=v${version}-dev.${{ github.event.workflow_run.head_sha }}" >> "$GITHUB_OUTPUT"
+                  if [[ ! "$HEAD_SHA" =~ ^[0-9a-fA-F]{40}$ ]]; then
+                    echo "::error::Unexpected workflow_run head SHA: ${HEAD_SHA}"
+                    exit 1
+                  fi
+
+                  # Read package metadata from the published main commit as inert JSON instead of checking out the triggering SHA.
+                  version="$(gh api \
+                    -H "Accept: application/vnd.github.v3.raw+json" \
+                    "/repos/${GITHUB_REPOSITORY}/contents/package.json?ref=${HEAD_SHA}" \
+                    | node -p 'JSON.parse(require("node:fs").readFileSync(0, "utf8")).version')"
+                  echo "head_tag=v${version}-dev.${HEAD_SHA}" >> "$GITHUB_OUTPUT"
             - uses: ./.github/actions/release-commenter
               with:
                   github-token: ${{ secrets.GITHUB_TOKEN }}
