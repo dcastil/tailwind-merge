@@ -2192,11 +2192,6 @@ export const getDefaultConfig = () => {
              */
             'scroll-behavior': [{ scroll: ['auto', 'smooth'] }],
             /**
-             * Scrollbar Width
-             * @see https://tailwindcss.com/docs/scrollbar-width
-             */
-            'scrollbar-w': [{ scrollbar: ['auto', 'thin', 'none'] }],
-            /**
              * Scrollbar Thumb Color
              * @see https://tailwindcss.com/docs/scrollbar-color
              */
@@ -2211,6 +2206,11 @@ export const getDefaultConfig = () => {
              * @see https://tailwindcss.com/docs/scrollbar-gutter
              */
             'scrollbar-gutter': [{ 'scrollbar-gutter': ['auto', 'stable', 'both'] }],
+            /**
+             * Scrollbar Width
+             * @see https://tailwindcss.com/docs/scrollbar-width
+             */
+            'scrollbar-w': [{ scrollbar: ['auto', 'thin', 'none'] }],
             /**
              * Scroll Margin
              * @see https://tailwindcss.com/docs/scroll-margin
