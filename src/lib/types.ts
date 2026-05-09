@@ -2,8 +2,7 @@
  * Type the tailwind-merge configuration adheres to.
  */
 export interface Config<ClassGroupIds extends string, ThemeGroupIds extends string>
-    extends ConfigStaticPart,
-        ConfigGroupsPart<ClassGroupIds, ThemeGroupIds> {}
+    extends ConfigStaticPart, ConfigGroupsPart<ClassGroupIds, ThemeGroupIds> {}
 
 /**
  * The static part of the tailwind-merge configuration. When merging multiple configurations, the properties of this interface are always overridden.
@@ -75,7 +74,7 @@ export interface ParsedClassName {
      *
      * This property is prefixed with "maybe" because tailwind-merge does not know whether something is a postfix modifier or part of the base class since it's possible to configure Tailwind CSS classes which include a `/` in the base class name.
      *
-     * If a `maybePostfixModifierPosition` is present, tailwind-merge first tries to match the `baseClassName` without the possible postfix modifier to a class group. If that fails, it tries again with the possible postfix modifier.
+     * If a `maybePostfixModifierPosition` is present, tailwind-merge first tries to match the `baseClassName` without the possible postfix modifier to a class group. If that fails or the matched class group is configured in `postfixLookupClassGroups`, it tries again with the possible postfix modifier.
      *
      * @example 11 // for `bg-gray-100/50`
      */
@@ -125,6 +124,14 @@ interface ConfigGroupsPart<ClassGroupIds extends string, ThemeGroupIds extends s
         Partial<Record<ClassGroupIds, readonly ClassGroupIds[]>>
     >
     /**
+     * Class group IDs which should be resolved again with their postfix modifier attached.
+     *
+     * This is needed when a slash can make the full class name belong to a different class group than the part before the slash.
+     *
+     * @example ['container-type'] // `@container-size/sidebar` should resolve differently from `@container-size`
+     */
+    postfixLookupClassGroups?: readonly NoInferString<ClassGroupIds>[]
+    /**
      * Modifiers whose order among multiple modifiers should be preserved because their order changes which element gets targeted.
      *
      * tailwind-merge makes sure that classes with these modifiers are not overwritten by classes with the same modifiers with order-sensitive modifiers being in a different position.
@@ -135,14 +142,23 @@ interface ConfigGroupsPart<ClassGroupIds extends string, ThemeGroupIds extends s
 /**
  * Type of the configuration object that can be passed to `extendTailwindMerge`.
  */
-export interface ConfigExtension<ClassGroupIds extends string, ThemeGroupIds extends string>
-    extends Partial<ConfigStaticPart> {
-    override?: PartialPartial<ConfigGroupsPart<ClassGroupIds, ThemeGroupIds>>
-    extend?: PartialPartial<ConfigGroupsPart<ClassGroupIds, ThemeGroupIds>>
+export interface ConfigExtension<
+    ClassGroupIds extends string,
+    ThemeGroupIds extends string,
+> extends Partial<ConfigStaticPart> {
+    override?: PartialConfigGroupsPart<ClassGroupIds, ThemeGroupIds>
+    extend?: PartialConfigGroupsPart<ClassGroupIds, ThemeGroupIds>
 }
 
-type PartialPartial<T> = {
-    [P in keyof T]?: T[P] extends any[] ? T[P] : Partial<T[P]>
+interface PartialConfigGroupsPart<ClassGroupIds extends string, ThemeGroupIds extends string> {
+    theme?: NoInfer<Partial<ThemeObject<ThemeGroupIds>>>
+    classGroups?: NoInfer<Partial<Record<ClassGroupIds, ClassGroup<ThemeGroupIds>>>>
+    conflictingClassGroups?: NoInfer<Partial<Record<ClassGroupIds, readonly ClassGroupIds[]>>>
+    conflictingClassGroupModifiers?: NoInfer<
+        Partial<Record<ClassGroupIds, readonly ClassGroupIds[]>>
+    >
+    postfixLookupClassGroups?: readonly NoInferString<ClassGroupIds>[]
+    orderSensitiveModifiers?: string[]
 }
 
 export type ThemeObject<ThemeGroupIds extends string> = Record<
@@ -171,6 +187,13 @@ type ClassObject<ThemeGroupIds extends string> = Record<
  * Could be replaced with NoInfer utility type from TypeScript (https://www.typescriptlang.org/docs/handbook/utility-types.html#noinfertype), but that is only supported in TypeScript 5.4 or higher, so I should wait some time before using it.
  */
 export type NoInfer<T> = [T][T extends any ? 0 : never]
+
+/**
+ * Special-purpose NoInfer variant for string unions used in array item positions.
+ *
+ * The NoInfer helper above doesn't prevent inference from array items in all cases, so this keeps config arrays like `postfixLookupClassGroups` from defining or narrowing class group IDs. Once tailwind-merge only supports TypeScript 5.4 and newer, this can be replaced with TypeScript's built-in NoInfer utility type.
+ */
+type NoInferString<T extends string> = T extends infer S ? S & string : never
 
 /**
  * Theme group IDs included in the default configuration of tailwind-merge.
@@ -282,6 +305,8 @@ export type DefaultClassGroupIds =
     | 'color-scheme'
     | 'columns'
     | 'container'
+    | 'container-named'
+    | 'container-type'
     | 'content'
     | 'contrast'
     | 'cursor'
@@ -497,6 +522,10 @@ export type DefaultClassGroupIds =
     | 'scale-y'
     | 'scale-z'
     | 'scale'
+    | 'scrollbar-gutter'
+    | 'scrollbar-thumb-color'
+    | 'scrollbar-track-color'
+    | 'scrollbar-w'
     | 'scroll-behavior'
     | 'scroll-m'
     | 'scroll-mb'
@@ -542,6 +571,7 @@ export type DefaultClassGroupIds =
     | 'stroke-w'
     | 'stroke'
     | 'table-layout'
+    | 'tab-size'
     | 'text-alignment'
     | 'text-color'
     | 'text-decoration-color'
@@ -576,6 +606,7 @@ export type DefaultClassGroupIds =
     | 'whitespace'
     | 'will-change'
     | 'wrap'
+    | 'zoom'
     | 'z'
 
 export type AnyClassGroupIds = string

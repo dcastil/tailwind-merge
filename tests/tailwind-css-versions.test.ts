@@ -292,3 +292,87 @@ test('supports Tailwind CSS v4.2 features', () => {
     expect(twMerge('w-8/11 w-8.5/11')).toBe('w-8.5/11')
     expect(twMerge('inset-1/2 inset-1.25/2.5')).toBe('inset-1.25/2.5')
 })
+
+test('supports Tailwind CSS v4.3 scrollbar features', () => {
+    expect(twMerge('scrollbar-auto scrollbar-thin scrollbar-none')).toBe('scrollbar-none')
+    expect(twMerge('scrollbar-gutter-auto scrollbar-gutter-stable scrollbar-gutter-both')).toBe(
+        'scrollbar-gutter-both',
+    )
+
+    expect(twMerge('scrollbar-thumb-red-500 scrollbar-thumb-blue-500')).toBe(
+        'scrollbar-thumb-blue-500',
+    )
+    expect(twMerge('scrollbar-thumb-red-500 scrollbar-thumb-red-500/50')).toBe(
+        'scrollbar-thumb-red-500/50',
+    )
+    expect(twMerge('scrollbar-thumb-[#0088cc] scrollbar-thumb-(--thumb-color)')).toBe(
+        'scrollbar-thumb-(--thumb-color)',
+    )
+
+    expect(twMerge('scrollbar-track-red-500 scrollbar-track-blue-500')).toBe(
+        'scrollbar-track-blue-500',
+    )
+    expect(twMerge('scrollbar-track-red-500 scrollbar-track-[color:var(--track-color)]')).toBe(
+        'scrollbar-track-[color:var(--track-color)]',
+    )
+
+    expect(twMerge('scrollbar-thin scrollbar-thumb-red-500 scrollbar-track-blue-500')).toBe(
+        'scrollbar-thin scrollbar-thumb-red-500 scrollbar-track-blue-500',
+    )
+})
+
+test('supports Tailwind CSS v4.3 container query container features', () => {
+    expect(twMerge('@container @container-normal @container-size')).toBe('@container-size')
+    expect(twMerge('@container-[inline-size] @container-(--container-type)')).toBe(
+        '@container-(--container-type)',
+    )
+
+    expect(twMerge('@container @container-size/sidebar')).toBe('@container-size/sidebar')
+    expect(twMerge('@container-normal @container-size/sidebar')).toBe('@container-size/sidebar')
+    expect(twMerge('@container-size/sidebar @container')).toBe(
+        '@container-size/sidebar @container',
+    )
+    expect(twMerge('@container/sidebar @container-normal')).toBe(
+        '@container/sidebar @container-normal',
+    )
+
+    expect(twMerge('@container/sidebar @container-normal/sidebar @container-size/content')).toBe(
+        '@container-size/content',
+    )
+    expect(twMerge('@container/sidebar @container-normal/content @container-size')).toBe(
+        '@container-normal/content @container-size',
+    )
+    expect(twMerge('@container-size @container/sidebar')).toBe('@container/sidebar')
+
+    expect(twMerge('@container-size/[sidebar] @container-normal/(--container-name)')).toBe(
+        '@container-normal/(--container-name)',
+    )
+    expect(twMerge('hover:@container hover:@container-size/sidebar')).toBe(
+        'hover:@container-size/sidebar',
+    )
+    expect(twMerge('hover:@container-size/sidebar hover:@container')).toBe(
+        'hover:@container-size/sidebar hover:@container',
+    )
+    expect(twMerge('@container! @container-size/sidebar!')).toBe('@container-size/sidebar!')
+    expect(twMerge('@container-size/sidebar! @container!')).toBe(
+        '@container-size/sidebar! @container!',
+    )
+
+    expect(twMerge('@container-foo/sidebar @container-size/sidebar')).toBe(
+        '@container-foo/sidebar @container-size/sidebar',
+    )
+})
+
+test('supports Tailwind CSS v4.3 zoom features', () => {
+    expect(twMerge('zoom-50 zoom-100')).toBe('zoom-100')
+    expect(twMerge('zoom-100 zoom-[var(--zoom)]')).toBe('zoom-[var(--zoom)]')
+    expect(twMerge('zoom-[1.5] zoom-(--zoom)')).toBe('zoom-(--zoom)')
+    expect(twMerge('zoom-50 scale-125')).toBe('zoom-50 scale-125')
+})
+
+test('supports Tailwind CSS v4.3 tab-size features', () => {
+    expect(twMerge('tab-2 tab-8')).toBe('tab-8')
+    expect(twMerge('tab-8 tab-[12px]')).toBe('tab-[12px]')
+    expect(twMerge('tab-[3] tab-(--tab-size)')).toBe('tab-(--tab-size)')
+    expect(twMerge('tab-4 tabular-nums')).toBe('tab-4 tabular-nums')
+})

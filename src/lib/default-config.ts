@@ -22,6 +22,7 @@ import {
     isArbitraryWeight,
     isFraction,
     isInteger,
+    isNamedContainerQuery,
     isNumber,
     isPercent,
     isTshirtSize,
@@ -292,6 +293,18 @@ export const getDefaultConfig = () => {
              * @deprecated since Tailwind CSS v4.0.0
              */
             container: ['container'],
+            /**
+             * Container Type
+             * @see https://tailwindcss.com/docs/responsive-design#container-queries
+             */
+            'container-type': [
+                { '@container': ['', 'normal', 'size', isArbitraryVariable, isArbitraryValue] },
+            ],
+            /**
+             * Container Name
+             * @see https://tailwindcss.com/docs/responsive-design#named-containers
+             */
+            'container-named': [isNamedContainerQuery],
             /**
              * Columns
              * @see https://tailwindcss.com/docs/columns
@@ -1112,6 +1125,11 @@ export const getDefaultConfig = () => {
              * @see https://tailwindcss.com/docs/text-indent
              */
             indent: [{ indent: scaleUnambiguousSpacing() }],
+            /**
+             * Tab Size
+             * @see https://tailwindcss.com/docs/tab-size
+             */
+            'tab-size': [{ tab: [isInteger, isArbitraryVariable, isArbitraryValue] }],
             /**
              * Vertical Alignment
              * @see https://tailwindcss.com/docs/vertical-align
@@ -2086,6 +2104,11 @@ export const getDefaultConfig = () => {
              * @see https://tailwindcss.com/docs/translate
              */
             'translate-none': ['translate-none'],
+            /**
+             * Zoom
+             * @see https://tailwindcss.com/docs/zoom
+             */
+            zoom: [{ zoom: [isInteger, isArbitraryVariable, isArbitraryValue] }],
 
             // ---------------------
             // --- Interactivity ---
@@ -2181,6 +2204,26 @@ export const getDefaultConfig = () => {
              * @see https://tailwindcss.com/docs/scroll-behavior
              */
             'scroll-behavior': [{ scroll: ['auto', 'smooth'] }],
+            /**
+             * Scrollbar Thumb Color
+             * @see https://tailwindcss.com/docs/scrollbar-color
+             */
+            'scrollbar-thumb-color': [{ 'scrollbar-thumb': scaleColor() }],
+            /**
+             * Scrollbar Track Color
+             * @see https://tailwindcss.com/docs/scrollbar-color
+             */
+            'scrollbar-track-color': [{ 'scrollbar-track': scaleColor() }],
+            /**
+             * Scrollbar Gutter
+             * @see https://tailwindcss.com/docs/scrollbar-gutter
+             */
+            'scrollbar-gutter': [{ 'scrollbar-gutter': ['auto', 'stable', 'both'] }],
+            /**
+             * Scrollbar Width
+             * @see https://tailwindcss.com/docs/scrollbar-width
+             */
+            'scrollbar-w': [{ scrollbar: ['auto', 'thin', 'none'] }],
             /**
              * Scroll Margin
              * @see https://tailwindcss.com/docs/scroll-margin
@@ -2393,6 +2436,7 @@ export const getDefaultConfig = () => {
             'forced-color-adjust': [{ 'forced-color-adjust': ['auto', 'none'] }],
         },
         conflictingClassGroups: {
+            'container-named': ['container-type'],
             overflow: ['overflow-x', 'overflow-y'],
             overscroll: ['overscroll-x', 'overscroll-y'],
             inset: [
@@ -2521,6 +2565,7 @@ export const getDefaultConfig = () => {
         conflictingClassGroupModifiers: {
             'font-size': ['leading'],
         },
+        postfixLookupClassGroups: ['container-type'],
         orderSensitiveModifiers: [
             '*',
             '**',

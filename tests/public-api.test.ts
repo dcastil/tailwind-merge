@@ -43,11 +43,12 @@ test('has correct export types', () => {
         isArbitraryWeight: expect.any(Function),
         isFraction: expect.any(Function),
         isInteger: expect.any(Function),
+        isNamedContainerQuery: expect.any(Function),
         isNumber: expect.any(Function),
         isPercent: expect.any(Function),
         isTshirtSize: expect.any(Function),
     })
-    expect(Object.keys(validators)).toHaveLength(24)
+    expect(Object.keys(validators)).toHaveLength(25)
     expect(mergeConfigs).toStrictEqual(expect.any(Function))
     expect(extendTailwindMerge).toStrictEqual(expect.any(Function))
     expect(twJoin).toStrictEqual(expect.any(Function))
@@ -174,6 +175,7 @@ test('validators have correct inputs and outputs', () => {
     expect(validators.isArbitraryImage('')).toEqual(expect.any(Boolean))
     expect(validators.isArbitraryNumber('')).toEqual(expect.any(Boolean))
     expect(validators.isArbitraryShadow('')).toEqual(expect.any(Boolean))
+    expect(validators.isNamedContainerQuery('')).toEqual(expect.any(Boolean))
 })
 
 test('mergeConfigs has correct inputs and outputs', () => {

@@ -52,6 +52,9 @@ const tailwindMergeConfig = {
     conflictingClassGroupModifiers: {
         // Conflicts between postfix modifier of a class group and another class group are defined here
     },
+    postfixLookupClassGroups: [
+        // Class group IDs which should be resolved again with their postfix modifier attached
+    ],
     orderSensitiveModifiers: [
         // Modifiers whose order among multiple modifiers should be preserved because their order
         // changes which element gets targeted.
@@ -159,6 +162,18 @@ const conflictingClassGroupModifiers = {
     'font-size': ['leading'],
 }
 ```
+
+### Postfix lookup class groups
+
+When a class contains a slash (`/`), tailwind-merge first treats the part after the slash as a possible postfix modifier. For example, `text-lg/7` is resolved as the `text-lg` class with `/7` as its postfix modifier.
+
+In rare cases, the slash belongs to the full class name instead. The `postfixLookupClassGroups` config property lets you opt in class groups where tailwind-merge should also try resolving the full class name after resolving the part before the slash.
+
+```ts
+const postfixLookupClassGroups = ['container-type']
+```
+
+This is needed for classes like `@container-size/sidebar`, where `@container-size` is a container type class, but `@container-size/sidebar` is a named container query class which should be resolved as a different class group.
 
 ### Order-sensitive modifiers
 

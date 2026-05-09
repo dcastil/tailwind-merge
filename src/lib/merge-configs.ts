@@ -25,6 +25,7 @@ export const mergeConfigs = <ClassGroupIds extends string, ThemeGroupIds extends
         baseConfig.conflictingClassGroupModifiers,
         override.conflictingClassGroupModifiers,
     )
+    overrideProperty(baseConfig, 'postfixLookupClassGroups', override.postfixLookupClassGroups)
     overrideProperty(baseConfig, 'orderSensitiveModifiers', override.orderSensitiveModifiers)
 
     mergeConfigProperties(baseConfig.theme, extend.theme)
@@ -34,6 +35,7 @@ export const mergeConfigs = <ClassGroupIds extends string, ThemeGroupIds extends
         baseConfig.conflictingClassGroupModifiers,
         extend.conflictingClassGroupModifiers,
     )
+    mergeArrayProperties(baseConfig, extend, 'postfixLookupClassGroups')
     mergeArrayProperties(baseConfig, extend, 'orderSensitiveModifiers')
 
     return baseConfig

@@ -4,8 +4,13 @@ import { IMPORTANT_MODIFIER } from './parse-class-name'
 const SPLIT_CLASSES_REGEX = /\s+/
 
 export const mergeClassList = (classList: string, configUtils: ConfigUtils) => {
-    const { parseClassName, getClassGroupId, getConflictingClassGroupIds, sortModifiers } =
-        configUtils
+    const {
+        parseClassName,
+        getClassGroupId,
+        getConflictingClassGroupIds,
+        sortModifiers,
+        postfixLookupClassGroupIds,
+    } = configUtils
 
     /**
      * Set of classGroupIds in following format:
@@ -36,11 +41,26 @@ export const mergeClassList = (classList: string, configUtils: ConfigUtils) => {
         }
 
         let hasPostfixModifier = !!maybePostfixModifierPosition
-        let classGroupId = getClassGroupId(
-            hasPostfixModifier
-                ? baseClassName.substring(0, maybePostfixModifierPosition)
-                : baseClassName,
-        )
+        let classGroupId: ReturnType<typeof getClassGroupId>
+
+        if (hasPostfixModifier) {
+            const baseClassNameWithoutPostfix = baseClassName.substring(
+                0,
+                maybePostfixModifierPosition,
+            )
+            classGroupId = getClassGroupId(baseClassNameWithoutPostfix)
+
+            const classGroupIdWithPostfix =
+                classGroupId && postfixLookupClassGroupIds[classGroupId]
+                    ? getClassGroupId(baseClassName)
+                    : undefined
+            if (classGroupIdWithPostfix && classGroupIdWithPostfix !== classGroupId) {
+                classGroupId = classGroupIdWithPostfix
+                hasPostfixModifier = false
+            }
+        } else {
+            classGroupId = getClassGroupId(baseClassName)
+        }
 
         if (!classGroupId) {
             if (!hasPostfixModifier) {

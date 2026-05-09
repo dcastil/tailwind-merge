@@ -146,6 +146,9 @@ const twMerge = extendTailwindMerge<AdditionalClassGroupIds, AdditionalThemeGrou
             // You probably won't need this, but it follows the same shape as
             // `conflictingClassGroups`.
         },
+        // ↓ Class group IDs which should be resolved again with their postfix modifier attached.
+        //   Overrides default value.
+        postfixLookupClassGroups: ['container-type'],
         // ↓ Modifiers whose order among multiple modifiers should be preserved because their
         //   order changes which element gets targeted. Overrides default value.
         orderSensitiveModifiers: ['before'],
@@ -187,6 +190,9 @@ const twMerge = extendTailwindMerge<AdditionalClassGroupIds, AdditionalThemeGrou
             // You probably won't need this, but it follows the same shape as
             // `conflictingClassGroups`.
         },
+        // ↓ Class group IDs which should be resolved again with their postfix modifier attached.
+        //   Extends default value.
+        postfixLookupClassGroups: ['aspect-reset'],
         // ↓ Modifiers whose order among multiple modifiers should be preserved because their
         //   order changes which element gets targeted. Extends default value.
         orderSensitiveModifiers: ['before'],
@@ -243,6 +249,7 @@ const twMerge = createTailwindMerge(() => {
             ...defaultConfig.conflictingClassGroupModifiers,
             card: ['icon-size'],
         },
+        postfixLookupClassGroups: defaultConfig.postfixLookupClassGroups,
         orderSensitiveModifiers: [...defaultConfig.orderSensitiveModifiers, 'before'],
     }
 })
@@ -341,15 +348,16 @@ const customImageGroup = [{ 'custom-img': [validators.isArbitraryImage] }]
 
 These validators check for basic patterns and types:
 
-| Validator           | Description                                                                                                              | Example Match      |
-| ------------------- | ------------------------------------------------------------------------------------------------------------------------ | ------------------ |
-| `isAny`             | Always returns `true`. Use carefully - matches everything. Best when certain no other class groups exist in a namespace. | Matches any value  |
-| `isAnyNonArbitrary` | Checks if class part is NOT an arbitrary value or variable                                                               | `red`, `lg`, `4`   |
-| `isInteger`         | Matches integer values                                                                                                   | `3`, `100`         |
-| `isNumber`          | Matches any number (integer or decimal)                                                                                  | `3`, `1.5`, `0.25` |
-| `isFraction`        | Matches fraction patterns                                                                                                | `1/2`, `127/256`   |
-| `isPercent`         | Matches percentage values                                                                                                | `12.5%`, `50%`     |
-| `isTshirtSize`      | Matches T-shirt sizes, optionally with number prefix                                                                     | `sm`, `xl`, `2xl`  |
+| Validator               | Description                                                                                                              | Example Match                                |
+| ----------------------- | ------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------- |
+| `isAny`                 | Always returns `true`. Use carefully - matches everything. Best when certain no other class groups exist in a namespace. | Matches any value                            |
+| `isAnyNonArbitrary`     | Checks if class part is NOT an arbitrary value or variable                                                               | `red`, `lg`, `4`                             |
+| `isNamedContainerQuery` | Checks for named container query classes                                                                                 | `@container/sidebar`, `@container-size/main` |
+| `isInteger`             | Matches integer values                                                                                                   | `3`, `100`                                   |
+| `isNumber`              | Matches any number (integer or decimal)                                                                                  | `3`, `1.5`, `0.25`                           |
+| `isFraction`            | Matches fraction patterns                                                                                                | `1/2`, `127/256`                             |
+| `isPercent`             | Matches percentage values                                                                                                | `12.5%`, `50%`                               |
+| `isTshirtSize`          | Matches T-shirt sizes, optionally with number prefix                                                                     | `sm`, `xl`, `2xl`                            |
 
 ### Arbitrary Value Validators
 

@@ -24,6 +24,7 @@ const {
     isArbitraryWeight,
     isFraction,
     isInteger,
+    isNamedContainerQuery,
     isNumber,
     isPercent,
     isTshirtSize,
@@ -49,6 +50,25 @@ test('isAnyNonArbitrary', () => {
     expect(isAnyNonArbitrary('[label:test]')).toBe(false)
     expect(isAnyNonArbitrary('(test)')).toBe(false)
     expect(isAnyNonArbitrary('(label:test)')).toBe(false)
+})
+
+test('isNamedContainerQuery', () => {
+    expect(isNamedContainerQuery('@container/sidebar')).toBe(true)
+    expect(isNamedContainerQuery('@container-normal/sidebar')).toBe(true)
+    expect(isNamedContainerQuery('@container-size/sidebar')).toBe(true)
+    expect(isNamedContainerQuery('@container/[sidebar]')).toBe(true)
+    expect(isNamedContainerQuery('@container-size/(--sidebar)')).toBe(true)
+
+    expect(isNamedContainerQuery('@container')).toBe(false)
+    expect(isNamedContainerQuery('@container-normal')).toBe(false)
+    expect(isNamedContainerQuery('@container-size')).toBe(false)
+    expect(isNamedContainerQuery('@container/')).toBe(false)
+    expect(isNamedContainerQuery('@container-normal/')).toBe(false)
+    expect(isNamedContainerQuery('@container-size/')).toBe(false)
+    expect(isNamedContainerQuery('@container-[size]/sidebar')).toBe(false)
+    expect(isNamedContainerQuery('@container-foo/sidebar')).toBe(false)
+    expect(isNamedContainerQuery('container/sidebar')).toBe(false)
+    expect(isNamedContainerQuery('hover:@container/sidebar')).toBe(false)
 })
 
 test('isArbitraryFamilyName', () => {

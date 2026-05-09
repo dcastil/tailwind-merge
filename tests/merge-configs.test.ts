@@ -25,6 +25,7 @@ test('mergeConfigs has correct behavior', () => {
                     hello: ['world'],
                     toOverride: ['groupToOverride-2'],
                 },
+                postfixLookupClassGroups: ['postfix-1'],
                 orderSensitiveModifiers: ['order-1'],
             },
             {
@@ -43,6 +44,7 @@ test('mergeConfigs has correct behavior', () => {
                     conflictingClassGroupModifiers: {
                         toOverride: ['overridden-2'],
                     },
+                    postfixLookupClassGroups: ['groupToOverride'],
                     orderSensitiveModifiers: ['order-2'],
                 },
                 extend: {
@@ -59,6 +61,7 @@ test('mergeConfigs has correct behavior', () => {
                     conflictingClassGroupModifiers: {
                         hello: ['world2'],
                     },
+                    postfixLookupClassGroups: ['fooKey'],
                     orderSensitiveModifiers: ['order-3'],
                 },
             },
@@ -87,6 +90,7 @@ test('mergeConfigs has correct behavior', () => {
             hello: ['world', 'world2'],
             toOverride: ['overridden-2'],
         },
+        postfixLookupClassGroups: ['groupToOverride', 'fooKey'],
         orderSensitiveModifiers: ['order-2', 'order-3'],
     })
 })

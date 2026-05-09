@@ -14,8 +14,11 @@ test('class map has correct class groups at first part', () => {
     )
 
     expect(classMap.classGroupId).toBeUndefined()
-    expect(classMap.validators).toBeNull()
+    expect(classMap.validators?.map(({ classGroupId }) => classGroupId)).toEqual([
+        'container-named',
+    ])
     expect(classGroupsByFirstPart).toEqual({
+        '@container': ['container-type'],
         absolute: ['position'],
         accent: ['accent'],
         align: ['vertical-align'],
@@ -304,6 +307,12 @@ test('class map has correct class groups at first part', () => {
             'scroll-px',
             'scroll-py',
         ],
+        scrollbar: [
+            'scrollbar-gutter',
+            'scrollbar-thumb-color',
+            'scrollbar-track-color',
+            'scrollbar-w',
+        ],
         select: ['select'],
         self: ['align-self'],
         sepia: ['sepia'],
@@ -321,6 +330,7 @@ test('class map has correct class groups at first part', () => {
         sticky: ['position'],
         stroke: ['stroke', 'stroke-w'],
         subpixel: ['font-smoothing'],
+        tab: ['tab-size'],
         table: ['display', 'table-layout'],
         tabular: ['fvn-spacing'],
         text: [
@@ -348,6 +358,7 @@ test('class map has correct class groups at first part', () => {
         whitespace: ['whitespace'],
         will: ['will-change'],
         wrap: ['wrap'],
+        zoom: ['zoom'],
         z: ['z'],
     })
 })
