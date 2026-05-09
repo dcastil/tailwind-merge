@@ -546,6 +546,7 @@ export type DefaultClassGroupIds =
     | 'stroke-w'
     | 'stroke'
     | 'table-layout'
+    | 'tab-size'
     | 'text-alignment'
     | 'text-color'
     | 'text-decoration-color'

@@ -327,3 +327,10 @@ test('supports Tailwind CSS v4.3 zoom features', () => {
     expect(twMerge('zoom-[1.5] zoom-(--zoom)')).toBe('zoom-(--zoom)')
     expect(twMerge('zoom-50 scale-125')).toBe('zoom-50 scale-125')
 })
+
+test('supports Tailwind CSS v4.3 tab-size features', () => {
+    expect(twMerge('tab-2 tab-8')).toBe('tab-8')
+    expect(twMerge('tab-8 tab-[12px]')).toBe('tab-[12px]')
+    expect(twMerge('tab-[3] tab-(--tab-size)')).toBe('tab-(--tab-size)')
+    expect(twMerge('tab-4 tabular-nums')).toBe('tab-4 tabular-nums')
+})

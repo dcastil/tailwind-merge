@@ -1113,6 +1113,11 @@ export const getDefaultConfig = () => {
              */
             indent: [{ indent: scaleUnambiguousSpacing() }],
             /**
+             * Tab Size
+             * @see https://tailwindcss.com/docs/tab-size
+             */
+            'tab-size': [{ tab: [isInteger, isArbitraryVariable, isArbitraryValue] }],
+            /**
              * Vertical Alignment
              * @see https://tailwindcss.com/docs/vertical-align
              */

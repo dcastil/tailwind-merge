@@ -327,6 +327,7 @@ test('class map has correct class groups at first part', () => {
         sticky: ['position'],
         stroke: ['stroke', 'stroke-w'],
         subpixel: ['font-smoothing'],
+        tab: ['tab-size'],
         table: ['display', 'table-layout'],
         tabular: ['fvn-spacing'],
         text: [
