@@ -304,6 +304,12 @@ test('class map has correct class groups at first part', () => {
             'scroll-px',
             'scroll-py',
         ],
+        scrollbar: [
+            'scrollbar-gutter',
+            'scrollbar-thumb-color',
+            'scrollbar-track-color',
+            'scrollbar-w',
+        ],
         select: ['select'],
         self: ['align-self'],
         sepia: ['sepia'],

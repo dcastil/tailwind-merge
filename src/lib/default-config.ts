@@ -2182,6 +2182,26 @@ export const getDefaultConfig = () => {
              */
             'scroll-behavior': [{ scroll: ['auto', 'smooth'] }],
             /**
+             * Scrollbar Width
+             * @see TBD - new Tailwind website not deployed yet
+             */
+            'scrollbar-w': [{ scrollbar: ['auto', 'thin', 'none'] }],
+            /**
+             * Scrollbar Thumb Color
+             * @see TBD - new Tailwind website not deployed yet
+             */
+            'scrollbar-thumb-color': [{ 'scrollbar-thumb': scaleColor() }],
+            /**
+             * Scrollbar Track Color
+             * @see TBD - new Tailwind website not deployed yet
+             */
+            'scrollbar-track-color': [{ 'scrollbar-track': scaleColor() }],
+            /**
+             * Scrollbar Gutter
+             * @see TBD - new Tailwind website not deployed yet
+             */
+            'scrollbar-gutter': [{ 'scrollbar-gutter': ['auto', 'stable', 'both'] }],
+            /**
              * Scroll Margin
              * @see https://tailwindcss.com/docs/scroll-margin
              */
