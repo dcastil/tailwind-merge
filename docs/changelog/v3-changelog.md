@@ -5,6 +5,7 @@
 ### New Features
 
 - Add support for Tailwind CSS v4.3 by [@dcastil](https://github.com/dcastil) in [#677](https://github.com/dcastil/tailwind-merge/pull/677)
+    - Add `postfixLookupClassGroups` option to config to support Tailwind utilities where a slash is part of the full class name, like named container queries
 - Add support for readonly array values by [@unional](https://github.com/unional) in [#652](https://github.com/dcastil/tailwind-merge/pull/652)
 
 ### Documentation
