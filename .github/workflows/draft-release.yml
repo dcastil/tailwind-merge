@@ -14,7 +14,7 @@ jobs:
             contents: write
             pull-requests: read
         steps:
-            - uses: release-drafter/release-drafter@v7
+            - uses: release-drafter/release-drafter@v7.3.0
               with:
                   token: ${{ github.token }}
 
@@ -25,6 +25,6 @@ jobs:
             contents: read
             pull-requests: write
         steps:
-            - uses: release-drafter/release-drafter/autolabeler@v7
+            - uses: release-drafter/release-drafter/autolabeler@v7.3.0
               with:
                   token: ${{ github.token }}
