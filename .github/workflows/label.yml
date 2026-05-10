@@ -18,7 +18,7 @@ jobs:
             pull-requests: write
 
         env:
-            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+            GITHUB_TOKEN: ${{ github.token }}
             REPO_OWNER: ${{ github.repository_owner }}
             REPO_NAME: ${{ github.event.repository.name }}
             LABEL_NAME: context-v3
