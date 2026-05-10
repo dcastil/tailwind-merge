@@ -18,11 +18,13 @@ const graphqlUrl = process.env.GITHUB_GRAPHQL_URL || `${apiUrl}/graphql`
 const githubServerUrl = process.env.GITHUB_SERVER_URL || 'https://github.com'
 const githubRunId = process.env.GITHUB_RUN_ID || ''
 
-main().catch((error) => {
-    const message = error instanceof Error ? error.message : String(error)
-    logError(message)
-    process.exit(1)
-})
+if (require.main === module) {
+    main().catch((error) => {
+        const message = error instanceof Error ? error.message : String(error)
+        logError(message)
+        process.exit(1)
+    })
+}
 
 /**
  * @typedef {{
@@ -76,6 +78,28 @@ main().catch((error) => {
  *   body?: string | null
  *   html_url: string
  * }} IssueComment
+ */
+
+/**
+ * @typedef {{
+ *   tag: string
+ *   commentUrl: string
+ * }} ReleaseComment
+ */
+
+/**
+ * @typedef {{
+ *   issueNumber: number
+ *   commentUrl: string
+ * }} PostedComment
+ */
+
+/**
+ * @typedef {{
+ *   issueNumber: number
+ *   existingTag: string
+ *   commentUrl: string
+ * }} SkippedTarget
  */
 
 /**
@@ -164,6 +188,22 @@ main().catch((error) => {
  *   baseRef: string
  *   headRef: string
  * }} CompareRefs
+ */
+
+/**
+ * @typedef {{
+ *   npmVersion: string
+ *   parsedVersion: ParsedTag
+ *   sha: string
+ * }} ShaPrereleaseCandidate
+ */
+
+/**
+ * @typedef {{
+ *   candidates: ShaPrereleaseCandidate[]
+ *   usedSameCoreVersion: boolean
+ *   fallbackCoreVersion: ParsedTag | null
+ * }} ShaPrereleaseCandidateSelection
  */
 
 /**
@@ -264,12 +304,22 @@ async function main() {
         return
     }
 
-    const targets = await collectLinkedIssuesAndPrs(token, owner, repo, commits, skipLabels)
+    let targets = await collectLinkedIssuesAndPrs(token, owner, repo, commits, skipLabels)
     log(`Resolved targets: ${targets.length}`)
 
     if (!targets.length) {
         log('No linked issues/PRs found. Nothing to do.')
         return
+    }
+
+    if (currentVersion.isPrerelease) {
+        targets = await filterTargetsWithoutReleaseComments(targets, async (issueNumber) =>
+            requestPaginated(token, `/repos/${owner}/${repo}/issues/${issueNumber}/comments`),
+        )
+        if (!targets.length) {
+            log('All prerelease targets already have release comments. Nothing to do.')
+            return
+        }
     }
 
     const guardViolations = await checkGuardViolations(token, owner, repo, targets, currentVersion)
@@ -510,6 +560,90 @@ async function collectLinkedIssuesAndPrs(token, owner, repo, commits, skipLabels
 }
 
 /**
+ * Removes targets that already received any release-commenter comment.
+ *
+ * Prerelease runs can cover an overlapping compare range after a version bump because their
+ * base is resolved from npm-published SHA prereleases. The first prerelease comment is the useful
+ * signal for a PR or issue; later prerelease passes should keep moving without adding more noise.
+ *
+ * @param {number[]} targetNumbers
+ * @param {(issueNumber: number) => Promise<IssueComment[]>} loadComments
+ * @returns {Promise<number[]>}
+ */
+async function filterTargetsWithoutReleaseComments(targetNumbers, loadComments) {
+    /** @type {number[]} */
+    const nextTargets = []
+    /** @type {SkippedTarget[]} */
+    const skippedTargets = []
+
+    for (const issueNumber of targetNumbers) {
+        const comments = await loadComments(issueNumber)
+        const existingReleaseComment = findReleaseComment(comments)
+
+        if (existingReleaseComment) {
+            skippedTargets.push({
+                issueNumber,
+                existingTag: existingReleaseComment.tag,
+                commentUrl: existingReleaseComment.commentUrl,
+            })
+            continue
+        }
+
+        nextTargets.push(issueNumber)
+    }
+
+    if (skippedTargets.length > 0) {
+        log(
+            `Skipping ${skippedTargets.length} prerelease target(s) that already have release comments:\n${formatSkippedTargetDetails(
+                skippedTargets,
+            )}`,
+        )
+    }
+
+    return nextTargets
+}
+
+/**
+ * Finds the first release-commenter marker or legacy release URL in a list of comments.
+ *
+ * @param {IssueComment[]} comments
+ * @returns {ReleaseComment | null}
+ */
+function findReleaseComment(comments) {
+    for (const comment of comments) {
+        const existingTag = extractReleaseTagFromComment(comment.body || '')
+        if (!existingTag || !parseTag(existingTag)) continue
+
+        return {
+            tag: existingTag,
+            commentUrl: comment.html_url,
+        }
+    }
+
+    return null
+}
+
+/**
+ * Formats skipped prerelease targets for compact workflow logs.
+ *
+ * @param {SkippedTarget[]} skippedTargets
+ * @returns {string}
+ */
+function formatSkippedTargetDetails(skippedTargets) {
+    const details = skippedTargets
+        .slice(0, 20)
+        .map(
+            (target) =>
+                `#${target.issueNumber} (existing ${target.existingTag}) ${target.commentUrl}`,
+        )
+        .join('\n')
+
+    if (skippedTargets.length <= 20) return details
+
+    return `${details}\n...and ${skippedTargets.length - 20} more`
+}
+
+/**
  * Validates that targets do not already have release comments that would make this run unsafe.
  *
  * @param {string} token
@@ -521,7 +655,7 @@ async function collectLinkedIssuesAndPrs(token, owner, repo, commits, skipLabels
  */
 async function checkGuardViolations(token, owner, repo, targetNumbers, currentVersion) {
     if (currentVersion.isPrerelease) {
-        log('Current release is a prerelease, skipping duplicate/previous-release comment guard')
+        log('Current release is a prerelease, skipping stable-release duplicate guard')
         return []
     }
 
@@ -581,18 +715,29 @@ async function checkGuardViolations(token, owner, repo, targetNumbers, currentVe
  * @returns {Promise<void>}
  */
 async function postCommentsAndLabels(token, owner, repo, targets, commentBody, labels, dryRun) {
+    /** @type {PostedComment[]} */
+    const postedComments = []
+
     for (const issueNumber of targets) {
         if (commentBody) {
             if (dryRun) {
                 log(`Dry run: would comment on #${issueNumber}`)
             } else {
-                await requestJson(
+                const createdComment = await requestJson(
                     token,
                     'POST',
                     `/repos/${owner}/${repo}/issues/${issueNumber}/comments`,
                     undefined,
                     { body: commentBody },
                 )
+                const commentUrl = getIssueCommentUrl(createdComment)
+
+                if (commentUrl) {
+                    log(`Posted comment on #${issueNumber}: ${commentUrl}`)
+                    postedComments.push({ issueNumber, commentUrl })
+                } else {
+                    log(`Posted comment on #${issueNumber}; GitHub response did not include a URL`)
+                }
             }
         }
 
@@ -610,6 +755,53 @@ async function postCommentsAndLabels(token, owner, repo, targets, commentBody, l
             }
         }
     }
+
+    if (!dryRun) {
+        writePostedCommentsSummary(postedComments)
+    }
+}
+
+/**
+ * Extracts the comment URL from the GitHub issue-comment creation response.
+ *
+ * @param {unknown} createdComment
+ * @returns {string}
+ */
+function getIssueCommentUrl(createdComment) {
+    if (!createdComment || typeof createdComment !== 'object') return ''
+
+    const commentUrl = /** @type {{html_url?: unknown}} */ (createdComment).html_url
+
+    return typeof commentUrl === 'string' ? commentUrl : ''
+}
+
+/**
+ * Appends posted comment URLs to the GitHub Actions job summary for later run-level inspection.
+ *
+ * @param {PostedComment[]} postedComments
+ */
+function writePostedCommentsSummary(postedComments) {
+    if (!postedComments.length) return
+
+    const stepSummaryPath = process.env.GITHUB_STEP_SUMMARY
+    if (!stepSummaryPath) return
+
+    fs.appendFileSync(stepSummaryPath, `\n${formatPostedCommentsSummary(postedComments)}\n`, 'utf8')
+    log(`Wrote ${postedComments.length} posted comment URL(s) to the workflow summary`)
+}
+
+/**
+ * Formats posted comment URLs as a compact Markdown summary section.
+ *
+ * @param {PostedComment[]} postedComments
+ * @returns {string}
+ */
+function formatPostedCommentsSummary(postedComments) {
+    const commentList = postedComments
+        .map((comment) => `- #${comment.issueNumber}: ${comment.commentUrl}`)
+        .join('\n')
+
+    return `### Release commenter posted comments\n\n${commentList}`
 }
 
 /**
@@ -746,6 +938,26 @@ function compareSemver(a, b) {
 }
 
 /**
+ * Compares only the major/minor/patch parts of two parsed semver values.
+ *
+ * SHA-suffixed prerelease identifiers are commit hashes, so their lexical semver ordering is not a
+ * meaningful proxy for publish time or git ancestry. Core-version comparison lets the prerelease
+ * fallback keep all candidates from the nearest previous version line and then choose the actual
+ * nearest ancestor by GitHub compare distance.
+ *
+ * @param {ParsedTag} a
+ * @param {ParsedTag} b
+ * @returns {-1 | 0 | 1}
+ */
+function compareCoreVersion(a, b) {
+    if (a.major !== b.major) return a.major < b.major ? -1 : 1
+    if (a.minor !== b.minor) return a.minor < b.minor ? -1 : 1
+    if (a.patch !== b.patch) return a.patch < b.patch ? -1 : 1
+
+    return 0
+}
+
+/**
  * Normalizes commit SHA casing.
  *
  * @param {string} value
@@ -773,7 +985,70 @@ function isShaLike(value) {
  * @returns {boolean}
  */
 function sameCoreVersion(a, b) {
-    return a.major === b.major && a.minor === b.minor && a.patch === b.patch
+    return compareCoreVersion(a, b) === 0
+}
+
+/**
+ * Formats the stable semver core for messages and workflow diagnostics.
+ *
+ * @param {ParsedTag} version
+ * @returns {string}
+ */
+function formatCoreVersion(version) {
+    return `${version.major}.${version.minor}.${version.patch}`
+}
+
+/**
+ * Picks candidate npm SHA prereleases to compare against the current prerelease.
+ *
+ * Prefer same-core candidates because a dev publish usually advances within the same package
+ * version. On the first dev publish after a version bump, use all candidates from the highest lower
+ * core version instead of choosing one full semver value; with hash suffixes, semver prerelease
+ * ordering would otherwise sort by SHA text and can select an older commit.
+ *
+ * @param {ShaPrereleaseCandidate[]} matchingDevCandidates
+ * @param {ParsedTag} currentVersion
+ * @returns {ShaPrereleaseCandidateSelection}
+ */
+function pickShaPrereleaseCandidatePool(matchingDevCandidates, currentVersion) {
+    const sameCoreCandidates = matchingDevCandidates.filter((candidate) =>
+        sameCoreVersion(candidate.parsedVersion, currentVersion),
+    )
+
+    if (sameCoreCandidates.length > 0) {
+        return {
+            candidates: sameCoreCandidates,
+            usedSameCoreVersion: true,
+            fallbackCoreVersion: null,
+        }
+    }
+
+    const fallbackCandidates = matchingDevCandidates.filter(
+        (candidate) => compareCoreVersion(candidate.parsedVersion, currentVersion) < 0,
+    )
+    const fallbackCoreVersion = fallbackCandidates.reduce(
+        /**
+         * @param {ParsedTag | null} highestCore
+         * @param {ShaPrereleaseCandidate} candidate
+         * @returns {ParsedTag | null}
+         */
+        (highestCore, candidate) =>
+            !highestCore || compareCoreVersion(candidate.parsedVersion, highestCore) > 0
+                ? candidate.parsedVersion
+                : highestCore,
+        null,
+    )
+    const candidates = fallbackCoreVersion
+        ? fallbackCandidates.filter((candidate) =>
+              sameCoreVersion(candidate.parsedVersion, fallbackCoreVersion),
+          )
+        : []
+
+    return {
+        candidates,
+        usedSameCoreVersion: false,
+        fallbackCoreVersion,
+    }
 }
 
 /**
@@ -1160,13 +1435,7 @@ async function resolveShaPrereleaseBaseRef(
         `Using npm SHA prerelease strategy for ${packageName} (${currentContext.prereleasePrefix}), checking ${npmVersions.length} npm version(s)`,
     )
 
-    /**
-     * @type {Array<{
-     *   npmVersion: string
-     *   parsedVersion: ParsedTag
-     *   sha: string
-     * }>}
-     */
+    /** @type {ShaPrereleaseCandidate[]} */
     const matchingDevCandidates = []
     for (const npmVersion of npmVersions) {
         const parsedNpmVersion = parseTag(npmVersion)
@@ -1184,42 +1453,23 @@ async function resolveShaPrereleaseBaseRef(
         })
     }
 
-    const sameCoreCandidates = matchingDevCandidates.filter((candidate) =>
-        sameCoreVersion(candidate.parsedVersion, currentVersion),
-    )
-    const fallbackCandidates = matchingDevCandidates.filter(
-        (candidate) => compareSemver(candidate.parsedVersion, currentVersion) < 0,
-    )
-    const highestFallbackVersion = fallbackCandidates.reduce(
-        /**
-         * @param {ParsedTag | null} highest
-         * @param {{parsedVersion: ParsedTag}} candidate
-         * @returns {ParsedTag | null}
-         */
-        (highest, candidate) =>
-            !highest || compareSemver(candidate.parsedVersion, highest) > 0
-                ? candidate.parsedVersion
-                : highest,
-        null,
-    )
-    const narrowedFallbackCandidates = highestFallbackVersion
-        ? fallbackCandidates.filter(
-              (candidate) => compareSemver(candidate.parsedVersion, highestFallbackVersion) === 0,
-          )
-        : []
-    const candidatePool =
-        sameCoreCandidates.length > 0 ? sameCoreCandidates : narrowedFallbackCandidates
+    const candidateSelection = pickShaPrereleaseCandidatePool(matchingDevCandidates, currentVersion)
+    const candidatePool = candidateSelection.candidates
 
     if (!candidatePool.length) {
         throw new Error(
-            `No prior npm versions found for ${packageName} with prerelease prefix "${currentContext.prereleasePrefix}" (same core ${currentVersion.major}.${currentVersion.minor}.${currentVersion.patch} or earlier versions)`,
+            `No prior npm versions found for ${packageName} with prerelease prefix "${currentContext.prereleasePrefix}" (same core ${formatCoreVersion(
+                currentVersion,
+            )} or earlier core versions)`,
         )
     }
 
     log(
-        sameCoreCandidates.length > 0
-            ? `Found ${sameCoreCandidates.length} prior same-core dev version(s)`
-            : `No same-core prior dev versions found; falling back to highest prior semver (${narrowedFallbackCandidates.length} candidate(s))`,
+        candidateSelection.usedSameCoreVersion
+            ? `Found ${candidatePool.length} prior same-core dev version(s)`
+            : `No same-core prior dev versions found; falling back to highest prior core version ${formatCoreVersion(
+                  /** @type {ParsedTag} */ (candidateSelection.fallbackCoreVersion),
+              )} (${candidatePool.length} candidate(s))`,
     )
 
     /** @type {Map<string, string>} */
@@ -1367,4 +1617,18 @@ function pickBaseTag(currentTag, currentVersion, allReleases, manualBaseTag) {
 function shouldSkipPr(skipLabels, prLabels) {
     if (!skipLabels.length) return false
     return skipLabels.some((skipLabel) => prLabels.includes(skipLabel))
+}
+
+module.exports = {
+    __testing: {
+        compareCoreVersion,
+        filterTargetsWithoutReleaseComments,
+        findReleaseComment,
+        formatPostedCommentsSummary,
+        getIssueCommentUrl,
+        parseTag,
+        pickShaPrereleaseCandidatePool,
+        postCommentsAndLabels,
+        releaseCommentMarker,
+    },
 }

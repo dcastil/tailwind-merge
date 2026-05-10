@@ -32,12 +32,13 @@ The workflow `.github/workflows/comment-released-prs-and-issues.yml` uses the lo
 - Automatic base-tag selection is semver-aware:
   - Stable release tags compare to the previous stable semver tag.
   - Prerelease tags with a SHA suffix (for example `v3.4.1-dev.<sha>`) resolve base from npm-published versions with the same prerelease prefix and pick the nearest ancestor commit.
-  - For SHA-suffixed prereleases, if no prior dev release exists for the same core version, resolution falls back to the highest semver lower than the current version (same prerelease prefix).
+  - For SHA-suffixed prereleases, if no prior dev release exists for the same core version, resolution falls back to all dev releases from the highest lower core version (same prerelease prefix) and picks the nearest ancestor commit.
   - SHA-suffixed prerelease comments link to the npm published version page instead of GitHub release tags.
   - Other prerelease tags compare to the previous semver tag (including prereleases).
 - If no valid base tag is found, the action fails.
 - The action fails before posting if any target issue/PR already has a previous stable release-comment.
-- For prereleases, duplicate/previous-comment guard checks are skipped so `-dev.*` and later stable releases can both comment.
+- For prereleases, targets that already have any previous release-comment are skipped so repeated `-dev.*` ranges do not post duplicate dev comments. Later stable releases can still comment after a prerelease.
+- Posted comment URLs are logged and added to the workflow run summary so all comments from one run can be inspected together.
 - Manual trigger supports optional overrides:
   - `head_tag`
   - `base_tag`
