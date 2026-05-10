@@ -62,7 +62,7 @@ jobs:
                   echo "head_tag=v${version}-dev.${HEAD_SHA}" >> "$GITHUB_OUTPUT"
             - uses: ./.github/actions/release-commenter
               with:
-                  github-token: ${{ secrets.GITHUB_TOKEN }}
+                  github-token: ${{ github.token }}
                   comment-template: This was addressed in release {release_link}.
                   skip-label: skip-release-comment
                   head-tag: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.head_tag || github.event_name == 'workflow_run' && steps.dev_head_tag.outputs.head_tag || '' }}
