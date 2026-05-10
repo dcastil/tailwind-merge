@@ -1,5 +1,24 @@
 # Changelog for v3 releases
 
+## v3.6.0
+
+### New Features
+
+- Add support for Tailwind CSS v4.3 by [@dcastil](https://github.com/dcastil) in [#677](https://github.com/dcastil/tailwind-merge/pull/677)
+- Add support for readonly array values by [@unional](https://github.com/unional) in [#652](https://github.com/dcastil/tailwind-merge/pull/652)
+
+### Documentation
+
+- Fix broken links in README by [@maurer2](https://github.com/maurer2) in [#662](https://github.com/dcastil/tailwind-merge/pull/662)
+
+### Other
+
+- Harden internal CI pipeline security by omitting git checkout by [@dcastil](https://github.com/dcastil), suggested by [@kyletaylored](https://github.com/kyletaylored) in [`6b2499c`](https://github.com/dcastil/tailwind-merge/commit/6b2499c10cf52bed42426d30b4219e90374b30d6)
+
+**Full Changelog**: [`v3.5.0...v3.6.0`](https://github.com/dcastil/tailwind-merge/compare/v3.5.0...v3.6.0)
+
+Thanks to [@brandonmcconnell](https://github.com/brandonmcconnell), [@manavm1990](https://github.com/manavm1990), [@langy](https://github.com/langy), [@roboflow](https://github.com/roboflow), [@syntaxfm](https://github.com/syntaxfm), [@getsentry](https://github.com/getsentry), [@codecov](https://github.com/codecov), a private sponsor, [@block](https://github.com/block), [@openclaw](https://github.com/openclaw), [@sourcegraph](https://github.com/sourcegraph), [@mike-healy](https://github.com/mike-healy) and more via [@thnxdev](https://github.com/thnxdev) for sponsoring tailwind-merge! ❤️
+
 ## v3.5.0
 
 ### New Features
