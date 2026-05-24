@@ -18,10 +18,11 @@ This repository is `tailwind-merge`, a TypeScript library that merges Tailwind c
 - CI workflows: `.github/workflows/`
 - Local GitHub actions: `.github/actions/`
 
-Deeper implementation notes live in:
-- `agents/tailwind-merge-internals.md`
-- `agents/tailwind-css-version-update.md` (Tailwind CSS version support workflow)
-- `agents/release-workflow.md` (release changelog + GitHub release notes workflow)
+## Agent Docs Map
+
+- `agents/tailwind-merge-internals.md`: architecture, file ownership by concern, testing strategy, build behavior, and CI/security guardrails.
+- `agents/tailwind-css-version-update.md`: Tailwind CSS version support workflow.
+- `agents/release-workflow.md`: changelog authoring, GitHub release text, sponsor handling, and release comments on issues/PRs.
 
 ## Environment and Commands
 
@@ -44,8 +45,6 @@ Core commands:
 4. `README.md` is version-generated from `docs/README.md`; do not regenerate it during normal development changes.
 5. Avoid manual edits to `dist/` and `coverage/`; they are generated artifacts.
 6. Validate packaging paths with `yarn build && yarn test:exports` when touching exports/build tooling.
-7. For Tailwind CSS version support work, follow `agents/tailwind-css-version-update.md`.
-8. Keep npm publish OIDC permissions isolated to publish-only jobs; do not install dependencies, run build/test scripts, or restore dependency caches in jobs with `id-token: write`, and do not use dependency caches in the npm publish workflow.
 
 ## Documentation Sync Policy
 
@@ -53,11 +52,15 @@ Treat documentation updates as part of the same change, not as follow-up work.
 
 Self-improvement is required while working in this repo: whenever you discover useful information about architecture, workflows, commands, constraints, debugging findings, or recurring pitfalls, add it to the appropriate file in `agents/` or to `AGENTS.md` in the same change. When existing agent guidance becomes stale, misleading, or irrelevant, remove or revise it immediately.
 
+Avoid repeating the same guidance in both `AGENTS.md` and specialized `agents/*` docs unless the rule is critically important. Prefer keeping `AGENTS.md` as the high-level entry point and putting detailed workflow, architecture, release, or CI notes in the relevant specialized agent document.
+
+It is acceptable to periodically restructure agent documentation when files become too large, when topics are hard to find, or when the current organization no longer matches how the repo is maintained. Split files, rename sections, or move information between `AGENTS.md` and `agents/*` as needed, while preserving useful guidance and removing stale duplication.
+
 Required when relevant:
 
 1. Update `docs/*.md` for any user-visible behavior, API, version support, or limitation changes.
-2. Update `AGENTS.md` whenever agent workflow, repo conventions, required commands, or guardrails change.
-3. Update `agents/tailwind-merge-internals.md` whenever architecture, file ownership by concern, CI flow, or testing strategy changes.
+2. Update `AGENTS.md` whenever repository-wide agent workflow, repo conventions, required commands, or high-level guardrails change.
+3. Update the relevant file in `agents/` whenever specialized architecture, workflow, CI, release, or testing guidance changes.
 4. Do not regenerate `README.md` during normal development. It is intentionally generated as part of the version/release flow so repo visitors are routed to docs for the latest release.
 
 Definition of done for every PR/change:
@@ -72,18 +75,3 @@ Definition of done for every PR/change:
 - Class groups/conflicts/default config: run `tests/default-config.test.ts`, `tests/class-group-conflicts.test.ts`, `tests/tailwind-css-versions.test.ts`.
 - Public API/types: run `tests/public-api.test.ts`, `tests/type-generics.test.ts`.
 - Release/package surface: run `yarn build` and `yarn test:exports`.
-
-## Release Workflow
-
-For Tailwind CSS version support work, use:
-
-- `agents/tailwind-css-version-update.md`
-
-For release-specific steps (draft release ingestion, changelog entry generation, sponsors handling, and GitHub release text formatting), use:
-
-- `agents/release-workflow.md`
-
-For release comments on issues/PRs:
-
-- Workflow: `.github/workflows/comment-released-prs-and-issues.yml`
-- Local action: `.github/actions/release-commenter/`

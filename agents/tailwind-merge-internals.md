@@ -74,7 +74,7 @@ Recommended local sequence for non-trivial changes:
 3. `yarn build`
 4. `yarn test:exports`
 
-## Build, packaging, and release notes
+## Build and packaging
 
 - Build uses Rollup (`scripts/rollup.config.mjs`) to produce:
   - ESM and CJS bundles,
@@ -85,13 +85,9 @@ Recommended local sequence for non-trivial changes:
   - `scripts/test-built-package-exports.mjs`
 - `README.md` is generated from `docs/README.md` by `scripts/update-readme.mjs` (run in `version` script via `zx`).
 
-### Release notes playbook
+## CI Behavior And Security
 
-Detailed release-specific agent workflow lives in:
-
-- `agents/release-workflow.md`
-
-## CI behavior (what must stay green)
+Treat this section as the source of truth for CI and publish security guardrails. Keep detailed CI guidance here instead of duplicating it in `AGENTS.md` unless a rule is critical enough to be visible before opening specialized docs.
 
 - `.github/workflows/test.yml` runs `yarn lint`, `yarn test`, `yarn build`, and `yarn test:exports`.
 - `.github/workflows/benchmark.yml` runs `yarn bench` with CodSpeed.
