@@ -120,7 +120,7 @@ Update docs in the same change when behavior or public API changes:
 - `docs/configuration.md` for config behavior.
 - `docs/api-reference.md` for exported validators, config fields, or public types.
 - `docs/changelog/v3-changelog.md` when preparing a release note.
-- `AGENTS.md` and `.agents/*` when the update process or repo guidance changes.
+- `AGENTS.md` and `agents/*` when the update process or repo guidance changes.
 
 Do not regenerate `README.md` during normal development; it is generated from `docs/README.md` during the release flow.
 

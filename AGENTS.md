@@ -19,9 +19,9 @@ This repository is `tailwind-merge`, a TypeScript library that merges Tailwind c
 - Local GitHub actions: `.github/actions/`
 
 Deeper implementation notes live in:
-- `.agents/tailwind-merge-internals.md`
-- `.agents/tailwind-css-version-update.md` (Tailwind CSS version support workflow)
-- `.agents/release-workflow.md` (release changelog + GitHub release notes workflow)
+- `agents/tailwind-merge-internals.md`
+- `agents/tailwind-css-version-update.md` (Tailwind CSS version support workflow)
+- `agents/release-workflow.md` (release changelog + GitHub release notes workflow)
 
 ## Environment and Commands
 
@@ -44,7 +44,7 @@ Core commands:
 4. `README.md` is version-generated from `docs/README.md`; do not regenerate it during normal development changes.
 5. Avoid manual edits to `dist/` and `coverage/`; they are generated artifacts.
 6. Validate packaging paths with `yarn build && yarn test:exports` when touching exports/build tooling.
-7. For Tailwind CSS version support work, follow `.agents/tailwind-css-version-update.md`.
+7. For Tailwind CSS version support work, follow `agents/tailwind-css-version-update.md`.
 8. Keep npm publish OIDC permissions isolated to publish-only jobs; do not install dependencies, run build/test scripts, or restore dependency caches in jobs with `id-token: write`, and do not use dependency caches in the npm publish workflow.
 
 ## Documentation Sync Policy
@@ -55,14 +55,14 @@ Required when relevant:
 
 1. Update `docs/*.md` for any user-visible behavior, API, version support, or limitation changes.
 2. Update `AGENTS.md` whenever agent workflow, repo conventions, required commands, or guardrails change.
-3. Update `.agents/tailwind-merge-internals.md` whenever architecture, file ownership by concern, CI flow, or testing strategy changes.
+3. Update `agents/tailwind-merge-internals.md` whenever architecture, file ownership by concern, CI flow, or testing strategy changes.
 4. Do not regenerate `README.md` during normal development. It is intentionally generated as part of the version/release flow so repo visitors are routed to docs for the latest release.
 
 Definition of done for every PR/change:
 
 1. Code and tests are updated.
 2. Relevant docs are updated in the same change set.
-3. `AGENTS.md` and `.agents/*` guidance is reviewed and updated if the change affects how agents should work in this repo.
+3. `AGENTS.md` and `agents/*` guidance is reviewed and updated if the change affects how agents should work in this repo.
 
 ## Quick Validation Matrix
 
@@ -75,11 +75,11 @@ Definition of done for every PR/change:
 
 For Tailwind CSS version support work, use:
 
-- `.agents/tailwind-css-version-update.md`
+- `agents/tailwind-css-version-update.md`
 
 For release-specific steps (draft release ingestion, changelog entry generation, sponsors handling, and GitHub release text formatting), use:
 
-- `.agents/release-workflow.md`
+- `agents/release-workflow.md`
 
 For release comments on issues/PRs:
 
