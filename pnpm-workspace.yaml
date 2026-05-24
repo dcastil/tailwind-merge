@@ -1,0 +1,9 @@
+packages:
+  - .
+  - .github/actions/metrics-report
+
+minimumReleaseAge: 4320
+minimumReleaseAgeStrict: true
+
+allowBuilds:
+  esbuild: true

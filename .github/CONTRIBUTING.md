@@ -42,13 +42,13 @@ Before submitting a pull request:
 
 ## Development
 
-You will need [Node.js](https://nodejs.org) and [yarn](https://classic.yarnpkg.com) installed on your machine. I recommend running tests in watch mode while you work on the code. Then the correct subset of tests is being run as you modify source code or the tests itself.
+You will need [Node.js](https://nodejs.org) and [pnpm](https://pnpm.io) installed on your machine. I recommend running tests in watch mode while you work on the code. Then the correct subset of tests is being run as you modify source code or the tests itself.
 
 ```sh
 # Install dependencies
-$ yarn
+$ pnpm install
 # Run tests
-$ yarn test --watch
+$ pnpm test:watch
 ```
 
 Happy coding!

@@ -105,10 +105,10 @@ For new utility support, include tests for:
 - Important modifier and variant combinations when parser or conflict behavior is involved.
 - Unknown or invalid classes remaining untouched.
 
-For TypeScript config changes, remember that `yarn tsc --noEmit` only checks `src`. Use the test tsconfig as an additional check when touching public types:
+For TypeScript config changes, remember that `pnpm tsc --noEmit` only checks `src`. Use the test tsconfig as an additional check when touching public types:
 
 ```sh
-yarn tsc --noEmit -p tests/tsconfig.json --moduleResolution bundler
+pnpm tsc --noEmit -p tests/tsconfig.json --moduleResolution bundler
 ```
 
 The plain `tests/tsconfig.json` currently inherits `moduleResolution: Node`, which can surface Vitest package export resolution errors unrelated to tailwind-merge types.
@@ -129,10 +129,10 @@ Do not regenerate `README.md` during normal development; it is generated from `d
 Run targeted tests while iterating, then run the full validation set before finalizing:
 
 ```sh
-yarn lint
-yarn tsc --noEmit
-yarn test
+pnpm lint
+pnpm tsc --noEmit
+pnpm test
 git diff --check
 ```
 
-Run `yarn build && yarn test:exports` when touching package exports, build tooling, or generated declaration behavior.
+Run `pnpm build && pnpm test:exports` when touching package exports, build tooling, or generated declaration behavior.

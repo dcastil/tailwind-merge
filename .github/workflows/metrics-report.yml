@@ -17,27 +17,8 @@ jobs:
               uses: actions/setup-node@v6
               with:
                   node-version: 24.15.0
-            - name: Restore node_modules cache
-              uses: actions/cache/restore@v5
-              with:
-                  path: node_modules
-                  key: yarn-node-24-lock-${{ hashFiles('yarn.lock') }}
-                  restore-keys: |
-                      yarn-node-24-lock-
-            - run: yarn --frozen-lockfile
-            - name: Save node_modules cache
-              uses: actions/cache/save@v5
-              with:
-                  path: node_modules
-                  key: yarn-node-24-lock-${{ hashFiles('yarn.lock') }}
-            - name: Use node_modules cache for metrics-report-action
-              uses: actions/cache@v5
-              with:
-                  path: .github/actions/metrics-report/node_modules
-                  key: yarn-node-24-metrics-report-action-lock-${{ hashFiles('.github/actions/metrics-report/yarn.lock') }}
-                  restore-keys: |
-                      yarn-node-24-metrics-report-action-lock-
-            - run: yarn --cwd .github/actions/metrics-report install --frozen-lockfile
+            - run: corepack enable
+            - run: pnpm install --frozen-lockfile
             - uses: ./.github/actions/metrics-report
               with:
                   comment-body-path: metrics-report-comment.md

@@ -21,17 +21,53 @@ import { actionRootPath, repoRootPath } from './utils/path.mjs'
  * @param {GetPackageSizeOptions=} options
  */
 export async function getPackageSize(options = {}) {
-    await buildPackage()
+    const didBuildPackage = await buildPackage(options)
+
+    if (!didBuildPackage) {
+        return []
+    }
 
     return getEntryPointSizes(options)
 }
 
-async function buildPackage() {
+/**
+ * The base branch can briefly be impossible to build while a pull request changes repository tooling. In that case, callers that request omitted failures should still get a report for the head commit instead of failing before any metrics are written.
+ *
+ * @param {GetPackageSizeOptions} options
+ * @returns {Promise<boolean>}
+ */
+async function buildPackage({ shouldOmitFailures }) {
     core.info('Installing dependencies')
-    await exec('yarn install --frozen-lockfile', [], { cwd: repoRootPath })
+    const installExitCode = await exec('pnpm install --frozen-lockfile', [], {
+        cwd: repoRootPath,
+        ignoreReturnCode: shouldOmitFailures,
+    })
+
+    if (installExitCode !== 0) {
+        if (shouldOmitFailures) {
+            core.info('Skipping package size collection because dependency installation failed')
+            return false
+        }
+
+        throw Error('Failed to install dependencies')
+    }
 
     core.info('Building package')
-    await exec('yarn build', [], { cwd: repoRootPath })
+    const buildExitCode = await exec('pnpm build', [], {
+        cwd: repoRootPath,
+        ignoreReturnCode: shouldOmitFailures,
+    })
+
+    if (buildExitCode !== 0) {
+        if (shouldOmitFailures) {
+            core.info('Skipping package size collection because the package build failed')
+            return false
+        }
+
+        throw Error('Failed to build package')
+    }
+
+    return true
 }
 
 /**

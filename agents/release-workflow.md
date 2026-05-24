@@ -55,6 +55,8 @@ gh workflow run comment-released-prs-and-issues.yml \
 
 ## Commands
 
+Bump package versions with `pnpm version <version|patch|minor|major>`. pnpm runs the existing `preversion`, `version`, and `postversion` lifecycle scripts and creates the version commit/tag, so the README regeneration in `scripts/update-readme.mjs` stays part of the version step.
+
 Fetch draft release:
 
 ```bash
