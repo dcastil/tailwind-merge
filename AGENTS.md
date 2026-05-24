@@ -26,16 +26,19 @@ This repository is `tailwind-merge`, a TypeScript library that merges Tailwind c
 
 ## Environment and Commands
 
-- Package manager: `yarn` (classic, v1 lockfile)
+- Package manager: `pnpm` with a workspace rooted at `pnpm-workspace.yaml`
 - CI runtime: Node `24.15.0`
+- Dependency supply-chain guardrail: `minimumReleaseAge: 4320` in `pnpm-workspace.yaml`, so newly published package versions must be at least three days old before pnpm installs them.
+- Dependency build scripts are denied by default unless explicitly allowed in `pnpm-workspace.yaml`; `esbuild` is currently allowed because `.github/actions/metrics-report` needs it.
 
 Core commands:
-- `yarn lint`
-- `yarn test`
-- `yarn test:watch`
-- `yarn build`
-- `yarn test:exports`
-- `yarn bench`
+- `pnpm install --frozen-lockfile`
+- `pnpm lint`
+- `pnpm test`
+- `pnpm test:watch`
+- `pnpm build`
+- `pnpm test:exports`
+- `pnpm bench`
 
 ## Working Rules for Changes
 
@@ -44,7 +47,7 @@ Core commands:
 3. If public behavior/docs change, update docs in `docs/` (not directly in `README.md`).
 4. `README.md` is version-generated from `docs/README.md`; do not regenerate it during normal development changes.
 5. Avoid manual edits to `dist/` and `coverage/`; they are generated artifacts.
-6. Validate packaging paths with `yarn build && yarn test:exports` when touching exports/build tooling.
+6. Validate packaging paths with `pnpm build && pnpm test:exports` when touching exports/build tooling.
 
 ## Documentation Sync Policy
 
@@ -74,4 +77,4 @@ Definition of done for every PR/change:
 - Parser or modifier semantics: run `tests/modifiers.test.ts`, `tests/arbitrary-variants.test.ts`, `tests/experimental-parse-class-name.test.ts`.
 - Class groups/conflicts/default config: run `tests/default-config.test.ts`, `tests/class-group-conflicts.test.ts`, `tests/tailwind-css-versions.test.ts`.
 - Public API/types: run `tests/public-api.test.ts`, `tests/type-generics.test.ts`.
-- Release/package surface: run `yarn build` and `yarn test:exports`.
+- Release/package surface: run `pnpm build` and `pnpm test:exports`.

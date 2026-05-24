@@ -20,20 +20,14 @@ jobs:
               uses: actions/setup-node@v6
               with:
                   node-version: 24.15.0
-            - name: Use node_modules cache
-              uses: actions/cache@v5
-              with:
-                  path: node_modules
-                  key: yarn-node-24-lock-${{ hashFiles('yarn.lock') }}
-                  restore-keys: |
-                      yarn-node-24-lock-
-            - run: yarn install --frozen-lockfile
-            - run: yarn lint
-            - run: yarn test
-            - run: yarn build
+            - run: corepack enable
+            - run: pnpm install --frozen-lockfile
+            - run: pnpm lint
+            - run: pnpm test
+            - run: pnpm build
             - uses: actions/upload-artifact@v7
               with:
                   name: build-output
                   path: dist
                   if-no-files-found: error
-            - run: yarn test:exports
+            - run: pnpm test:exports

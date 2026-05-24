@@ -22,8 +22,9 @@ jobs:
               with:
                   node-version: 24.15.0
                   package-manager-cache: false
-            - run: yarn install --frozen-lockfile
-            - run: yarn build
+            - run: corepack enable
+            - run: pnpm install --frozen-lockfile
+            - run: pnpm build
             - uses: actions/upload-artifact@v7
               with:
                   name: build-output
@@ -76,11 +77,12 @@ jobs:
               with:
                   node-version: 24.15.0
                   package-manager-cache: false
-            - run: yarn install --frozen-lockfile
-            - run: yarn lint
-            - run: yarn test
-            - run: yarn build
-            - run: yarn test:exports
+            - run: corepack enable
+            - run: pnpm install --frozen-lockfile
+            - run: pnpm lint
+            - run: pnpm test
+            - run: pnpm build
+            - run: pnpm test:exports
             - uses: actions/upload-artifact@v7
               with:
                   name: build-output

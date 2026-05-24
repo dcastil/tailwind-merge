@@ -20,18 +20,12 @@ jobs:
               uses: actions/setup-node@v6
               with:
                   node-version: 24.15.0
-            - name: Use node_modules cache
-              uses: actions/cache@v5
-              with:
-                  path: node_modules
-                  key: yarn-node-24-lock-${{ hashFiles('yarn.lock') }}
-                  restore-keys: |
-                      yarn-node-24-lock-
-            - run: yarn install --frozen-lockfile
+            - run: corepack enable
+            - run: pnpm install --frozen-lockfile
             - name: Run benchmark
               # Pinned from CodSpeedHQ/action@v4.15.1.
               uses: CodSpeedHQ/action@3194d9a39c4d46684cb44bf7207fc56626aad8fd
               with:
                   # This public repository uses CodSpeed tokenless uploads so PR benchmark code does not receive a long-lived upload token or OIDC permission.
                   mode: simulation
-                  run: yarn bench
+                  run: pnpm bench

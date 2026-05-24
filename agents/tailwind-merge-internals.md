@@ -66,13 +66,13 @@ This file is a practical map for agent-driven changes in this repo.
 - `tests/tailwind-css-versions.test.ts` is the compatibility anchor for Tailwind feature coverage by version.
 - `tests/docs-examples.test.ts` enforces that documented `twMerge(...) // -> ...` examples stay correct.
 - `tests/public-api.test.ts` guards runtime exports and broad type usage.
-- `tests/tw-merge.benchmark.ts` is for performance benchmarking (`yarn bench`), not correctness gating in CI.
+- `tests/tw-merge.benchmark.ts` is for performance benchmarking (`pnpm bench`), not correctness gating in CI.
 
 Recommended local sequence for non-trivial changes:
-1. `yarn lint`
-2. `yarn test`
-3. `yarn build`
-4. `yarn test:exports`
+1. `pnpm lint`
+2. `pnpm test`
+3. `pnpm build`
+4. `pnpm test:exports`
 
 ## Build and packaging
 
@@ -80,6 +80,7 @@ Recommended local sequence for non-trivial changes:
   - ESM and CJS bundles,
   - ES5 variants,
   - unified type declarations.
+- The `build` script passes Rollup `--forceExit` because the TypeScript Rollup plugin can leave referenced file-watch handles open after a non-watch build has already written all outputs.
 - Export smoke tests:
   - `scripts/test-built-package-exports.cjs`
   - `scripts/test-built-package-exports.mjs`
@@ -89,8 +90,10 @@ Recommended local sequence for non-trivial changes:
 
 Treat this section as the source of truth for CI and publish security guardrails. Keep detailed CI guidance here instead of duplicating it in `AGENTS.md` unless a rule is critical enough to be visible before opening specialized docs.
 
-- `.github/workflows/test.yml` runs `yarn lint`, `yarn test`, `yarn build`, and `yarn test:exports`.
-- `.github/workflows/benchmark.yml` runs `yarn bench` with CodSpeed tokenless uploads for this public repository; do not pass static CodSpeed upload tokens to jobs that execute PR benchmark code.
+- The repo uses a pnpm workspace rooted at `pnpm-workspace.yaml`; the root package remains `tailwind-merge`, and `.github/actions/metrics-report` is a workspace package so action dependencies share the root lockfile.
+- `pnpm-workspace.yaml` sets `minimumReleaseAge: 4320`, so dependency versions must be at least three days old before pnpm installs them. It also allows the `esbuild` dependency build script because the metrics action imports esbuild directly.
+- `.github/workflows/test.yml` runs `pnpm lint`, `pnpm test`, `pnpm build`, and `pnpm test:exports`.
+- `.github/workflows/benchmark.yml` runs `pnpm bench` with CodSpeed tokenless uploads for this public repository; do not pass static CodSpeed upload tokens to jobs that execute PR benchmark code.
 - `.github/workflows/codeql-analysis.yml` runs CodeQL for both JavaScript/TypeScript and GitHub Actions workflows; the Actions analysis uses the `security-extended` query suite to catch workflow-specific security issues. It also runs on PRs that touch `.github/actions/**` or `.github/workflows/**` so CI-control-plane changes are scanned before merge.
 - Every workflow should declare explicit least-privilege `permissions`; read-only build/test jobs use `contents: read`, and write scopes should appear only on the jobs that need them.
 - Use `persist-credentials: false` on `actions/checkout` unless the job must push commits or tags through git.
@@ -102,7 +105,7 @@ Treat this section as the source of truth for CI and publish security guardrails
   - keeps dependency installation, linting, tests, and builds in non-OIDC jobs,
   - avoids dependency caches in the publish workflow,
   - grants `id-token: write` only to minimal publish jobs that download the verified `dist` artifact and run `npm publish --ignore-scripts`.
-- `.github/workflows/label.yml` uses `pull_request_target` only for labeling metadata; do not add repository checkout or PR-code execution to that workflow.
+- `.github/workflows/label.yml` uses `pull_request_target` only for labeling metadata; do not add repository checkout or PR-code execution to that workflow. `gh` commands in that workflow must pass `--repo` explicitly because there is intentionally no `.git` checkout for repository inference.
 - `.github/workflows/comment-released-prs-and-issues.yml`:
   - runs local action `.github/actions/release-commenter`,
   - runs on `release.published`, on manual `workflow_dispatch`, and after successful `npm Publish` workflow completion for `push` events on `main`,
