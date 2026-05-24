@@ -24,9 +24,6 @@ jobs:
             LABEL_NAME: context-v3
 
         steps:
-            - name: Checkout repository
-              uses: actions/checkout@v6
-
             - name: Add label to new issue
               if: github.event_name == 'issues'
               run: |
