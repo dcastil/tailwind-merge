@@ -3,11 +3,10 @@ name: Metrics report
 on: [pull_request]
 
 jobs:
-    metrics-report:
+    generate-report:
         runs-on: ubuntu-latest
         permissions:
             contents: read
-            pull-requests: write
         steps:
             - uses: actions/checkout@v6
               with:
@@ -38,3 +37,38 @@ jobs:
                       yarn-node-24-metrics-report-action-lock-
             - run: yarn --cwd .github/actions/metrics-report install --frozen-lockfile
             - uses: ./.github/actions/metrics-report
+              with:
+                  comment-body-path: metrics-report-comment.md
+            - uses: actions/upload-artifact@v7
+              with:
+                  name: metrics-report-comment
+                  path: metrics-report-comment.md
+                  if-no-files-found: error
+                  retention-days: 1
+
+    post-comment:
+        if: github.event.pull_request.head.repo.full_name == github.repository
+        needs: generate-report
+        runs-on: ubuntu-latest
+        permissions:
+            contents: read
+            pull-requests: write
+        steps:
+            - uses: actions/checkout@v6
+              with:
+                  ref: ${{ github.event.pull_request.base.sha }}
+                  persist-credentials: false
+            - name: Use Node.js 24
+              uses: actions/setup-node@v6
+              with:
+                  node-version: 24.15.0
+                  package-manager-cache: false
+            - uses: actions/download-artifact@v7
+              with:
+                  name: metrics-report-comment
+            - name: Post metrics report comment
+              env:
+                  COMMENT_BODY_PATH: metrics-report-comment.md
+                  GITHUB_TOKEN: ${{ github.token }}
+                  PR_NUMBER: ${{ github.event.pull_request.number }}
+              run: node .github/actions/metrics-report/src/post-comment.mjs
