@@ -105,7 +105,7 @@ Treat this section as the source of truth for CI and publish security guardrails
   - keeps dependency installation, linting, tests, and builds in non-OIDC jobs,
   - avoids dependency caches in the publish workflow,
   - grants `id-token: write` only to minimal publish jobs that download the verified `dist` artifact and run `npm publish --ignore-scripts`.
-- `.github/workflows/label.yml` uses `pull_request_target` only for labeling metadata; do not add repository checkout or PR-code execution to that workflow.
+- `.github/workflows/label.yml` uses `pull_request_target` only for labeling metadata; do not add repository checkout or PR-code execution to that workflow. `gh` commands in that workflow must pass `--repo` explicitly because there is intentionally no `.git` checkout for repository inference.
 - `.github/workflows/comment-released-prs-and-issues.yml`:
   - runs local action `.github/actions/release-commenter`,
   - runs on `release.published`, on manual `workflow_dispatch`, and after successful `npm Publish` workflow completion for `push` events on `main`,

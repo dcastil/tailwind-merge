@@ -28,13 +28,13 @@ jobs:
               if: github.event_name == 'issues'
               run: |
                   ISSUE_NUMBER=${{ github.event.issue.number }}
-                  gh issue edit "$ISSUE_NUMBER" --add-label "$LABEL_NAME"
+                  gh issue edit "$ISSUE_NUMBER" --repo "$REPO_OWNER/$REPO_NAME" --add-label "$LABEL_NAME"
 
             - name: Add label to new PR
               if: github.event_name == 'pull_request_target'
               run: |
                   PR_NUMBER=${{ github.event.pull_request.number }}
-                  gh pr edit "$PR_NUMBER" --add-label "$LABEL_NAME"
+                  gh pr edit "$PR_NUMBER" --repo "$REPO_OWNER/$REPO_NAME" --add-label "$LABEL_NAME"
 
             - name: Get label id for discussion
               id: label-data
