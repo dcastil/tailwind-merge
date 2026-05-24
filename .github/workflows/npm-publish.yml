@@ -7,28 +7,21 @@ on:
         types: [published]
 
 permissions:
-    # Necessary for OIDC permissions for trusted publishing
-    id-token: write
+    contents: read
 
 jobs:
-    publish-dev:
+    build-dev:
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         runs-on: ubuntu-latest
         steps:
             - uses: actions/checkout@v6
+              with:
+                  persist-credentials: false
             - name: Use Node.js 24
               uses: actions/setup-node@v6
               with:
                   node-version: 24.15.0
-                  # More info: https://docs.github.com/en/actions/publishing-packages/publishing-nodejs-packages#publishing-packages-to-the-npm-registry
-                  registry-url: 'https://registry.npmjs.org'
-            - name: Use node_modules cache
-              uses: actions/cache@v5
-              with:
-                  path: node_modules
-                  key: yarn-node-24-lock-${{ hashFiles('yarn.lock') }}
-                  restore-keys: |
-                      yarn-node-24-lock-
+                  package-manager-cache: false
             - run: yarn install --frozen-lockfile
             - run: yarn build
             - uses: actions/upload-artifact@v7
@@ -36,41 +29,85 @@ jobs:
                   name: build-output
                   path: dist
                   if-no-files-found: error
-            - uses: martinbeentjes/npm-get-version-action@v1.3.1
-              id: package-version
-            - run: yarn version --no-git-tag-version --new-version ${{ steps.package-version.outputs.current-version }}-dev.${{ github.sha }}
-              # npm install -g npm@latest is necessary to make provenance available (available since v9.6.5 or so). More info: https://docs.npmjs.com/generating-provenance-statements
-            - run: npm install -g npm@latest
-            - run: npm publish --access public --tag dev
 
-    publish-prod:
+    publish-dev:
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        needs: build-dev
+        runs-on: ubuntu-latest
+        permissions:
+            contents: read
+            # Necessary for OIDC permissions for trusted publishing. Keep this isolated from dependency installation and build scripts.
+            id-token: write
+        steps:
+            - uses: actions/checkout@v6
+              with:
+                  persist-credentials: false
+            - name: Use Node.js 24
+              uses: actions/setup-node@v6
+              with:
+                  node-version: 24.15.0
+                  # More info: https://docs.github.com/en/actions/publishing-packages/publishing-nodejs-packages#publishing-packages-to-the-npm-registry
+                  registry-url: 'https://registry.npmjs.org'
+                  package-manager-cache: false
+            - uses: actions/download-artifact@v7
+              with:
+                  name: build-output
+                  path: dist
+            - name: Set dev package version
+              run: |
+                  node --input-type=module <<'EOF'
+                  import fs from 'node:fs'
+
+                  const packageJson = JSON.parse(fs.readFileSync('package.json', 'utf8'))
+                  packageJson.version = `${packageJson.version}-dev.${process.env.GITHUB_SHA}`
+                  fs.writeFileSync('package.json', `${JSON.stringify(packageJson, null, 4)}\n`)
+                  EOF
+            - run: npm publish --access public --tag dev --ignore-scripts
+
+    build-prod:
         if: github.event_name == 'release' && github.event.action == 'published'
         runs-on: ubuntu-latest
         steps:
             - uses: actions/checkout@v6
+              with:
+                  persist-credentials: false
+            - name: Use Node.js 24
+              uses: actions/setup-node@v6
+              with:
+                  node-version: 24.15.0
+                  package-manager-cache: false
+            - run: yarn install --frozen-lockfile
+            - run: yarn lint
+            - run: yarn test
+            - run: yarn build
+            - run: yarn test:exports
+            - uses: actions/upload-artifact@v7
+              with:
+                  name: build-output
+                  path: dist
+                  if-no-files-found: error
+
+    publish-prod:
+        if: github.event_name == 'release' && github.event.action == 'published'
+        needs: build-prod
+        runs-on: ubuntu-latest
+        permissions:
+            contents: read
+            # Necessary for OIDC permissions for trusted publishing. Keep this isolated from dependency installation and build scripts.
+            id-token: write
+        steps:
+            - uses: actions/checkout@v6
+              with:
+                  persist-credentials: false
             - name: Use Node.js 24
               uses: actions/setup-node@v6
               with:
                   node-version: 24.15.0
                   # More info: https://docs.github.com/en/actions/publishing-packages/publishing-nodejs-packages#publishing-packages-to-the-npm-registry
                   registry-url: 'https://registry.npmjs.org'
-            - name: Use node_modules cache
-              uses: actions/cache@v5
-              with:
-                  path: node_modules
-                  key: yarn-node-24-lock-${{ hashFiles('yarn.lock') }}
-                  restore-keys: |
-                      yarn-node-24-lock-
-            - run: yarn install --frozen-lockfile
-            - run: yarn lint
-            - run: yarn test
-            - run: yarn build
-            - uses: actions/upload-artifact@v7
+                  package-manager-cache: false
+            - uses: actions/download-artifact@v7
               with:
                   name: build-output
                   path: dist
-                  if-no-files-found: error
-            - run: yarn test:exports
-              # npm install -g npm@latest is necessary to make provenance available (available since v9.6.5 or so). More info: https://docs.npmjs.com/generating-provenance-statements
-            - run: npm install -g npm@latest
-            - run: npm publish
+            - run: npm publish --ignore-scripts

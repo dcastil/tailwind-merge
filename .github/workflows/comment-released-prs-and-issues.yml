@@ -43,6 +43,8 @@ jobs:
             pull-requests: write
         steps:
             - uses: actions/checkout@v6
+              with:
+                  persist-credentials: false
             - if: github.event_name == 'workflow_run'
               id: dev_head_tag
               env:

@@ -1,11 +1,12 @@
 // @ts-check
 
+import fs from 'fs/promises'
+
 import * as core from '@actions/core'
 import { context } from '@actions/github'
 
 import { getPackageSize } from './get-package-size.mjs'
 import { getSizeInKb, getSizeMetricsReportContent } from './get-size-metrics-report-content.mjs'
-import { setComment } from './set-comment.mjs'
 import { checkoutBranch } from './utils/git.mjs'
 
 run()
@@ -36,15 +37,17 @@ async function run() {
         ],
         [getSizeMetricsReportContent(entryPointSizesHead, entryPointSizesBase)],
     ])
+    const commentBodyPath = core.getInput('comment-body-path', { required: true })
 
     const isPullRequestFromFork =
         pullRequest.head.repo?.full_name !== `${context.repo.owner}/${context.repo.repo}`
 
+    await fs.writeFile(commentBodyPath, commentBody)
+    core.info(`Wrote metrics report comment body to ${commentBodyPath}`)
+
     if (isPullRequestFromFork) {
-        core.info('Pull request is from a fork, printing comment instead of posting it')
+        core.info('Pull request is from a fork, printing generated comment body')
         core.info(commentBody)
-    } else {
-        await setComment(commentBody)
     }
 }
 

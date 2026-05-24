@@ -32,7 +32,7 @@ This file is a practical map for agent-driven changes in this repo.
 - Add or change Tailwind utility support:
   - `src/lib/default-config.ts`
   - Usually paired with tests in `tests/tailwind-css-versions.test.ts` and focused utility tests.
-  - For a full Tailwind CSS version update, follow `.agents/tailwind-css-version-update.md`.
+  - For a full Tailwind CSS version update, follow `agents/tailwind-css-version-update.md`.
 
 - Change conflict behavior:
   - `src/lib/default-config.ts` (`conflictingClassGroups`, `conflictingClassGroupModifiers`)
@@ -74,7 +74,7 @@ Recommended local sequence for non-trivial changes:
 3. `yarn build`
 4. `yarn test:exports`
 
-## Build, packaging, and release notes
+## Build and packaging
 
 - Build uses Rollup (`scripts/rollup.config.mjs`) to produce:
   - ESM and CJS bundles,
@@ -85,19 +85,24 @@ Recommended local sequence for non-trivial changes:
   - `scripts/test-built-package-exports.mjs`
 - `README.md` is generated from `docs/README.md` by `scripts/update-readme.mjs` (run in `version` script via `zx`).
 
-### Release notes playbook
+## CI Behavior And Security
 
-Detailed release-specific agent workflow lives in:
-
-- `.agents/release-workflow.md`
-
-## CI behavior (what must stay green)
+Treat this section as the source of truth for CI and publish security guardrails. Keep detailed CI guidance here instead of duplicating it in `AGENTS.md` unless a rule is critical enough to be visible before opening specialized docs.
 
 - `.github/workflows/test.yml` runs `yarn lint`, `yarn test`, `yarn build`, and `yarn test:exports`.
-- `.github/workflows/benchmark.yml` runs `yarn bench` with CodSpeed.
+- `.github/workflows/benchmark.yml` runs `yarn bench` with CodSpeed tokenless uploads for this public repository; do not pass static CodSpeed upload tokens to jobs that execute PR benchmark code.
+- `.github/workflows/codeql-analysis.yml` runs CodeQL for both JavaScript/TypeScript and GitHub Actions workflows; the Actions analysis uses the `security-extended` query suite to catch workflow-specific security issues. It also runs on PRs that touch `.github/actions/**` or `.github/workflows/**` so CI-control-plane changes are scanned before merge.
+- Every workflow should declare explicit least-privilege `permissions`; read-only build/test jobs use `contents: read`, and write scopes should appear only on the jobs that need them.
+- Use `persist-credentials: false` on `actions/checkout` unless the job must push commits or tags through git.
+- Third-party GitHub Actions that receive secrets or write-capable tokens are pinned to full commit SHAs with comments showing the source tag or branch.
+- `.github/workflows/metrics-report.yml` keeps PR code execution in a read-only `generate-report` job and posts comments from a separate `post-comment` job that checks out trusted base-repo code. The metrics report action itself only writes the generated comment body to the artifact path and must not post PR comments directly. If a transition PR introduces or moves the trusted posting script, the workflow should skip the `post-comment` job at the job level until that script exists in the base checkout rather than running PR-provided posting code with write permissions.
 - `.github/workflows/npm-publish.yml`:
   - publishes `dev` tag on `main` pushes,
-  - publishes production on release events.
+  - publishes production on release events,
+  - keeps dependency installation, linting, tests, and builds in non-OIDC jobs,
+  - avoids dependency caches in the publish workflow,
+  - grants `id-token: write` only to minimal publish jobs that download the verified `dist` artifact and run `npm publish --ignore-scripts`.
+- `.github/workflows/label.yml` uses `pull_request_target` only for labeling metadata; do not add repository checkout or PR-code execution to that workflow.
 - `.github/workflows/comment-released-prs-and-issues.yml`:
   - runs local action `.github/actions/release-commenter`,
   - runs on `release.published`, on manual `workflow_dispatch`, and after successful `npm Publish` workflow completion for `push` events on `main`,
