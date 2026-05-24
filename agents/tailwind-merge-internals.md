@@ -92,6 +92,7 @@ Treat this section as the source of truth for CI and publish security guardrails
 - `.github/workflows/test.yml` runs `yarn lint`, `yarn test`, `yarn build`, and `yarn test:exports`.
 - `.github/workflows/benchmark.yml` runs `yarn bench` with CodSpeed.
 - Every workflow should declare explicit least-privilege `permissions`; read-only build/test jobs use `contents: read`, and write scopes should appear only on the jobs that need them.
+- Use `persist-credentials: false` on `actions/checkout` unless the job must push commits or tags through git.
 - Third-party GitHub Actions that receive secrets or write-capable tokens are pinned to full commit SHAs with comments showing the source tag or branch.
 - `.github/workflows/npm-publish.yml`:
   - publishes `dev` tag on `main` pushes,

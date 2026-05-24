@@ -10,6 +10,8 @@ jobs:
             pull-requests: write
         steps:
             - uses: actions/checkout@v6
+              with:
+                  persist-credentials: false
             - name: Use Node.js 24
               uses: actions/setup-node@v6
               with:
