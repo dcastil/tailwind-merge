@@ -94,7 +94,7 @@ Treat this section as the source of truth for CI and publish security guardrails
 - Every workflow should declare explicit least-privilege `permissions`; read-only build/test jobs use `contents: read`, and write scopes should appear only on the jobs that need them.
 - Use `persist-credentials: false` on `actions/checkout` unless the job must push commits or tags through git.
 - Third-party GitHub Actions that receive secrets or write-capable tokens are pinned to full commit SHAs with comments showing the source tag or branch.
-- `.github/workflows/metrics-report.yml` keeps PR code execution in a read-only `generate-report` job and posts comments from a separate `post-comment` job that checks out trusted base-repo code. The metrics report action itself only writes the generated comment body to the artifact path and must not post PR comments directly.
+- `.github/workflows/metrics-report.yml` keeps PR code execution in a read-only `generate-report` job and posts comments from a separate `post-comment` job that checks out trusted base-repo code. The metrics report action itself only writes the generated comment body to the artifact path and must not post PR comments directly. If a transition PR introduces or moves the trusted posting script, the `post-comment` job should skip posting until that script exists in the base checkout rather than running PR-provided posting code with write permissions.
 - `.github/workflows/npm-publish.yml`:
   - publishes `dev` tag on `main` pushes,
   - publishes production on release events,
