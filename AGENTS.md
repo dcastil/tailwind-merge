@@ -26,7 +26,7 @@ Deeper implementation notes live in:
 ## Environment and Commands
 
 - Package manager: `yarn` (classic, v1 lockfile)
-- CI runtime: Node `24.13.0`
+- CI runtime: Node `24.15.0`
 
 Core commands:
 - `yarn lint`
@@ -45,6 +45,7 @@ Core commands:
 5. Avoid manual edits to `dist/` and `coverage/`; they are generated artifacts.
 6. Validate packaging paths with `yarn build && yarn test:exports` when touching exports/build tooling.
 7. For Tailwind CSS version support work, follow `.agents/tailwind-css-version-update.md`.
+8. Keep npm publish OIDC permissions isolated to publish-only jobs; do not install dependencies, run build/test scripts, or restore dependency caches in jobs with `id-token: write`, and do not use dependency caches in the npm publish workflow.
 
 ## Documentation Sync Policy
 

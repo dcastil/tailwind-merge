@@ -97,7 +97,11 @@ Detailed release-specific agent workflow lives in:
 - `.github/workflows/benchmark.yml` runs `yarn bench` with CodSpeed.
 - `.github/workflows/npm-publish.yml`:
   - publishes `dev` tag on `main` pushes,
-  - publishes production on release events.
+  - publishes production on release events,
+  - keeps dependency installation, linting, tests, and builds in non-OIDC jobs,
+  - avoids dependency caches in the publish workflow,
+  - grants `id-token: write` only to minimal publish jobs that download the verified `dist` artifact and run `npm publish --ignore-scripts`.
+- `.github/workflows/label.yml` uses `pull_request_target` only for labeling metadata; do not add repository checkout or PR-code execution to that workflow.
 - `.github/workflows/comment-released-prs-and-issues.yml`:
   - runs local action `.github/actions/release-commenter`,
   - runs on `release.published`, on manual `workflow_dispatch`, and after successful `npm Publish` workflow completion for `push` events on `main`,
