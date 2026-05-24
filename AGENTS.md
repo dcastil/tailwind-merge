@@ -51,6 +51,8 @@ Core commands:
 
 Treat documentation updates as part of the same change, not as follow-up work.
 
+Self-improvement is required while working in this repo: whenever you discover useful information about architecture, workflows, commands, constraints, debugging findings, or recurring pitfalls, add it to the appropriate file in `agents/` or to `AGENTS.md` in the same change. When existing agent guidance becomes stale, misleading, or irrelevant, remove or revise it immediately.
+
 Required when relevant:
 
 1. Update `docs/*.md` for any user-visible behavior, API, version support, or limitation changes.
@@ -62,7 +64,7 @@ Definition of done for every PR/change:
 
 1. Code and tests are updated.
 2. Relevant docs are updated in the same change set.
-3. `AGENTS.md` and `agents/*` guidance is reviewed and updated if the change affects how agents should work in this repo.
+3. `AGENTS.md` and `agents/*` guidance is reviewed, with useful new context added and stale guidance removed whenever the change affects how agents should work in this repo.
 
 ## Quick Validation Matrix
 
