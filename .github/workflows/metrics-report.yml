@@ -7,6 +7,8 @@ jobs:
         runs-on: ubuntu-latest
         permissions:
             contents: read
+        outputs:
+            trusted-post-comment-script-available: ${{ steps.trusted_post_comment_script.outputs.available }}
         steps:
             - uses: actions/checkout@v6
               with:
@@ -45,9 +47,25 @@ jobs:
                   path: metrics-report-comment.md
                   if-no-files-found: error
                   retention-days: 1
+            - name: Check whether the base checkout can post comments
+              id: trusted_post_comment_script
+              env:
+                  BASE_SHA: ${{ github.event.pull_request.base.sha }}
+              run: |
+                  git fetch --no-tags --depth=1 origin "$BASE_SHA"
+
+                  if git cat-file -e "$BASE_SHA:.github/actions/metrics-report/src/post-comment.mjs"; then
+                    echo "available=true" >> "$GITHUB_OUTPUT"
+                  else
+                    echo "available=false" >> "$GITHUB_OUTPUT"
+                  fi
 
     post-comment:
-        if: github.event.pull_request.head.repo.full_name == github.repository
+        if: >-
+            ${{
+                github.event.pull_request.head.repo.full_name == github.repository &&
+                needs.generate-report.outputs.trusted-post-comment-script-available == 'true'
+            }}
         needs: generate-report
         runs-on: ubuntu-latest
         permissions:
@@ -58,27 +76,15 @@ jobs:
               with:
                   ref: ${{ github.event.pull_request.base.sha }}
                   persist-credentials: false
-            - name: Check for trusted post-comment script
-              id: trusted_post_comment_script
-              run: |
-                  if [[ -f .github/actions/metrics-report/src/post-comment.mjs ]]; then
-                    echo "available=true" >> "$GITHUB_OUTPUT"
-                  else
-                    echo "::notice::Trusted post-comment script is not present in the base checkout; skipping comment posting for this transition run."
-                    echo "available=false" >> "$GITHUB_OUTPUT"
-                  fi
             - name: Use Node.js 24
-              if: steps.trusted_post_comment_script.outputs.available == 'true'
               uses: actions/setup-node@v6
               with:
                   node-version: 24.15.0
                   package-manager-cache: false
             - uses: actions/download-artifact@v7
-              if: steps.trusted_post_comment_script.outputs.available == 'true'
               with:
                   name: metrics-report-comment
             - name: Post metrics report comment
-              if: steps.trusted_post_comment_script.outputs.available == 'true'
               env:
                   COMMENT_BODY_PATH: metrics-report-comment.md
                   GITHUB_TOKEN: ${{ github.token }}
