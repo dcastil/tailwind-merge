@@ -14,7 +14,8 @@ jobs:
             contents: write
             pull-requests: read
         steps:
-            - uses: release-drafter/release-drafter@v7.3.0
+            # Pinned from release-drafter/release-drafter@v7.3.0.
+            - uses: release-drafter/release-drafter@c2e2804cc59f45f57076a99af580d0fedb697927
               with:
                   token: ${{ github.token }}
 
@@ -25,6 +26,7 @@ jobs:
             contents: read
             pull-requests: write
         steps:
-            - uses: release-drafter/release-drafter/autolabeler@v7.3.0
+            # Pinned from release-drafter/release-drafter@v7.3.0.
+            - uses: release-drafter/release-drafter/autolabeler@c2e2804cc59f45f57076a99af580d0fedb697927
               with:
                   token: ${{ github.token }}

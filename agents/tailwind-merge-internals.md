@@ -95,6 +95,7 @@ Detailed release-specific agent workflow lives in:
 
 - `.github/workflows/test.yml` runs `yarn lint`, `yarn test`, `yarn build`, and `yarn test:exports`.
 - `.github/workflows/benchmark.yml` runs `yarn bench` with CodSpeed.
+- Third-party GitHub Actions that receive secrets or write-capable tokens are pinned to full commit SHAs with comments showing the source tag or branch.
 - `.github/workflows/npm-publish.yml`:
   - publishes `dev` tag on `main` pushes,
   - publishes production on release events,

@@ -47,7 +47,8 @@ jobs:
                   echo "label_id=$res" >> $GITHUB_OUTPUT
 
             - name: Add label to new discussion
-              uses: octokit/graphql-action@v2.x
+              # Pinned from octokit/graphql-action@v2.3.3.
+              uses: octokit/graphql-action@f7836e89a7e5bac63911bbe9653c21147b3d9bc3
               if: github.event_name == 'discussion'
               env:
                   DISCUSSION_ID: ${{ github.event.discussion.node_id }}
