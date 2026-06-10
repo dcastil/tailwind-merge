@@ -38,3 +38,30 @@ test('line-clamp classes do create conflicts correctly', () => {
     expect(twMerge('overflow-auto inline line-clamp-1')).toBe('line-clamp-1')
     expect(twMerge('line-clamp-1 overflow-auto inline')).toBe('line-clamp-1 overflow-auto inline')
 })
+
+test('named font-size classes override leading but arbitrary ones do not', () => {
+    // Named font-size utilities set a line-height in Tailwind, so they override leading
+    expect(twMerge('leading-6 text-lg')).toBe('text-lg')
+    expect(twMerge('leading-6 text-base')).toBe('text-base')
+    expect(twMerge('text-sm leading-6 text-lg')).toBe('text-lg')
+
+    // Arbitrary font-size values only set font-size and don't affect line-height,
+    // so they must not override leading
+    expect(twMerge('leading-6 text-[1.5rem]')).toBe('leading-6 text-[1.5rem]')
+    expect(twMerge('leading-[1.75rem] text-[1.5rem]')).toBe('leading-[1.75rem] text-[1.5rem]')
+    expect(twMerge('leading-6 text-[length:12px]')).toBe('leading-6 text-[length:12px]')
+    expect(twMerge('leading-6 text-(length:--my-size)')).toBe('leading-6 text-(length:--my-size)')
+
+    // But an arbitrary font-size with a line-height modifier does set a line-height
+    // and therefore still overrides leading
+    expect(twMerge('leading-6 text-[1.5rem]/6')).toBe('text-[1.5rem]/6')
+    expect(twMerge('leading-6 text-[length:12px]/4')).toBe('text-[length:12px]/4')
+})
+
+test('named and arbitrary font-size classes still conflict with each other', () => {
+    expect(twMerge('text-lg text-[1.5rem]')).toBe('text-[1.5rem]')
+    expect(twMerge('text-[1.5rem] text-lg')).toBe('text-lg')
+    expect(twMerge('text-sm text-base')).toBe('text-base')
+    expect(twMerge('text-[1rem] text-[2rem]')).toBe('text-[2rem]')
+    expect(twMerge('text-[length:12px] text-[length:16px]')).toBe('text-[length:16px]')
+})
