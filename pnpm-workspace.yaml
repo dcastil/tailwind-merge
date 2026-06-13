@@ -7,3 +7,6 @@ minimumReleaseAgeStrict: true
 
 allowBuilds:
   esbuild: true
+minimumReleaseAgeExclude:
+  # Renovate security update: esbuild@0.28.1
+  - esbuild@0.28.1
