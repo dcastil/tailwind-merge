@@ -7,3 +7,6 @@ minimumReleaseAgeStrict: true
 
 allowBuilds:
   esbuild: true
+minimumReleaseAgeExclude:
+  # Renovate security update: @babel/core@7.29.6
+  - "@babel/core@7.29.6"
