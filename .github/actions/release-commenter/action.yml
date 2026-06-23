@@ -31,5 +31,5 @@ inputs:
         description: 'Optional npm package name for SHA-based prerelease base resolution'
         required: false
 runs:
-    using: 'node20'
+    using: 'node24'
     main: 'index.js'

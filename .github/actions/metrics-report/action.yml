@@ -6,5 +6,5 @@ inputs:
         description: 'Path to write the generated metrics report comment body'
         required: true
 runs:
-    using: 'node20'
+    using: 'node24'
     main: 'src/main.mjs'

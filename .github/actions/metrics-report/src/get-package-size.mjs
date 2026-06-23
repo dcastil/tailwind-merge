@@ -141,7 +141,8 @@ async function getEntryPointSizes({ shouldOmitFailures }) {
  * @returns {Promise<EntryPointConfiguration[]>}
  */
 async function getEntryPointConfigs() {
-    const pkg = (await import('../../../../package.json', { assert: { type: 'json' } })).default
+    const packageJson = await fs.readFile(path.join(repoRootPath, 'package.json'), 'utf8')
+    const pkg = JSON.parse(packageJson)
 
     return Object.entries(pkg.exports).flatMap(([relativeEntryPointPath, bundleObject]) => {
         const entryPointPath = path.join('tailwind-merge', relativeEntryPointPath)
