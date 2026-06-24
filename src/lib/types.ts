@@ -333,6 +333,7 @@ export type DefaultClassGroupIds =
     | 'font-family'
     | 'font-features'
     | 'font-size'
+    | 'font-size-arbitrary'
     | 'font-smoothing'
     | 'font-stretch'
     | 'font-style'
