@@ -33,3 +33,21 @@ test('theme object can be extended', () => {
     expect(tailwindMerge('p-3 p-hello p-hallo')).toBe('p-3 p-hello p-hallo')
     expect(tailwindMerge('px-3 px-hello px-hallo')).toBe('px-hallo')
 })
+
+test('leading-none keeps merging when the leading theme scale is overridden', () => {
+    // `leading-none` is a static Tailwind v4 utility (`line-height: 1`) that does
+    // not come from the `--leading-*` theme namespace, so overriding `theme.leading`
+    // must not stop it from conflicting with other line-height utilities — same as
+    // `rounded-none` / `shadow-none` survive `theme.radius` / `theme.shadow` overrides.
+    const tailwindMerge = extendTailwindMerge({
+        override: {
+            theme: {
+                leading: ['tight'],
+            },
+        },
+    })
+
+    expect(tailwindMerge('leading-tight leading-none')).toBe('leading-none')
+    expect(tailwindMerge('leading-none leading-tight')).toBe('leading-tight')
+    expect(tailwindMerge('leading-4 leading-none')).toBe('leading-none')
+})
