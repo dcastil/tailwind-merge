@@ -18,6 +18,19 @@ test('theme scale can be extended', () => {
     )
 })
 
+test('leading-none survives theme.leading override', () => {
+    const tailwindMerge = extendTailwindMerge({
+        override: {
+            theme: {
+                leading: ['tight', 'snug'],
+            },
+        },
+    })
+
+    expect(tailwindMerge('leading-none leading-tight')).toBe('leading-tight')
+    expect(tailwindMerge('leading-none leading-tight leading-snug')).toBe('leading-snug')
+})
+
 test('theme object can be extended', () => {
     const tailwindMerge = extendTailwindMerge<never, string>({
         extend: {
