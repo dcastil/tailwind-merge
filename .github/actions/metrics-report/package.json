@@ -11,7 +11,7 @@
         "@actions/exec": "^3.0.0",
         "@actions/github": "^9.1.1",
         "@octokit/webhooks-types": "^7.6.1",
-        "esbuild": "^0.28.0",
-        "rollup": "^4.60.2"
+        "esbuild": "^0.28.1",
+        "rollup": "^4.62.2"
     }
 }
