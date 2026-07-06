@@ -1,4 +1,5 @@
 {
+    "$schema": "https://docs.renovatebot.com/renovate-schema.json",
     "extends": [
         "config:recommended",
         ":combinePatchMinorReleases",
@@ -10,5 +11,6 @@
     ],
     "timezone": "Europe/Berlin",
     "prHourlyLimit": 10,
-    "rangeStrategy": "bump"
+    "rangeStrategy": "bump",
+    "minimumReleaseAge": "4 days"
 }
