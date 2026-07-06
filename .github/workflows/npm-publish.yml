@@ -20,7 +20,7 @@ jobs:
             - name: Use Node.js 24
               uses: actions/setup-node@v6
               with:
-                  node-version: 24.15.0
+                  node-version: 24.18.0
                   package-manager-cache: false
             - run: corepack enable
             - run: pnpm install --frozen-lockfile
@@ -46,7 +46,7 @@ jobs:
             - name: Use Node.js 24
               uses: actions/setup-node@v6
               with:
-                  node-version: 24.15.0
+                  node-version: 24.18.0
                   # More info: https://docs.github.com/en/actions/publishing-packages/publishing-nodejs-packages#publishing-packages-to-the-npm-registry
                   registry-url: 'https://registry.npmjs.org'
                   package-manager-cache: false
@@ -75,7 +75,7 @@ jobs:
             - name: Use Node.js 24
               uses: actions/setup-node@v6
               with:
-                  node-version: 24.15.0
+                  node-version: 24.18.0
                   package-manager-cache: false
             - run: corepack enable
             - run: pnpm install --frozen-lockfile
@@ -104,7 +104,7 @@ jobs:
             - name: Use Node.js 24
               uses: actions/setup-node@v6
               with:
-                  node-version: 24.15.0
+                  node-version: 24.18.0
                   # More info: https://docs.github.com/en/actions/publishing-packages/publishing-nodejs-packages#publishing-packages-to-the-npm-registry
                   registry-url: 'https://registry.npmjs.org'
                   package-manager-cache: false
