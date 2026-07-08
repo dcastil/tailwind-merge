@@ -89,5 +89,5 @@
     "publishConfig": {
         "provenance": true
     },
-    "packageManager": "pnpm@10.34.4"
+    "packageManager": "pnpm@11.10.0"
 }
