@@ -11,6 +11,30 @@ import { dts } from 'rollup-plugin-dts'
 
 import pkg from '../package.json' with { type: 'json' }
 
+/**
+ * Preserves the generated-code semantics of Babel 7's `@babel/preset-env` `loose: true` option after Babel 8 removed it.
+ *
+ * @see https://babeljs.io/docs/assumptions#migrating-from-babelpreset-envs-loose-and-spec-modes
+ */
+const babelLooseAssumptions = {
+    arrayLikeIsIterable: true,
+    constantReexports: true,
+    ignoreFunctionLength: true,
+    ignoreToPrimitiveHint: true,
+    mutableTemplateObject: true,
+    noClassCalls: true,
+    noDocumentAll: true,
+    objectRestNoSymbols: true,
+    privateFieldsAsProperties: true,
+    pureGetters: true,
+    setClassMethods: true,
+    setComputedProperties: true,
+    setPublicClassFields: true,
+    setSpreadProperties: true,
+    skipForOfIteratorClosing: true,
+    superIsCallableConstructor: true,
+}
+
 export default defineConfig([
     // Default entry point
     {
@@ -89,6 +113,7 @@ export default defineConfig([
 ])
 
 /**
+ * Creates a shared output configuration so every public bundle receives the same Babel transforms while retaining its format-specific file path and runtime targets.
  *
  * @param {object} param0
  * @param {string} param0.file
@@ -106,12 +131,12 @@ function getOutputConfig({ file, format, targets }) {
         generatedCode: 'es2015',
         plugins: [
             getBabelOutputPlugin({
+                assumptions: babelLooseAssumptions,
                 presets: [
                     [
                         '@babel/preset-env',
                         {
-                            loose: true,
-                            bugfixes: true,
+                            exclude: ['transform-typeof-symbol'],
                             modules: false,
                             targets,
                         },
