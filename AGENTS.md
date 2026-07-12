@@ -26,7 +26,7 @@ This repository is `tailwind-merge`, a TypeScript library that merges Tailwind c
 
 ## Environment and Commands
 
-- Package manager: `pnpm` with a workspace rooted at `pnpm-workspace.yaml`
+- Package manager: `pnpm` with a workspace rooted at `pnpm-workspace.yaml`; pnpm 11 requires Node 22 or newer for local tooling
 - CI runtime: Node `24.18.0`, pinned via `node-version` in the workflows under `.github/workflows/` (Renovate bumps it there; treat the workflows as the source of truth if this number looks stale)
 - Dependency supply-chain guardrail: `minimumReleaseAge: 4320` in `pnpm-workspace.yaml`, so newly published package versions must be at least three days old before pnpm installs them. Renovate has a matching cooldown in `.github/renovate.json` (see `agents/tailwind-merge-internals.md` for how the two must stay in sync).
 - Dependency build scripts are denied by default unless explicitly allowed in `pnpm-workspace.yaml`; `esbuild` is currently allowed because `.github/actions/metrics-report` needs it.
