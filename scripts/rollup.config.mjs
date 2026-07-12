@@ -12,15 +12,15 @@ import { dts } from 'rollup-plugin-dts'
 import pkg from '../package.json' with { type: 'json' }
 
 /**
- * Preserves the generated-code semantics of Babel 7's `@babel/preset-env` `loose: true` option after Babel 8 removed it.
+ * Preserves the generated-code semantics of Babel 7's `@babel/preset-env` `loose: true` option after Babel 8 removed it. The documented migration's `arrayLikeIsIterable` assumption is replaced with `iterableIsArray` because every transformed iterable in this package is an array; this avoids Babel 8's generic iterable helpers and keeps the generated JavaScript byte-for-byte equivalent to Babel 7.
  *
  * @see https://babeljs.io/docs/assumptions#migrating-from-babelpreset-envs-loose-and-spec-modes
  */
 const babelLooseAssumptions = {
-    arrayLikeIsIterable: true,
     constantReexports: true,
     ignoreFunctionLength: true,
     ignoreToPrimitiveHint: true,
+    iterableIsArray: true,
     mutableTemplateObject: true,
     noClassCalls: true,
     noDocumentAll: true,
