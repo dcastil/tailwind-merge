@@ -81,9 +81,11 @@ Recommended local sequence for non-trivial changes:
   - ES5 variants,
   - unified type declarations.
 - The `build` script passes Rollup `--forceExit` because the TypeScript Rollup plugin can leave referenced file-watch handles open after a non-watch build has already written all outputs.
+- Babel 8 performs the final target-specific transforms for all four JavaScript bundles. Its `@babel/preset-env` `bugfixes` behavior is unconditional, and the removed `loose: true` option is preserved through top-level assumptions plus the `transform-typeof-symbol` exclusion in `scripts/rollup.config.mjs`. The config deliberately replaces the migration guide's `arrayLikeIsIterable` with `iterableIsArray` because Babel disallows enabling both and every transformed spread and destructuring operand is an array; this suppresses generic iterable helpers and keeps the generated JavaScript bundles equivalent in size and behavior to the Babel 7 bundles.
 - Export smoke tests:
   - `scripts/test-built-package-exports.cjs`
   - `scripts/test-built-package-exports.mjs`
+  - Both scripts execute the default and ES5 bundles so build-tool upgrades cannot break only the legacy entry point unnoticed.
 - `README.md` is generated from `docs/README.md` by `scripts/update-readme.mjs` (run in `version` script via `zx`).
 
 ## CI Behavior And Security

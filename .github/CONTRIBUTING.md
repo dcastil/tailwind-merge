@@ -42,7 +42,7 @@ Before submitting a pull request:
 
 ## Development
 
-You will need [Node.js](https://nodejs.org) 22 or newer and [pnpm](https://pnpm.io) installed on your machine. pnpm 11 requires Node.js 22 or newer for development, but this does not change the runtime support of the published `tailwind-merge` package. I recommend running tests in watch mode while you work on the code. Then the correct subset of tests is being run as you modify source code or the tests itself.
+You will need [Node.js](https://nodejs.org) 22.18 or newer on a supported LTS release and [pnpm](https://pnpm.io) installed on your machine. This development requirement satisfies both pnpm 11 and the Babel 8 build toolchain, but it does not change the runtime support of the published `tailwind-merge` package. I recommend running tests in watch mode while you work on the code. Then the correct subset of tests is being run as you modify source code or the tests itself.
 
 ```sh
 # Install dependencies
