@@ -99,7 +99,8 @@ Treat this section as the source of truth for CI and publish security guardrails
 - `.github/workflows/benchmark.yml` runs `pnpm bench` with CodSpeed tokenless uploads for this public repository; do not pass static CodSpeed upload tokens to jobs that execute PR benchmark code.
 - `.github/workflows/codeql-analysis.yml` runs CodeQL for both JavaScript/TypeScript and GitHub Actions workflows; the Actions analysis uses the `security-extended` query suite to catch workflow-specific security issues. It also runs on PRs that touch `.github/actions/**` or `.github/workflows/**` so CI-control-plane changes are scanned before merge.
 - Every workflow should declare explicit least-privilege `permissions`; read-only build/test jobs use `contents: read`, and write scopes should appear only on the jobs that need them.
-- Use `persist-credentials: false` on `actions/checkout` unless the job must push commits or tags through git.
+- Pin every `actions/checkout` use to an immutable commit and set `persist-credentials: false` unless the job must push commits or tags through git; checkout receives the job token even in read-only jobs.
+- `actions/checkout` v7+ blocks fork pull request code under `pull_request_target` and PR-triggered `workflow_run`; never set `allow-unsafe-pr-checkout: true`. Keep `label.yml` checkout-free, keep the metrics comment job on the base SHA, and keep release-comment workflow runs restricted to successful `push` events on `main`.
 - Third-party GitHub Actions that receive secrets or write-capable tokens are pinned to full commit SHAs with comments showing the source tag or branch.
 - Artifact handoffs intentionally pair `actions/upload-artifact@v7` with `actions/download-artifact@v8` because the two actions have different latest major versions; do not try to align their version numbers unless upstream releases change.
 - Local JavaScript GitHub Actions use `runs.using: node24`; keep action scripts compatible with the declared runner and avoid runtime-fragile ESM features, such as JSON module import assertion syntax, when a simple filesystem read works across supported Node versions.
@@ -115,6 +116,7 @@ Treat this section as the source of truth for CI and publish security guardrails
 - `.github/workflows/comment-released-prs-and-issues.yml`:
   - runs local action `.github/actions/release-commenter`,
   - runs on `release.published`, on manual `workflow_dispatch`, and after successful `npm Publish` workflow completion for `push` events on `main`,
+  - keeps the `workflow_run` checkout on trusted default-branch code and reads the triggering main commit's package metadata through the GitHub API instead of checking out the triggering SHA,
   - supports manual `workflow_dispatch` with optional `head_tag`, `base_tag`, `dry_run`, and `npm_package_name`.
 
 ## Practical guardrails
