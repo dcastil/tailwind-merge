@@ -10,7 +10,7 @@ jobs:
         outputs:
             trusted-post-comment-script-available: ${{ steps.trusted_post_comment_script.outputs.available }}
         steps:
-            - uses: actions/checkout@v6
+            - uses: actions/checkout@v7
               with:
                   persist-credentials: false
             - name: Use Node.js 24
@@ -53,7 +53,7 @@ jobs:
             contents: read
             pull-requests: write
         steps:
-            - uses: actions/checkout@v6
+            - uses: actions/checkout@v7
               with:
                   ref: ${{ github.event.pull_request.base.sha }}
                   persist-credentials: false

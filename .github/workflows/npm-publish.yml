@@ -14,7 +14,7 @@ jobs:
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         runs-on: ubuntu-latest
         steps:
-            - uses: actions/checkout@v6
+            - uses: actions/checkout@v7
               with:
                   persist-credentials: false
             - name: Use Node.js 24
@@ -40,7 +40,7 @@ jobs:
             # Necessary for OIDC permissions for trusted publishing. Keep this isolated from dependency installation and build scripts.
             id-token: write
         steps:
-            - uses: actions/checkout@v6
+            - uses: actions/checkout@v7
               with:
                   persist-credentials: false
             - name: Use Node.js 24
@@ -69,7 +69,7 @@ jobs:
         if: github.event_name == 'release' && github.event.action == 'published'
         runs-on: ubuntu-latest
         steps:
-            - uses: actions/checkout@v6
+            - uses: actions/checkout@v7
               with:
                   persist-credentials: false
             - name: Use Node.js 24
@@ -98,7 +98,7 @@ jobs:
             # Necessary for OIDC permissions for trusted publishing. Keep this isolated from dependency installation and build scripts.
             id-token: write
         steps:
-            - uses: actions/checkout@v6
+            - uses: actions/checkout@v7
               with:
                   persist-credentials: false
             - name: Use Node.js 24
