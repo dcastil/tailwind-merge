@@ -50,10 +50,11 @@ jobs:
                   # More info: https://docs.github.com/en/actions/publishing-packages/publishing-nodejs-packages#publishing-packages-to-the-npm-registry
                   registry-url: 'https://registry.npmjs.org'
                   package-manager-cache: false
-            - uses: actions/download-artifact@v8
+            - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
               with:
                   name: build-output
                   path: dist
+                  digest-mismatch: error
             - name: Set dev package version
               run: |
                   node --input-type=module <<'EOF'
@@ -108,8 +109,9 @@ jobs:
                   # More info: https://docs.github.com/en/actions/publishing-packages/publishing-nodejs-packages#publishing-packages-to-the-npm-registry
                   registry-url: 'https://registry.npmjs.org'
                   package-manager-cache: false
-            - uses: actions/download-artifact@v8
+            - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
               with:
                   name: build-output
                   path: dist
+                  digest-mismatch: error
             - run: npm publish --ignore-scripts

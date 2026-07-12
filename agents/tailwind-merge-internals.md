@@ -99,6 +99,7 @@ Treat this section as the source of truth for CI and publish security guardrails
 - Every workflow should declare explicit least-privilege `permissions`; read-only build/test jobs use `contents: read`, and write scopes should appear only on the jobs that need them.
 - Use `persist-credentials: false` on `actions/checkout` unless the job must push commits or tags through git.
 - Third-party GitHub Actions that receive secrets or write-capable tokens are pinned to full commit SHAs with comments showing the source tag or branch.
+- Artifact handoffs intentionally pair `actions/upload-artifact@v7` with `actions/download-artifact@v8` because the two actions have different latest major versions; do not try to align their version numbers unless upstream releases change.
 - Local JavaScript GitHub Actions use `runs.using: node24`; keep action scripts compatible with the declared runner and avoid runtime-fragile ESM features, such as JSON module import assertion syntax, when a simple filesystem read works across supported Node versions.
 - `.github/workflows/metrics-report.yml` keeps PR code execution in a read-only `generate-report` job and posts comments from a separate `post-comment` job that checks out trusted base-repo code. The metrics report action itself only writes the generated comment body to the artifact path and must not post PR comments directly. If a transition PR introduces or moves the trusted posting script, the workflow should skip the `post-comment` job at the job level until that script exists in the base checkout rather than running PR-provided posting code with write permissions.
 - `.github/workflows/npm-publish.yml`:
@@ -106,7 +107,8 @@ Treat this section as the source of truth for CI and publish security guardrails
   - publishes production on release events,
   - keeps dependency installation, linting, tests, and builds in non-OIDC jobs,
   - avoids dependency caches in the publish workflow,
-  - grants `id-token: write` only to minimal publish jobs that download the verified `dist` artifact and run `npm publish --ignore-scripts`.
+  - grants `id-token: write` only to minimal publish jobs that download the verified `dist` artifact and run `npm publish --ignore-scripts`,
+  - pins `actions/download-artifact` to an immutable commit in the OIDC jobs and keeps digest mismatches fatal so corrupted or substituted artifacts cannot reach npm publishing.
 - `.github/workflows/label.yml` uses `pull_request_target` only for labeling metadata; do not add repository checkout or PR-code execution to that workflow. `gh` commands in that workflow must pass `--repo` explicitly because there is intentionally no `.git` checkout for repository inference.
 - `.github/workflows/comment-released-prs-and-issues.yml`:
   - runs local action `.github/actions/release-commenter`,
