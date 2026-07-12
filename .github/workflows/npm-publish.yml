@@ -50,7 +50,7 @@ jobs:
                   # More info: https://docs.github.com/en/actions/publishing-packages/publishing-nodejs-packages#publishing-packages-to-the-npm-registry
                   registry-url: 'https://registry.npmjs.org'
                   package-manager-cache: false
-            - uses: actions/download-artifact@v7
+            - uses: actions/download-artifact@v8
               with:
                   name: build-output
                   path: dist
@@ -108,7 +108,7 @@ jobs:
                   # More info: https://docs.github.com/en/actions/publishing-packages/publishing-nodejs-packages#publishing-packages-to-the-npm-registry
                   registry-url: 'https://registry.npmjs.org'
                   package-manager-cache: false
-            - uses: actions/download-artifact@v7
+            - uses: actions/download-artifact@v8
               with:
                   name: build-output
                   path: dist
