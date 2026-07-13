@@ -3,6 +3,7 @@
     "include": ["./**/*"],
     "compilerOptions": {
         "resolveJsonModule": true,
+        "rootDir": "..",
         "types": ["vitest/globals"]
     }
 }

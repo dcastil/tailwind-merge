@@ -8,6 +8,8 @@ This package follows the [SemVer](https://semver.org) versioning rules. More spe
 
 -   Major version gets incremented when breaking changes are introduced to the package API. E.g. the return type of `twMerge` changes.
 
+-   Published type declarations support TypeScript 3.8 and newer. The TypeScript version used to build tailwind-merge is an internal development detail and can be newer than the versions used by consumers. Increasing the minimum supported consumer TypeScript version is a breaking change and therefore requires a new major version.
+
 -   `alpha` releases might introduce breaking changes on any update. `beta` releases intend to only introduce new features or bug fixes, but can introduce breaking changes in rare cases.
 
 -   Any API that has `experimental` in its name can introduce breaking changes in any minor version update.

@@ -23,6 +23,7 @@ jobs:
             - run: corepack enable
             - run: pnpm install --frozen-lockfile
             - run: pnpm lint
+            - run: pnpm test:types
             - run: pnpm test
             - run: pnpm build
             - uses: actions/upload-artifact@v7

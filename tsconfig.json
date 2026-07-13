@@ -9,10 +9,11 @@
         "strict": true,
         // Modules
         "module": "ESNext",
-        "moduleResolution": "Node",
+        "moduleResolution": "Bundler",
         // Emit
         "declaration": true,
         "noEmit": true,
+        "rootDir": "src",
         "sourceMap": true,
         // Interop Constraints
         "esModuleInterop": true,

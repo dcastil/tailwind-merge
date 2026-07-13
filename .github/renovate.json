@@ -12,5 +12,12 @@
     "timezone": "Europe/Berlin",
     "prHourlyLimit": 10,
     "rangeStrategy": "bump",
-    "minimumReleaseAge": "4 days"
+    "minimumReleaseAge": "4 days",
+    "packageRules": [
+        {
+            "description": "Keep the compiler used to verify the documented minimum TypeScript version pinned",
+            "matchDepNames": ["typescript-compat"],
+            "enabled": false
+        }
+    ]
 }

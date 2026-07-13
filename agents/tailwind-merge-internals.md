@@ -70,9 +70,10 @@ This file is a practical map for agent-driven changes in this repo.
 
 Recommended local sequence for non-trivial changes:
 1. `pnpm lint`
-2. `pnpm test`
-3. `pnpm build`
-4. `pnpm test:exports`
+2. `pnpm test:types`
+3. `pnpm test`
+4. `pnpm build`
+5. `pnpm test:exports`
 
 ## Build and packaging
 
@@ -82,10 +83,12 @@ Recommended local sequence for non-trivial changes:
   - unified type declarations.
 - The `build` script passes Rollup `--forceExit` because the TypeScript Rollup plugin can leave referenced file-watch handles open after a non-watch build has already written all outputs.
 - Babel 8 performs the final target-specific transforms for all four JavaScript bundles. Its `@babel/preset-env` `bugfixes` behavior is unconditional, and the removed `loose: true` option is preserved through top-level assumptions plus the `transform-typeof-symbol` exclusion in `scripts/rollup.config.mjs`. The config deliberately replaces the migration guide's `arrayLikeIsIterable` with `iterableIsArray` because Babel disallows enabling both and every transformed spread and destructuring operand is an array; this suppresses generic iterable helpers and keeps the generated JavaScript bundles equivalent in size and behavior to the Babel 7 bundles.
+- TypeScript 6 requires the source `rootDir` to be explicit when declaration output is redirected by Rollup, so `tsconfig.json` fixes it to `src`. Module resolution uses `Bundler`, matching the Rollup build and avoiding the deprecated `Node`/`node10` resolver.
 - Export smoke tests:
   - `scripts/test-built-package-exports.cjs`
   - `scripts/test-built-package-exports.mjs`
   - Both scripts execute the default and ES5 bundles so build-tool upgrades cannot break only the legacy entry point unnoticed.
+- `pnpm test:types` type-checks both the source and the test suite with the development compiler. `scripts/typescript-compatibility/consumer.ts` separately compiles the built declaration bundle with the `typescript-compat` compiler alias pinned to TypeScript 3.8.3. `pnpm test:exports` includes the compatibility check because TypeScript 3.8 is the documented minimum consumer version; keep the alias excluded from Renovate updates and treat any increase to this floor as a major-version change.
 - `README.md` is generated from `docs/README.md` by `scripts/update-readme.mjs` (run in `version` script via `zx`).
 
 ## CI Behavior And Security
@@ -97,7 +100,7 @@ Treat this section as the source of truth for CI and publish security guardrails
 - CI enables Corepack so the root `packageManager` pin selects the pnpm version before every frozen install. For pnpm major updates, run both `pnpm install` and `pnpm install --frozen-lockfile` with the new pinned version, and commit any lockfile migration produced by the non-frozen install.
 - `pnpm-workspace.yaml` sets `minimumReleaseAge: 4320` (minutes, i.e. three days) with `minimumReleaseAgeStrict: true`, so dependency versions must be at least three days old before pnpm installs them. It also allows the `esbuild` dependency build script because the metrics action imports esbuild directly.
 - `.github/renovate.json` sets `minimumReleaseAge: "4 days"` (all datasources) so Renovate never proposes versions that pnpm strict mode would reject during lockfile updates; the extra day over pnpm's three days is a deliberate buffer against boundary races. If the pnpm cooldown changes, keep the Renovate value at least as large. Renovate exempts vulnerability alerts from its cooldown, but pnpm strict mode still blocks immature versions at install time; use pnpm's `minimumReleaseAgeExclude` if a security fix must land early.
-- `.github/workflows/test.yml` runs `pnpm lint`, `pnpm test`, `pnpm build`, and `pnpm test:exports`.
+- `.github/workflows/test.yml` runs `pnpm lint`, `pnpm test:types`, `pnpm test`, `pnpm build`, and `pnpm test:exports`.
 - `.github/workflows/benchmark.yml` runs `pnpm bench` with CodSpeed tokenless uploads for this public repository; do not pass static CodSpeed upload tokens to jobs that execute PR benchmark code.
 - `.github/workflows/codeql-analysis.yml` runs CodeQL for both JavaScript/TypeScript and GitHub Actions workflows; the Actions analysis uses the `security-extended` query suite to catch workflow-specific security issues. It also runs on PRs that touch `.github/actions/**` or `.github/workflows/**` so CI-control-plane changes are scanned before merge.
 - Every workflow should declare explicit least-privilege `permissions`; read-only build/test jobs use `contents: read`, and write scopes should appear only on the jobs that need them.

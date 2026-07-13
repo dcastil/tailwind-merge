@@ -18,7 +18,7 @@ twMerge('px-2 py-1 bg-red hover:bg-dark-red', 'p-3 bg-[#B91C1C]')
 
 - Supports Tailwind v4.0 up to v4.3 (if you use Tailwind v3, use [tailwind-merge v2.6.0](https://github.com/dcastil/tailwind-merge/tree/v2.6.0))
 - Works in all modern browsers and maintained Node versions
-- Fully typed
+- Fully typed, with published declarations compatible with TypeScript 3.8 and newer
 - [Check bundle size on Bundlephobia](https://bundlephobia.com/package/tailwind-merge)
 
 ## Get started
