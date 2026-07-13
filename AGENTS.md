@@ -29,6 +29,7 @@ This repository is `tailwind-merge`, a TypeScript library that merges Tailwind c
 - Package manager: `pnpm` with a workspace rooted at `pnpm-workspace.yaml`
 - Local development runtime: Node `22.18.0` or newer on a supported LTS release, satisfying the requirements of pnpm 11 and the Babel 8 build toolchain
 - CI runtime: Node `24.18.0`, pinned via `node-version` in the workflows under `.github/workflows/` (Renovate bumps it there; treat the workflows as the source of truth if this number looks stale)
+- Consumer TypeScript support: TypeScript `3.8` and newer; `pnpm test:exports` verifies the generated declarations with the pinned minimum compiler
 - Dependency supply-chain guardrail: `minimumReleaseAge: 4320` in `pnpm-workspace.yaml`, so newly published package versions must be at least three days old before pnpm installs them. Renovate has a matching cooldown in `.github/renovate.json` (see `agents/tailwind-merge-internals.md` for how the two must stay in sync).
 - Dependency build scripts are denied by default unless explicitly allowed in `pnpm-workspace.yaml`; `esbuild` is currently allowed because `.github/actions/metrics-report` needs it.
 
@@ -36,6 +37,7 @@ Core commands:
 - `pnpm install --frozen-lockfile`
 - `pnpm lint`
 - `pnpm test`
+- `pnpm test:types`
 - `pnpm test:watch`
 - `pnpm build`
 - `pnpm test:exports`
@@ -77,5 +79,5 @@ Definition of done for every PR/change:
 
 - Parser or modifier semantics: run `tests/modifiers.test.ts`, `tests/arbitrary-variants.test.ts`, `tests/experimental-parse-class-name.test.ts`.
 - Class groups/conflicts/default config: run `tests/default-config.test.ts`, `tests/class-group-conflicts.test.ts`, `tests/tailwind-css-versions.test.ts`.
-- Public API/types: run `tests/public-api.test.ts`, `tests/type-generics.test.ts`.
+- Public API/types: run `tests/public-api.test.ts`, `tests/type-generics.test.ts`, and `pnpm test:types`.
 - Release/package surface: run `pnpm build` and `pnpm test:exports`.

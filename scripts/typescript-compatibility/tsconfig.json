@@ -1,0 +1,10 @@
+{
+    "compilerOptions": {
+        "module": "ESNext",
+        "noEmit": true,
+        "strict": true,
+        "target": "ESNext",
+        "types": []
+    },
+    "files": ["consumer.ts"]
+}
