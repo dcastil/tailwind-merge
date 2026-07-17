@@ -2,13 +2,14 @@
 
 ## Installation
 
-The tailwind-merge package is hosted on npm under the name [`tailwind-merge`](https://www.npmjs.com/package/tailwind-merge). There are lots of package managers for installing packages hosted on npm. Here are installation instructions for the most popular ones: [npm](https://npmjs.com), [yarn](https://yarnpkg.com), [pnpm](https://pnpm.io) and [bun](https://bun.sh).
+The tailwind-merge package is hosted on npm under the name [`tailwind-merge`](https://www.npmjs.com/package/tailwind-merge). There are lots of package managers for installing packages hosted on npm. Here are installation instructions for the most popular ones: [npm](https://npmjs.com), [yarn](https://yarnpkg.com), [pnpm](https://pnpm.io), [bun](https://bun.sh) and [Deno](https://deno.com).
 
 ```sh
 npm add tailwind-merge
 yarn add tailwind-merge
 pnpm add tailwind-merge
 bun add tailwind-merge
+deno add tailwind-merge
 ```
 
 ## Basic usage
