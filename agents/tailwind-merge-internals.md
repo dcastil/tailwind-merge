@@ -19,6 +19,7 @@ This file is a practical map for agent-driven changes in this repo.
    - compiles class definitions into a recursive map + validator list,
    - maps class names to class group IDs,
    - returns conflicting groups, including postfix-modifier conflicts.
+   - On the cache-miss hot path, hyphen segments are found with `indexOf`/`slice` (not `split`) so lookups avoid allocating a segment array per class.
 5. `createParseClassName` in `src/lib/parse-class-name.ts`:
    - parses stacked modifiers with bracket/paren depth tracking,
    - supports important modifier (`!`) and legacy v3 position,

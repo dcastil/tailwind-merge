@@ -41,7 +41,6 @@ const createClassPartObject = (
     classGroupId,
 })
 
-const CLASS_PART_SEPARATOR = '-'
 
 const EMPTY_CONFLICTS: readonly AnyClassGroupIds[] = []
 // I use two dots here because one dot is used as prefix for class groups in plugins
@@ -56,10 +55,10 @@ export const createClassGroupUtils = (config: AnyConfig) => {
             return getGroupIdForArbitraryProperty(className)
         }
 
-        const classParts = className.split(CLASS_PART_SEPARATOR)
-        // Classes like `-inset-1` produce an empty string as first classPart. We assume that classes for negative values are used correctly and skip it.
-        const startIndex = classParts[0] === '' && classParts.length > 1 ? 1 : 0
-        return getGroupRecursive(classParts, startIndex, classMap)
+        // Classes like `-inset-1` produce an empty first segment. Skip it (same as split('-')[0] === '').
+        const startIndex = className[0] === '-' && className.length > 1 ? 1 : 0
+
+        return getGroupRecursive(className, startIndex, classMap)
     }
 
     const getConflictingClassGroupIds = (
@@ -92,20 +91,23 @@ export const createClassGroupUtils = (config: AnyConfig) => {
 }
 
 const getGroupRecursive = (
-    classParts: string[],
+    className: string,
     startIndex: number,
     classPartObject: ClassPartObject,
 ): AnyClassGroupIds | undefined => {
-    const classPathsLength = classParts.length - startIndex
-    if (classPathsLength === 0) {
+    const classNameLength = className.length
+    if (startIndex >= classNameLength) {
         return classPartObject.classGroupId
     }
 
-    const currentClassPart = classParts[startIndex]!
+    const hyphenIndex = className.indexOf('-', startIndex)
+    const partEnd = hyphenIndex === -1 ? classNameLength : hyphenIndex
+    const currentClassPart = className.slice(startIndex, partEnd)
     const nextClassPartObject = classPartObject.nextPart.get(currentClassPart)
 
     if (nextClassPartObject) {
-        const result = getGroupRecursive(classParts, startIndex + 1, nextClassPartObject)
+        const nextStartIndex = hyphenIndex === -1 ? classNameLength : hyphenIndex + 1
+        const result = getGroupRecursive(className, nextStartIndex, nextClassPartObject)
         if (result) return result
     }
 
@@ -114,11 +116,7 @@ const getGroupRecursive = (
         return undefined
     }
 
-    // Build classRest string efficiently by joining from startIndex onwards
-    const classRest =
-        startIndex === 0
-            ? classParts.join(CLASS_PART_SEPARATOR)
-            : classParts.slice(startIndex).join(CLASS_PART_SEPARATOR)
+    const classRest = className.slice(startIndex)
     const validatorsLength = validators.length
 
     for (let i = 0; i < validatorsLength; i++) {
@@ -252,11 +250,13 @@ const processObjectDefinition = (
 
 const getPart = (classPartObject: ClassPartObject, path: string): ClassPartObject => {
     let current = classPartObject
-    const parts = path.split(CLASS_PART_SEPARATOR)
-    const len = parts.length
+    let startIndex = 0
+    const pathLength = path.length
 
-    for (let i = 0; i < len; i++) {
-        const part = parts[i]!
+    while (startIndex <= pathLength) {
+        const hyphenIndex = path.indexOf('-', startIndex)
+        const partEnd = hyphenIndex === -1 ? pathLength : hyphenIndex
+        const part = path.slice(startIndex, partEnd)
 
         let next = current.nextPart.get(part)
         if (!next) {
@@ -264,6 +264,11 @@ const getPart = (classPartObject: ClassPartObject, path: string): ClassPartObjec
             current.nextPart.set(part, next)
         }
         current = next
+
+        if (hyphenIndex === -1) {
+            break
+        }
+        startIndex = hyphenIndex + 1
     }
 
     return current
