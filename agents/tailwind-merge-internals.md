@@ -9,6 +9,7 @@ This file is a practical map for agent-driven changes in this repo.
    - lazily builds config utils on first call,
    - joins inputs via `twJoin`,
    - caches final joined-input results,
+   - returns class lists shorter than 7 characters as-is without parsing or caching (too short to contain two classes, so a merge is impossible; parsing/caching them would only waste compute and slots; class lists containing whitespace still go through `mergeClassList` for normalization),
    - calls `mergeClassList` on cache miss.
 3. `mergeClassList` in `src/lib/merge-classlist.ts`:
    - parses classes,

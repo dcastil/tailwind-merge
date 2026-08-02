@@ -21,6 +21,19 @@ for (let i = 0; i < 200; i++) {
     }
 }
 
+// Short class lists which can't contain a merge; interleaving them with the
+// collection simulates the cache churn of repeated tiny calls
+const shortClassLists: string[] = []
+for (const prefix of ['m', 'p', 'mx', 'my', 'px', 'py', 'w', 'h', 'z']) {
+    for (let value = 0; value <= 99; value++) {
+        shortClassLists.push(`${prefix}-${value}`)
+    }
+}
+shortClassLists.push('flex', 'grid', 'block', 'table', 'inline', 'static', 'fixed', 'hidden')
+
+// First 100 items of the test collection, matching the cache size used in the churn benchmark
+const cacheChurnTestData = testDataCollection.slice(0, 100)
+
 describe('twMerge', () => {
     benchWithMemory('init', () => {
         const twMerge = extendTailwindMerge({})
@@ -51,21 +64,46 @@ describe('twMerge', () => {
         )
     })
 
-    benchWithMemory('collection with cache', () => {
-        const twMerge = extendTailwindMerge({})
+    benchWithMemory(
+        'collection with cache',
+        () => {
+            const twMerge = extendTailwindMerge({})
 
-        for (let index = 0; index < testDataCollection.length; ++index) {
-            twMerge(...(testDataCollection[index] as TestDataItem))
-        }
-    })
+            for (let index = 0; index < testDataCollection.length; ++index) {
+                twMerge(...(testDataCollection[index] as TestDataItem))
+            }
+        },
+        { operations: testDataCollection.length },
+    )
 
-    benchWithMemory('collection without cache', () => {
-        const twMerge = extendTailwindMerge({ cacheSize: 0 })
+    benchWithMemory(
+        'collection without cache',
+        () => {
+            const twMerge = extendTailwindMerge({ cacheSize: 0 })
 
-        for (let index = 0; index < testDataCollection.length; ++index) {
-            twMerge(...(testDataCollection[index] as TestDataItem))
-        }
-    })
+            for (let index = 0; index < testDataCollection.length; ++index) {
+                twMerge(...(testDataCollection[index] as TestDataItem))
+            }
+        },
+        { operations: testDataCollection.length },
+    )
+
+    benchWithMemory(
+        'collection with short class cache churn',
+        () => {
+            const twMerge = extendTailwindMerge({ cacheSize: 100 })
+
+            for (let index = 0; index < cacheChurnTestData.length; ++index) {
+                twMerge(...(cacheChurnTestData[index] as TestDataItem))
+                twMerge(shortClassLists[(3 * index) % shortClassLists.length])
+                twMerge(shortClassLists[(3 * index + 1) % shortClassLists.length])
+                twMerge(shortClassLists[(3 * index + 2) % shortClassLists.length])
+            }
+        },
+        {
+            operations: cacheChurnTestData.length * 4,
+        },
+    )
 
     benchWithMemory('ultra long class list with many conflicts without cache', () => {
         const twMerge = extendTailwindMerge({ cacheSize: 0 })
@@ -85,9 +123,9 @@ afterAll(() => {
     for (const [benchName, benchData] of memoryData.entries()) {
         const memoryDelta = benchData.after.heapUsed - benchData.before.heapUsed
         lines.push(`  ${benchName}: ${formatBytes(memoryDelta)} heap`)
-        if (benchName.includes('collection')) {
+        if (benchData.operations !== undefined) {
             lines.push(`    Total footprint: ${formatBytes(benchData.after.rss)}`)
-            lines.push(`    Operations: ${testDataCollection.length}`)
+            lines.push(`    Operations: ${benchData.operations}`)
         }
     }
     // eslint-disable-next-line no-console -- This is a summary that will be printed to the console.
@@ -97,7 +135,7 @@ afterAll(() => {
 function benchWithMemory(
     name: string,
     fn: () => void,
-    options?: { iterations?: number; time?: number },
+    options?: { iterations?: number; time?: number; operations?: number },
 ) {
     let iterationBefore: MemoryStats | null = null
     let peakMemoryDelta = 0
@@ -139,6 +177,7 @@ function benchWithMemory(
                     memoryData.set(name, {
                         before: iterationBefore,
                         after: iterationBefore,
+                        operations: options?.operations,
                     })
                 }
             },
@@ -189,4 +228,4 @@ async function forceGarbageCollection(): Promise<void> {
     }
 }
 
-const memoryData = new Map<string, { before: MemoryStats; after: MemoryStats }>()
+const memoryData = new Map<string, { before: MemoryStats; after: MemoryStats; operations?: number }>()
