@@ -1,6 +1,36 @@
 import { expect, test } from 'vitest'
 
-import { createTailwindMerge } from '../src'
+import { createTailwindMerge, getDefaultConfig } from '../src'
+
+test('class lists too short to contain two classes are not cached', () => {
+    let parseCount = 0
+    const tailwindMerge = createTailwindMerge(() => ({
+        ...getDefaultConfig(),
+        cacheSize: 10,
+        experimentalParseClassName: ({ className, parseClassName }) => {
+            parseCount++
+            return parseClassName(className)
+        },
+    }))
+
+    // Repeated short single-class calls are never cache hits, so they get parsed every time
+    tailwindMerge('m-1')
+    tailwindMerge('m-1')
+    expect(parseCount).toBe(2)
+
+    // Multi-class lists are cached: parsed once, subsequent calls are cache hits
+    const parseCountBeforeMultiClassCall = parseCount
+    tailwindMerge('m-1 m-2')
+    expect(parseCount).toBe(parseCountBeforeMultiClassCall + 2)
+    tailwindMerge('m-1 m-2')
+    expect(parseCount).toBe(parseCountBeforeMultiClassCall + 2)
+
+    // Single-class lists with 7 or more characters are still cached
+    const parseCountBeforeLongSingleClassCall = parseCount
+    tailwindMerge('bg-red-500')
+    tailwindMerge('bg-red-500')
+    expect(parseCount).toBe(parseCountBeforeLongSingleClassCall + 1)
+})
 
 test('createTailwindMerge works with single config function', () => {
     const tailwindMerge = createTailwindMerge(() => ({

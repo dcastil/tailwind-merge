@@ -8,6 +8,12 @@ type CreateConfigSubsequent = (config: AnyConfig) => AnyConfig
 type TailwindMerge = (...classLists: ClassNameValue[]) => string
 type ConfigUtils = ReturnType<typeof createConfigUtils>
 
+// Class lists shorter than this can't contain two classes (the shortest Tailwind
+// class is 3 characters, e.g. `m-0`, plus a space separator between classes), so
+// there is nothing to merge and caching the result would just waste a cache slot
+// on repeated single-class calls like `twMerge('flex')`.
+const MIN_CACHEABLE_CLASS_LIST_LENGTH = 7
+
 export const createTailwindMerge = (
     createConfigFirst: CreateConfigFirst,
     ...createConfigRest: CreateConfigSubsequent[]
@@ -32,6 +38,11 @@ export const createTailwindMerge = (
     }
 
     const tailwindMerge = (classList: string) => {
+        if (classList.length < MIN_CACHEABLE_CLASS_LIST_LENGTH) {
+            // Too short to contain a merge, so there is nothing to cache
+            return mergeClassList(classList, configUtils)
+        }
+
         const cachedResult = cacheGet(classList)
 
         if (cachedResult) {

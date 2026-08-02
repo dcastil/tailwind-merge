@@ -179,6 +179,8 @@ tailwind-merge is optimized for speed when running in the browser. This includes
 
 Results get cached by default, so you don't need to worry about wasteful re-renders. The library uses a computationally lightweight [LRU cache](<https://en.wikipedia.org/wiki/Cache_replacement_policies#Least_recently_used_(LRU)>) which stores up to 500 different results by default. The cache is applied after all arguments are [joined](./api-reference.md#twjoin) together to a single string. This means that if you call `twMerge` repeatedly with different arguments that result in the same string when joined, the cache will be hit.
 
+Class lists too short to contain two classes (less than 7 characters) are never cached. They can't produce a merge, so caching them would only waste cache slots on repeated single-class calls like `twMerge('flex')` and evict results that benefit from caching.
+
 The cache size can be modified or opt-out of by using [`extendTailwindMerge`](./api-reference.md#extendtailwindmerge).
 
 ### Data structures are reused between calls
