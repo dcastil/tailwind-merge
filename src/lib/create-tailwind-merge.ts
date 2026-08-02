@@ -8,11 +8,13 @@ type CreateConfigSubsequent = (config: AnyConfig) => AnyConfig
 type TailwindMerge = (...classLists: ClassNameValue[]) => string
 type ConfigUtils = ReturnType<typeof createConfigUtils>
 
-// Class lists shorter than this can't contain two classes (the shortest Tailwind
-// class is 3 characters, e.g. `m-0`, plus a space separator between classes), so
-// there is nothing to merge and caching the result would just waste a cache slot
-// on repeated single-class calls like `twMerge('flex')`.
+// The shortest Tailwind class is 3 characters (e.g. `m-0`), so a class list
+// shorter than 7 characters (3 + space + 3) can't contain two classes and thus
+// no merge. They're returned as-is instead of being parsed and cached.
 const MIN_CACHEABLE_CLASS_LIST_LENGTH = 7
+
+// Matches any whitespace that would need normalization by mergeClassList
+const HAS_WHITESPACE_REGEX = /\s/
 
 export const createTailwindMerge = (
     createConfigFirst: CreateConfigFirst,
@@ -39,7 +41,12 @@ export const createTailwindMerge = (
 
     const tailwindMerge = (classList: string) => {
         if (classList.length < MIN_CACHEABLE_CLASS_LIST_LENGTH) {
-            // Too short to contain a merge, so there is nothing to cache
+            // A single class can't conflict with itself, so it's already the merge
+            // result — unless whitespace needs normalizing.
+            if (!HAS_WHITESPACE_REGEX.test(classList)) {
+                return classList
+            }
+
             return mergeClassList(classList, configUtils)
         }
 

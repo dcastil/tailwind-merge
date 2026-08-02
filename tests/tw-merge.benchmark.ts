@@ -21,10 +21,8 @@ for (let i = 0; i < 200; i++) {
     }
 }
 
-// Distinct short class lists (single class, less than 7 characters) which can never
-// contain a merge. Without the minimum class list length check these get cached like
-// any other result and evict the large class lists from the small cache, turning
-// their repeated calls into expensive cache misses.
+// Short class lists which can't contain a merge; interleaving them with the
+// collection simulates the cache churn of repeated tiny calls
 const shortClassLists: string[] = []
 for (const prefix of ['m', 'p', 'mx', 'my', 'px', 'py', 'w', 'h', 'z']) {
     for (let value = 0; value <= 99; value++) {
