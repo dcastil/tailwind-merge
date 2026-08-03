@@ -14,13 +14,13 @@ jobs:
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         runs-on: ubuntu-latest
         steps:
-            - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+            - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
               with:
                   persist-credentials: false
             - name: Use Node.js 24
               uses: actions/setup-node@v6
               with:
-                  node-version: 24.18.0
+                  node-version: 24.18.1
                   package-manager-cache: false
             - run: corepack enable
             - run: pnpm install --frozen-lockfile
@@ -40,13 +40,13 @@ jobs:
             # Necessary for OIDC permissions for trusted publishing. Keep this isolated from dependency installation and build scripts.
             id-token: write
         steps:
-            - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+            - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
               with:
                   persist-credentials: false
             - name: Use Node.js 24
               uses: actions/setup-node@v6
               with:
-                  node-version: 24.18.0
+                  node-version: 24.18.1
                   # More info: https://docs.github.com/en/actions/publishing-packages/publishing-nodejs-packages#publishing-packages-to-the-npm-registry
                   registry-url: 'https://registry.npmjs.org'
                   package-manager-cache: false
@@ -70,13 +70,13 @@ jobs:
         if: github.event_name == 'release' && github.event.action == 'published'
         runs-on: ubuntu-latest
         steps:
-            - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+            - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
               with:
                   persist-credentials: false
             - name: Use Node.js 24
               uses: actions/setup-node@v6
               with:
-                  node-version: 24.18.0
+                  node-version: 24.18.1
                   package-manager-cache: false
             - run: corepack enable
             - run: pnpm install --frozen-lockfile
@@ -99,13 +99,13 @@ jobs:
             # Necessary for OIDC permissions for trusted publishing. Keep this isolated from dependency installation and build scripts.
             id-token: write
         steps:
-            - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+            - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
               with:
                   persist-credentials: false
             - name: Use Node.js 24
               uses: actions/setup-node@v6
               with:
-                  node-version: 24.18.0
+                  node-version: 24.18.1
                   # More info: https://docs.github.com/en/actions/publishing-packages/publishing-nodejs-packages#publishing-packages-to-the-npm-registry
                   registry-url: 'https://registry.npmjs.org'
                   package-manager-cache: false
