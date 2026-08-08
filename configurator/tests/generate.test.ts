@@ -1,4 +1,3 @@
-import { mkdir, writeFile } from 'node:fs/promises'
 import { fileURLToPath } from 'node:url'
 
 import { describe, expect, test } from 'vitest'
@@ -129,12 +128,8 @@ describe('generate from vanilla Tailwind CSS', () => {
         expect(plan.report.unassignedClasses).toEqual([])
     })
 
-    test('emitted module matches snapshot', async () => {
-        expect(code).toMatchSnapshot()
-
-        // Also written to disk (gitignored) so the package's `test:types` script type-checks a real emitted artifact against the library's public types.
-        const generatedDirectory = new URL('.generated/', import.meta.url)
-        await mkdir(generatedDirectory, { recursive: true })
-        await writeFile(new URL('vanilla.ts', generatedDirectory), code)
+    test('emitted module matches its file snapshot', async () => {
+        // A file snapshot instead of an inline one: the committed artifact is reviewable as real TypeScript and, living inside tests/, is type-checked against the library's public types by the package's `test:types` script.
+        await expect(code).toMatchFileSnapshot('./__snapshots__/vanilla.snap.ts')
     })
 })

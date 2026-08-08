@@ -11,7 +11,6 @@ export default typescriptPlugin.config(
             'dist/**/*',
             'node_modules/**/*',
             'configurator/dist/**/*',
-            'configurator/tests/.generated/**/*',
         ],
     },
     {

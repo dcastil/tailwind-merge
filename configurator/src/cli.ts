@@ -7,7 +7,7 @@ import { generate } from './generate'
 /**
  * Minimal CLI around the library API in generate.ts. Kept deliberately thin: the generation pipeline is the product, and future integrations (bundler plugins, a `--check` CI mode) should reuse the library rather than the CLI.
  */
-const main = async (argv: string[]) => {
+async function main(argv: string[]) {
     const args = parseArguments(argv)
 
     if (!args.input || !args.output) {
@@ -57,7 +57,7 @@ const main = async (argv: string[]) => {
     }
 }
 
-const parseArguments = (argv: string[]) => {
+function parseArguments(argv: string[]) {
     const args: { input?: string; output?: string } = {}
 
     for (let index = 0; index < argv.length; index++) {

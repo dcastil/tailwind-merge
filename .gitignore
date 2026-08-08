@@ -2,7 +2,6 @@
 /.pnpm-store/
 /.vscode/
 /configurator/dist/
-/configurator/tests/.generated/
 /dist/
 coverage
 node_modules/

@@ -21,10 +21,10 @@ export interface ScaleSnapshot {
  *
  * Variables outside the supported namespaces (e.g. `--text-color-*` or `--z-index-*`) are not captured here — the classes they create are picked up by the vanilla-diff augmentation pass instead, which classifies them empirically.
  */
-export const snapshotTheme = (
+export function snapshotTheme(
     designSystem: DesignSystemAccess,
     themeKeys: string[],
-): ThemeSnapshot => {
+): ThemeSnapshot {
     const prefix = designSystem.theme.prefix ?? null
     if (prefix) {
         throw new Error(

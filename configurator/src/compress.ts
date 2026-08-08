@@ -18,7 +18,7 @@ export interface ScaleEncoding {
  *
  * The family encoding also mirrors Tailwind's own resolution order better than a flat validator: a named part match wins over sibling validators in the class map, exactly like Tailwind prefers a color namespace hit over a bare value interpretation.
  */
-export const encodeScale = (names: string[]): ScaleEncoding => {
+export function encodeScale(names: string[]): ScaleEncoding {
     if (names.length === 0) {
         return { items: [], strategy: 'empty' }
     }
@@ -47,7 +47,7 @@ export const encodeScale = (names: string[]): ScaleEncoding => {
 /**
  * Rough size in characters of the emitted representation. Only used to compare encodings of the same scale against each other, so precision doesn't matter as long as it is monotonic with real output size.
  */
-export const estimateCost = (items: PlanValue[]): number => {
+export function estimateCost(items: PlanValue[]): number {
     let cost = 0
 
     for (const item of items) {
@@ -75,8 +75,8 @@ const VALIDATOR_CANDIDATES: [ValidatorName, (value: string) => boolean][] = [
     ['isNumber', validators.isNumber],
 ]
 
-const encodeWithValidators = (names: string[]): ScaleEncoding[] =>
-    VALIDATOR_CANDIDATES.flatMap(([name, validator]) => {
+function encodeWithValidators(names: string[]): ScaleEncoding[] {
+    return VALIDATOR_CANDIDATES.flatMap(([name, validator]) => {
         const outliers = names.filter((value) => !validator(value))
         const coveredCount = names.length - outliers.length
 
@@ -92,11 +92,12 @@ const encodeWithValidators = (names: string[]): ScaleEncoding[] =>
             },
         ]
     })
+}
 
 /**
- * Collapses names sharing a first segment and a numeric tail into `{ family: [isNumber] }` entries, which is how color palettes compress (22 families × 11 shades become 22 nested validators). Names outside qualifying families stay enumerated, and a family only qualifies with at least 2 members so single values don't lose their exact match.
+ * Collapses names sharing a first segment and a numeric tail into `{ family: [isNumber] }` entries, which is how color palettes compress (many families × many shades become one nested validator per family). Names outside qualifying families stay enumerated, and a family only qualifies with at least 2 members so single values don't lose their exact match.
  */
-const encodeAsFamilies = (names: string[]): ScaleEncoding | null => {
+function encodeAsFamilies(names: string[]): ScaleEncoding | null {
     const familyTails = new Map<string, string[]>()
 
     for (const name of names) {
@@ -150,4 +151,6 @@ const encodeAsFamilies = (names: string[]): ScaleEncoding | null => {
     return { items, strategy: 'families' }
 }
 
-const literal = (value: string): PlanValue => ({ kind: 'class', value })
+function literal(value: string): PlanValue {
+    return { kind: 'class', value }
+}

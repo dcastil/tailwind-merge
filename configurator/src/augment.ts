@@ -21,12 +21,12 @@ export interface BuildAugmentationsOptions {
  *
  * Mechanism: diff the project's class list against the vanilla one. Every new class that the generated config doesn't already classify is matched against candidate groups derived from its vanilla siblings (classes sharing the first name segment, e.g. `text-…`), where each candidate group is represented by the declared-property signature of one exemplar class. A unique signature match assigns the group — `text-primary` declares `color` like `text-red-500` does, not `font-size` like `text-xl` — which handles Tailwind's undocumented compat sub-namespaces (`--text-color-*`, `--background-color-*`) and namespaces tailwind-merge has no theme key for (`--z-index-*`, `--border-width-*`) with one rule. Ambiguous or unmatched classes are reported, never guessed.
  */
-export const buildAugmentations = ({
+export function buildAugmentations({
     project,
     vanilla,
     projectClassGroupId,
     vanillaClassGroupId,
-}: BuildAugmentationsOptions): AugmentationResult => {
+}: BuildAugmentationsOptions): AugmentationResult {
     const vanillaClassNames = vanilla.getClassList().map(([className]) => className)
     const vanillaClassNameSet = new Set(vanillaClassNames)
 
@@ -88,10 +88,10 @@ export const buildAugmentations = ({
 /**
  * One exemplar class per (first name segment, class group) pair, e.g. `text` → text-color: `text-red-500`. Only exemplars for segments that actually need classification get compiled later, so collecting names here is cheap.
  */
-const collectExemplars = (
+function collectExemplars(
     vanillaClassNames: string[],
     vanillaClassGroupId: (className: string) => string | undefined,
-): Map<string, Map<string, string>> => {
+): Map<string, Map<string, string>> {
     const exemplarsByFirstSegment = new Map<string, Map<string, string>>()
 
     for (const className of vanillaClassNames) {
@@ -111,12 +111,12 @@ const collectExemplars = (
     return exemplarsByFirstSegment
 }
 
-const classifyByProperties = (
+function classifyByProperties(
     className: string,
     properties: Set<string>,
     exemplarsByFirstSegment: Map<string, Map<string, string>>,
     vanilla: DesignSystemAccess,
-): string | { reason: string } => {
+): string | { reason: string } {
     const groupExemplars = exemplarsByFirstSegment.get(firstNameSegment(className))
     if (!groupExemplars || groupExemplars.size === 0) {
         return { reason: 'no vanilla classes share its root' }
@@ -141,7 +141,7 @@ const classifyByProperties = (
     }
 }
 
-const firstNameSegment = (className: string): string => {
+function firstNameSegment(className: string): string {
     const separatorIndex = className.indexOf('-')
     return separatorIndex === -1 ? className : className.slice(0, separatorIndex)
 }

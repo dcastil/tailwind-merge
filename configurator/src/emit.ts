@@ -19,7 +19,7 @@ export interface EmitOptions {
  *
  * Two measured insights shape the output. Validators are destructured once and referenced as bare identifiers because property accesses like `v.isArbitraryVariable` survive minification while local bindings get mangled. And sharing is applied selectively (see EmitOptions.sharing): deduplicating repetition into consts shrinks the minified size but *grows* the compressed size, since references add entropy where gzip/brotli handled the repetition nearly for free — so the default shares only theme scales, emitted as references or spreads (e.g. `['none', ...scale7]`). Sharing array identity across class groups is safe because tailwind-merge never mutates config arrays. Output is deterministic for identical input so a future `--check` mode can diff against the file on disk.
  */
-export const emitModule = (plan: ConfigPlan, options: EmitOptions = {}): string => {
+export function emitModule(plan: ConfigPlan, options: EmitOptions = {}): string {
     const candidates = collectConstantCandidates(plan, options.sharing ?? 'scales')
 
     // First pass with every candidate available determines which consts are actually referenced (directly from the config or transitively from other used consts). The second pass re-serializes with final sequential names for just the used ones, so decisions are identical and numbering has no gaps.
@@ -91,10 +91,10 @@ const INDENT = '    '
 const NAME_LENGTH = 7
 
 /** Validator names in first-use order, for the destructuring statement at the top of `getConfig`. */
-const collectUsedValidatorNames = (plan: ConfigPlan): string[] => {
+function collectUsedValidatorNames(plan: ConfigPlan): string[] {
     const names = new Set<string>()
 
-    const visitItems = (items: PlanValue[]) => {
+    function visitItems(items: PlanValue[]) {
         for (const item of items) {
             if (item.kind === 'validator') {
                 names.add(item.name)
@@ -138,22 +138,22 @@ interface SerializedOutput {
 /**
  * Gathers what becomes a shared const under the chosen sharing strategy: the resolved theme scales (group arrays contain them as contiguous runs), and under 'aggressive' additionally every repeated array/object whose size outweighs a reference plus frequent runs mined from the group arrays (e.g. the spacing tail repeated across margin/padding/sizing scales).
  */
-const collectConstantCandidates = (
+function collectConstantCandidates(
     plan: ConfigPlan,
     sharing: NonNullable<EmitOptions['sharing']>,
-): CandidateMap => {
+): CandidateMap {
     const candidates: CandidateMap = new Map()
 
     if (sharing === 'none') {
         return candidates
     }
 
-    const addArrayCandidate = (
+    function addArrayCandidate(
         canonical: string,
         items: PlanValue[],
         preferredName: string | null = null,
         comment: string | null = null,
-    ) => {
+    ) {
         const existing = candidates.get(canonical)
         if (!existing) {
             candidates.set(canonical, {
@@ -181,7 +181,7 @@ const collectConstantCandidates = (
         const runStats = new Map<string, { count: number; items: PlanValue[] }>()
         const collectionOrder: string[] = []
 
-        const visitArray = (items: PlanValue[]) => {
+        function visitArray(items: PlanValue[]) {
             for (const item of items) {
                 if (item.kind === 'object') {
                     for (const [, entryItems] of item.entries) {
@@ -267,25 +267,29 @@ const collectConstantCandidates = (
 }
 
 /** `color` → `scaleColor`, `font-weight` → `scaleFontWeight`. Theme keys are unique, so the derived names are too; the `scale` prefix avoids collisions with destructured validator names. */
-const scaleConstName = (themeKey: string): string =>
-    `scale${themeKey
+function scaleConstName(themeKey: string): string {
+    return `scale${themeKey
         .split('-')
         .map((segment) => `${segment[0]?.toUpperCase() ?? ''}${segment.slice(1)}`)
         .join('')}`
+}
 
 /** Hoisting replaces `count` inline copies with references plus one declaration. */
-const hoistingPaysOff = (canonicalLength: number, count: number): boolean =>
-    count >= 2 && count * (canonicalLength - NAME_LENGTH) - (canonicalLength + 20) > 0
+function hoistingPaysOff(canonicalLength: number, count: number): boolean {
+    return count >= 2 && count * (canonicalLength - NAME_LENGTH) - (canonicalLength + 20) > 0
+}
 
 /** Spreads pay a `...` on top of the reference at every use site. */
-const spreadingPaysOff = (canonicalLength: number, count: number): boolean =>
-    count >= 3 && count * (canonicalLength - NAME_LENGTH - 4) - (canonicalLength + 20) > 0
+function spreadingPaysOff(canonicalLength: number, count: number): boolean {
+    return count >= 3 && count * (canonicalLength - NAME_LENGTH - 4) - (canonicalLength + 20) > 0
+}
 
-const provisionalNames = (candidates: CandidateMap): Map<string, string> =>
-    new Map([...candidates.keys()].map((canonical, index) => [canonical, `scale${index}`]))
+function provisionalNames(candidates: CandidateMap): Map<string, string> {
+    return new Map([...candidates.keys()].map((canonical, index) => [canonical, `scale${index}`]))
+}
 
 /** Names the used consts: theme scales get their semantic name (`scaleColor`), everything else positional numbering. Numeric names cannot collide with semantic ones, so uniqueness only needs the taken-set check. */
-const assignNames = (candidates: CandidateMap, usedCanonicals: Set<string>): Map<string, string> => {
+function assignNames(candidates: CandidateMap, usedCanonicals: Set<string>): Map<string, string> {
     const names = new Map<string, string>()
     const takenNames = new Set<string>()
     let positionalIndex = 0
@@ -308,11 +312,11 @@ const assignNames = (candidates: CandidateMap, usedCanonicals: Set<string>): Map
 /**
  * Serializes the config body and every candidate's body with the given name map, recording which candidates each output references so usage can be resolved before final naming.
  */
-const serializeAll = (
+function serializeAll(
     plan: ConfigPlan,
     candidates: CandidateMap,
     names: Map<string, string>,
-): SerializedOutput => {
+): SerializedOutput {
     const directUsage = new Set<string>()
     const usageByConstant = new Map<string, Set<string>>()
 
@@ -380,7 +384,7 @@ const serializeAll = (
 }
 
 /** Usage is transitive: a const referenced only from another used const's body still has to be emitted. */
-const resolveTransitiveUsage = (candidates: CandidateMap, output: SerializedOutput): Set<string> => {
+function resolveTransitiveUsage(candidates: CandidateMap, output: SerializedOutput): Set<string> {
     const used = new Set<string>(output.directUsage)
     let changed = true
 
@@ -400,11 +404,13 @@ const resolveTransitiveUsage = (candidates: CandidateMap, output: SerializedOutp
 }
 
 /** Orders consts so that every reference points to an already-declared name, using the exact usage sets recorded during serialization. Containment makes cycles impossible. */
-const sortByDependencies = (
+function sortByDependencies(
     output: SerializedOutput,
     names: Map<string, string>,
-): [string, string][] => {
-    const remaining = new Map([...output.constantBodies].filter(([canonical]) => names.has(canonical)))
+): [string, string][] {
+    const remaining = new Map(
+        [...output.constantBodies].filter(([canonical]) => names.has(canonical)),
+    )
     const declared = new Set<string>()
     const sorted: [string, string][] = []
 
@@ -439,7 +445,7 @@ interface SerializeContext {
     selfCanonical: string | null
 }
 
-const serializeArray = (items: PlanValue[], indent: number, context: SerializeContext): string => {
+function serializeArray(items: PlanValue[], indent: number, context: SerializeContext): string {
     const canonical = canonicalArray(items)
     if (canonical !== context.selfCanonical) {
         const name = context.names.get(canonical)
@@ -451,11 +457,11 @@ const serializeArray = (items: PlanValue[], indent: number, context: SerializeCo
     return serializeArrayBody(items, indent, context)
 }
 
-const serializeArrayBody = (
+function serializeArrayBody(
     items: PlanValue[],
     indent: number,
     context: SerializeContext,
-): string => {
+): string {
     const itemCanonicals = items.map(canonicalValue)
     const parts: string[] = []
 
@@ -483,12 +489,12 @@ const serializeArrayBody = (
 }
 
 /** Finds the longest candidate array matching the items starting at `start`, to be emitted as a spread. Skips the candidate currently being defined and full-array matches (those are handled as plain references). */
-const findLongestRun = (
+function findLongestRun(
     items: PlanValue[],
     itemCanonicals: string[],
     start: number,
     context: SerializeContext,
-): { name: string; canonical: string; length: number } | null => {
+): { name: string; canonical: string; length: number } | null {
     let best: { name: string; canonical: string; length: number } | null = null
 
     for (const [canonical, candidate] of context.candidates) {
@@ -528,7 +534,7 @@ const findLongestRun = (
     return best
 }
 
-const serializeValue = (value: PlanValue, indent: number, context: SerializeContext): string => {
+function serializeValue(value: PlanValue, indent: number, context: SerializeContext): string {
     if (value.kind === 'class') {
         return quote(value.value)
     }
@@ -547,11 +553,11 @@ const serializeValue = (value: PlanValue, indent: number, context: SerializeCont
     return serializeObjectBody(value, indent, context)
 }
 
-const serializeObjectBody = (
+function serializeObjectBody(
     value: Extract<PlanValue, { kind: 'object' }>,
     indent: number,
     context: SerializeContext,
-): string => {
+): string {
     const entryParts = value.entries.map(
         ([key, items]) => `${propertyKey(key)}: ${serializeArray(items, indent + 4, context)}`,
     )
@@ -569,7 +575,7 @@ const serializeObjectBody = (
 /**
  * Canonical string form used as identity for sharing decisions: fully inlined, ignoring shared consts and line breaks, so identical content always produces identical keys. Cached by node identity since plans reuse instances for repeated scales.
  */
-const canonicalArray = (items: PlanValue[]): string => {
+function canonicalArray(items: PlanValue[]): string {
     let canonical = canonicalArrayCache.get(items)
     if (!canonical) {
         canonical = `[${items.map(canonicalValue).join(', ')}]`
@@ -578,7 +584,7 @@ const canonicalArray = (items: PlanValue[]): string => {
     return canonical
 }
 
-const canonicalValue = (value: PlanValue): string => {
+function canonicalValue(value: PlanValue): string {
     if (value.kind === 'class') {
         return quote(value.value)
     }
@@ -598,7 +604,7 @@ const canonicalValue = (value: PlanValue): string => {
 const canonicalArrayCache = new WeakMap<PlanValue[], string>()
 const canonicalObjectCache = new WeakMap<Extract<PlanValue, { kind: 'object' }>, string>()
 
-const pushStringRecordMap = (lines: string[], property: string, map: Map<string, string[]>) => {
+function pushStringRecordMap(lines: string[], property: string, map: Map<string, string[]>) {
     lines.push(`${INDENT}${INDENT}${property}: {`)
     for (const [key, values] of map) {
         lines.push(`${INDENT.repeat(3)}${propertyKey(key)}: ${serializeStringArray(values)},`)
@@ -606,10 +612,14 @@ const pushStringRecordMap = (lines: string[], property: string, map: Map<string,
     lines.push(`${INDENT}${INDENT}},`)
 }
 
-const serializeStringArray = (values: readonly string[]): string =>
-    `[${values.map(quote).join(', ')}]`
+function serializeStringArray(values: readonly string[]): string {
+    return `[${values.map(quote).join(', ')}]`
+}
 
-const propertyKey = (key: string): string =>
-    /^[A-Za-z_$][A-Za-z0-9_$]*$/.test(key) ? key : quote(key)
+function propertyKey(key: string): string {
+    return /^[A-Za-z_$][A-Za-z0-9_$]*$/.test(key) ? key : quote(key)
+}
 
-const quote = (value: string): string => `'${value.replaceAll('\\', '\\\\').replaceAll("'", "\\'")}'`
+function quote(value: string): string {
+    return `'${value.replaceAll('\\', '\\\\').replaceAll("'", "\\'")}'`
+}

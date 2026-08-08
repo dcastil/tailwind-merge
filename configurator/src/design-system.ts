@@ -20,10 +20,10 @@ export interface LoadDesignSystemsOptions {
 /**
  * Loads the project's design system alongside a vanilla one resolved from the same base directory (and therefore the same Tailwind installation and version). The vanilla system is the reference for diffing which classes the project's theme created and for classifying them — comparisons are only meaningful when both sides come from the identical compiler.
  */
-export const loadDesignSystems = async ({
-    css,
-    base,
-}: LoadDesignSystemsOptions): Promise<{ project: DesignSystemAccess; vanilla: DesignSystemAccess }> => {
+export async function loadDesignSystems({ css, base }: LoadDesignSystemsOptions): Promise<{
+    project: DesignSystemAccess
+    vanilla: DesignSystemAccess
+}> {
     const [project, vanilla] = await Promise.all([
         __unstable__loadDesignSystem(css, { base }),
         __unstable__loadDesignSystem("@import 'tailwindcss';", { base }),
@@ -38,10 +38,10 @@ export const loadDesignSystems = async ({
 /**
  * Compiles a class through Tailwind and returns the set of CSS properties (custom properties included) it declares, or null when the class produces no CSS. `@property` registrations are stripped first: composable utilities share them without conflicting, so they are noise for conflict semantics. This is the same signature the test oracle uses to decide whether two classes conflict, which is exactly why group classification uses it too.
  */
-export const declaredProperties = (
+export function declaredProperties(
     designSystem: DesignSystemAccess,
     className: string,
-): Set<string> | null => {
+): Set<string> | null {
     let cache = declaredPropertiesCache.get(designSystem)
     if (!cache) {
         cache = new Map()
@@ -69,5 +69,6 @@ export const declaredProperties = (
 const declaredPropertiesCache = new WeakMap<DesignSystemAccess, Map<string, Set<string> | null>>()
 
 /** Set equality over property names — the strict form of "these classes set the same things". */
-export const havePropertiesEqual = (first: Set<string>, second: Set<string>): boolean =>
-    first.size === second.size && [...first].every((property) => second.has(property))
+export function havePropertiesEqual(first: Set<string>, second: Set<string>): boolean {
+    return first.size === second.size && [...first].every((property) => second.has(property))
+}
