@@ -18,6 +18,7 @@ This file is a practical map for agent-driven changes in this repo.
 4. `createClassGroupUtils` in `src/lib/class-group-utils.ts`:
    - compiles class definitions into a recursive map + validator list,
    - maps class names to class group IDs,
+   - assigns arbitrary properties (`[key:value]`) synthetic group IDs prefixed with `ARBITRARY_PROPERTY_PREFIX` (e.g. `arbitrary..key`) so distinct properties conflict independently,
    - returns conflicting groups, including postfix-modifier conflicts.
 5. `createParseClassName` in `src/lib/parse-class-name.ts`:
    - parses stacked modifiers with bracket/paren depth tracking,
@@ -26,6 +27,15 @@ This file is a practical map for agent-driven changes in this repo.
 6. `createSortModifiers` in `src/lib/sort-modifiers.ts`:
    - alphabetically sorts non-sensitive modifiers,
    - preserves placement around arbitrary/order-sensitive modifiers.
+
+## Performance constraints in hot-path code
+
+The hot paths are `src/lib/merge-classlist.ts` and `src/lib/class-group-utils.ts`; `src/lib/parse-class-name.ts` runs per class on cache misses. When editing these files, preserve the existing V8-oriented patterns:
+
+- Keep call sites monomorphic: functions are deliberately split per input type (see the `create*` factories and the "monomorphic" comments in `class-group-utils.ts` and `parse-class-name.ts`); do not merge them back into one polymorphic function.
+- Keep object shapes consistent: always define optional properties explicitly (as `undefined`/`null`) so objects created in different branches share a hidden class; result objects are built through factory functions for this reason.
+- Pre-allocate arrays where the final length is known (see `concatArrays` in `src/lib/utils.ts`) instead of spreading or pushing, and return shared constants like `EMPTY_CONFLICTS` instead of fresh empty arrays.
+- Avoid adding function calls or allocations in hot loops when an inline check works.
 
 ## Files to edit by intent
 
@@ -67,6 +77,8 @@ This file is a practical map for agent-driven changes in this repo.
 - `tests/docs-examples.test.ts` enforces that documented `twMerge(...) // -> ...` examples stay correct.
 - `tests/public-api.test.ts` guards runtime exports and broad type usage.
 - `tests/tw-merge.benchmark.ts` is for performance benchmarking (`pnpm bench`), not correctness gating in CI.
+
+Run a single test file or test by name with Vitest's filter syntax: `pnpm test:watch tests/modifiers.test.ts` or `pnpm test:watch -t "test name pattern"`.
 
 Recommended local sequence for non-trivial changes:
 1. `pnpm lint`
