@@ -203,6 +203,7 @@ In the Tailwind config you can modify your theme variable namespace to add class
 | `--radius-*`           | `radius`                 |
 | `--shadow-*`           | `shadow`                 |
 | `--inset-shadow-*`     | `inset-shadow`           |
+| `--text-shadow-*`      | `text-shadow`            |
 | `--drop-shadow-*`      | `drop-shadow`            |
 | `--blur-*`             | `blur`                   |
 | `--perspective-*`      | `perspective`            |
