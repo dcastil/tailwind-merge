@@ -1,6 +1,4 @@
-import { getDefaultConfig } from '../../src'
-import { createClassGroupUtils } from '../../src/lib/class-group-utils'
-import { AnyConfig } from '../../src/lib/types'
+import { AnyConfig, createClassGroupUtils, getDefaultConfig } from 'tailwind-merge'
 
 import { buildAugmentations } from './augment'
 import { buildCustomUtilityGroups } from './custom-utilities'

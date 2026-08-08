@@ -1,4 +1,4 @@
-import { validators } from '../../src'
+import { validators } from 'tailwind-merge'
 
 import { PlanValue, ValidatorName } from './plan'
 

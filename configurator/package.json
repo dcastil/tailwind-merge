@@ -9,12 +9,15 @@
     "scripts": {
         "test:types": "tsc --noEmit"
     },
-    "dependencies": {
+    "peerDependencies": {
         "@tailwindcss/node": "^4.3.3",
-        "tailwind-merge": "workspace:*",
+        "tailwind-merge": "^3.7.0",
         "tailwindcss": "^4.3.3"
     },
     "devDependencies": {
-        "@types/node": "^24.13.3"
+        "@tailwindcss/node": "^4.3.3",
+        "@types/node": "^24.13.3",
+        "tailwind-merge": "workspace:*",
+        "tailwindcss": "^4.3.3"
     }
 }

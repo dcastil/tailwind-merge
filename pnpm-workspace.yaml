@@ -6,5 +6,10 @@ packages:
 minimumReleaseAge: 4320
 minimumReleaseAgeStrict: true
 
+# The configurator's peer range names the first tailwind-merge release that ships the APIs it needs (themeKey on theme getters, createClassGroupUtils). The workspace runs the unreleased source, which already includes them, so the version-number mismatch is expected until that release.
+peerDependencyRules:
+  allowedVersions:
+    'tailwind-merge-configurator>tailwind-merge': '>=3.6.0'
+
 allowBuilds:
   esbuild: true

@@ -1,8 +1,8 @@
 import { fileURLToPath } from 'node:url'
 
 import { describe, expect, test } from 'vitest'
+import { createTailwindMerge, twMerge as defaultTwMerge } from 'tailwind-merge'
 
-import { createTailwindMerge, twMerge as defaultTwMerge } from '../../src'
 import { generate } from '../src'
 import { loadDesignSystems } from '../src/design-system'
 
