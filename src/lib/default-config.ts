@@ -1029,6 +1029,7 @@ export const getDefaultConfig = () => {
             leading: [
                 {
                     leading: [
+                        'none',
                         /** Deprecated since Tailwind CSS v4.0.0. @see https://github.com/tailwindlabs/tailwindcss.com/issues/2027#issuecomment-2620152757 */
                         themeLeading,
                         ...scaleUnambiguousSpacing(),
