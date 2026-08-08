@@ -20,8 +20,8 @@ export interface ConfigPlan {
     cacheSize: number
     prefix: string | null
     classGroups: Map<string, PlanValue[]>
-    /** Resolved scale items per theme key. Group arrays contain these as contiguous runs (theme getters are spliced in place), so the emitter can reuse them as spreadable shared consts. */
-    scales: Map<string, PlanValue[]>
+    /** Resolved scales per theme key. Group arrays contain the items as contiguous runs (theme getters are spliced in place), so the emitter can reuse them as spreadable shared consts, named and documented per theme key. */
+    scales: Map<string, ScalePlan>
     conflictingClassGroups: Map<string, string[]>
     conflictingClassGroupModifiers: Map<string, string[]>
     postfixLookupClassGroups: string[]
@@ -34,6 +34,12 @@ export interface PlanReport {
     scaleStrategies: Record<string, string>
     /** Class groups dropped because the theme disables everything they could match, e.g. after a namespace reset. Their conflict map entries are dropped with them. */
     prunedClassGroups: string[]
+}
+
+export interface ScalePlan {
+    items: PlanValue[]
+    /** Human explanation of the scale's provenance and encoding, emitted as a JSDoc comment on the shared const. */
+    comment: string
 }
 
 export interface BuildPlanOptions {
@@ -112,7 +118,10 @@ export const buildPlan = ({ snapshot, cacheSize }: BuildPlanOptions): ConfigPlan
         prefix: snapshot.prefix,
         classGroups,
         scales: new Map(
-            [...scaleEncodings].map(([themeKey, encoding]) => [themeKey, encoding.items]),
+            [...scaleEncodings].map(([themeKey, encoding]) => [
+                themeKey,
+                { items: encoding.items, comment: describeScale(themeKey, encoding.strategy) },
+            ]),
         ),
         conflictingClassGroups: filterConflictMap(skeleton.conflictingClassGroups, classGroups),
         conflictingClassGroupModifiers: filterConflictMap(
@@ -209,6 +218,34 @@ const createThemeKeyResolver = (themeKeys: string[]) => {
         }
         return themeKey
     }
+}
+
+/**
+ * Explains where a scale's values come from and why they are encoded the way they are, so the generated file stays debuggable without readers having to know the compression policy. Derived from the encoding strategy instead of restating the values, which the code right below the comment already shows.
+ */
+const describeScale = (themeKey: string, strategy: string): string => {
+    const namespace = `\`--${themeKey}-*\``
+
+    if (themeKey === 'spacing' && strategy.startsWith('multiplier')) {
+        const base = `The bare \`--spacing\` multiplier is set, which makes every number a valid spacing value (e.g. p-13).`
+        return strategy === 'multiplier' ? base : `Named ${namespace} theme values. ${base}`
+    }
+
+    const prefix =
+        themeKey === 'color'
+            ? `Color keywords plus the ${namespace} theme values`
+            : `The ${namespace} theme values`
+
+    if (strategy === 'families') {
+        return `${prefix}, with families sharing numeric suffixes compressed into nested matchers.`
+    }
+    if (strategy.startsWith('validator:')) {
+        return `${prefix}, all matching \`${strategy.slice('validator:'.length)}\`.`
+    }
+    if (strategy.startsWith('mixed:')) {
+        return `${prefix}: enumerated outliers plus the \`${strategy.slice('mixed:'.length)}\` pattern covering the rest.`
+    }
+    return `${prefix}.`
 }
 
 const validatorNames = new Map<unknown, ValidatorName>(
