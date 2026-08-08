@@ -1533,6 +1533,8 @@ export const getDefaultConfig = () => {
                     shadow: [
                         // Deprecated since Tailwind CSS v4.0.0
                         '',
+                        // Deprecated since Tailwind CSS v4.0.0
+                        'inner',
                         'none',
                         themeShadow,
                         isArbitraryVariableShadow,
