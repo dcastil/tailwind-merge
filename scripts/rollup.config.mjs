@@ -35,6 +35,8 @@ const babelLooseAssumptions = {
     superIsCallableConstructor: true,
 }
 
+const modernTargets = '> 0.5%, last 2 versions, Firefox ESR, not dead, maintained node versions'
+
 export default defineConfig([
     // Default entry point
     {
@@ -43,12 +45,12 @@ export default defineConfig([
             getOutputConfig({
                 file: pkg.exports['.'].import,
                 format: 'esm',
-                targets: '> 0.5%, last 2 versions, Firefox ESR, not dead, maintained node versions',
+                targets: modernTargets,
             }),
             getOutputConfig({
                 file: pkg.exports['.'].require,
                 format: 'cjs',
-                targets: '> 0.5%, last 2 versions, Firefox ESR, not dead, maintained node versions',
+                targets: modernTargets,
             }),
         ],
         external: /node_modules/,
@@ -94,6 +96,32 @@ export default defineConfig([
         ],
     },
 
+    // Unstable entry point for tooling built on tailwind-merge internals. Same modern targets as the default entry point; no es5 variant since it isn't meant for application bundles (see docs/versioning.md).
+    {
+        input: 'src/unstable-do-not-import.ts',
+        output: [
+            getOutputConfig({
+                file: pkg.exports['./unstable-do-not-import'].import,
+                format: 'esm',
+                targets: modernTargets,
+            }),
+            getOutputConfig({
+                file: pkg.exports['./unstable-do-not-import'].require,
+                format: 'cjs',
+                targets: modernTargets,
+            }),
+        ],
+        external: /node_modules/,
+        plugins: [
+            nodeResolve(),
+            typescript({
+                compilerOptions: {
+                    outDir: path.dirname(pkg.exports['./unstable-do-not-import'].import),
+                },
+            }),
+        ],
+    },
+
     // Type declarations of default and es5 entry points
     {
         input: 'dist/index.d.ts',
@@ -101,10 +129,20 @@ export default defineConfig([
             file: pkg.exports['.'].types,
             format: 'esm',
         },
+        plugins: [dts()],
+    },
+
+    // Type declarations of the unstable entry point. Also cleans up the intermediate declaration files, which must happen after every dts bundle above is built from them.
+    {
+        input: 'dist/unstable-do-not-import.d.ts',
+        output: {
+            file: pkg.exports['./unstable-do-not-import'].types,
+            format: 'esm',
+        },
         plugins: [
             dts(),
             del({
-                targets: ['dist/lib', 'dist/index.d.ts'],
+                targets: ['dist/lib', 'dist/index.d.ts', 'dist/unstable-do-not-import.d.ts'],
                 hook: 'buildEnd',
                 runOnce: true,
             }),

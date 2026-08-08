@@ -1,4 +1,5 @@
-import { AnyConfig, ClassGroup, validators } from 'tailwind-merge'
+import { validators } from 'tailwind-merge'
+import { AnyConfig, ClassGroup } from 'tailwind-merge/unstable-do-not-import'
 
 import { ConfigPlan, PlanValue } from './plan'
 

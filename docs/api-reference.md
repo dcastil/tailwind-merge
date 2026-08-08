@@ -304,19 +304,6 @@ const twMerge = createTailwindMerge(getDefaultConfig, (config) =>
 )
 ```
 
-## `createClassGroupUtils`
-
-```ts
-function createClassGroupUtils(config: AnyConfig): {
-    getClassGroupId(className: string): string | undefined
-    getConflictingClassGroupIds(classGroupId: string, hasPostfixModifier: boolean): readonly string[]
-}
-```
-
-Advanced function that builds the class classification utilities tailwind-merge uses internally from a config: `getClassGroupId` returns the ID of the class group a base class name (without modifiers) belongs to, or `undefined` for classes the config doesn't know, and `getConflictingClassGroupIds` returns the IDs of class groups that a class group removes when it appears later in the input.
-
-This is primarily meant for tooling that needs to inspect how a config classifies classes, like config generators or debugging utilities. Note that it computes a large data structure on every call, so you should call it once and reuse the returned functions.
-
 ## `validators`
 
 ```ts
@@ -473,34 +460,6 @@ type ClassValidator = (value: string) => boolean
 ```
 
 TypeScript type for class validators accepted in class definitions within [`extendTailwindMerge`](#extendtailwindmerge) and [`createTailwindMerge`](#createtailwindmerge).
-
-## `AnyConfig`
-
-```ts
-type AnyConfig = Config<string, string>
-```
-
-TypeScript type for a config object with arbitrary class group and theme group IDs. Useful for code that processes configs generically, like functions accepting any config as an argument.
-
-## `ClassGroup`
-
-```ts
-type ClassGroup<ThemeGroupIds extends string> = readonly ClassDefinition<ThemeGroupIds>[]
-```
-
-TypeScript type for a single class group within the `classGroups` object of the [`Config`](#config) type: an array of class name parts, [validators](#classvalidator), [theme getters](#fromtheme) and nested objects.
-
-## `ThemeGetter`
-
-```ts
-interface ThemeGetter {
-    (theme: ThemeObject): ClassGroup
-    isThemeGetter: true
-    themeKey?: string
-}
-```
-
-TypeScript type for the functions returned by [`fromTheme`](#fromtheme). The `themeKey` property is present on getters created with `fromTheme` and names the theme scale the getter reads.
 
 ---
 

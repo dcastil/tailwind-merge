@@ -1,11 +1,13 @@
 import assert from 'assert'
 
 // Not ideal, but there seems to be no way to point the import resolver to the package.json file if this isn't a npm package.
-import { twMerge } from '../dist/bundle-mjs.mjs'
+import { getDefaultConfig, twMerge } from '../dist/bundle-mjs.mjs'
 import { twMerge as twMergeEs5 } from '../dist/es5/bundle-mjs.mjs'
+import { createClassGroupUtils } from '../dist/unstable-mjs.mjs'
 
 assertBuiltTwMerge(twMerge)
 assertBuiltTwMerge(twMergeEs5)
+assert(createClassGroupUtils(getDefaultConfig()).getClassGroupId('bg-red-500') === 'bg-color')
 
 console.log('[tailwind-merge] Tests for built ESM package exports and ES5 bundle passed.')
 
