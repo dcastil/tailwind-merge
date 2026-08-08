@@ -86,6 +86,10 @@ test('supports Tailwind CSS v4.0 features', () => {
     expect(twMerge('via-red-500 via-(length:--mobile-header-gradient)')).toBe(
         'via-red-500 via-(length:--mobile-header-gradient)',
     )
+    // shadow-inner is deprecated in v4 but still sets --tw-shadow, so it conflicts with other shadow utilities and not with shadow color utilities
+    expect(twMerge('shadow-inner shadow-lg')).toBe('shadow-lg')
+    expect(twMerge('shadow-lg shadow-inner')).toBe('shadow-inner')
+    expect(twMerge('shadow-initial shadow-inner')).toBe('shadow-initial shadow-inner')
 })
 
 test('supports Tailwind CSS v4.1 features', () => {
