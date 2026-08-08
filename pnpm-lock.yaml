@@ -103,20 +103,19 @@ importers:
         version: 4.62.3
 
   configurator:
-    dependencies:
+    devDependencies:
       '@tailwindcss/node':
         specifier: ^4.3.3
         version: 4.3.3
+      '@types/node':
+        specifier: ^24.13.3
+        version: 24.13.3
       tailwind-merge:
         specifier: workspace:*
         version: link:..
       tailwindcss:
         specifier: ^4.3.3
         version: 4.3.3
-    devDependencies:
-      '@types/node':
-        specifier: ^24.13.3
-        version: 24.13.3
 
 packages:
 

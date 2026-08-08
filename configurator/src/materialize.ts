@@ -1,5 +1,4 @@
-import { validators } from '../../src'
-import { AnyConfig, ClassGroup } from '../../src/lib/types'
+import { AnyConfig, ClassGroup, validators } from 'tailwind-merge'
 
 import { ConfigPlan, PlanValue } from './plan'
 

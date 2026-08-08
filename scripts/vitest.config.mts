@@ -1,11 +1,19 @@
 /// <reference types="vitest" />
 
+import { fileURLToPath } from 'node:url'
+
 import codspeedPlugin from '@codspeed/vitest-plugin'
 import { defineConfig } from 'vitest/config'
 
 export default defineConfig({
     // When Codspeed plugin is enabled, benchmark results don't get logged. More info: https://github.com/CodSpeedHQ/codspeed-node/issues/36
     plugins: process.env.CI ? [codspeedPlugin()] : undefined,
+    resolve: {
+        // Resolves the package name to the library source so the configurator workspace package, whose dependency on tailwind-merge goes through package.json like any consumer's, can be tested without building dist/ first. Mirrors the paths mapping in configurator/tsconfig.json, which does the same for types.
+        alias: {
+            'tailwind-merge': fileURLToPath(new URL('../src/index.ts', import.meta.url)),
+        },
+    },
     test: {
         coverage: {
             include: ['src/**/*.ts'],

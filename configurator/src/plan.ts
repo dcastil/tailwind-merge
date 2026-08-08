@@ -1,5 +1,4 @@
-import { getDefaultConfig, validators } from '../../src'
-import { ClassGroup, ThemeGetter } from '../../src/lib/types'
+import { ClassGroup, ThemeGetter, getDefaultConfig, validators } from 'tailwind-merge'
 
 import { ScaleEncoding, encodeScale } from './compress'
 import { ThemeSnapshot } from './snapshot'
@@ -66,7 +65,6 @@ export interface BuildPlanOptions {
  */
 export function buildPlan({ snapshot, cacheSize }: BuildPlanOptions): ConfigPlan {
     const skeleton = getDefaultConfig()
-    const resolveThemeKey = createThemeKeyResolver(Object.keys(skeleton.theme))
     const scaleEncodings = new Map<string, ScaleEncoding>()
 
     function resolveScale(themeKey: string): ScaleEncoding {
@@ -89,7 +87,13 @@ export function buildPlan({ snapshot, cacheSize }: BuildPlanOptions): ConfigPlan
 
         if (typeof definition === 'function') {
             if (isThemeGetter(definition)) {
-                return resolveScale(resolveThemeKey(definition)).items
+                if (definition.themeKey === undefined) {
+                    // fromTheme sets themeKey on every getter it creates; absence means an unsupported tailwind-merge version (see the peerDependencies range).
+                    throw new Error(
+                        'Theme getter without a themeKey property — the configurator requires a tailwind-merge version that exposes it',
+                    )
+                }
+                return resolveScale(definition.themeKey).items
             }
 
             const name = validatorNames.get(definition)
@@ -311,28 +315,6 @@ function encodeThemeScale(themeKey: string, snapshot: ThemeSnapshot): ScaleEncod
     }
 
     return encodeScale(names)
-}
-
-/**
- * Identifies which theme key a theme getter refers to by calling it with a probe theme whose values are unique markers. The key is not exposed on the getter itself, so this observes it through the getter's only behavior.
- */
-function createThemeKeyResolver(themeKeys: string[]) {
-    const markerToKey = new Map<unknown, string>()
-    const probeTheme: Record<string, ClassGroup<string>> = {}
-
-    for (const themeKey of themeKeys) {
-        const marker: ClassGroup<string> = []
-        markerToKey.set(marker, themeKey)
-        probeTheme[themeKey] = marker
-    }
-
-    return (themeGetter: ThemeGetter): string => {
-        const themeKey = markerToKey.get(themeGetter(probeTheme))
-        if (!themeKey) {
-            throw new Error('Theme getter in default config refers to an unknown theme key')
-        }
-        return themeKey
-    }
 }
 
 /**
