@@ -20,6 +20,8 @@ export interface ConfigPlan {
     cacheSize: number
     prefix: string | null
     classGroups: Map<string, PlanValue[]>
+    /** Resolved scale items per theme key. Group arrays contain these as contiguous runs (theme getters are spliced in place), so the emitter can reuse them as spreadable shared consts. */
+    scales: Map<string, PlanValue[]>
     conflictingClassGroups: Map<string, string[]>
     conflictingClassGroupModifiers: Map<string, string[]>
     postfixLookupClassGroups: string[]
@@ -109,6 +111,9 @@ export const buildPlan = ({ snapshot, cacheSize }: BuildPlanOptions): ConfigPlan
         cacheSize: cacheSize ?? skeleton.cacheSize,
         prefix: snapshot.prefix,
         classGroups,
+        scales: new Map(
+            [...scaleEncodings].map(([themeKey, encoding]) => [themeKey, encoding.items]),
+        ),
         conflictingClassGroups: filterConflictMap(skeleton.conflictingClassGroups, classGroups),
         conflictingClassGroupModifiers: filterConflictMap(
             skeleton.conflictingClassGroupModifiers,
