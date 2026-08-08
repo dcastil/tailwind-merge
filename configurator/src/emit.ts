@@ -25,11 +25,7 @@ export const emitModule = (plan: ConfigPlan, options: EmitOptions = {}): string 
     // First pass with every candidate available determines which consts are actually referenced (directly from the config or transitively from other used consts). The second pass re-serializes with final sequential names for just the used ones, so decisions are identical and numbering has no gaps.
     const firstPass = serializeAll(plan, candidates, provisionalNames(candidates))
     const usedCanonicals = resolveTransitiveUsage(candidates, firstPass)
-    const finalNames = new Map(
-        [...candidates.keys()]
-            .filter((canonical) => usedCanonicals.has(canonical))
-            .map((canonical, index) => [canonical, `scale${index}`]),
-    )
+    const finalNames = assignNames(candidates, usedCanonicals)
     const secondPass = serializeAll(plan, candidates, finalNames)
     const { configBody, constantBodies } = secondPass
 
@@ -45,17 +41,32 @@ export const emitModule = (plan: ConfigPlan, options: EmitOptions = {}): string 
     lines.push(
         ' * Builds the tailwind-merge config for this project. Called lazily on the first `twMerge` call. Can be composed further via `createTailwindMerge(getConfig, ...extensions)`.',
     )
+    lines.push(' *')
+    lines.push(
+        " * The structure mirrors tailwind-merge's default config. The `scale*` consts hold this project's resolved theme scales — each one's comment says which theme namespace it came from — and class groups use them by reference or as spreads. Patterns like `isTshirtSize` come from tailwind-merge's public validators.",
+    )
     lines.push(' */')
     lines.push('export const getConfig = () => {')
 
     // Validators are referenced as bare identifiers instead of `v.name` property accesses: property names survive minification while local bindings get mangled to single characters, and validator references are among the most repeated tokens in the config.
     const usedValidators = collectUsedValidatorNames(plan)
     if (usedValidators.length > 0) {
-        lines.push(`${INDENT}const { ${usedValidators.join(', ')} } = v`)
+        const inline = `${INDENT}const { ${usedValidators.join(', ')} } = v`
+        if (inline.length <= MAX_LINE_LENGTH) {
+            lines.push(inline)
+        } else {
+            lines.push(`${INDENT}const {`)
+            lines.push(...usedValidators.map((name) => `${INDENT}${INDENT}${name},`))
+            lines.push(`${INDENT}} = v`)
+        }
         lines.push('')
     }
 
     for (const [canonical, body] of sortByDependencies(secondPass, finalNames)) {
+        const comment = candidates.get(canonical)?.comment
+        if (comment) {
+            lines.push(`${INDENT}/** ${comment} */`)
+        }
         lines.push(`${INDENT}const ${finalNames.get(canonical)} = ${body}`)
     }
     if (constantBodies.size > 0) {
@@ -104,6 +115,10 @@ interface ConstantCandidate {
     node: PlanValue[] | Extract<PlanValue, { kind: 'object' }>
     /** Item-wise canonical forms for arrays, used for run matching. */
     itemCanonicals: string[] | null
+    /** Semantic const name, set for theme scales (e.g. `scaleColor`). Falls back to positional naming when absent or already taken. */
+    preferredName: string | null
+    /** JSDoc text emitted above the const declaration. Stripped by minifiers, so it costs nothing in production bundles. */
+    comment: string | null
 }
 
 type CandidateMap = Map<string, ConstantCandidate>
@@ -130,13 +145,27 @@ const collectConstantCandidates = (
         return candidates
     }
 
-    const addArrayCandidate = (canonical: string, items: PlanValue[]) => {
-        if (!candidates.has(canonical)) {
+    const addArrayCandidate = (
+        canonical: string,
+        items: PlanValue[],
+        preferredName: string | null = null,
+        comment: string | null = null,
+    ) => {
+        const existing = candidates.get(canonical)
+        if (!existing) {
             candidates.set(canonical, {
                 kind: 'array',
                 node: items,
                 itemCanonicals: items.map(canonicalValue),
+                preferredName,
+                comment,
             })
+        } else if (existing.preferredName === null) {
+            existing.preferredName = preferredName
+            existing.comment = comment
+        } else if (comment !== null) {
+            // Two theme scales resolved to identical content and share one const; the comment must mention both origins.
+            existing.comment = `${existing.comment ?? ''} ${comment}`.trim()
         }
     }
 
@@ -206,6 +235,8 @@ const collectConstantCandidates = (
                     kind: 'object',
                     node: object.node,
                     itemCanonicals: null,
+                    preferredName: null,
+                    comment: null,
                 })
             }
         }
@@ -218,14 +249,26 @@ const collectConstantCandidates = (
     }
 
     // Theme scales are prime spread targets — group arrays contain them verbatim wherever a theme getter was substituted.
-    for (const [, items] of plan.scales) {
-        if (items.length >= 2) {
-            addArrayCandidate(canonicalArray(items), items)
+    for (const [themeKey, scale] of plan.scales) {
+        if (scale.items.length >= 2) {
+            addArrayCandidate(
+                canonicalArray(scale.items),
+                scale.items,
+                scaleConstName(themeKey),
+                scale.comment,
+            )
         }
     }
 
     return candidates
 }
+
+/** `color` → `scaleColor`, `font-weight` → `scaleFontWeight`. Theme keys are unique, so the derived names are too; the `scale` prefix avoids collisions with destructured validator names. */
+const scaleConstName = (themeKey: string): string =>
+    `scale${themeKey
+        .split('-')
+        .map((segment) => `${segment[0]?.toUpperCase() ?? ''}${segment.slice(1)}`)
+        .join('')}`
 
 /** Hoisting replaces `count` inline copies with references plus one declaration. */
 const hoistingPaysOff = (canonicalLength: number, count: number): boolean =>
@@ -237,6 +280,27 @@ const spreadingPaysOff = (canonicalLength: number, count: number): boolean =>
 
 const provisionalNames = (candidates: CandidateMap): Map<string, string> =>
     new Map([...candidates.keys()].map((canonical, index) => [canonical, `scale${index}`]))
+
+/** Names the used consts: theme scales get their semantic name (`scaleColor`), everything else positional numbering. Numeric names cannot collide with semantic ones, so uniqueness only needs the taken-set check. */
+const assignNames = (candidates: CandidateMap, usedCanonicals: Set<string>): Map<string, string> => {
+    const names = new Map<string, string>()
+    const takenNames = new Set<string>()
+    let positionalIndex = 0
+
+    for (const [canonical, candidate] of candidates) {
+        if (!usedCanonicals.has(canonical)) {
+            continue
+        }
+        const name =
+            candidate.preferredName !== null && !takenNames.has(candidate.preferredName)
+                ? candidate.preferredName
+                : `scale${positionalIndex++}`
+        takenNames.add(name)
+        names.set(canonical, name)
+    }
+
+    return names
+}
 
 /**
  * Serializes the config body and every candidate's body with the given name map, recording which candidates each output references so usage can be resolved before final naming.

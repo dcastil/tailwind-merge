@@ -5,17 +5,50 @@ exports[`generate from vanilla Tailwind CSS > emitted module matches snapshot 1`
 
 /**
  * Builds the tailwind-merge config for this project. Called lazily on the first \`twMerge\` call. Can be composed further via \`createTailwindMerge(getConfig, ...extensions)\`.
+ *
+ * The structure mirrors tailwind-merge's default config. The \`scale*\` consts hold this project's resolved theme scales — each one's comment says which theme namespace it came from — and class groups use them by reference or as spreads. Patterns like \`isTshirtSize\` come from tailwind-merge's public validators.
  */
 export const getConfig = () => {
-    const { isFraction, isArbitraryValue, isArbitraryVariable, isNamedContainerQuery, isNumber, isTshirtSize, isInteger, isArbitraryVariableLength, isArbitraryLength, isArbitraryVariableWeight, isArbitraryWeight, isPercent, isArbitraryVariableFamilyName, isArbitraryFamilyName, isArbitraryNumber, isArbitraryVariablePosition, isArbitraryPosition, isArbitraryVariableSize, isArbitrarySize, isArbitraryVariableImage, isArbitraryImage, isArbitraryVariableShadow, isArbitraryShadow } = v
+    const {
+        isFraction,
+        isArbitraryValue,
+        isArbitraryVariable,
+        isNamedContainerQuery,
+        isNumber,
+        isTshirtSize,
+        isInteger,
+        isArbitraryVariableLength,
+        isArbitraryLength,
+        isArbitraryVariableWeight,
+        isArbitraryWeight,
+        isPercent,
+        isArbitraryVariableFamilyName,
+        isArbitraryFamilyName,
+        isArbitraryNumber,
+        isArbitraryVariablePosition,
+        isArbitraryPosition,
+        isArbitraryVariableSize,
+        isArbitrarySize,
+        isArbitraryVariableImage,
+        isArbitraryImage,
+        isArbitraryVariableShadow,
+        isArbitraryShadow,
+    } = v
 
-    const scale0 = ['px', isNumber]
-    const scale1 = ['base', isTshirtSize]
-    const scale2 = ['thin', 'extralight', 'light', 'normal', 'medium', 'semibold', 'bold', 'extrabold', 'black']
-    const scale3 = ['sans', 'serif', 'mono']
-    const scale4 = ['tighter', 'tight', 'normal', 'wide', 'wider', 'widest']
-    const scale5 = ['tight', 'snug', 'normal', 'relaxed', 'loose']
-    const scale6 = [
+    /** The bare \`--spacing\` multiplier is set, which makes every number a valid spacing value (e.g. p-13). */
+    const scaleSpacing = ['px', isNumber]
+    /** The \`--text-*\` theme values: enumerated outliers plus the \`isTshirtSize\` pattern covering the rest. */
+    const scaleText = ['base', isTshirtSize]
+    /** The \`--font-weight-*\` theme values. */
+    const scaleFontWeight = ['thin', 'extralight', 'light', 'normal', 'medium', 'semibold', 'bold', 'extrabold', 'black']
+    /** The \`--font-*\` theme values. */
+    const scaleFont = ['sans', 'serif', 'mono']
+    /** The \`--tracking-*\` theme values. */
+    const scaleTracking = ['tighter', 'tight', 'normal', 'wide', 'wider', 'widest']
+    /** The \`--leading-*\` theme values. */
+    const scaleLeading = ['tight', 'snug', 'normal', 'relaxed', 'loose']
+    /** Color keywords plus the \`--color-*\` theme values, with families sharing numeric suffixes compressed into nested matchers. */
+    const scaleColor = [
         'inherit',
         'current',
         'transparent',
@@ -50,10 +83,14 @@ export const getConfig = () => {
         'black',
         'white',
     ]
-    const scale7 = ['inner', isTshirtSize]
-    const scale8 = ['in', 'out', 'in-out']
-    const scale9 = ['spin', 'ping', 'pulse', 'bounce']
-    const scale10 = ['dramatic', 'near', 'normal', 'midrange', 'distant']
+    /** The \`--shadow-*\` theme values: enumerated outliers plus the \`isTshirtSize\` pattern covering the rest. */
+    const scaleShadow = ['inner', isTshirtSize]
+    /** The \`--ease-*\` theme values. */
+    const scaleEase = ['in', 'out', 'in-out']
+    /** The \`--animate-*\` theme values. */
+    const scaleAnimate = ['spin', 'ping', 'pulse', 'bounce']
+    /** The \`--perspective-*\` theme values. */
+    const scalePerspective = ['dramatic', 'near', 'normal', 'midrange', 'distant']
 
     return {
         cacheSize: 500,
@@ -139,59 +176,150 @@ export const getConfig = () => {
             position: ['static', 'fixed', 'absolute', 'relative', 'sticky'],
             inset: [
                 {
-                    inset: [isFraction, 'full', 'auto', isArbitraryVariable, isArbitraryValue, ...scale0],
+                    inset: [
+                        isFraction,
+                        'full',
+                        'auto',
+                        isArbitraryVariable,
+                        isArbitraryValue,
+                        ...scaleSpacing,
+                    ],
                 },
             ],
             'inset-x': [
                 {
-                    'inset-x': [isFraction, 'full', 'auto', isArbitraryVariable, isArbitraryValue, ...scale0],
+                    'inset-x': [
+                        isFraction,
+                        'full',
+                        'auto',
+                        isArbitraryVariable,
+                        isArbitraryValue,
+                        ...scaleSpacing,
+                    ],
                 },
             ],
             'inset-y': [
                 {
-                    'inset-y': [isFraction, 'full', 'auto', isArbitraryVariable, isArbitraryValue, ...scale0],
+                    'inset-y': [
+                        isFraction,
+                        'full',
+                        'auto',
+                        isArbitraryVariable,
+                        isArbitraryValue,
+                        ...scaleSpacing,
+                    ],
                 },
             ],
             start: [
                 {
-                    'inset-s': [isFraction, 'full', 'auto', isArbitraryVariable, isArbitraryValue, ...scale0],
-                    start: [isFraction, 'full', 'auto', isArbitraryVariable, isArbitraryValue, ...scale0],
+                    'inset-s': [
+                        isFraction,
+                        'full',
+                        'auto',
+                        isArbitraryVariable,
+                        isArbitraryValue,
+                        ...scaleSpacing,
+                    ],
+                    start: [
+                        isFraction,
+                        'full',
+                        'auto',
+                        isArbitraryVariable,
+                        isArbitraryValue,
+                        ...scaleSpacing,
+                    ],
                 },
             ],
             end: [
                 {
-                    'inset-e': [isFraction, 'full', 'auto', isArbitraryVariable, isArbitraryValue, ...scale0],
-                    end: [isFraction, 'full', 'auto', isArbitraryVariable, isArbitraryValue, ...scale0],
+                    'inset-e': [
+                        isFraction,
+                        'full',
+                        'auto',
+                        isArbitraryVariable,
+                        isArbitraryValue,
+                        ...scaleSpacing,
+                    ],
+                    end: [
+                        isFraction,
+                        'full',
+                        'auto',
+                        isArbitraryVariable,
+                        isArbitraryValue,
+                        ...scaleSpacing,
+                    ],
                 },
             ],
             'inset-bs': [
                 {
-                    'inset-bs': [isFraction, 'full', 'auto', isArbitraryVariable, isArbitraryValue, ...scale0],
+                    'inset-bs': [
+                        isFraction,
+                        'full',
+                        'auto',
+                        isArbitraryVariable,
+                        isArbitraryValue,
+                        ...scaleSpacing,
+                    ],
                 },
             ],
             'inset-be': [
                 {
-                    'inset-be': [isFraction, 'full', 'auto', isArbitraryVariable, isArbitraryValue, ...scale0],
+                    'inset-be': [
+                        isFraction,
+                        'full',
+                        'auto',
+                        isArbitraryVariable,
+                        isArbitraryValue,
+                        ...scaleSpacing,
+                    ],
                 },
             ],
             top: [
                 {
-                    top: [isFraction, 'full', 'auto', isArbitraryVariable, isArbitraryValue, ...scale0],
+                    top: [
+                        isFraction,
+                        'full',
+                        'auto',
+                        isArbitraryVariable,
+                        isArbitraryValue,
+                        ...scaleSpacing,
+                    ],
                 },
             ],
             right: [
                 {
-                    right: [isFraction, 'full', 'auto', isArbitraryVariable, isArbitraryValue, ...scale0],
+                    right: [
+                        isFraction,
+                        'full',
+                        'auto',
+                        isArbitraryVariable,
+                        isArbitraryValue,
+                        ...scaleSpacing,
+                    ],
                 },
             ],
             bottom: [
                 {
-                    bottom: [isFraction, 'full', 'auto', isArbitraryVariable, isArbitraryValue, ...scale0],
+                    bottom: [
+                        isFraction,
+                        'full',
+                        'auto',
+                        isArbitraryVariable,
+                        isArbitraryValue,
+                        ...scaleSpacing,
+                    ],
                 },
             ],
             left: [
                 {
-                    left: [isFraction, 'full', 'auto', isArbitraryVariable, isArbitraryValue, ...scale0],
+                    left: [
+                        isFraction,
+                        'full',
+                        'auto',
+                        isArbitraryVariable,
+                        isArbitraryValue,
+                        ...scaleSpacing,
+                    ],
                 },
             ],
             visibility: ['visible', 'invisible', 'collapse'],
@@ -205,7 +333,7 @@ export const getConfig = () => {
                         isTshirtSize,
                         isArbitraryVariable,
                         isArbitraryValue,
-                        ...scale0,
+                        ...scaleSpacing,
                     ],
                 },
             ],
@@ -258,9 +386,9 @@ export const getConfig = () => {
             'grid-flow': [{ 'grid-flow': ['row', 'col', 'dense', 'row-dense', 'col-dense'] }],
             'auto-cols': [{ 'auto-cols': ['auto', 'min', 'max', 'fr', isArbitraryVariable, isArbitraryValue] }],
             'auto-rows': [{ 'auto-rows': ['auto', 'min', 'max', 'fr', isArbitraryVariable, isArbitraryValue] }],
-            gap: [{ gap: [isArbitraryVariable, isArbitraryValue, ...scale0] }],
-            'gap-x': [{ 'gap-x': [isArbitraryVariable, isArbitraryValue, ...scale0] }],
-            'gap-y': [{ 'gap-y': [isArbitraryVariable, isArbitraryValue, ...scale0] }],
+            gap: [{ gap: [isArbitraryVariable, isArbitraryValue, ...scaleSpacing] }],
+            'gap-x': [{ 'gap-x': [isArbitraryVariable, isArbitraryValue, ...scaleSpacing] }],
+            'gap-y': [{ 'gap-y': [isArbitraryVariable, isArbitraryValue, ...scaleSpacing] }],
             'justify-content': [
                 {
                     justify: [
@@ -358,31 +486,31 @@ export const getConfig = () => {
                     'place-self': ['auto', 'start', 'end', 'center', 'stretch', 'center-safe', 'end-safe'],
                 },
             ],
-            p: [{ p: [isArbitraryVariable, isArbitraryValue, ...scale0] }],
-            px: [{ px: [isArbitraryVariable, isArbitraryValue, ...scale0] }],
-            py: [{ py: [isArbitraryVariable, isArbitraryValue, ...scale0] }],
-            ps: [{ ps: [isArbitraryVariable, isArbitraryValue, ...scale0] }],
-            pe: [{ pe: [isArbitraryVariable, isArbitraryValue, ...scale0] }],
-            pbs: [{ pbs: [isArbitraryVariable, isArbitraryValue, ...scale0] }],
-            pbe: [{ pbe: [isArbitraryVariable, isArbitraryValue, ...scale0] }],
-            pt: [{ pt: [isArbitraryVariable, isArbitraryValue, ...scale0] }],
-            pr: [{ pr: [isArbitraryVariable, isArbitraryValue, ...scale0] }],
-            pb: [{ pb: [isArbitraryVariable, isArbitraryValue, ...scale0] }],
-            pl: [{ pl: [isArbitraryVariable, isArbitraryValue, ...scale0] }],
-            m: [{ m: ['auto', isArbitraryVariable, isArbitraryValue, ...scale0] }],
-            mx: [{ mx: ['auto', isArbitraryVariable, isArbitraryValue, ...scale0] }],
-            my: [{ my: ['auto', isArbitraryVariable, isArbitraryValue, ...scale0] }],
-            ms: [{ ms: ['auto', isArbitraryVariable, isArbitraryValue, ...scale0] }],
-            me: [{ me: ['auto', isArbitraryVariable, isArbitraryValue, ...scale0] }],
-            mbs: [{ mbs: ['auto', isArbitraryVariable, isArbitraryValue, ...scale0] }],
-            mbe: [{ mbe: ['auto', isArbitraryVariable, isArbitraryValue, ...scale0] }],
-            mt: [{ mt: ['auto', isArbitraryVariable, isArbitraryValue, ...scale0] }],
-            mr: [{ mr: ['auto', isArbitraryVariable, isArbitraryValue, ...scale0] }],
-            mb: [{ mb: ['auto', isArbitraryVariable, isArbitraryValue, ...scale0] }],
-            ml: [{ ml: ['auto', isArbitraryVariable, isArbitraryValue, ...scale0] }],
-            'space-x': [{ 'space-x': [isArbitraryVariable, isArbitraryValue, ...scale0] }],
+            p: [{ p: [isArbitraryVariable, isArbitraryValue, ...scaleSpacing] }],
+            px: [{ px: [isArbitraryVariable, isArbitraryValue, ...scaleSpacing] }],
+            py: [{ py: [isArbitraryVariable, isArbitraryValue, ...scaleSpacing] }],
+            ps: [{ ps: [isArbitraryVariable, isArbitraryValue, ...scaleSpacing] }],
+            pe: [{ pe: [isArbitraryVariable, isArbitraryValue, ...scaleSpacing] }],
+            pbs: [{ pbs: [isArbitraryVariable, isArbitraryValue, ...scaleSpacing] }],
+            pbe: [{ pbe: [isArbitraryVariable, isArbitraryValue, ...scaleSpacing] }],
+            pt: [{ pt: [isArbitraryVariable, isArbitraryValue, ...scaleSpacing] }],
+            pr: [{ pr: [isArbitraryVariable, isArbitraryValue, ...scaleSpacing] }],
+            pb: [{ pb: [isArbitraryVariable, isArbitraryValue, ...scaleSpacing] }],
+            pl: [{ pl: [isArbitraryVariable, isArbitraryValue, ...scaleSpacing] }],
+            m: [{ m: ['auto', isArbitraryVariable, isArbitraryValue, ...scaleSpacing] }],
+            mx: [{ mx: ['auto', isArbitraryVariable, isArbitraryValue, ...scaleSpacing] }],
+            my: [{ my: ['auto', isArbitraryVariable, isArbitraryValue, ...scaleSpacing] }],
+            ms: [{ ms: ['auto', isArbitraryVariable, isArbitraryValue, ...scaleSpacing] }],
+            me: [{ me: ['auto', isArbitraryVariable, isArbitraryValue, ...scaleSpacing] }],
+            mbs: [{ mbs: ['auto', isArbitraryVariable, isArbitraryValue, ...scaleSpacing] }],
+            mbe: [{ mbe: ['auto', isArbitraryVariable, isArbitraryValue, ...scaleSpacing] }],
+            mt: [{ mt: ['auto', isArbitraryVariable, isArbitraryValue, ...scaleSpacing] }],
+            mr: [{ mr: ['auto', isArbitraryVariable, isArbitraryValue, ...scaleSpacing] }],
+            mb: [{ mb: ['auto', isArbitraryVariable, isArbitraryValue, ...scaleSpacing] }],
+            ml: [{ ml: ['auto', isArbitraryVariable, isArbitraryValue, ...scaleSpacing] }],
+            'space-x': [{ 'space-x': [isArbitraryVariable, isArbitraryValue, ...scaleSpacing] }],
             'space-x-reverse': ['space-x-reverse'],
-            'space-y': [{ 'space-y': [isArbitraryVariable, isArbitraryValue, ...scale0] }],
+            'space-y': [{ 'space-y': [isArbitraryVariable, isArbitraryValue, ...scaleSpacing] }],
             'space-y-reverse': ['space-y-reverse'],
             size: [
                 {
@@ -401,7 +529,7 @@ export const getConfig = () => {
                         'fit',
                         isArbitraryVariable,
                         isArbitraryValue,
-                        ...scale0,
+                        ...scaleSpacing,
                     ],
                 },
             ],
@@ -420,7 +548,7 @@ export const getConfig = () => {
                         'fit',
                         isArbitraryVariable,
                         isArbitraryValue,
-                        ...scale0,
+                        ...scaleSpacing,
                     ],
                 },
             ],
@@ -439,7 +567,7 @@ export const getConfig = () => {
                         'fit',
                         isArbitraryVariable,
                         isArbitraryValue,
-                        ...scale0,
+                        ...scaleSpacing,
                     ],
                 },
             ],
@@ -458,7 +586,7 @@ export const getConfig = () => {
                         'fit',
                         isArbitraryVariable,
                         isArbitraryValue,
-                        ...scale0,
+                        ...scaleSpacing,
                     ],
                 },
             ],
@@ -478,7 +606,7 @@ export const getConfig = () => {
                         'fit',
                         isArbitraryVariable,
                         isArbitraryValue,
-                        ...scale0,
+                        ...scaleSpacing,
                     ],
                 },
             ],
@@ -498,7 +626,7 @@ export const getConfig = () => {
                         'fit',
                         isArbitraryVariable,
                         isArbitraryValue,
-                        ...scale0,
+                        ...scaleSpacing,
                     ],
                 },
             ],
@@ -518,7 +646,7 @@ export const getConfig = () => {
                         'fit',
                         isArbitraryVariable,
                         isArbitraryValue,
-                        ...scale0,
+                        ...scaleSpacing,
                     ],
                 },
             ],
@@ -541,7 +669,7 @@ export const getConfig = () => {
                         'fit',
                         isArbitraryVariable,
                         isArbitraryValue,
-                        ...scale0,
+                        ...scaleSpacing,
                     ],
                 },
             ],
@@ -565,7 +693,7 @@ export const getConfig = () => {
                         'fit',
                         isArbitraryVariable,
                         isArbitraryValue,
-                        ...scale0,
+                        ...scaleSpacing,
                     ],
                 },
             ],
@@ -591,7 +719,7 @@ export const getConfig = () => {
                         'fit',
                         isArbitraryVariable,
                         isArbitraryValue,
-                        ...scale0,
+                        ...scaleSpacing,
                     ],
                 },
             ],
@@ -614,7 +742,7 @@ export const getConfig = () => {
                         'fit',
                         isArbitraryVariable,
                         isArbitraryValue,
-                        ...scale0,
+                        ...scaleSpacing,
                     ],
                 },
             ],
@@ -638,7 +766,7 @@ export const getConfig = () => {
                         'fit',
                         isArbitraryVariable,
                         isArbitraryValue,
-                        ...scale0,
+                        ...scaleSpacing,
                     ],
                 },
             ],
@@ -661,14 +789,14 @@ export const getConfig = () => {
                         'fit',
                         isArbitraryVariable,
                         isArbitraryValue,
-                        ...scale0,
+                        ...scaleSpacing,
                     ],
                 },
             ],
-            'font-size': [{ text: [...scale1, isArbitraryVariableLength, isArbitraryLength] }],
+            'font-size': [{ text: [...scaleText, isArbitraryVariableLength, isArbitraryLength] }],
             'font-smoothing': ['antialiased', 'subpixel-antialiased'],
             'font-style': ['italic', 'not-italic'],
-            'font-weight': [{ font: [...scale2, isArbitraryVariableWeight, isArbitraryWeight] }],
+            'font-weight': [{ font: [...scaleFontWeight, isArbitraryVariableWeight, isArbitraryWeight] }],
             'font-stretch': [
                 {
                     'font-stretch': [
@@ -686,7 +814,7 @@ export const getConfig = () => {
                     ],
                 },
             ],
-            'font-family': [{ font: [isArbitraryVariableFamilyName, isArbitraryFamilyName, ...scale3] }],
+            'font-family': [{ font: [isArbitraryVariableFamilyName, isArbitraryFamilyName, ...scaleFont] }],
             'font-features': [{ 'font-features': [isArbitraryValue] }],
             'fvn-normal': ['normal-nums'],
             'fvn-ordinal': ['ordinal'],
@@ -694,18 +822,20 @@ export const getConfig = () => {
             'fvn-figure': ['lining-nums', 'oldstyle-nums'],
             'fvn-spacing': ['proportional-nums', 'tabular-nums'],
             'fvn-fraction': ['diagonal-fractions', 'stacked-fractions'],
-            tracking: [{ tracking: [...scale4, isArbitraryVariable, isArbitraryValue] }],
+            tracking: [{ tracking: [...scaleTracking, isArbitraryVariable, isArbitraryValue] }],
             'line-clamp': [{ 'line-clamp': [isNumber, 'none', isArbitraryVariable, isArbitraryNumber] }],
             leading: [
-                { leading: [...scale5, isArbitraryVariable, isArbitraryValue, ...scale0] },
+                {
+                    leading: [...scaleLeading, isArbitraryVariable, isArbitraryValue, ...scaleSpacing],
+                },
                 'leading-none',
             ],
             'list-image': [{ 'list-image': ['none', isArbitraryVariable, isArbitraryValue] }],
             'list-style-position': [{ list: ['inside', 'outside'] }],
             'list-style-type': [{ list: ['disc', 'decimal', 'none', isArbitraryVariable, isArbitraryValue] }],
             'text-alignment': [{ text: ['left', 'center', 'right', 'justify', 'start', 'end'] }],
-            'placeholder-color': [{ placeholder: [...scale6, isArbitraryVariable, isArbitraryValue] }],
-            'text-color': [{ text: [...scale6, isArbitraryVariable, isArbitraryValue] }],
+            'placeholder-color': [{ placeholder: [...scaleColor, isArbitraryVariable, isArbitraryValue] }],
+            'text-color': [{ text: [...scaleColor, isArbitraryVariable, isArbitraryValue] }],
             'text-decoration': ['underline', 'overline', 'line-through', 'no-underline'],
             'text-decoration-style': [{ decoration: ['solid', 'dashed', 'dotted', 'double', 'wavy'] }],
             'text-decoration-thickness': [
@@ -713,12 +843,12 @@ export const getConfig = () => {
                     decoration: [isNumber, 'from-font', 'auto', isArbitraryVariable, isArbitraryLength],
                 },
             ],
-            'text-decoration-color': [{ decoration: [...scale6, isArbitraryVariable, isArbitraryValue] }],
+            'text-decoration-color': [{ decoration: [...scaleColor, isArbitraryVariable, isArbitraryValue] }],
             'underline-offset': [{ 'underline-offset': [isNumber, 'auto', isArbitraryVariable, isArbitraryValue] }],
             'text-transform': ['uppercase', 'lowercase', 'capitalize', 'normal-case'],
             'text-overflow': ['truncate', 'text-ellipsis', 'text-clip'],
             'text-wrap': [{ text: ['wrap', 'nowrap', 'balance', 'pretty'] }],
-            indent: [{ indent: [isArbitraryVariable, isArbitraryValue, ...scale0] }],
+            indent: [{ indent: [isArbitraryVariable, isArbitraryValue, ...scaleSpacing] }],
             'tab-size': [{ tab: [isInteger, isArbitraryVariable, isArbitraryValue] }],
             'vertical-align': [
                 {
@@ -798,13 +928,13 @@ export const getConfig = () => {
                     ],
                 },
             ],
-            'bg-color': [{ bg: [...scale6, isArbitraryVariable, isArbitraryValue] }],
+            'bg-color': [{ bg: [...scaleColor, isArbitraryVariable, isArbitraryValue] }],
             'gradient-from-pos': [{ from: [isPercent, isArbitraryVariableLength, isArbitraryLength] }],
             'gradient-via-pos': [{ via: [isPercent, isArbitraryVariableLength, isArbitraryLength] }],
             'gradient-to-pos': [{ to: [isPercent, isArbitraryVariableLength, isArbitraryLength] }],
-            'gradient-from': [{ from: [...scale6, isArbitraryVariable, isArbitraryValue] }, 'from-none'],
-            'gradient-via': [{ via: [...scale6, isArbitraryVariable, isArbitraryValue] }, 'via-none'],
-            'gradient-to': [{ to: [...scale6, isArbitraryVariable, isArbitraryValue] }, 'to-none'],
+            'gradient-from': [{ from: [...scaleColor, isArbitraryVariable, isArbitraryValue] }, 'from-none'],
+            'gradient-via': [{ via: [...scaleColor, isArbitraryVariable, isArbitraryValue] }, 'via-none'],
+            'gradient-to': [{ to: [...scaleColor, isArbitraryVariable, isArbitraryValue] }, 'to-none'],
             rounded: [
                 {
                     rounded: ['', 'none', 'full', isTshirtSize, isArbitraryVariable, isArbitraryValue],
@@ -897,47 +1027,51 @@ export const getConfig = () => {
             'divide-y-reverse': ['divide-y-reverse'],
             'border-style': [{ border: ['solid', 'dashed', 'dotted', 'double', 'hidden', 'none'] }],
             'divide-style': [{ divide: ['solid', 'dashed', 'dotted', 'double', 'hidden', 'none'] }],
-            'border-color': [{ border: [...scale6, isArbitraryVariable, isArbitraryValue] }],
-            'border-color-x': [{ 'border-x': [...scale6, isArbitraryVariable, isArbitraryValue] }],
-            'border-color-y': [{ 'border-y': [...scale6, isArbitraryVariable, isArbitraryValue] }],
-            'border-color-s': [{ 'border-s': [...scale6, isArbitraryVariable, isArbitraryValue] }],
-            'border-color-e': [{ 'border-e': [...scale6, isArbitraryVariable, isArbitraryValue] }],
-            'border-color-bs': [{ 'border-bs': [...scale6, isArbitraryVariable, isArbitraryValue] }],
-            'border-color-be': [{ 'border-be': [...scale6, isArbitraryVariable, isArbitraryValue] }],
-            'border-color-t': [{ 'border-t': [...scale6, isArbitraryVariable, isArbitraryValue] }],
-            'border-color-r': [{ 'border-r': [...scale6, isArbitraryVariable, isArbitraryValue] }],
-            'border-color-b': [{ 'border-b': [...scale6, isArbitraryVariable, isArbitraryValue] }],
-            'border-color-l': [{ 'border-l': [...scale6, isArbitraryVariable, isArbitraryValue] }],
-            'divide-color': [{ divide: [...scale6, isArbitraryVariable, isArbitraryValue] }],
+            'border-color': [{ border: [...scaleColor, isArbitraryVariable, isArbitraryValue] }],
+            'border-color-x': [{ 'border-x': [...scaleColor, isArbitraryVariable, isArbitraryValue] }],
+            'border-color-y': [{ 'border-y': [...scaleColor, isArbitraryVariable, isArbitraryValue] }],
+            'border-color-s': [{ 'border-s': [...scaleColor, isArbitraryVariable, isArbitraryValue] }],
+            'border-color-e': [{ 'border-e': [...scaleColor, isArbitraryVariable, isArbitraryValue] }],
+            'border-color-bs': [{ 'border-bs': [...scaleColor, isArbitraryVariable, isArbitraryValue] }],
+            'border-color-be': [{ 'border-be': [...scaleColor, isArbitraryVariable, isArbitraryValue] }],
+            'border-color-t': [{ 'border-t': [...scaleColor, isArbitraryVariable, isArbitraryValue] }],
+            'border-color-r': [{ 'border-r': [...scaleColor, isArbitraryVariable, isArbitraryValue] }],
+            'border-color-b': [{ 'border-b': [...scaleColor, isArbitraryVariable, isArbitraryValue] }],
+            'border-color-l': [{ 'border-l': [...scaleColor, isArbitraryVariable, isArbitraryValue] }],
+            'divide-color': [{ divide: [...scaleColor, isArbitraryVariable, isArbitraryValue] }],
             'outline-style': [{ outline: ['solid', 'dashed', 'dotted', 'double', 'none', 'hidden'] }],
             'outline-offset': [{ 'outline-offset': [isNumber, isArbitraryVariable, isArbitraryValue] }],
             'outline-w': [{ outline: ['', isNumber, isArbitraryVariableLength, isArbitraryLength] }],
-            'outline-color': [{ outline: [...scale6, isArbitraryVariable, isArbitraryValue] }],
-            shadow: [{ shadow: ['', 'none', ...scale7, isArbitraryVariableShadow, isArbitraryShadow] }],
-            'shadow-color': [{ shadow: [...scale6, isArbitraryVariable, isArbitraryValue] }, 'shadow-initial'],
+            'outline-color': [{ outline: [...scaleColor, isArbitraryVariable, isArbitraryValue] }],
+            shadow: [
+                {
+                    shadow: ['', 'none', ...scaleShadow, isArbitraryVariableShadow, isArbitraryShadow],
+                },
+            ],
+            'shadow-color': [{ shadow: [...scaleColor, isArbitraryVariable, isArbitraryValue] }, 'shadow-initial'],
             'inset-shadow': [
                 {
                     'inset-shadow': ['none', isTshirtSize, isArbitraryVariableShadow, isArbitraryShadow],
                 },
             ],
             'inset-shadow-color': [
-                { 'inset-shadow': [...scale6, isArbitraryVariable, isArbitraryValue] },
+                { 'inset-shadow': [...scaleColor, isArbitraryVariable, isArbitraryValue] },
                 'inset-shadow-initial',
             ],
             'ring-w': [{ ring: ['', isNumber, isArbitraryVariableLength, isArbitraryLength] }],
             'ring-w-inset': ['ring-inset'],
-            'ring-color': [{ ring: [...scale6, isArbitraryVariable, isArbitraryValue] }],
+            'ring-color': [{ ring: [...scaleColor, isArbitraryVariable, isArbitraryValue] }],
             'ring-offset-w': [{ 'ring-offset': [isNumber, isArbitraryLength] }],
-            'ring-offset-color': [{ 'ring-offset': [...scale6, isArbitraryVariable, isArbitraryValue] }],
+            'ring-offset-color': [{ 'ring-offset': [...scaleColor, isArbitraryVariable, isArbitraryValue] }],
             'inset-ring-w': [{ 'inset-ring': ['', isNumber, isArbitraryVariableLength, isArbitraryLength] }],
-            'inset-ring-color': [{ 'inset-ring': [...scale6, isArbitraryVariable, isArbitraryValue] }],
+            'inset-ring-color': [{ 'inset-ring': [...scaleColor, isArbitraryVariable, isArbitraryValue] }],
             'text-shadow': [
                 {
                     'text-shadow': ['none', isTshirtSize, isArbitraryVariableShadow, isArbitraryShadow],
                 },
             ],
             'text-shadow-color': [
-                { 'text-shadow': [...scale6, isArbitraryVariable, isArbitraryValue] },
+                { 'text-shadow': [...scaleColor, isArbitraryVariable, isArbitraryValue] },
                 'text-shadow-initial',
             ],
             opacity: [{ opacity: [isNumber, isArbitraryVariable, isArbitraryValue] }],
@@ -1003,8 +1137,8 @@ export const getConfig = () => {
                     'mask-linear-to': [isNumber, isPercent, isArbitraryVariablePosition, isArbitraryPosition],
                 },
             ],
-            'mask-image-linear-from-color': [{ 'mask-linear-from': [...scale6, isArbitraryVariable, isArbitraryValue] }],
-            'mask-image-linear-to-color': [{ 'mask-linear-to': [...scale6, isArbitraryVariable, isArbitraryValue] }],
+            'mask-image-linear-from-color': [{ 'mask-linear-from': [...scaleColor, isArbitraryVariable, isArbitraryValue] }],
+            'mask-image-linear-to-color': [{ 'mask-linear-to': [...scaleColor, isArbitraryVariable, isArbitraryValue] }],
             'mask-image-t-from-pos': [
                 {
                     'mask-t-from': [isNumber, isPercent, isArbitraryVariablePosition, isArbitraryPosition],
@@ -1015,8 +1149,8 @@ export const getConfig = () => {
                     'mask-t-to': [isNumber, isPercent, isArbitraryVariablePosition, isArbitraryPosition],
                 },
             ],
-            'mask-image-t-from-color': [{ 'mask-t-from': [...scale6, isArbitraryVariable, isArbitraryValue] }],
-            'mask-image-t-to-color': [{ 'mask-t-to': [...scale6, isArbitraryVariable, isArbitraryValue] }],
+            'mask-image-t-from-color': [{ 'mask-t-from': [...scaleColor, isArbitraryVariable, isArbitraryValue] }],
+            'mask-image-t-to-color': [{ 'mask-t-to': [...scaleColor, isArbitraryVariable, isArbitraryValue] }],
             'mask-image-r-from-pos': [
                 {
                     'mask-r-from': [isNumber, isPercent, isArbitraryVariablePosition, isArbitraryPosition],
@@ -1027,8 +1161,8 @@ export const getConfig = () => {
                     'mask-r-to': [isNumber, isPercent, isArbitraryVariablePosition, isArbitraryPosition],
                 },
             ],
-            'mask-image-r-from-color': [{ 'mask-r-from': [...scale6, isArbitraryVariable, isArbitraryValue] }],
-            'mask-image-r-to-color': [{ 'mask-r-to': [...scale6, isArbitraryVariable, isArbitraryValue] }],
+            'mask-image-r-from-color': [{ 'mask-r-from': [...scaleColor, isArbitraryVariable, isArbitraryValue] }],
+            'mask-image-r-to-color': [{ 'mask-r-to': [...scaleColor, isArbitraryVariable, isArbitraryValue] }],
             'mask-image-b-from-pos': [
                 {
                     'mask-b-from': [isNumber, isPercent, isArbitraryVariablePosition, isArbitraryPosition],
@@ -1039,8 +1173,8 @@ export const getConfig = () => {
                     'mask-b-to': [isNumber, isPercent, isArbitraryVariablePosition, isArbitraryPosition],
                 },
             ],
-            'mask-image-b-from-color': [{ 'mask-b-from': [...scale6, isArbitraryVariable, isArbitraryValue] }],
-            'mask-image-b-to-color': [{ 'mask-b-to': [...scale6, isArbitraryVariable, isArbitraryValue] }],
+            'mask-image-b-from-color': [{ 'mask-b-from': [...scaleColor, isArbitraryVariable, isArbitraryValue] }],
+            'mask-image-b-to-color': [{ 'mask-b-to': [...scaleColor, isArbitraryVariable, isArbitraryValue] }],
             'mask-image-l-from-pos': [
                 {
                     'mask-l-from': [isNumber, isPercent, isArbitraryVariablePosition, isArbitraryPosition],
@@ -1051,8 +1185,8 @@ export const getConfig = () => {
                     'mask-l-to': [isNumber, isPercent, isArbitraryVariablePosition, isArbitraryPosition],
                 },
             ],
-            'mask-image-l-from-color': [{ 'mask-l-from': [...scale6, isArbitraryVariable, isArbitraryValue] }],
-            'mask-image-l-to-color': [{ 'mask-l-to': [...scale6, isArbitraryVariable, isArbitraryValue] }],
+            'mask-image-l-from-color': [{ 'mask-l-from': [...scaleColor, isArbitraryVariable, isArbitraryValue] }],
+            'mask-image-l-to-color': [{ 'mask-l-to': [...scaleColor, isArbitraryVariable, isArbitraryValue] }],
             'mask-image-x-from-pos': [
                 {
                     'mask-x-from': [isNumber, isPercent, isArbitraryVariablePosition, isArbitraryPosition],
@@ -1063,8 +1197,8 @@ export const getConfig = () => {
                     'mask-x-to': [isNumber, isPercent, isArbitraryVariablePosition, isArbitraryPosition],
                 },
             ],
-            'mask-image-x-from-color': [{ 'mask-x-from': [...scale6, isArbitraryVariable, isArbitraryValue] }],
-            'mask-image-x-to-color': [{ 'mask-x-to': [...scale6, isArbitraryVariable, isArbitraryValue] }],
+            'mask-image-x-from-color': [{ 'mask-x-from': [...scaleColor, isArbitraryVariable, isArbitraryValue] }],
+            'mask-image-x-to-color': [{ 'mask-x-to': [...scaleColor, isArbitraryVariable, isArbitraryValue] }],
             'mask-image-y-from-pos': [
                 {
                     'mask-y-from': [isNumber, isPercent, isArbitraryVariablePosition, isArbitraryPosition],
@@ -1075,8 +1209,8 @@ export const getConfig = () => {
                     'mask-y-to': [isNumber, isPercent, isArbitraryVariablePosition, isArbitraryPosition],
                 },
             ],
-            'mask-image-y-from-color': [{ 'mask-y-from': [...scale6, isArbitraryVariable, isArbitraryValue] }],
-            'mask-image-y-to-color': [{ 'mask-y-to': [...scale6, isArbitraryVariable, isArbitraryValue] }],
+            'mask-image-y-from-color': [{ 'mask-y-from': [...scaleColor, isArbitraryVariable, isArbitraryValue] }],
+            'mask-image-y-to-color': [{ 'mask-y-to': [...scaleColor, isArbitraryVariable, isArbitraryValue] }],
             'mask-image-radial': [{ 'mask-radial': [isArbitraryVariable, isArbitraryValue] }],
             'mask-image-radial-from-pos': [
                 {
@@ -1088,8 +1222,8 @@ export const getConfig = () => {
                     'mask-radial-to': [isNumber, isPercent, isArbitraryVariablePosition, isArbitraryPosition],
                 },
             ],
-            'mask-image-radial-from-color': [{ 'mask-radial-from': [...scale6, isArbitraryVariable, isArbitraryValue] }],
-            'mask-image-radial-to-color': [{ 'mask-radial-to': [...scale6, isArbitraryVariable, isArbitraryValue] }],
+            'mask-image-radial-from-color': [{ 'mask-radial-from': [...scaleColor, isArbitraryVariable, isArbitraryValue] }],
+            'mask-image-radial-to-color': [{ 'mask-radial-to': [...scaleColor, isArbitraryVariable, isArbitraryValue] }],
             'mask-image-radial-shape': [{ 'mask-radial': ['circle', 'ellipse'] }],
             'mask-image-radial-size': [{ 'mask-radial': [{ closest: ['side', 'corner'], farthest: ['side', 'corner'] }] }],
             'mask-image-radial-pos': [
@@ -1122,8 +1256,8 @@ export const getConfig = () => {
                     'mask-conic-to': [isNumber, isPercent, isArbitraryVariablePosition, isArbitraryPosition],
                 },
             ],
-            'mask-image-conic-from-color': [{ 'mask-conic-from': [...scale6, isArbitraryVariable, isArbitraryValue] }],
-            'mask-image-conic-to-color': [{ 'mask-conic-to': [...scale6, isArbitraryVariable, isArbitraryValue] }],
+            'mask-image-conic-from-color': [{ 'mask-conic-from': [...scaleColor, isArbitraryVariable, isArbitraryValue] }],
+            'mask-image-conic-to-color': [{ 'mask-conic-to': [...scaleColor, isArbitraryVariable, isArbitraryValue] }],
             'mask-mode': [{ mask: ['alpha', 'luminance', 'match'] }],
             'mask-origin': [{ 'mask-origin': ['border', 'padding', 'content', 'fill', 'stroke', 'view'] }],
             'mask-position': [
@@ -1172,7 +1306,7 @@ export const getConfig = () => {
                     'drop-shadow': ['', 'none', isTshirtSize, isArbitraryVariableShadow, isArbitraryShadow],
                 },
             ],
-            'drop-shadow-color': [{ 'drop-shadow': [...scale6, isArbitraryVariable, isArbitraryValue] }],
+            'drop-shadow-color': [{ 'drop-shadow': [...scaleColor, isArbitraryVariable, isArbitraryValue] }],
             grayscale: [{ grayscale: ['', isNumber, isArbitraryVariable, isArbitraryValue] }],
             'hue-rotate': [{ 'hue-rotate': [isNumber, isArbitraryVariable, isArbitraryValue] }],
             invert: [{ invert: ['', isNumber, isArbitraryVariable, isArbitraryValue] }],
@@ -1193,9 +1327,9 @@ export const getConfig = () => {
             'backdrop-saturate': [{ 'backdrop-saturate': [isNumber, isArbitraryVariable, isArbitraryValue] }],
             'backdrop-sepia': [{ 'backdrop-sepia': ['', isNumber, isArbitraryVariable, isArbitraryValue] }],
             'border-collapse': [{ border: ['collapse', 'separate'] }],
-            'border-spacing': [{ 'border-spacing': [isArbitraryVariable, isArbitraryValue, ...scale0] }],
-            'border-spacing-x': [{ 'border-spacing-x': [isArbitraryVariable, isArbitraryValue, ...scale0] }],
-            'border-spacing-y': [{ 'border-spacing-y': [isArbitraryVariable, isArbitraryValue, ...scale0] }],
+            'border-spacing': [{ 'border-spacing': [isArbitraryVariable, isArbitraryValue, ...scaleSpacing] }],
+            'border-spacing-x': [{ 'border-spacing-x': [isArbitraryVariable, isArbitraryValue, ...scaleSpacing] }],
+            'border-spacing-y': [{ 'border-spacing-y': [isArbitraryVariable, isArbitraryValue, ...scaleSpacing] }],
             'table-layout': [{ table: ['auto', 'fixed'] }],
             caption: [{ caption: ['top', 'bottom'] }],
             transition: [
@@ -1215,12 +1349,12 @@ export const getConfig = () => {
             ],
             'transition-behavior': [{ transition: ['normal', 'discrete'] }],
             duration: [{ duration: [isNumber, 'initial', isArbitraryVariable, isArbitraryValue] }],
-            ease: [{ ease: ['linear', 'initial', ...scale8, isArbitraryVariable, isArbitraryValue] }],
+            ease: [{ ease: ['linear', 'initial', ...scaleEase, isArbitraryVariable, isArbitraryValue] }],
             delay: [{ delay: [isNumber, isArbitraryVariable, isArbitraryValue] }],
-            animate: [{ animate: ['none', ...scale9, isArbitraryVariable, isArbitraryValue] }],
+            animate: [{ animate: ['none', ...scaleAnimate, isArbitraryVariable, isArbitraryValue] }],
             backface: [{ backface: ['hidden', 'visible'] }],
             perspective: [
-                { perspective: [...scale10, isArbitraryVariable, isArbitraryValue] },
+                { perspective: [...scalePerspective, isArbitraryVariable, isArbitraryValue] },
                 'perspective-none',
             ],
             'perspective-origin': [
@@ -1281,29 +1415,29 @@ export const getConfig = () => {
             'transform-style': [{ transform: ['3d', 'flat'] }],
             translate: [
                 {
-                    translate: [isFraction, 'full', isArbitraryVariable, isArbitraryValue, ...scale0],
+                    translate: [isFraction, 'full', isArbitraryVariable, isArbitraryValue, ...scaleSpacing],
                 },
             ],
             'translate-x': [
                 {
-                    'translate-x': [isFraction, 'full', isArbitraryVariable, isArbitraryValue, ...scale0],
+                    'translate-x': [isFraction, 'full', isArbitraryVariable, isArbitraryValue, ...scaleSpacing],
                 },
             ],
             'translate-y': [
                 {
-                    'translate-y': [isFraction, 'full', isArbitraryVariable, isArbitraryValue, ...scale0],
+                    'translate-y': [isFraction, 'full', isArbitraryVariable, isArbitraryValue, ...scaleSpacing],
                 },
             ],
             'translate-z': [
                 {
-                    'translate-z': [isFraction, 'full', isArbitraryVariable, isArbitraryValue, ...scale0],
+                    'translate-z': [isFraction, 'full', isArbitraryVariable, isArbitraryValue, ...scaleSpacing],
                 },
             ],
             'translate-none': ['translate-none'],
             zoom: [{ zoom: [isInteger, isArbitraryVariable, isArbitraryValue] }],
-            accent: [{ accent: [...scale6, isArbitraryVariable, isArbitraryValue] }, 'accent-auto'],
+            accent: [{ accent: [...scaleColor, isArbitraryVariable, isArbitraryValue] }, 'accent-auto'],
             appearance: [{ appearance: ['none', 'auto'] }],
-            'caret-color': [{ caret: [...scale6, isArbitraryVariable, isArbitraryValue] }],
+            'caret-color': [{ caret: [...scaleColor, isArbitraryVariable, isArbitraryValue] }],
             'color-scheme': [{ scheme: ['normal', 'dark', 'light', 'light-dark', 'only-dark', 'only-light'] }],
             cursor: [
                 {
@@ -1353,32 +1487,32 @@ export const getConfig = () => {
             'pointer-events': [{ 'pointer-events': ['auto', 'none'] }],
             resize: [{ resize: ['none', '', 'y', 'x'] }],
             'scroll-behavior': [{ scroll: ['auto', 'smooth'] }],
-            'scrollbar-thumb-color': [{ 'scrollbar-thumb': [...scale6, isArbitraryVariable, isArbitraryValue] }],
-            'scrollbar-track-color': [{ 'scrollbar-track': [...scale6, isArbitraryVariable, isArbitraryValue] }],
+            'scrollbar-thumb-color': [{ 'scrollbar-thumb': [...scaleColor, isArbitraryVariable, isArbitraryValue] }],
+            'scrollbar-track-color': [{ 'scrollbar-track': [...scaleColor, isArbitraryVariable, isArbitraryValue] }],
             'scrollbar-gutter': [{ 'scrollbar-gutter': ['auto', 'stable', 'both'] }],
             'scrollbar-w': [{ scrollbar: ['auto', 'thin', 'none'] }],
-            'scroll-m': [{ 'scroll-m': [isArbitraryVariable, isArbitraryValue, ...scale0] }],
-            'scroll-mx': [{ 'scroll-mx': [isArbitraryVariable, isArbitraryValue, ...scale0] }],
-            'scroll-my': [{ 'scroll-my': [isArbitraryVariable, isArbitraryValue, ...scale0] }],
-            'scroll-ms': [{ 'scroll-ms': [isArbitraryVariable, isArbitraryValue, ...scale0] }],
-            'scroll-me': [{ 'scroll-me': [isArbitraryVariable, isArbitraryValue, ...scale0] }],
-            'scroll-mbs': [{ 'scroll-mbs': [isArbitraryVariable, isArbitraryValue, ...scale0] }],
-            'scroll-mbe': [{ 'scroll-mbe': [isArbitraryVariable, isArbitraryValue, ...scale0] }],
-            'scroll-mt': [{ 'scroll-mt': [isArbitraryVariable, isArbitraryValue, ...scale0] }],
-            'scroll-mr': [{ 'scroll-mr': [isArbitraryVariable, isArbitraryValue, ...scale0] }],
-            'scroll-mb': [{ 'scroll-mb': [isArbitraryVariable, isArbitraryValue, ...scale0] }],
-            'scroll-ml': [{ 'scroll-ml': [isArbitraryVariable, isArbitraryValue, ...scale0] }],
-            'scroll-p': [{ 'scroll-p': [isArbitraryVariable, isArbitraryValue, ...scale0] }],
-            'scroll-px': [{ 'scroll-px': [isArbitraryVariable, isArbitraryValue, ...scale0] }],
-            'scroll-py': [{ 'scroll-py': [isArbitraryVariable, isArbitraryValue, ...scale0] }],
-            'scroll-ps': [{ 'scroll-ps': [isArbitraryVariable, isArbitraryValue, ...scale0] }],
-            'scroll-pe': [{ 'scroll-pe': [isArbitraryVariable, isArbitraryValue, ...scale0] }],
-            'scroll-pbs': [{ 'scroll-pbs': [isArbitraryVariable, isArbitraryValue, ...scale0] }],
-            'scroll-pbe': [{ 'scroll-pbe': [isArbitraryVariable, isArbitraryValue, ...scale0] }],
-            'scroll-pt': [{ 'scroll-pt': [isArbitraryVariable, isArbitraryValue, ...scale0] }],
-            'scroll-pr': [{ 'scroll-pr': [isArbitraryVariable, isArbitraryValue, ...scale0] }],
-            'scroll-pb': [{ 'scroll-pb': [isArbitraryVariable, isArbitraryValue, ...scale0] }],
-            'scroll-pl': [{ 'scroll-pl': [isArbitraryVariable, isArbitraryValue, ...scale0] }],
+            'scroll-m': [{ 'scroll-m': [isArbitraryVariable, isArbitraryValue, ...scaleSpacing] }],
+            'scroll-mx': [{ 'scroll-mx': [isArbitraryVariable, isArbitraryValue, ...scaleSpacing] }],
+            'scroll-my': [{ 'scroll-my': [isArbitraryVariable, isArbitraryValue, ...scaleSpacing] }],
+            'scroll-ms': [{ 'scroll-ms': [isArbitraryVariable, isArbitraryValue, ...scaleSpacing] }],
+            'scroll-me': [{ 'scroll-me': [isArbitraryVariable, isArbitraryValue, ...scaleSpacing] }],
+            'scroll-mbs': [{ 'scroll-mbs': [isArbitraryVariable, isArbitraryValue, ...scaleSpacing] }],
+            'scroll-mbe': [{ 'scroll-mbe': [isArbitraryVariable, isArbitraryValue, ...scaleSpacing] }],
+            'scroll-mt': [{ 'scroll-mt': [isArbitraryVariable, isArbitraryValue, ...scaleSpacing] }],
+            'scroll-mr': [{ 'scroll-mr': [isArbitraryVariable, isArbitraryValue, ...scaleSpacing] }],
+            'scroll-mb': [{ 'scroll-mb': [isArbitraryVariable, isArbitraryValue, ...scaleSpacing] }],
+            'scroll-ml': [{ 'scroll-ml': [isArbitraryVariable, isArbitraryValue, ...scaleSpacing] }],
+            'scroll-p': [{ 'scroll-p': [isArbitraryVariable, isArbitraryValue, ...scaleSpacing] }],
+            'scroll-px': [{ 'scroll-px': [isArbitraryVariable, isArbitraryValue, ...scaleSpacing] }],
+            'scroll-py': [{ 'scroll-py': [isArbitraryVariable, isArbitraryValue, ...scaleSpacing] }],
+            'scroll-ps': [{ 'scroll-ps': [isArbitraryVariable, isArbitraryValue, ...scaleSpacing] }],
+            'scroll-pe': [{ 'scroll-pe': [isArbitraryVariable, isArbitraryValue, ...scaleSpacing] }],
+            'scroll-pbs': [{ 'scroll-pbs': [isArbitraryVariable, isArbitraryValue, ...scaleSpacing] }],
+            'scroll-pbe': [{ 'scroll-pbe': [isArbitraryVariable, isArbitraryValue, ...scaleSpacing] }],
+            'scroll-pt': [{ 'scroll-pt': [isArbitraryVariable, isArbitraryValue, ...scaleSpacing] }],
+            'scroll-pr': [{ 'scroll-pr': [isArbitraryVariable, isArbitraryValue, ...scaleSpacing] }],
+            'scroll-pb': [{ 'scroll-pb': [isArbitraryVariable, isArbitraryValue, ...scaleSpacing] }],
+            'scroll-pl': [{ 'scroll-pl': [isArbitraryVariable, isArbitraryValue, ...scaleSpacing] }],
             'snap-align': [{ snap: ['start', 'end', 'center', 'align-none'] }],
             'snap-stop': [{ snap: ['normal', 'always'] }],
             'snap-type': [{ snap: ['none', 'x', 'y', 'both'] }],
@@ -1400,13 +1534,13 @@ export const getConfig = () => {
                     ],
                 },
             ],
-            fill: [{ fill: ['none', ...scale6, isArbitraryVariable, isArbitraryValue] }],
+            fill: [{ fill: ['none', ...scaleColor, isArbitraryVariable, isArbitraryValue] }],
             'stroke-w': [
                 {
                     stroke: [isNumber, isArbitraryVariableLength, isArbitraryLength, isArbitraryNumber],
                 },
             ],
-            stroke: [{ stroke: ['none', ...scale6, isArbitraryVariable, isArbitraryValue] }],
+            stroke: [{ stroke: ['none', ...scaleColor, isArbitraryVariable, isArbitraryValue] }],
             'forced-color-adjust': [{ 'forced-color-adjust': ['auto', 'none'] }],
         },
         conflictingClassGroups: {
