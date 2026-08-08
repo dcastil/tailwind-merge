@@ -50,6 +50,13 @@ async function main(argv: string[]) {
                 .join('; ')}`,
         )
     }
+    for (const { className, keptGroupId, removedFromGroupIds } of plan.report.resolvedCollisions) {
+        console.log(
+            keptGroupId === null
+                ? `Resolved name collision: '${className}' resolves through multiple utilities and will pass through unmerged`
+                : `Resolved name collision: '${className}' stays in ${keptGroupId}, removed the shadowing value from ${removedFromGroupIds.join(', ')}`,
+        )
+    }
     for (const { className, reason } of plan.report.unassignedClasses) {
         console.warn(
             `Warning: could not determine a class group for '${className}' (${reason}). It will be treated like a non-Tailwind class when merging.`,

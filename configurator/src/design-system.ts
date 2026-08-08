@@ -36,37 +36,53 @@ export async function loadDesignSystems({ css, base }: LoadDesignSystemsOptions)
 }
 
 /**
- * Compiles a class through Tailwind and returns the set of CSS properties (custom properties included) it declares, or null when the class produces no CSS. `@property` registrations are stripped first: composable utilities share them without conflicting, so they are noise for conflict semantics. This is the same signature the test oracle uses to decide whether two classes conflict, which is exactly why group classification uses it too.
+ * Compiles a class through Tailwind and returns its declarations as property → value text, or null when the class produces no CSS. `@property` registrations are stripped first: composable utilities share them without conflicting, so they are noise for conflict semantics. Values matter to the conflict oracle: two classes re-declaring the same property with identical `var()`-composed text (like `border-spacing: var(--tw-border-spacing-x) var(--tw-border-spacing-y)`) carry their state in the custom properties, not the declaration itself.
  */
+export function declaredDeclarations(
+    designSystem: DesignSystemAccess,
+    className: string,
+): Map<string, string> | null {
+    let cache = declarationsCache.get(designSystem)
+    if (!cache) {
+        cache = new Map()
+        declarationsCache.set(designSystem, cache)
+    }
+
+    let declarations = cache.get(className)
+    if (declarations === undefined) {
+        const css = designSystem.candidatesToCss([className])[0] ?? null
+        if (css === null) {
+            declarations = null
+        } else {
+            declarations = new Map()
+            const withoutPropertyRules = css.replace(/@property[^{]*\{[^}]*\}/g, '')
+            for (const match of withoutPropertyRules.matchAll(
+                /^\s*(--[\w-]+|[a-z-]+)\s*:\s*([^;]+);/gim,
+            )) {
+                declarations.set(match[1]!, match[2]!.trim())
+            }
+        }
+        cache.set(className, declarations)
+    }
+
+    return declarations
+}
+
+/** The set of declared property names — the signature used for class-group classification, where values don't matter. */
 export function declaredProperties(
     designSystem: DesignSystemAccess,
     className: string,
 ): Set<string> | null {
-    let cache = declaredPropertiesCache.get(designSystem)
-    if (!cache) {
-        cache = new Map()
-        declaredPropertiesCache.set(designSystem, cache)
-    }
-
-    let properties = cache.get(className)
-    if (properties === undefined) {
-        const css = designSystem.candidatesToCss([className])[0] ?? null
-        if (css === null) {
-            properties = null
-        } else {
-            properties = new Set()
-            const declarations = css.replace(/@property[^{]*\{[^}]*\}/g, '')
-            for (const match of declarations.matchAll(/^\s*(--[\w-]+|[a-z-]+)\s*:/gim)) {
-                properties.add(match[1]!)
-            }
-        }
-        cache.set(className, properties)
-    }
-
-    return properties
+    const declarations = declaredDeclarations(designSystem, className)
+    return declarations === null ? null : new Set(declarations.keys())
 }
 
-const declaredPropertiesCache = new WeakMap<DesignSystemAccess, Map<string, Set<string> | null>>()
+const declarationsCache = new WeakMap<DesignSystemAccess, Map<string, Map<string, string> | null>>()
+
+/** Proper-subset check over property names, used to recognize classes whose declarations span multiple groups' signatures. */
+export function haveProperSubset(subset: Set<string>, superset: Set<string>): boolean {
+    return subset.size < superset.size && [...subset].every((property) => superset.has(property))
+}
 
 /** Set equality over property names — the strict form of "these classes set the same things". */
 export function havePropertiesEqual(first: Set<string>, second: Set<string>): boolean {

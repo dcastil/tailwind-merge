@@ -36,6 +36,12 @@ export interface PlanReport {
     prunedClassGroups: string[]
     /** Full class names appended per class group by the vanilla-diff augmentation pass — classes from compat sub-namespaces (`--text-color-*`) and namespaces without a tailwind-merge theme key (`--z-index-*`). */
     augmentedClassGroups: Record<string, string[]>
+    /** Name collisions resolved after a theme value name shadowed an existing class (e.g. `--color-bottom` vs `bg-bottom`). `keptGroupId` names the group the class stays in, or is null when the class now resolves through multiple utilities at once and was neutralized — removed from every group so it passes through unmerged. */
+    resolvedCollisions: {
+        className: string
+        keptGroupId: string | null
+        removedFromGroupIds: string[]
+    }[]
     /** Theme-created classes no group could be determined for. Reported so gaps are visible instead of silently unmergeable. */
     unassignedClasses: { className: string; reason: string }[]
 }
@@ -143,6 +149,7 @@ export function buildPlan({ snapshot, cacheSize }: BuildPlanOptions): ConfigPlan
             ),
             prunedClassGroups,
             augmentedClassGroups: {},
+            resolvedCollisions: [],
             unassignedClasses: [],
         },
     }
@@ -155,6 +162,12 @@ export function applyAugmentations(
     plan: ConfigPlan,
     augmentations: {
         assignments: Map<string, string[]>
+        collisions: {
+            className: string
+            claimingGroupId: string
+            vanillaGroupId: string
+            resolution: 'restore' | 'neutralize'
+        }[]
         unassigned: { className: string; reason: string }[]
     },
 ): void {
@@ -172,7 +185,62 @@ export function applyAugmentations(
         plan.report.augmentedClassGroups[classGroupId] = classNames
     }
 
-    plan.report.unassignedClasses = augmentations.unassigned
+    plan.report.unassignedClasses = [...augmentations.unassigned]
+
+    // Collisions are resolved by removing claims. Each group array holds its own copy of the scale items, so a removed value keeps working for every other utility root (with `--color-xl`, removing `xl` under `drop-shadow` leaves `text-xl` a color). 'restore' removes only the new claim — the original group's own machinery then classifies the class again. 'neutralize' removes the claims of both groups, because a class compiling into multiple rules at once must not be merged away in either direction.
+    for (const { className, claimingGroupId, vanillaGroupId, resolution } of augmentations.collisions) {
+        const groupIdsToRemoveFrom =
+            resolution === 'restore' ? [claimingGroupId] : [claimingGroupId, vanillaGroupId]
+        const removedFromGroupIds = groupIdsToRemoveFrom.filter((groupId) => {
+            const items = plan.classGroups.get(groupId)
+            return items !== undefined && removeClassClaim(items, className)
+        })
+
+        if (removedFromGroupIds.length === groupIdsToRemoveFrom.length) {
+            plan.report.resolvedCollisions.push({
+                className,
+                keptGroupId: resolution === 'restore' ? vanillaGroupId : null,
+                removedFromGroupIds,
+            })
+        } else {
+            plan.report.unassignedClasses.push({
+                className,
+                reason: `name collision with ${claimingGroupId} could not be fully resolved (a claim is not a plain value that can be removed)`,
+            })
+        }
+    }
+}
+
+/**
+ * Removes the item that makes `className` resolve into this group: either a top-level full-class literal, or a literal value inside an object entry whose key prefixes the class name. Returns false when the claim comes from something else (a validator or a compressed family), which the caller reports instead of guessing.
+ */
+function removeClassClaim(items: PlanValue[], className: string): boolean {
+    for (let index = 0; index < items.length; index++) {
+        const item = items[index]!
+
+        if (item.kind === 'class' && item.value === className) {
+            items.splice(index, 1)
+            return true
+        }
+
+        if (item.kind === 'object') {
+            for (const [key, entryItems] of item.entries) {
+                if (!className.startsWith(`${key}-`)) {
+                    continue
+                }
+                const valueName = className.slice(key.length + 1)
+                const valueIndex = entryItems.findIndex(
+                    (entryItem) => entryItem.kind === 'class' && entryItem.value === valueName,
+                )
+                if (valueIndex !== -1) {
+                    entryItems.splice(valueIndex, 1)
+                    return true
+                }
+            }
+        }
+    }
+
+    return false
 }
 
 /**
@@ -214,19 +282,16 @@ function encodeThemeScale(themeKey: string, snapshot: ThemeSnapshot): ScaleEncod
     }
 
     if (themeKey === 'spacing') {
-        // A bare `--spacing` variable enables Tailwind's numeric spacing scale (`p-13` works via multiplication), plus the static `px` value. Without it, only named `--spacing-*` values produce classes, so the number validator must not be emitted.
+        // The static `px` value (1px) is utility semantics and exists regardless of the theme. The numeric scale (`p-13` via multiplication) only exists while the bare `--spacing` multiplier variable is set, so the number validator must not be emitted without it.
         const encoding = encodeScale(names)
-        if (!scale?.hasBareValue) {
-            return encoding
+        const items: PlanValue[] = [{ kind: 'class', value: 'px' }]
+        let strategy = encoding.strategy
+        if (scale?.hasBareValue) {
+            items.push({ kind: 'validator', name: 'isNumber' })
+            strategy = names.length === 0 ? 'multiplier' : `multiplier+${encoding.strategy}`
         }
-        return {
-            items: [
-                { kind: 'class', value: 'px' },
-                { kind: 'validator', name: 'isNumber' },
-                ...encoding.items,
-            ],
-            strategy: names.length === 0 ? 'multiplier' : `multiplier+${encoding.strategy}`,
-        }
+        items.push(...encoding.items)
+        return { items, strategy }
     }
 
     return encodeScale(names)

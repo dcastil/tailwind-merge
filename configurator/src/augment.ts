@@ -1,8 +1,25 @@
-import { DesignSystemAccess, declaredProperties, havePropertiesEqual } from './design-system'
+import {
+    DesignSystemAccess,
+    declaredProperties,
+    haveProperSubset,
+    havePropertiesEqual,
+} from './design-system'
+
+export interface CollisionResolution {
+    className: string
+    /** The group whose scale value wrongly claimed the class. */
+    claimingGroupId: string
+    /** The group the class resolved to before the theme changed it. */
+    vanillaGroupId: string
+    /** 'restore': the original classification is still correct, remove the new claim. 'neutralize': the class now resolves through multiple utilities at once, so it must not belong to any group — remove every claim and let it pass through unmerged. */
+    resolution: 'restore' | 'neutralize'
+}
 
 export interface AugmentationResult {
     /** Full class names to append per class group ID, in class-list order. */
     assignments: Map<string, string[]>
+    /** Existing classes whose classification the theme accidentally changed (a value name shadowing them), e.g. `bg-bottom` with a `--color-bottom` defined. */
+    collisions: CollisionResolution[]
     /** New classes no group could be determined for, with the reason — reported instead of guessed. */
     unassigned: { className: string; reason: string }[]
 }
@@ -82,7 +99,68 @@ export function buildAugmentations({
         }
     }
 
-    return { assignments, unassigned }
+    // Collision corrections: a theme value name can shadow a class that already exists (`--color-bottom` vs the `bg-bottom` position, `--color-xl` vs the `drop-shadow-xl` size). Which side Tailwind resolves differs per utility — `text-xl` genuinely becomes a color while `drop-shadow-xl` stays a size — so every class whose classification changed relative to the vanilla config is re-checked against its compiled output. Classes that now compile into multiple rules at once belong to no group at all.
+    const collisions: CollisionResolution[] = []
+
+    for (const className of vanillaClassNames) {
+        const projectGroupId = projectClassGroupId(className)
+        const vanillaGroupId = vanillaClassGroupId(className)
+        if (
+            projectGroupId === vanillaGroupId ||
+            projectGroupId === undefined ||
+            vanillaGroupId === undefined
+        ) {
+            continue
+        }
+
+        const registrationName = className.startsWith('-') ? className.slice(1) : className
+        if (handledNames.has(registrationName)) {
+            continue
+        }
+
+        const properties = declaredProperties(project, className)
+        if (properties === null || properties.size === 0) {
+            continue
+        }
+        handledNames.add(registrationName)
+
+        const targetGroupId = classifyByProperties(
+            className,
+            properties,
+            exemplarsByFirstSegment,
+            vanilla,
+        )
+
+        if (targetGroupId === projectGroupId) {
+            // Tailwind really does resolve the class differently now (e.g. `text-xl` becoming a color) — the new classification is correct.
+            continue
+        }
+        if (typeof targetGroupId !== 'string' && targetGroupId.isJanus) {
+            collisions.push({
+                className: registrationName,
+                claimingGroupId: projectGroupId,
+                vanillaGroupId,
+                resolution: 'neutralize',
+            })
+        } else if (targetGroupId === vanillaGroupId) {
+            collisions.push({
+                className: registrationName,
+                claimingGroupId: projectGroupId,
+                vanillaGroupId,
+                resolution: 'restore',
+            })
+        } else {
+            unassigned.push({
+                className: registrationName,
+                reason:
+                    typeof targetGroupId === 'string'
+                        ? `classification changed to an unexpected group (${targetGroupId})`
+                        : `classification changed but ${targetGroupId.reason}`,
+            })
+        }
+    }
+
+    return { assignments, collisions, unassigned }
 }
 
 /**
@@ -116,28 +194,39 @@ function classifyByProperties(
     properties: Set<string>,
     exemplarsByFirstSegment: Map<string, Map<string, string>>,
     vanilla: DesignSystemAccess,
-): string | { reason: string } {
+): string | { reason: string; isJanus: boolean } {
     const groupExemplars = exemplarsByFirstSegment.get(firstNameSegment(className))
     if (!groupExemplars || groupExemplars.size === 0) {
-        return { reason: 'no vanilla classes share its root' }
+        return { reason: 'no vanilla classes share its root', isJanus: false }
     }
 
     const matches: string[] = []
+    let containedSignatures = 0
     for (const [classGroupId, exemplarClassName] of groupExemplars) {
         const exemplarProperties = declaredProperties(vanilla, exemplarClassName)
-        if (exemplarProperties !== null && havePropertiesEqual(properties, exemplarProperties)) {
+        if (exemplarProperties === null) {
+            continue
+        }
+        if (havePropertiesEqual(properties, exemplarProperties)) {
             matches.push(classGroupId)
+        } else if (haveProperSubset(exemplarProperties, properties)) {
+            containedSignatures += 1
         }
     }
 
     if (matches.length === 1) {
         return matches[0]!
     }
+    if (matches.length === 0 && containedSignatures >= 2) {
+        // Tailwind resolved the candidate through several interpretations at once and emitted all their declarations in one rule (e.g. `bg-bottom` with a `--color-bottom` theme value declares both background-color and background-position). Such a class cannot belong to one conflict group: merging it away in either direction would lose part of its effect.
+        return { reason: 'resolves as multiple utilities at once', isJanus: true }
+    }
     return {
         reason:
             matches.length === 0
                 ? 'no candidate group declares the same CSS properties'
                 : `ambiguous between class groups ${matches.join(', ')}`,
+        isJanus: false,
     }
 }
 
