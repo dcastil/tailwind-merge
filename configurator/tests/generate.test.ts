@@ -1,11 +1,11 @@
 import { mkdir, writeFile } from 'node:fs/promises'
 import { fileURLToPath } from 'node:url'
 
-import { __unstable__loadDesignSystem } from '@tailwindcss/node'
 import { describe, expect, test } from 'vitest'
 
 import { createTailwindMerge, twMerge as defaultTwMerge } from '../../src'
 import { generate } from '../src'
+import { declaredProperties, loadDesignSystems } from '../src/design-system'
 
 const base = fileURLToPath(new URL('.', import.meta.url))
 const vanillaCss = "@import 'tailwindcss';"
@@ -67,30 +67,10 @@ describe('generate from vanilla Tailwind CSS', () => {
     })
 
     test('matches Tailwind conflict semantics across the design-system class list', async () => {
-        const designSystem = await __unstable__loadDesignSystem(vanillaCss, { base })
+        const { project: designSystem } = await loadDesignSystems({ css: vanillaCss, base })
         const classNames = designSystem.getClassList().map(([className]) => className)
 
         expect(classNames.length).toBeGreaterThan(20_000)
-
-        // Compiles a class through Tailwind and records which CSS properties (custom properties included) it declares. `@property` registrations are stripped first since composable utilities share them without conflicting.
-        const propertiesCache = new Map<string, Set<string> | null>()
-        const declaredProperties = (className: string): Set<string> | null => {
-            let properties = propertiesCache.get(className)
-            if (properties === undefined) {
-                const css = designSystem.candidatesToCss([className])[0] ?? null
-                if (css === null) {
-                    properties = null
-                } else {
-                    properties = new Set()
-                    const declarations = css.replace(/@property[^{]*\{[^}]*\}/g, '')
-                    for (const match of declarations.matchAll(/^\s*(--[\w-]+|[a-z-]+)\s*:/gim)) {
-                        properties.add(match[1]!)
-                    }
-                }
-                propertiesCache.set(className, properties)
-            }
-            return properties
-        }
 
         // Neighboring entries in the class list mostly share a utility root, so pairing them yields a high density of actual conflicts. Every consecutive pair is swept — no sampling. Where generated and default config disagree, Tailwind itself referees: two classes conflict when their compiled declarations overlap. The generated config must always match the oracle; places where the default config doesn't are known misclassifications that exact theme knowledge fixes, and they are snapshotted below as the intended-divergence report.
         const failures: { input: string; generated: string; default: string; oracle: string }[] = []
@@ -107,8 +87,8 @@ describe('generate from vanilla Tailwind CSS', () => {
                 continue
             }
 
-            const firstProperties = declaredProperties(first)
-            const secondProperties = declaredProperties(second)
+            const firstProperties = declaredProperties(designSystem, first)
+            const secondProperties = declaredProperties(designSystem, second)
             const conflictExpected =
                 firstProperties !== null &&
                 secondProperties !== null &&
@@ -142,6 +122,11 @@ describe('generate from vanilla Tailwind CSS', () => {
         expect(plan.report.scaleStrategies['text']).toBe('mixed:isTshirtSize')
         expect(plan.report.scaleStrategies['spacing']).toBe('multiplier')
         expect(plan.report.scaleStrategies['font-weight']).toBe('enumerated')
+    })
+
+    test('needs no augmentations on the vanilla theme', () => {
+        expect(plan.report.augmentedClassGroups).toEqual({})
+        expect(plan.report.unassignedClasses).toEqual([])
     })
 
     test('emitted module matches snapshot', async () => {

@@ -42,6 +42,19 @@ const main = async (argv: string[]) => {
     if (plan.report.prunedClassGroups.length > 0) {
         console.log(`Pruned class groups: ${plan.report.prunedClassGroups.join(', ')}`)
     }
+    const augmented = Object.entries(plan.report.augmentedClassGroups)
+    if (augmented.length > 0) {
+        console.log(
+            `Classes added beyond standard namespaces: ${augmented
+                .map(([classGroupId, classNames]) => `${classGroupId} += ${classNames.join(', ')}`)
+                .join('; ')}`,
+        )
+    }
+    for (const { className, reason } of plan.report.unassignedClasses) {
+        console.warn(
+            `Warning: could not determine a class group for '${className}' (${reason}). It will be treated like a non-Tailwind class when merging.`,
+        )
+    }
 }
 
 const parseArguments = (argv: string[]) => {
