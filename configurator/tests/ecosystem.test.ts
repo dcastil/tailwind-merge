@@ -4,7 +4,7 @@ import { describe, expect, test } from 'vitest'
 
 import { assertTailwindConformance, generateFixture } from './fixture-utils'
 
-// Custom @utility definitions get bounded support: each root becomes a self-conflict group (static roots as single classes, functional roots matching any value), with no inferred conflicts against built-in groups — see PROPOSAL.md for the scope decision.
+// Custom @utility support is empirical, in tiers derived from compiled declarations (see PROPOSAL.md): static utilities matching exactly one built-in group's signature join that group as aliases, every other root becomes a self-conflict group, and a self-conflict utility whose unconditional element-level declarations fully cover another group's gets an override edge so it removes that group's classes when it comes later.
 describe('theme with custom @utility definitions', async () => {
     const { twMerge, plan, designSystem } = await generateFixture(`
 @import 'tailwindcss';
@@ -30,19 +30,129 @@ describe('theme with custom @utility definitions', async () => {
         expect(twMerge('zz-[13] zz-2')).toBe('zz-2')
     })
 
-    test('custom utilities never conflict across groups', () => {
-        expect(twMerge('btn zz-2')).toBe('btn zz-2')
+    test('alias utilities join the built-in group and merge in both directions', () => {
+        expect(plan.report.aliasedUtilityClasses).toEqual({ 'scrollbar-hide': 'scrollbar-w' })
+        expect(twMerge('scrollbar-hide scrollbar-thin')).toBe('scrollbar-thin')
+        expect(twMerge('scrollbar-thin scrollbar-hide')).toBe('scrollbar-hide')
+    })
+
+    test('a utility fully covering other groups removes their classes when it comes later, but not the other way around', () => {
+        // btn sets padding and border-radius, so an earlier p-4 or rounded-lg has no visible effect left.
+        expect(twMerge('p-4 btn')).toBe('btn')
+        expect(twMerge('rounded-lg btn')).toBe('btn')
+        expect(twMerge('px-2 rounded-t-sm btn')).toBe('btn')
+        // The reverse only overrides part of btn — removing btn would lose the rest of its effect.
         expect(twMerge('btn p-4')).toBe('btn p-4')
+        expect(twMerge('btn rounded-lg')).toBe('btn rounded-lg')
+    })
+
+    test('utilities covering nothing stay independent', () => {
+        expect(twMerge('btn zz-2')).toBe('btn zz-2')
         expect(twMerge('scrollbar-hide btn')).toBe('scrollbar-hide btn')
     })
 
-    test('reports the self-conflict groups and leaves nothing unassigned', () => {
-        expect(plan.report.customUtilityGroups.sort()).toEqual([
-            'utility.btn',
-            'utility.scrollbar-hide',
-            'utility.zz',
-        ])
+    test('reports the groups and overrides and leaves nothing unassigned', () => {
+        expect(plan.report.customUtilityGroups.sort()).toEqual(['utility.btn', 'utility.zz'])
+        expect(plan.report.customUtilityConflicts['utility.btn']).toContain('p')
+        expect(plan.report.customUtilityConflicts['utility.btn']).toContain('rounded')
         expect(plan.report.unassignedClasses).toEqual([])
+    })
+})
+
+// Utility shapes distilled from real-world files: pseudo-element overlays (shadcn's border-ghost), conditional declarations (shadcn's extend-touch-target), and a composable family sharing scaffolding while carrying state in custom properties (supabase's hit-area). Override inference must see through all three: only unconditional element-level declarations justify removing another class.
+describe('theme with pseudo-element, conditional, and state-carrying custom utilities', async () => {
+    const { twMerge, plan, designSystem } = await generateFixture(`
+@import 'tailwindcss';
+@utility overlay-frame {
+    position: relative;
+    &::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        border-width: 1px;
+        border-color: red;
+    }
+}
+@utility touch-pad {
+    @media (pointer: coarse) {
+        padding: 1rem;
+    }
+}
+@custom-variant dark (&:is(.dark *));
+@utility frame-line {
+    border-color: red;
+    &:is(.dark *) {
+        border-color: white;
+    }
+}
+@utility expand {
+    position: relative;
+    &::before {
+        content: '';
+        position: absolute;
+        inset: var(--expand-t, 0px) var(--expand-r, 0px) var(--expand-b, 0px) var(--expand-l, 0px);
+    }
+}
+@utility expand-* {
+    position: relative;
+    --expand-t: --spacing(--value(number) * -1);
+    --expand-r: --spacing(--value(number) * -1);
+    --expand-b: --spacing(--value(number) * -1);
+    --expand-l: --spacing(--value(number) * -1);
+    &::before {
+        content: '';
+        position: absolute;
+        inset: var(--expand-t, 0px) var(--expand-r, 0px) var(--expand-b, 0px) var(--expand-l, 0px);
+    }
+}
+@utility expand-t-* {
+    position: relative;
+    --expand-t: --spacing(--value(number) * -1);
+    &::before {
+        content: '';
+        position: absolute;
+        inset: var(--expand-t, 0px) var(--expand-r, 0px) var(--expand-b, 0px) var(--expand-l, 0px);
+    }
+}
+`)
+
+    test('conforms to Tailwind conflict semantics across the class list', () => {
+        assertTailwindConformance(designSystem, twMerge, plan)
+    })
+
+    test('a pseudo-element border never merges with element-level borders', () => {
+        expect(twMerge('border-red-500 overlay-frame')).toBe('border-red-500 overlay-frame')
+        expect(twMerge('overlay-frame border-red-500')).toBe('overlay-frame border-red-500')
+    })
+
+    test('a conditional re-declaration of its own property does not stop a utility from aliasing', () => {
+        expect(plan.report.aliasedUtilityClasses).toEqual({ 'frame-line': 'border-color' })
+        expect(twMerge('frame-line border-red-500')).toBe('border-red-500')
+        expect(twMerge('border-red-500 frame-line')).toBe('frame-line')
+    })
+
+    test('an element-level position declaration still overrides position classes', () => {
+        expect(twMerge('relative overlay-frame')).toBe('overlay-frame')
+        expect(twMerge('static expand-2')).toBe('expand-2')
+    })
+
+    test('conditional declarations never justify removal', () => {
+        expect(twMerge('p-2 touch-pad')).toBe('p-2 touch-pad')
+        expect(twMerge('touch-pad p-2')).toBe('touch-pad p-2')
+    })
+
+    test('values subsume the bare scaffold and broader values subsume narrower ones, not the other way around', () => {
+        expect(twMerge('expand expand-4')).toBe('expand-4')
+        expect(twMerge('expand expand-t-2')).toBe('expand-t-2')
+        expect(twMerge('expand-t-2 expand-4')).toBe('expand-4')
+        // The reverse directions would lose state the later class doesn't set.
+        expect(twMerge('expand-4 expand')).toBe('expand-4 expand')
+        expect(twMerge('expand-4 expand-t-2')).toBe('expand-4 expand-t-2')
+    })
+
+    test('values within one root merge, values of sibling roots do not', () => {
+        expect(twMerge('expand-t-2 expand-t-4')).toBe('expand-t-4')
+        expect(twMerge('expand-2 expand-4')).toBe('expand-4')
     })
 })
 

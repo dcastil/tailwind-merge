@@ -2,11 +2,11 @@ import { getDefaultConfig } from 'tailwind-merge'
 import { AnyConfig, createClassGroupUtils } from 'tailwind-merge/unstable-do-not-import'
 
 import { buildAugmentations } from './augment'
-import { buildCustomUtilityGroups } from './custom-utilities'
+import { buildCustomUtilityPlan } from './custom-utilities'
 import { loadDesignSystems } from './design-system'
 import { emitModule } from './emit'
 import { materializeConfig } from './materialize'
-import { ConfigPlan, applyAugmentations, applyCustomUtilityGroups, buildPlan } from './plan'
+import { ConfigPlan, applyAugmentations, applyCustomUtilityPlan, buildPlan } from './plan'
 import { snapshotTheme } from './snapshot'
 
 export interface GenerateOptions {
@@ -44,15 +44,24 @@ export async function generate(options: GenerateOptions): Promise<GenerateResult
         snapshot: snapshotTheme(project, themeKeys),
         cacheSize: options.cacheSize,
     })
-    // Registered before the diff passes run, so classes of custom utilities count as classified and don't show up as unassigned.
-    applyCustomUtilityGroups(plan, buildCustomUtilityGroups(project, vanilla))
 
     // Both classifiers reuse the configurator's own output: the pre-augmentation project config decides which new classes are already covered, the vanilla config buckets sibling classes into the candidate groups for classification. They run without the prefix because class-list names are unprefixed — the prefix only applies to real candidates like `tw:bg-red-500`.
     const vanillaPlan = buildPlan({ snapshot: snapshotTheme(vanilla, themeKeys) })
+    const vanillaClassGroupUtils = createClassGroupUtils(materializeConfig(vanillaPlan))
+
+    // Applied before the diff passes run, so classes of custom utilities count as classified and don't show up as unassigned — whether they joined a built-in group as an alias or got their own group.
+    applyCustomUtilityPlan(
+        plan,
+        buildCustomUtilityPlan({
+            project,
+            vanilla,
+            vanillaClassGroupId: vanillaClassGroupUtils.getClassGroupId,
+        }),
+    )
+
     const projectClassGroupUtils = createClassGroupUtils(
         materializeConfig({ ...plan, prefix: null }),
     )
-    const vanillaClassGroupUtils = createClassGroupUtils(materializeConfig(vanillaPlan))
 
     applyAugmentations(
         plan,
