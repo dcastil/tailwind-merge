@@ -97,14 +97,15 @@ input CSS entrypoint
 adapter: load design system ──────────► tailwindcss / @tailwindcss/node
         │                               (__unstable__loadDesignSystem)
         ▼
-snapshot: { themeEntries, prefix, customUtilities, variants,
-            probedNamespaceLinks (sentinel pass + candidatesToCss) }
+snapshot: { themeEntries, prefix, customUtilities, variants }
+          + vanilla design system from the same install, as diff baseline
         │
         ▼
 plan: getDefaultConfig() skeleton × snapshot
       → substitute theme getters with resolved scales
       → prune reset/empty scales and dead groups (+ conflict edges)
-      → augment groups from sub-namespace probe results
+      → augment groups with theme-created classes found by diffing against
+        the vanilla class list, classified by their compiled declarations
       → append class groups for custom @utility roots
       → set prefix
         │
@@ -153,7 +154,7 @@ Notable mechanics:
 
 - **Validator identity → import name.** The generator walks the skeleton, and every function it encounters is either a theme getter (`isThemeGetter === true` — substituted) or one of the 25 public validators (matched by identity against the `validators` namespace, emitted as `v.<name>`). Shared scales are hoisted into local consts to keep the output small and readable.
 - **Derived, not maintained.** Theme values, sub-namespace links, custom utilities, prefix, and `--spacing` behavior are all read or probed from the design system at generation time. The only maintained knowledge is what the repo maintains today anyway (`default-config.ts`) plus the small probe harness and emitter.
-- **Probing beats tables even on weird inputs.** Because Tailwind's theme is a flat map, a variable like `--text-color-primary` simultaneously makes `text-primary` a color (via the `--text-color` namespace) and `text-color-primary` a font size (via the `--text` namespace with key `color-primary`). `candidatesToCss` reports both faithfully; a hand-maintained mapping would likely get such cases wrong.
+- **Empirical classification beats tables even on weird inputs.** Sub-namespace support ended up implemented as a vanilla-diff correction pass instead of the sentinel probing sketched during the interview — it answers the actual question directly: which classes did *this* theme create, and which group owns each one. New classes (project class list minus vanilla class list, from the same Tailwind install) that the standard namespace flow doesn't already classify are matched against candidate groups derived from their vanilla siblings, each represented by one exemplar's declared-property signature: `text-primary` declares `color` like `text-red-500` does, not `font-size` like `text-xl`. Flat-map oddities stay handled — `--text-color-primary` simultaneously makes `text-primary` a color and `text-color-primary` a font size, and both land correctly. Ambiguous or unmatched classes are reported (`unassignedClasses`), never guessed.
 - **Custom `@utility`:** static utilities become single-class groups; functional utilities become a group fed by their completion values plus arbitrary-value validators. Self-conflict (same root replaces same root) is the correct default; cross-conflicts with built-ins can't be inferred and stay out of scope for v1 (escape hatch: the generated module remains composable, see below).
 - **Lazy by construction.** Everything is built inside `getConfig`, which `createTailwindMerge` invokes on the first `twMerge` call — module evaluation allocates nothing, matching the library's lazy-init design (measured: import ~1.4 ms, first call ~2.9 ms including config build, on par with the default `twMerge`).
 - **Size is measured, not assumed.** Two emitter insights came out of measurement: validator references are destructured into bare identifiers because property accesses like `.isArbitraryVariable` survive minification while local bindings get mangled, and deduplicating repetition into shared consts shrinks the minified size but *grows* the compressed size, because references add entropy where gzip/brotli handled the repetition nearly for free. The default sharing policy (`'scales'`) optimizes compressed size — the metric network transfer pays — while an `'aggressive'` mode optimizes minified size; the measured numbers live on `EmitOptions.sharing`.
@@ -184,7 +185,7 @@ The repo is already a pnpm workspace (`pnpm-workspace.yaml` lists `.` and `.gith
 
 - **P0 — research + feasibility spike.** Done (this document; spike verified against 4.3.3).
 - **P1 — vanilla exactness.** Done. Skeleton-transform generator + emitter with scale compression, full-sweep differential over all ~23k consecutive class-list pairs with Tailwind-as-oracle adjudication (`candidatesToCss` declaration overlap), intended-divergence snapshot, size measurement. Result: zero oracle failures; the only divergences from current `twMerge` on existing classes are two cases around `shadow-inner` where the default config is provably wrong today; vanilla bundle at compressed parity (7,706 B vs 7,463 B brotli, +3.3%; 8,822 B vs 8,516 B gzip) under the compressed-optimal default sharing policy.
-- **P2 — real themes.** Overrides, extensions, resets, compat sub-namespaces via sentinel probing, `--spacing` logic, compound keys (`--text-*--line-height`). Exit: Replit-style CSS produces correct merges; regression scenarios from #684/#657/#631 pass.
+- **P2 — real themes.** Done. Overrides, extensions, resets, `--spacing` logic and compound keys ride on the standard namespace flow; classes from compat sub-namespaces (`--text-color-*`, `--background-color-*`) and from namespaces without a tailwind-merge theme key (`--z-index-*`, `--border-width-*`) are picked up by the vanilla-diff augmentation pass and classified by declared-property signatures (negative variants normalize to their positive form). Exit criteria met: the Replit-style fixture merges correctly with issues #684/#657/#631 reproduced as passing tests, reset palette values stop merging, a disabled `--spacing` multiplier removes numeric spacing classes, and the fixture bundle stays at compressed parity (7,684 B brotli vs 7,463 B for the default config) while being correct where the default config is broken.
 - **P3 — ecosystem completeness.** Prefix, `@config`/`@plugin` end-to-end tests, `--check` CI mode, tailwind version matrix, and custom `@utility` in its bounded form (see below).
 - **P4 — future.** Used-class scanning ("minification" of the config), bundler plugins with virtual modules + HMR, and — with adoption data in hand — reopening the upstream conversation with the Tailwind team.
 

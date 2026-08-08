@@ -34,6 +34,10 @@ export interface PlanReport {
     scaleStrategies: Record<string, string>
     /** Class groups dropped because the theme disables everything they could match, e.g. after a namespace reset. Their conflict map entries are dropped with them. */
     prunedClassGroups: string[]
+    /** Full class names appended per class group by the vanilla-diff augmentation pass — classes from compat sub-namespaces (`--text-color-*`) and namespaces without a tailwind-merge theme key (`--z-index-*`). */
+    augmentedClassGroups: Record<string, string[]>
+    /** Theme-created classes no group could be determined for. Reported so gaps are visible instead of silently unmergeable. */
+    unassignedClasses: { className: string; reason: string }[]
 }
 
 export interface ScalePlan {
@@ -137,8 +141,37 @@ export const buildPlan = ({ snapshot, cacheSize }: BuildPlanOptions): ConfigPlan
                 [...scaleEncodings].map(([themeKey, encoding]) => [themeKey, encoding.strategy]),
             ),
             prunedClassGroups,
+            augmentedClassGroups: {},
+            unassignedClasses: [],
         },
     }
+}
+
+/**
+ * Appends augmentation classes (full class names determined by the vanilla-diff pass) to their class groups and records them in the report. Appending literals is enough: the trie gives named paths precedence over validators, and joining an existing group wires up all its conflict relations automatically.
+ */
+export const applyAugmentations = (
+    plan: ConfigPlan,
+    augmentations: {
+        assignments: Map<string, string[]>
+        unassigned: { className: string; reason: string }[]
+    },
+): void => {
+    for (const [classGroupId, classNames] of augmentations.assignments) {
+        const items = plan.classGroups.get(classGroupId)
+        if (!items) {
+            // The target group was pruned, which can only happen when the theme reset everything it matched — the augmented class still belongs there, so restore the group with just the literals.
+            plan.classGroups.set(
+                classGroupId,
+                classNames.map((value): PlanValue => ({ kind: 'class', value })),
+            )
+        } else {
+            items.push(...classNames.map((value): PlanValue => ({ kind: 'class', value })))
+        }
+        plan.report.augmentedClassGroups[classGroupId] = classNames
+    }
+
+    plan.report.unassignedClasses = augmentations.unassigned
 }
 
 /**

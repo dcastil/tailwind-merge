@@ -1,4 +1,4 @@
-import { __unstable__loadDesignSystem } from '@tailwindcss/node'
+import { DesignSystemAccess } from './design-system'
 
 export interface ThemeSnapshot {
     /** Class name prefix configured via `@import 'tailwindcss' prefix(…)`, or `null` without one. */
@@ -14,28 +14,18 @@ export interface ScaleSnapshot {
     hasBareValue: boolean
 }
 
-export interface LoadThemeSnapshotOptions {
-    css: string
-    base: string
-    /** Namespaces to capture, as tailwind-merge theme keys (namespace without the `--` prefix). */
-    themeKeys: string[]
-}
-
 /**
- * Loads the design system through Tailwind's own compiler and captures the effective theme per namespace.
+ * Captures the effective theme per namespace from a loaded design system.
  *
  * Reading the design system instead of parsing CSS text means defaults, `@import` chains, namespace resets (`--color-*: initial`), `@config`/`@plugin` contributions and value precedence are all Tailwind's responsibility — the snapshot only records the result. Values are intentionally not resolved: only which names exist matters for class classification.
+ *
+ * Variables outside the supported namespaces (e.g. `--text-color-*` or `--z-index-*`) are not captured here — the classes they create are picked up by the vanilla-diff augmentation pass instead, which classifies them empirically.
  */
-export const loadThemeSnapshot = async ({
-    css,
-    base,
-    themeKeys,
-}: LoadThemeSnapshotOptions): Promise<ThemeSnapshot> => {
-    const designSystem = await __unstable__loadDesignSystem(css, { base })
-    // The theme's typed surface hides the parts we need behind private fields, so this narrows to the small structural slice the snapshot relies on. Verified against tailwindcss 4.3.x, guarded by tests.
-    const theme = designSystem.theme as unknown as ThemeAccess
-
-    const prefix = theme.prefix ?? null
+export const snapshotTheme = (
+    designSystem: DesignSystemAccess,
+    themeKeys: string[],
+): ThemeSnapshot => {
+    const prefix = designSystem.theme.prefix ?? null
     if (prefix) {
         throw new Error(
             'Tailwind CSS prefixes are not supported yet. Planned for a later iteration, see PROPOSAL.md.',
@@ -46,18 +36,16 @@ export const loadThemeSnapshot = async ({
         themeKeys.map((themeKey) => [themeKey, { names: [], hasBareValue: false }]),
     )
 
-    // Longest key first so `--text-shadow-2xs` lands in `text-shadow` and never in `text`. The same mechanism will keep sub-namespaces like `--text-color-*` out of `text` once they are supported.
+    // Longest key first so `--text-shadow-2xs` lands in `text-shadow` and never in `text`.
     const keysByLength = [...themeKeys].sort((a, b) => b.length - a.length)
 
-    for (const [variableName] of theme.entries()) {
+    for (const [variableName] of designSystem.theme.entries()) {
         if (!variableName.startsWith('--')) {
             continue
         }
         const path = variableName.slice(2)
 
-        const themeKey = keysByLength.find(
-            (key) => path === key || path.startsWith(`${key}-`),
-        )
+        const themeKey = keysByLength.find((key) => path === key || path.startsWith(`${key}-`))
         if (!themeKey) {
             continue
         }
@@ -76,9 +64,4 @@ export const loadThemeSnapshot = async ({
     }
 
     return { prefix, scales }
-}
-
-interface ThemeAccess {
-    prefix: string | null
-    entries(): Iterable<[string, unknown]>
 }
