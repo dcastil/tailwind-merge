@@ -12,6 +12,7 @@ export const fromTheme = <
         theme[key] || fallbackThemeArr
 
     themeGetter.isThemeGetter = true as const
+    themeGetter.themeKey = key
 
     return themeGetter
 }
