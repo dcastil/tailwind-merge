@@ -34,8 +34,8 @@ export const getConfig = () => {
         isArbitraryShadow,
     } = v
 
-    /** The `--spacing-*` theme values. */
-    const scaleSpacing = ['px', 'sm', 'lg']
+    /** The bare `--spacing` multiplier is set, which makes every number a valid spacing value (e.g. p-13). */
+    const scaleSpacing = ['px', isNumber]
     /** The `--text-*` theme values: enumerated outliers plus the `isTshirtSize` pattern covering the rest. */
     const scaleText = ['base', isTshirtSize]
     /** The `--font-weight-*` theme values. */
@@ -78,16 +78,31 @@ export const getConfig = () => {
             olive: [isNumber],
             mist: [isNumber],
             taupe: [isNumber],
+            chart: [isNumber],
         },
         'black',
         'white',
+        'background',
+        'foreground',
+        'card',
+        'card-foreground',
+        'primary',
+        'primary-foreground',
+        'secondary',
+        'muted',
+        'muted-foreground',
+        'accent',
+        'destructive',
+        'border',
+        'input',
+        'ring',
     ]
     /** The `--shadow-*` theme values: enumerated outliers plus the `isTshirtSize` pattern covering the rest. */
     const scaleShadow = ['inner', isTshirtSize]
     /** The `--ease-*` theme values. */
     const scaleEase = ['in', 'out', 'in-out']
     /** The `--animate-*` theme values. */
-    const scaleAnimate = ['spin', 'ping', 'pulse', 'bounce']
+    const scaleAnimate = ['spin', 'ping', 'pulse', 'bounce', 'accordion-down', 'accordion-up']
     /** The `--perspective-*` theme values. */
     const scalePerspective = ['dramatic', 'near', 'normal', 'midrange', 'distant']
 

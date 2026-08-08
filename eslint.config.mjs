@@ -185,4 +185,13 @@ export default typescriptPlugin.config(
             'no-console': 'off',
         },
     },
+    {
+        files: ['configurator/tests/**/*.test.ts'],
+        rules: {
+            'vitest/expect-expect': [
+                'error',
+                { assertFunctionNames: ['expect', 'assertTailwindConformance'] },
+            ],
+        },
+    },
 )

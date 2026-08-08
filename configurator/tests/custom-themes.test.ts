@@ -1,16 +1,6 @@
-import { fileURLToPath } from 'node:url'
-
 import { describe, expect, test } from 'vitest'
 
-import { createTailwindMerge } from '../../src'
-import { generate } from '../src'
-
-const base = fileURLToPath(new URL('.', import.meta.url))
-
-async function generateTwMerge(css: string) {
-    const { code, config, plan } = await generate({ css, base })
-    return { code, twMerge: createTailwindMerge(() => config), plan }
-}
+import { assertTailwindConformance, generateFixture } from './fixture-utils'
 
 // Modeled on a typical design-system setup: the color palette reset and replaced with a custom one, utility-specific compat sub-namespaces (--background-color-*, --text-color-*), a custom font size with a compound line-height key, and namespaces tailwind-merge has no theme key for (--z-index-*, --border-width-*). Reproduces the scenarios from issues #684 (custom --text-* misread as color), #657 (--z-index), and #631 (--border-width).
 const designSystemCss = `
@@ -33,11 +23,15 @@ const designSystemCss = `
 `
 
 describe('design-system theme with compat sub-namespaces and resets', async () => {
-    const { code, twMerge, plan } = await generateTwMerge(designSystemCss)
+    const { code, twMerge, plan, designSystem } = await generateFixture(designSystemCss)
 
     test('emitted module matches its file snapshot', async () => {
         // File snapshots keep the emitted module reviewable as real TypeScript, and being inside tests/ they are type-checked by the package's `test:types` script.
         await expect(code).toMatchFileSnapshot('./__snapshots__/sub-namespaces.snap.ts')
+    })
+
+    test('conforms to Tailwind conflict semantics across the class list', () => {
+        assertTailwindConformance(designSystem, twMerge, plan)
     })
 
     test('merges custom classes from standard namespaces', () => {
@@ -87,7 +81,7 @@ describe('design-system theme with compat sub-namespaces and resets', async () =
 })
 
 describe('theme with disabled spacing multiplier', async () => {
-    const { code, twMerge, plan } = await generateTwMerge(`
+    const { code, twMerge, plan, designSystem } = await generateFixture(`
 @import 'tailwindcss';
 @theme {
     --spacing: initial;
@@ -101,11 +95,17 @@ describe('theme with disabled spacing multiplier', async () => {
         await expect(code).toMatchFileSnapshot('./__snapshots__/spacing-named.snap.ts')
     })
 
+    test('conforms to Tailwind conflict semantics across the class list', () => {
+        assertTailwindConformance(designSystem, twMerge, plan)
+    })
+
     test('named spacing values merge, numeric ones no longer exist', () => {
         expect(twMerge('p-sm p-lg')).toBe('p-lg')
         expect(twMerge('m-lg m-sm')).toBe('m-sm')
         expect(twMerge('p-2 p-4')).toBe('p-2 p-4')
         expect(twMerge('p-sm p-2')).toBe('p-sm p-2')
+        // The static `px` value (1px) is independent of the disabled multiplier.
+        expect(twMerge('p-px p-sm')).toBe('p-sm')
     })
 
     test('drops the number validator from the spacing scale', () => {
@@ -115,7 +115,7 @@ describe('theme with disabled spacing multiplier', async () => {
 
 // Heavy resets document what pruning does and doesn't do: scales empty out, but class groups survive because they still accept arbitrary values — so reset theme values stop merging while the arbitrary syntax keeps working.
 describe('minimal theme with heavy resets', async () => {
-    const { code, twMerge, plan } = await generateTwMerge(`
+    const { code, twMerge, plan, designSystem } = await generateFixture(`
 @import 'tailwindcss';
 @theme {
     --color-*: initial;
@@ -129,6 +129,10 @@ describe('minimal theme with heavy resets', async () => {
 
     test('emitted module matches its file snapshot', async () => {
         await expect(code).toMatchFileSnapshot('./__snapshots__/minimal-resets.snap.ts')
+    })
+
+    test('conforms to Tailwind conflict semantics across the class list', () => {
+        assertTailwindConformance(designSystem, twMerge, plan)
     })
 
     test('reset scale values stop merging while arbitrary values keep working', () => {

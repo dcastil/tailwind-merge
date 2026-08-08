@@ -4,7 +4,9 @@ import { describe, expect, test } from 'vitest'
 
 import { createTailwindMerge, twMerge as defaultTwMerge } from '../../src'
 import { generate } from '../src'
-import { declaredProperties, loadDesignSystems } from '../src/design-system'
+import { loadDesignSystems } from '../src/design-system'
+
+import { assertTailwindConformance } from './fixture-utils'
 
 const base = fileURLToPath(new URL('.', import.meta.url))
 const vanillaCss = "@import 'tailwindcss';"
@@ -67,47 +69,10 @@ describe('generate from vanilla Tailwind CSS', () => {
 
     test('matches Tailwind conflict semantics across the design-system class list', async () => {
         const { project: designSystem } = await loadDesignSystems({ css: vanillaCss, base })
-        const classNames = designSystem.getClassList().map(([className]) => className)
+        const conformance = assertTailwindConformance(designSystem, generatedTwMerge, plan)
 
-        expect(classNames.length).toBeGreaterThan(20_000)
-
-        // Neighboring entries in the class list mostly share a utility root, so pairing them yields a high density of actual conflicts. Every consecutive pair is swept — no sampling. Where generated and default config disagree, Tailwind itself referees: two classes conflict when their compiled declarations overlap. The generated config must always match the oracle; places where the default config doesn't are known misclassifications that exact theme knowledge fixes, and they are snapshotted below as the intended-divergence report.
-        const failures: { input: string; generated: string; default: string; oracle: string }[] = []
-        const improvementsOverDefault: string[] = []
-
-        for (let index = 0; index + 1 < classNames.length; index += 1) {
-            const first = classNames[index]!
-            const second = classNames[index + 1]!
-            const input = `${first} ${second}`
-            const generatedResult = generatedTwMerge(input)
-            const defaultResult = defaultTwMerge(input)
-
-            if (generatedResult === defaultResult) {
-                continue
-            }
-
-            const firstProperties = declaredProperties(designSystem, first)
-            const secondProperties = declaredProperties(designSystem, second)
-            const conflictExpected =
-                firstProperties !== null &&
-                secondProperties !== null &&
-                [...firstProperties].some((property) => secondProperties.has(property))
-            const oracleResult = conflictExpected ? second : input
-
-            if (generatedResult === oracleResult) {
-                improvementsOverDefault.push(`${input} → ${oracleResult} (default: ${defaultResult})`)
-            } else {
-                failures.push({
-                    input,
-                    generated: generatedResult,
-                    default: defaultResult,
-                    oracle: oracleResult,
-                })
-            }
-        }
-
-        expect(failures).toEqual([])
-        expect(improvementsOverDefault).toMatchSnapshot()
+        // The intended-divergence report: pairs where the generated config matches Tailwind while the default config doesn't — known misclassifications that exact theme knowledge fixes.
+        expect(conformance.improvementsOverDefault).toMatchSnapshot()
     })
 
     test('intentionally diverges from default twMerge on nonexistent class names', () => {
