@@ -1,4 +1,5 @@
 /.claude/
+/.pnpm-store/
 /.vscode/
 /dist/
 coverage
