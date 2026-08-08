@@ -36,7 +36,7 @@ export interface GenerateResult {
  *
  * Classes the theme creates outside the standard namespaces (compat sub-namespaces like `--text-color-*`, or namespaces without a theme key like `--z-index-*`) are found by diffing against a vanilla design system of the same Tailwind installation and classified empirically by their compiled CSS declarations, so no namespace mapping needs to be hand-maintained anywhere.
  */
-export const generate = async (options: GenerateOptions): Promise<GenerateResult> => {
+export async function generate(options: GenerateOptions): Promise<GenerateResult> {
     const themeKeys = Object.keys(getDefaultConfig().theme)
     const { project, vanilla } = await loadDesignSystems({ css: options.css, base: options.base })
 

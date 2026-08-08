@@ -56,12 +56,12 @@ export interface BuildPlanOptions {
  *
  * Walking `getDefaultConfig()` instead of maintaining a parallel structure means class group semantics, group ordering (which decides validator precedence in the class map), and conflict relationships automatically stay in sync with tailwind-merge.
  */
-export const buildPlan = ({ snapshot, cacheSize }: BuildPlanOptions): ConfigPlan => {
+export function buildPlan({ snapshot, cacheSize }: BuildPlanOptions): ConfigPlan {
     const skeleton = getDefaultConfig()
     const resolveThemeKey = createThemeKeyResolver(Object.keys(skeleton.theme))
     const scaleEncodings = new Map<string, ScaleEncoding>()
 
-    const resolveScale = (themeKey: string): ScaleEncoding => {
+    function resolveScale(themeKey: string): ScaleEncoding {
         let encoding = scaleEncodings.get(themeKey)
         if (!encoding) {
             encoding = encodeThemeScale(themeKey, snapshot)
@@ -70,10 +70,11 @@ export const buildPlan = ({ snapshot, cacheSize }: BuildPlanOptions): ConfigPlan
         return encoding
     }
 
-    const planGroup = (group: ClassGroup<string>): PlanValue[] =>
-        dedupeValues(group.flatMap(planDefinition))
+    function planGroup(group: ClassGroup<string>): PlanValue[] {
+        return dedupeValues(group.flatMap(planDefinition))
+    }
 
-    const planDefinition = (definition: ClassGroup<string>[number]): PlanValue[] => {
+    function planDefinition(definition: ClassGroup<string>[number]): PlanValue[] {
         if (typeof definition === 'string') {
             return [{ kind: 'class', value: definition }]
         }
@@ -150,13 +151,13 @@ export const buildPlan = ({ snapshot, cacheSize }: BuildPlanOptions): ConfigPlan
 /**
  * Appends augmentation classes (full class names determined by the vanilla-diff pass) to their class groups and records them in the report. Appending literals is enough: the trie gives named paths precedence over validators, and joining an existing group wires up all its conflict relations automatically.
  */
-export const applyAugmentations = (
+export function applyAugmentations(
     plan: ConfigPlan,
     augmentations: {
         assignments: Map<string, string[]>
         unassigned: { className: string; reason: string }[]
     },
-): void => {
+): void {
     for (const [classGroupId, classNames] of augmentations.assignments) {
         const items = plan.classGroups.get(classGroupId)
         if (!items) {
@@ -197,7 +198,7 @@ const UTILITY_STATIC_CLASSES: Record<string, string[]> = {
 /**
  * Encodes the scale for one theme key, applying per-key knowledge on top of the generic encoding.
  */
-const encodeThemeScale = (themeKey: string, snapshot: ThemeSnapshot): ScaleEncoding => {
+function encodeThemeScale(themeKey: string, snapshot: ThemeSnapshot): ScaleEncoding {
     const scale = snapshot.scales.get(themeKey)
     const names = scale?.names ?? []
 
@@ -234,7 +235,7 @@ const encodeThemeScale = (themeKey: string, snapshot: ThemeSnapshot): ScaleEncod
 /**
  * Identifies which theme key a theme getter refers to by calling it with a probe theme whose values are unique markers. The key is not exposed on the getter itself, so this observes it through the getter's only behavior.
  */
-const createThemeKeyResolver = (themeKeys: string[]) => {
+function createThemeKeyResolver(themeKeys: string[]) {
     const markerToKey = new Map<unknown, string>()
     const probeTheme: Record<string, ClassGroup<string>> = {}
 
@@ -256,7 +257,7 @@ const createThemeKeyResolver = (themeKeys: string[]) => {
 /**
  * Explains where a scale's values come from and why they are encoded the way they are, so the generated file stays debuggable without readers having to know the compression policy. Derived from the encoding strategy instead of restating the values, which the code right below the comment already shows.
  */
-const describeScale = (themeKey: string, strategy: string): string => {
+function describeScale(themeKey: string, strategy: string): string {
     const namespace = `\`--${themeKey}-*\``
 
     if (themeKey === 'spacing' && strategy.startsWith('multiplier')) {
@@ -285,13 +286,14 @@ const validatorNames = new Map<unknown, ValidatorName>(
     Object.entries(validators).map(([name, validator]) => [validator, name as ValidatorName]),
 )
 
-const isThemeGetter = (value: Function): value is ThemeGetter =>
-    'isThemeGetter' in value && value.isThemeGetter === true
+function isThemeGetter(value: Function): value is ThemeGetter {
+    return 'isThemeGetter' in value && value.isThemeGetter === true
+}
 
 /**
  * Removes duplicate literals and validator references while keeping the first occurrence, since substituting a theme scale can repeat values the skeleton already defines statically (e.g. `text-base` exists both as skeleton literal and as `--text-base` theme value).
  */
-const dedupeValues = (values: PlanValue[]): PlanValue[] => {
+function dedupeValues(values: PlanValue[]): PlanValue[] {
     const seen = new Set<string>()
 
     return values.filter((value) => {
@@ -307,10 +309,10 @@ const dedupeValues = (values: PlanValue[]): PlanValue[] => {
     })
 }
 
-const filterConflictMap = (
+function filterConflictMap(
     conflictMap: Partial<Record<string, readonly string[]>>,
     classGroups: Map<string, PlanValue[]>,
-): Map<string, string[]> => {
+): Map<string, string[]> {
     const filtered = new Map<string, string[]>()
 
     for (const [classGroupId, conflicts] of Object.entries(conflictMap)) {
