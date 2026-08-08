@@ -11,6 +11,7 @@ export default typescriptPlugin.config(
             'dist/**/*',
             'node_modules/**/*',
             'configurator/dist/**/*',
+            'configurator/tests/.tmp-*/**/*',
         ],
     },
     {
@@ -180,7 +181,7 @@ export default typescriptPlugin.config(
         },
     },
     {
-        files: ['scripts/**/*.?(m|c)@(t|j)s', 'configurator/src/cli.ts'],
+        files: ['scripts/**/*.?(m|c)@(t|j)s', 'configurator/src/cli.ts', 'configurator/src/run-cli.ts'],
         rules: {
             'no-console': 'off',
         },
@@ -192,6 +193,13 @@ export default typescriptPlugin.config(
                 'error',
                 { assertFunctionNames: ['expect', 'assertTailwindConformance'] },
             ],
+        },
+    },
+    {
+        // Tailwind's plugin loader expects the plugin function as the module's default export.
+        files: ['configurator/tests/fixtures/**/*'],
+        rules: {
+            'import/no-default-export': 'off',
         },
     },
 )

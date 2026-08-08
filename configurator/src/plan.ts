@@ -32,6 +32,8 @@ export interface ConfigPlan {
 export interface PlanReport {
     /** Chosen encoding strategy per theme scale, for CLI output and tests. */
     scaleStrategies: Record<string, string>
+    /** Self-conflict groups created for utilities the project registers beyond the built-ins (`@utility` and `@plugin`), by group ID. */
+    customUtilityGroups: string[]
     /** Class groups dropped because the theme disables everything they could match, e.g. after a namespace reset. Their conflict map entries are dropped with them. */
     prunedClassGroups: string[]
     /** Full class names appended per class group by the vanilla-diff augmentation pass — classes from compat sub-namespaces (`--text-color-*`) and namespaces without a tailwind-merge theme key (`--z-index-*`). */
@@ -148,10 +150,24 @@ export function buildPlan({ snapshot, cacheSize }: BuildPlanOptions): ConfigPlan
                 [...scaleEncodings].map(([themeKey, encoding]) => [themeKey, encoding.strategy]),
             ),
             prunedClassGroups,
+            customUtilityGroups: [],
             augmentedClassGroups: {},
             resolvedCollisions: [],
             unassignedClasses: [],
         },
+    }
+}
+
+/**
+ * Adds self-conflict groups for custom utilities to the plan. They join `classGroups` like any other group — without entries in the conflict maps, so they only ever conflict with themselves, which is the bounded support decided in PROPOSAL.md.
+ */
+export function applyCustomUtilityGroups(
+    plan: ConfigPlan,
+    customUtilityGroups: Map<string, PlanValue[]>,
+): void {
+    for (const [groupId, items] of customUtilityGroups) {
+        plan.classGroups.set(groupId, items)
+        plan.report.customUtilityGroups.push(groupId)
     }
 }
 

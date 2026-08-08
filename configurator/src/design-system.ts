@@ -8,6 +8,9 @@ export interface DesignSystemAccess {
         prefix: string | null
         entries(): Iterable<[string, unknown]>
     }
+    utilities: {
+        keys(kind: 'static' | 'functional'): string[]
+    }
     getClassList(): [string, { modifiers: string[] }][]
     candidatesToCss(classes: string[]): (string | null)[]
 }

@@ -2,6 +2,7 @@
 /.pnpm-store/
 /.vscode/
 /configurator/dist/
+/configurator/tests/.tmp-*/
 /dist/
 coverage
 node_modules/

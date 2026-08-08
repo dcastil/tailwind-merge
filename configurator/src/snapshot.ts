@@ -26,11 +26,6 @@ export function snapshotTheme(
     themeKeys: string[],
 ): ThemeSnapshot {
     const prefix = designSystem.theme.prefix ?? null
-    if (prefix) {
-        throw new Error(
-            'Tailwind CSS prefixes are not supported yet. Planned for a later iteration, see PROPOSAL.md.',
-        )
-    }
 
     const scales = new Map<string, ScaleSnapshot>(
         themeKeys.map((themeKey) => [themeKey, { names: [], hasBareValue: false }]),
@@ -43,7 +38,14 @@ export function snapshotTheme(
         if (!variableName.startsWith('--')) {
             continue
         }
-        const path = variableName.slice(2)
+        let path = variableName.slice(2)
+        // With `@import 'tailwindcss' prefix(tw)` the theme stores every variable prefixed (`--tw-color-*`); namespace bucketing works on the logical name.
+        if (prefix !== null) {
+            if (!path.startsWith(`${prefix}-`)) {
+                continue
+            }
+            path = path.slice(prefix.length + 1)
+        }
 
         const themeKey = keysByLength.find((key) => path === key || path.startsWith(`${key}-`))
         if (!themeKey) {
