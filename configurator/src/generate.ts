@@ -1,4 +1,5 @@
-import { AnyConfig, createClassGroupUtils, getDefaultConfig } from 'tailwind-merge'
+import { getDefaultConfig } from 'tailwind-merge'
+import { AnyConfig, createClassGroupUtils } from 'tailwind-merge/unstable-do-not-import'
 
 import { buildAugmentations } from './augment'
 import { buildCustomUtilityGroups } from './custom-utilities'

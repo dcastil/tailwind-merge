@@ -40,6 +40,12 @@
             "require": "./dist/es5/bundle-cjs.js",
             "import": "./dist/es5/bundle-mjs.mjs",
             "default": "./dist/es5/bundle-mjs.mjs"
+        },
+        "./unstable-do-not-import": {
+            "types": "./dist/unstable-types.d.ts",
+            "require": "./dist/unstable-cjs.js",
+            "import": "./dist/unstable-mjs.mjs",
+            "default": "./dist/unstable-mjs.mjs"
         }
     },
     "main": "./dist/bundle-cjs.js",

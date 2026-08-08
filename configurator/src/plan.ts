@@ -1,4 +1,5 @@
-import { ClassGroup, ThemeGetter, getDefaultConfig, validators } from 'tailwind-merge'
+import { getDefaultConfig, validators } from 'tailwind-merge'
+import { ClassGroup, ThemeGetter } from 'tailwind-merge/unstable-do-not-import'
 
 import { ScaleEncoding, encodeScale } from './compress'
 import { ThemeSnapshot } from './snapshot'

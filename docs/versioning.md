@@ -14,6 +14,8 @@ This package follows the [SemVer](https://semver.org) versioning rules. More spe
 
 -   Any API that has `experimental` in its name can introduce breaking changes in any minor version update.
 
+-   Anything marked as unstable can change or be removed in any version update, including patch releases. In particular, every export of the `tailwind-merge/unstable-do-not-import` entry point is unstable: it exposes internals for tooling built on top of tailwind-merge and is not meant to be used in applications or libraries. If you need something from it, please [open an issue](https://github.com/dcastil/tailwind-merge/issues) so a supported API can be considered instead.
+
 -   Releases with major version 0 might introduce breaking changes on a minor version update.
 
 -   A non-production-ready version of every commit pushed to the main branch is released under the `dev` tag for testing purposes. It has a format like [`1.6.1-dev.4202ccf913525617f19fbc493db478a76d64d054`](https://www.npmjs.com/package/tailwind-merge/v/1.6.1-dev.4202ccf913525617f19fbc493db478a76d64d054) in which the first numbers are the corresponding last release and the hash at the end is the git SHA of the commit. You can install the latest dev release with `npm install tailwind-merge@dev`.
