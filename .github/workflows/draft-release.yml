@@ -3,7 +3,8 @@ name: Draft Release
 on:
     push:
         branches: [main]
-    pull_request:
+    # pull_request_target instead of pull_request so the autolabeler gets a write-capable token on fork PRs; the plain pull_request token is read-only for forks, which made labeling fail with "Resource not accessible by integration". Safe because the auto_label job never checks out or executes PR code.
+    pull_request_target:
         types: [opened, reopened, synchronize]
 
 jobs:
@@ -20,7 +21,7 @@ jobs:
                   token: ${{ github.token }}
 
     auto_label:
-        if: github.event_name == 'pull_request'
+        if: github.event_name == 'pull_request_target'
         runs-on: ubuntu-latest
         permissions:
             contents: read

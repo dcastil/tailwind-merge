@@ -130,6 +130,7 @@ Treat this section as the source of truth for CI and publish security guardrails
   - grants `id-token: write` only to minimal publish jobs that download the verified `dist` artifact and run `npm publish --ignore-scripts`,
   - pins `actions/download-artifact` to an immutable commit in the OIDC jobs and keeps digest mismatches fatal so corrupted or substituted artifacts cannot reach npm publishing.
 - `.github/workflows/label.yml` uses `pull_request_target` only for labeling metadata; do not add repository checkout or PR-code execution to that workflow. `gh` commands in that workflow must pass `--repo` explicitly because there is intentionally no `.git` checkout for repository inference.
+- `.github/workflows/draft-release.yml` runs the release-drafter autolabeler under `pull_request_target` for the same reason: the plain `pull_request` token is read-only on fork PRs, so labeling fails with "Resource not accessible by integration" (seen on PR #689). Like `label.yml`, the `auto_label` job must stay checkout-free and never execute PR code.
 - `.github/workflows/comment-released-prs-and-issues.yml`:
   - runs local action `.github/actions/release-commenter`,
   - runs on `release.published`, on manual `workflow_dispatch`, and after successful `npm Publish` workflow completion for `push` events on `main`,
