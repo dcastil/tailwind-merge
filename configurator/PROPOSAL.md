@@ -4,7 +4,7 @@ Status: exploration on branch `feature/add-tailwind-merge-configurator`. Nothing
 
 ## TL;DR
 
-Build a build-time tool ("configurator") that takes the path to a project's Tailwind CSS v4 entrypoint, loads the fully resolved design system through Tailwind's own APIs, and generates a source file exporting a `twMerge` function backed by a project-specific config via `createTailwindMerge`. On a stock theme the generated function behaves identically to today's `twMerge`. On custom themes it is *more* correct than today's `twMerge` (custom scales, compat sub-namespaces, resets, prefix, `@config`/`@plugin`, custom `@utility`) with zero manual configuration, and smaller when scales are reset. The default config gets tree-shaken away because the generated module never imports it.
+Build a build-time tool ("configurator") that takes the path to a project's Tailwind CSS v4 entrypoint, loads the fully resolved design system through Tailwind's own APIs, and generates a source file exporting a `twMerge` function backed by a project-specific config via `createTailwindMerge`. On a stock theme the generated function matches today's `twMerge` for every class that exists, while classifying *exactly* instead of heuristically (divergence only on nonexistent class names). On custom themes it is far more correct than today's `twMerge` (custom scales, compat sub-namespaces, resets, prefix, `@config`/`@plugin`) with zero manual configuration, and smaller when scales are reset. The default config gets tree-shaken away because the generated module never imports it.
 
 Feasibility was verified with a working spike against `tailwindcss@4.3.3`, and a prior-art scan found that nothing like this exists yet, while demand for it is documented across many tailwind-merge issues and discussions.
 
@@ -26,7 +26,7 @@ The root cause: Tailwind knows the theme at build time, tailwind-merge only runs
 Goals:
 
 1. Zero-config correctness for arbitrary Tailwind v4 setups: theme overrides and extensions, namespace resets (`--color-*: initial`), utility-specific compat sub-namespaces, `--spacing` semantics, prefix, `@config`/`@plugin` contributions, custom `@utility`.
-2. On a stock theme, behavior is provably equivalent to today's `twMerge`.
+2. On a stock theme, behavior matches today's `twMerge` for every class name that actually exists in the theme; deliberate divergences are limited to nonexistent class names (where exact scales classify more precisely than today's loose validators) and are captured in a reviewed snapshot.
 3. Bundle size ≤ today's `twMerge`, and smaller when the theme resets scales; the default config must be tree-shaken out.
 4. All classes the project's Tailwind can produce keep working — no scanning of source files for used classes (that's a future optimization, not v1).
 5. Library-first architecture with a thin CLI, so a bundler plugin (virtual module + HMR) can reuse the core later.
@@ -153,13 +153,15 @@ Notable mechanics:
 - **Probing beats tables even on weird inputs.** Because Tailwind's theme is a flat map, a variable like `--text-color-primary` simultaneously makes `text-primary` a color (via the `--text-color` namespace) and `text-color-primary` a font size (via the `--text` namespace with key `color-primary`). `candidatesToCss` reports both faithfully; a hand-maintained mapping would likely get such cases wrong.
 - **Custom `@utility`:** static utilities become single-class groups; functional utilities become a group fed by their completion values plus arbitrary-value validators. Self-conflict (same root replaces same root) is the correct default; cross-conflicts with built-ins can't be inferred and stay out of scope for v1 (escape hatch: the generated module remains composable, see below).
 - **Composability preserved.** Exporting `config` alongside `twMerge` lets users keep layering: `createTailwindMerge(() => config, myExtension)`, `mergeConfigs`, or feeding it to `tailwind-variants`-style wrappers.
-- **Open fidelity question (interview):** whether scales that today use open validators should become exact enumerations where the theme is known (e.g. colors: exact names vs today's `isAny`). Exactness fixes misclassification bugs but changes behavior for nonexistent classes and costs bundle bytes (~288 default color names, though brotli compresses name lists well); this wants measurement, and possibly an `--exact` flag rather than a single answer.
+- **Fidelity (decided in the 2026-08-08 interview): exact theme from the start, with scale compression.** Scales are generated from the actual theme rather than mimicking today's loose validators, but "exact" does not mean "enumerate everything": when the tail of a scale's names adheres to a validator, the generator emits the validator instead of the values. Example: default color families with numeric shade tails compress to `{ red: [v.isNumber], orange: [v.isNumber], … }` (the class-group trie already supports nested parts), and a t-shirt-shaped size scale compresses to `[v.isTshirtSize]` plus enumerated outliers like `'huge'`. The governing rule: **never undermatch a class that exists; overmatching nonexistent names inside a known prefix is acceptable when it saves bytes.** Among candidate encodings (full enumeration, prefix + tail validator, whole-scale validator + outliers) the generator picks the smallest emitted representation. Rationale: this is a new project, so breaking-change cost is at its lifetime minimum — optimize for genuinely good behavior now and hold backwards compatibility later, instead of inheriting the default config's known misclassifications for compatibility's sake.
 
 ## 6. Correctness and size strategy
 
-1. **Structural gate:** `createClassMap(generatedConfigFromVanillaCss)` must equal `createClassMap(getDefaultConfig())` (the existing `tests/class-map.test.ts` machinery), with an explicit allowlist for intentional divergences once exactness features land.
-2. **Behavioral gate:** parametrize the existing ~250-assertion corpus to run against both the default `twMerge` and a generated-from-vanilla-CSS instance.
-3. **Differential fuzzing:** sample class pairs from `getClassList()` (23k names) and compare merge results between default and generated on the vanilla theme; on custom themes, targeted scenario tests reproducing [#684](https://github.com/dcastil/tailwind-merge/issues/684), [#657](https://github.com/dcastil/tailwind-merge/issues/657), [#631](https://github.com/dcastil/tailwind-merge/issues/631), [#587](https://github.com/dcastil/tailwind-merge/discussions/587), and a Replit-style sub-namespace theme.
+Because exact mode deliberately diverges from today's `twMerge` on nonexistent class names, "equivalence with the default config" is scoped down from a blanket gate to an existing-classes gate plus a reviewed divergence report:
+
+1. **Existing-class gate:** for class names that exist in the vanilla theme (sourced from `getClassList()` and the existing test corpus), a generated-from-vanilla-CSS instance must produce the same merge results as today's `twMerge`. The ~250-assertion corpus gets parametrized to run against both, minus assertions that intentionally exercise nonexistent names.
+2. **Divergence snapshot:** a structural diff of `createClassMap(generated)` vs `createClassMap(getDefaultConfig())` (existing `tests/class-map.test.ts` machinery) is committed as a reviewed snapshot, so every behavioral divergence — expected: nonexistent names that today's loose validators misclassify — is visible and deliberate rather than accidental.
+3. **Differential fuzzing + scenarios:** sample class pairs from `getClassList()` (23k names) and compare merge results between default and generated on the vanilla theme (existing names only); on custom themes, targeted scenario tests reproducing [#684](https://github.com/dcastil/tailwind-merge/issues/684), [#657](https://github.com/dcastil/tailwind-merge/issues/657), [#631](https://github.com/dcastil/tailwind-merge/issues/631), [#587](https://github.com/dcastil/tailwind-merge/discussions/587), and a Replit-style sub-namespace theme. Where current behavior is not a usable oracle (custom themes), correctness is defined against Tailwind itself: two classes conflict iff their `candidatesToCss` output sets overlapping declarations under the same variant scope.
 4. **Version matrix:** run the probe + generation suite against tailwindcss 4.0 → latest in CI to catch `__unstable__` drift early.
 5. **Size tracking:** measure generated bundles (esbuild + brotli, same approach as `.github/actions/metrics-report`) for three scenarios — vanilla, heavy custom theme, heavy resets — and compare against `twMerge`. Expectation to validate: vanilla ≈ parity, resets < default, custom themes ≈ parity while being *correct* (which `extendTailwindMerge` setups only achieve with manual work, on top of the full default config).
 
@@ -176,18 +178,21 @@ The repo is already a pnpm workspace (`pnpm-workspace.yaml` lists `.` and `.gith
 ## 8. Phased plan
 
 - **P0 — research + feasibility spike.** Done (this document; spike verified against 4.3.3).
-- **P1 — vanilla equivalence.** Skeleton-transform generator + emitter, structural + behavioral equivalence harness, size report. Exit: generated-from-vanilla-CSS ≡ default `twMerge`, bundle ≈ parity.
+- **P1 — vanilla exactness.** Skeleton-transform generator + emitter with scale compression, existing-class gate + divergence snapshot, size report. Exit: generated-from-vanilla-CSS matches current `twMerge` on all existing vanilla classes, the divergence report contains only intended exactness wins, bundle ≤ parity.
 - **P2 — real themes.** Overrides, extensions, resets, compat sub-namespaces via sentinel probing, `--spacing` logic, compound keys (`--text-*--line-height`). Exit: Replit-style CSS produces correct merges; regression scenarios from #684/#657/#631 pass.
-- **P3 — ecosystem completeness.** Custom `@utility` groups, prefix, `@config`/`@plugin` end-to-end tests, `--check` CI mode, tailwind version matrix.
+- **P3 — ecosystem completeness.** Prefix, `@config`/`@plugin` end-to-end tests, `--check` CI mode, tailwind version matrix, and custom `@utility` in its bounded form (see below).
 - **P4 — future.** Used-class scanning ("minification" of the config), bundler plugins with virtual modules + HMR, and — with adoption data in hand — reopening the upstream conversation with the Tailwind team.
 
-## 9. Open questions
+Custom `@utility` scope (decided in the 2026-08-08 interview): support is limited to **self-conflict registration** — each custom utility root becomes its own class group (static roots as single-class groups, functional roots fed by completion values + arbitrary-value validators), so a custom utility merges against itself. This is cheap and cannot corrupt built-in groups; roots that shadow built-ins are skipped. **Property-based cross-group conflict inference is explicitly out of scope indefinitely** — utilities that set many CSS properties would need conflict edges against many groups, making the generated config large and ugly. The documented stance for cross-conflicts: tailwind-merge does not model them, and users who need coordinated multi-property styles are better served by JS constants composing plain Tailwind classes than by custom utilities. If even self-conflict support turns out disproportionately messy during implementation, it gets dropped rather than complicated.
 
-Tracked for the design interview; answers will be folded back into this document:
+## 9. Decisions from the 2026-08-08 design interview
 
-1. Theme source: resolve the *project's own* `tailwindcss` install (IntelliSense pattern) vs pinning our own copy vs parsing CSS ourselves.
-2. Output shape: ready `twMerge` module vs config-only; whether generated code should import validators from `tailwind-merge` or be fully self-contained.
-3. Fidelity default: strict vanilla-equivalence first vs exact-theme enumeration from the start vs both behind a flag; where `isAny`-style leniency should survive.
-4. Scope of P2/P3: which capabilities are must-have for the prototype to be convincing.
-5. Emission details: TS vs JS default, `cacheSize` passthrough, multiple CSS entrypoints (multi-theme monorepos), deterministic formatting (prettier config of the host repo vs fixed style).
-6. Naming and eventual packaging.
+1. **Theme source: the project's own `tailwindcss` install**, loaded via the design-system API (IntelliSense/prettier-plugin pattern). No pinned parallel Tailwind, no hand-rolled CSS parsing.
+2. **Output shape: a ready `twMerge` module** built with `createTailwindMerge`, exporting the config object alongside for composability, importing `createTailwindMerge` + `validators` from `tailwind-merge`.
+3. **Fidelity: exact theme from the start, with scale compression** — see section 5. Never undermatch existing classes; overmatch nonexistent tails within known prefixes when it saves bytes; smallest encoding wins. Rationale: breaking-change cost is lowest now; make behavior genuinely good first, hold compatibility later.
+4. **Must-have scope: compat sub-namespaces and prefix support.** Custom `@utility` is in only as bounded self-conflict registration (see section 8); property-based cross-group conflict inference stays out indefinitely, with documentation pointing users to JS constants for multi-property composition.
+
+Still open, to resolve during implementation:
+
+1. Emission details: TS vs JS default, `cacheSize` passthrough, multiple CSS entrypoints (multi-theme monorepos), deterministic formatting (prettier config of the host repo vs fixed style).
+2. Naming and eventual packaging (working assumption: separate package, working name `tailwind-merge-configurator`).
