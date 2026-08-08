@@ -86,6 +86,15 @@ No tool generates a tailwind-merge config from a Tailwind theme, for v3 or v4. n
 
 **D. Runtime auto-config in the browser** (read CSS variables from the DOM). Dead on arrival: used-only variable emission, SSR complications, runtime cost. Rejected.
 
+**F. Custom runtime with a configurator-specific config format** (investigated 2026-08-08, after P3). Since the configurator controls the emitted artifact, it could emit a purpose-built representation for a leaner custom merge runtime instead of a `Config` for `createTailwindMerge`. Measurements on the vanilla theme killed every variant of this:
+
+- The entire engine (`createTailwindMerge` with merge loop, parser, class-map builder, LRU cache) is **4,494 B min / 1,815 B brotli** — the ceiling for any engine rewrite is a few hundred compressed bytes, against duplicating the hardest-won, perf-tuned code in the library and losing its bugfix stream.
+- The config data (~25 kB min / ~5 kB brotli of the generated bundle) is information-dense: emitting the pre-built class-map trie instead — the main candidate format, which would skip runtime trie building entirely — measures **9,964 B brotli vs 4,894 B for the classGroups form, 2× worse**, because the trie is the *decompressed* config: shared scales repeat under every consuming root. `classGroups` already is the factorized encoding.
+- What the pre-built format would save at runtime: `createClassMap` is 0.69 ms of the 0.73 ms one-time lazy init. Shipping kilobytes to save a one-time sub-millisecond is strictly bad.
+- Unused-validator dead weight is ~2 of 25 validators (~70 B brotli) on vanilla — the namespace export prevents tree-shaking them, but the amount is negligible.
+
+Verdict: **stay on the current path** — configure the real `createTailwindMerge`, keep full composability (`createTailwindMerge(getConfig, ext)`, `mergeConfigs`, wrapper libraries) and the library's engine maintenance for free. The worthwhile subset of "split the library into reusable parts" is three small additive API changes to tailwind-merge itself, none configurator-specific: individual validator exports (enables tree-shaking unused ones for every `createTailwindMerge` user), a public `themeKey` property on theme getters (deletes the configurator's marker-probe), and a public classification/class-map hook (removes the configurator's one internal import — the packaging blocker). Revisit condition: if P4 usage-scanning ever shrinks the config far below the engine's ~1.8 kB, a hyper-specialized emitted runtime (per-app lookup maps) becomes worth re-measuring — not before.
+
 **E. Upstream integration into Tailwind.** The north star from the Slack conversation, but not actionable today (#10348 dormant). A working configurator with adoption numbers is the strongest possible artifact to reopen that conversation with.
 
 ## 5. Recommended architecture (C1)
@@ -203,3 +212,4 @@ Still open, to resolve during implementation:
 
 1. Emission details: TS vs JS default, `cacheSize` passthrough, multiple CSS entrypoints (multi-theme monorepos), deterministic formatting (prettier config of the host repo vs fixed style).
 2. Naming and eventual packaging (working assumption: separate package, working name `tailwind-merge-configurator`).
+3. Small additive tailwind-merge API candidates that would benefit the configurator without any runtime fork (see option F): individual validator exports, `themeKey` on theme getters, a public class-map/classification hook.
