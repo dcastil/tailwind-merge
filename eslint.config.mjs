@@ -4,7 +4,15 @@ import typescriptPlugin from 'typescript-eslint'
 
 export default typescriptPlugin.config(
     {
-        ignores: ['coverage/**/*', 'dist/**/*', 'node_modules/**/*'],
+        ignores: [
+            // Local Claude Code data, including worktrees holding full repo copies whose files would otherwise be linted without the path-scoped overrides below matching them.
+            '.claude/**/*',
+            'coverage/**/*',
+            'dist/**/*',
+            'node_modules/**/*',
+            'configurator/dist/**/*',
+            'configurator/tests/.generated/**/*',
+        ],
     },
     {
         files: ['**/*.?(m|c)@(t|j)s'],
@@ -173,7 +181,7 @@ export default typescriptPlugin.config(
         },
     },
     {
-        files: ['scripts/**/*.?(m|c)@(t|j)s'],
+        files: ['scripts/**/*.?(m|c)@(t|j)s', 'configurator/src/cli.ts'],
         rules: {
             'no-console': 'off',
         },

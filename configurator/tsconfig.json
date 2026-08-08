@@ -1,0 +1,29 @@
+{
+    "compilerOptions": {
+        // Type Checking — mirrors the root tsconfig so shared source files compile identically
+        "allowUnreachableCode": false,
+        "allowUnusedLabels": false,
+        "noFallthroughCasesInSwitch": true,
+        "noImplicitOverride": true,
+        "noUncheckedIndexedAccess": true,
+        "strict": true,
+        // Modules
+        "module": "ESNext",
+        "moduleResolution": "Bundler",
+        // Maps the package name to the library source so type-checking works without a prior `pnpm build` (the published types live in dist/). Runtime resolution in tests goes through the pnpm workspace link instead.
+        "paths": {
+            "tailwind-merge": ["../src/index.ts"]
+        },
+        // Emit
+        "noEmit": true,
+        // @tailwindcss/node ships type declarations whose relative imports don't resolve under Bundler module resolution. The configurator only uses small structurally-typed slices of that API, so skipping lib checks is safe.
+        "skipLibCheck": true,
+        "types": ["node"],
+        // Interop Constraints
+        "esModuleInterop": true,
+        "forceConsistentCasingInFileNames": true,
+        // Language and Environment
+        "target": "ESNext"
+    },
+    "include": ["src/**/*", "tests/**/*"]
+}

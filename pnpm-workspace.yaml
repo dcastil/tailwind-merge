@@ -1,6 +1,7 @@
 packages:
   - .
   - .github/actions/metrics-report
+  - configurator
 
 minimumReleaseAge: 4320
 minimumReleaseAgeStrict: true
