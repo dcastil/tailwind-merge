@@ -34,6 +34,10 @@ export interface PlanReport {
     scaleStrategies: Record<string, string>
     /** Self-conflict groups created for utilities the project registers beyond the built-ins (`@utility` and `@plugin`), by group ID. */
     customUtilityGroups: string[]
+    /** Static custom utilities whose compiled declarations exactly match one built-in group's signature — they joined that group instead of getting their own (class name → group ID). */
+    aliasedUtilityClasses: Record<string, string>
+    /** Inferred override relationships for custom utility groups: the utility coming later in a class list removes classes of the listed groups, because its unconditional element-level declarations fully cover theirs. */
+    customUtilityConflicts: Record<string, string[]>
     /** Class groups dropped because the theme disables everything they could match, e.g. after a namespace reset. Their conflict map entries are dropped with them. */
     prunedClassGroups: string[]
     /** Full class names appended per class group by the vanilla-diff augmentation pass — classes from compat sub-namespaces (`--text-color-*`) and namespaces without a tailwind-merge theme key (`--z-index-*`). */
@@ -156,6 +160,8 @@ export function buildPlan({ snapshot, cacheSize }: BuildPlanOptions): ConfigPlan
             ),
             prunedClassGroups,
             customUtilityGroups: [],
+            aliasedUtilityClasses: {},
+            customUtilityConflicts: {},
             augmentedClassGroups: {},
             resolvedCollisions: [],
             unassignedClasses: [],
@@ -164,15 +170,45 @@ export function buildPlan({ snapshot, cacheSize }: BuildPlanOptions): ConfigPlan
 }
 
 /**
- * Adds self-conflict groups for custom utilities to the plan. They join `classGroups` like any other group — without entries in the conflict maps, so they only ever conflict with themselves, which is the bounded support decided in PROPOSAL.md.
+ * Applies the custom-utility plan: self-conflict groups join `classGroups` like any other group, alias classes join their built-in group as literals (the trie gives named paths precedence, and joining wires up the group's full conflict behavior), and inferred override relationships land in `conflictingClassGroups` so a custom utility coming later removes the classes it fully covers.
  */
-export function applyCustomUtilityGroups(
+export function applyCustomUtilityPlan(
     plan: ConfigPlan,
-    customUtilityGroups: Map<string, PlanValue[]>,
+    customUtilityPlan: {
+        groups: Map<string, PlanValue[]>
+        aliases: Map<string, string>
+        conflicts: Map<string, string[]>
+    },
 ): void {
-    for (const [groupId, items] of customUtilityGroups) {
+    for (const [groupId, items] of customUtilityPlan.groups) {
         plan.classGroups.set(groupId, items)
         plan.report.customUtilityGroups.push(groupId)
+    }
+
+    for (const [className, groupId] of customUtilityPlan.aliases) {
+        const items = plan.classGroups.get(groupId)
+        if (!items) {
+            // The target group was pruned, which can only happen when the theme reset everything it matched — the alias still belongs there, so restore the group with just the literal.
+            plan.classGroups.set(groupId, [{ kind: 'class', value: className }])
+        } else {
+            items.push({ kind: 'class', value: className })
+        }
+        plan.report.aliasedUtilityClasses[className] = groupId
+    }
+
+    for (const [groupId, coveredGroupIds] of customUtilityPlan.conflicts) {
+        // Override targets pruned from the plan have no classes left to remove; dropping the edge keeps the emitted conflict map free of dangling group IDs.
+        const existingTargets = coveredGroupIds.filter((targetId) => plan.classGroups.has(targetId))
+        if (existingTargets.length === 0) {
+            continue
+        }
+        const conflictTargets = plan.conflictingClassGroups.get(groupId)
+        if (conflictTargets) {
+            conflictTargets.push(...existingTargets)
+        } else {
+            plan.conflictingClassGroups.set(groupId, existingTargets)
+        }
+        plan.report.customUtilityConflicts[groupId] = existingTargets
     }
 }
 

@@ -39,12 +39,24 @@ export async function loadDesignSystems({ css, base }: LoadDesignSystemsOptions)
 }
 
 /**
- * Compiles a class through Tailwind and returns its declarations as property → value text, or null when the class produces no CSS. `@property` registrations are stripped first: composable utilities share them without conflicting, so they are noise for conflict semantics. Values matter to the conflict oracle: two classes re-declaring the same property with identical `var()`-composed text (like `border-spacing: var(--tw-border-spacing-x) var(--tw-border-spacing-y)`) carry their state in the custom properties, not the declaration itself.
+ * One CSS declaration of a compiled class, annotated with where and when it applies. The annotations exist because conflict semantics depend on them: a `border-color` set on an `::after` overlay never fights with a `border-color` on the element itself, and a padding that only applies inside a media query cannot be said to fully override an unconditional one.
+ */
+export interface DeclarationEntry {
+    /** Render target of the declaration: `''` for the element the class sits on, a pseudo-element chain like `'::after'`, or a combinator tail like `'> :not(:last-child)'` when the declaration styles a different element entirely. */
+    context: string
+    /** True when the declaration applies only under a condition — an `@media`/`@supports`/`@container` wrapper or a pseudo-class guard like `:hover` or `:is(.dark *)`. */
+    conditional: boolean
+    property: string
+    value: string
+}
+
+/**
+ * Compiles a class through Tailwind and returns its declarations, or null when the class produces no CSS. `@property` registrations and `@keyframes` bodies are skipped: composable utilities share the former without conflicting, and the latter describe animation frames, not what the class sets on an element. Values matter to the conflict oracle: two classes re-declaring the same property with identical text are idempotent together and carry their real state elsewhere (usually in custom properties).
  */
 export function declaredDeclarations(
     designSystem: DesignSystemAccess,
     className: string,
-): Map<string, string> | null {
+): DeclarationEntry[] | null {
     let cache = declarationsCache.get(designSystem)
     if (!cache) {
         cache = new Map()
@@ -54,33 +66,175 @@ export function declaredDeclarations(
     let declarations = cache.get(className)
     if (declarations === undefined) {
         const css = designSystem.candidatesToCss([className])[0] ?? null
-        if (css === null) {
-            declarations = null
-        } else {
-            declarations = new Map()
-            const withoutPropertyRules = css.replace(/@property[^{]*\{[^}]*\}/g, '')
-            for (const match of withoutPropertyRules.matchAll(
-                /^\s*(--[\w-]+|[a-z-]+)\s*:\s*([^;]+);/gim,
-            )) {
-                declarations.set(match[1]!, match[2]!.trim())
-            }
-        }
+        declarations = css === null ? null : parseDeclarations(css)
         cache.set(className, declarations)
     }
 
     return declarations
 }
 
-/** The set of declared property names — the signature used for class-group classification, where values don't matter. */
+/**
+ * The context-qualified property names of a class — the signature used for class-group classification, where values and conditions don't matter but render targets do: `color` on the element and `color` on `::before` are different things to set.
+ */
 export function declaredProperties(
     designSystem: DesignSystemAccess,
     className: string,
 ): Set<string> | null {
     const declarations = declaredDeclarations(designSystem, className)
-    return declarations === null ? null : new Set(declarations.keys())
+    return declarations === null
+        ? null
+        : new Set(declarations.map((entry) => qualifiedProperty(entry)))
 }
 
-const declarationsCache = new WeakMap<DesignSystemAccess, Map<string, Map<string, string> | null>>()
+/** Key joining render target and property name, e.g. `'::after border-color'`; base-context entries stay the bare property name. */
+export function qualifiedProperty(entry: { context: string; property: string }): string {
+    return entry.context === '' ? entry.property : `${entry.context} ${entry.property}`
+}
+
+const declarationsCache = new WeakMap<DesignSystemAccess, Map<string, DeclarationEntry[] | null>>()
+
+interface BlockFrame {
+    context: string
+    conditional: boolean
+    /** Set for blocks whose declarations are not element styles (`@property`, `@keyframes` and their descendants). */
+    skip: boolean
+}
+
+/**
+ * Parses the CSS text Tailwind compiles for one class into annotated declarations. A hand-rolled scanner is enough here: `candidatesToCss` output is machine-generated nested CSS without comments, and only braces, semicolons, and block headers need tracking.
+ */
+function parseDeclarations(css: string): DeclarationEntry[] {
+    const entries: DeclarationEntry[] = []
+    const stack: BlockFrame[] = []
+    let buffer = ''
+
+    const flushDeclaration = () => {
+        const frame = stack[stack.length - 1]
+        const declaration = buffer.trim()
+        buffer = ''
+        if (!frame || frame.skip || declaration === '') {
+            return
+        }
+        const colonIndex = declaration.indexOf(':')
+        if (colonIndex <= 0) {
+            return
+        }
+        const property = declaration.slice(0, colonIndex).trim()
+        const value = declaration.slice(colonIndex + 1).trim()
+        // Property-name shape guard (covers standard, vendor `-ms-…`, and custom `--…` properties) so selector fragments of malformed input never register as declarations.
+        if (/^-{0,2}[a-zA-Z][\w-]*$/.test(property)) {
+            entries.push({ context: frame.context, conditional: frame.conditional, property, value })
+        }
+    }
+
+    let parenDepth = 0
+    for (const char of css) {
+        if (char === '(') {
+            parenDepth += 1
+        } else if (char === ')') {
+            parenDepth = Math.max(0, parenDepth - 1)
+        }
+
+        if (parenDepth === 0 && char === '{') {
+            const header = buffer.trim()
+            buffer = ''
+            stack.push(frameForHeader(header, stack[stack.length - 1]))
+        } else if (parenDepth === 0 && char === '}') {
+            flushDeclaration()
+            stack.pop()
+        } else if (parenDepth === 0 && char === ';') {
+            flushDeclaration()
+        } else {
+            buffer += char
+        }
+    }
+
+    return entries
+}
+
+function frameForHeader(header: string, parent: BlockFrame | undefined): BlockFrame {
+    const parentContext = parent?.context ?? ''
+    const parentConditional = parent?.conditional ?? false
+    const parentSkip = parent?.skip ?? false
+
+    if (header.startsWith('@')) {
+        // Conditional at-rules keep targeting the same element; everything else at-rule-shaped (@property, @keyframes) holds non-style declarations.
+        const isConditional = /^@(media|supports|container)\b/.test(header)
+        return {
+            context: parentContext,
+            conditional: parentConditional || isConditional,
+            skip: parentSkip || !isConditional,
+        }
+    }
+
+    const { contextFragment, conditional } = analyzeSelector(header)
+    return {
+        context:
+            parentContext === '' || contextFragment === ''
+                ? parentContext + contextFragment
+                : `${parentContext} ${contextFragment}`,
+        conditional: parentConditional || conditional,
+        skip: parentSkip,
+    }
+}
+
+/** Single-colon selectors that are pseudo-elements by CSS's legacy compatibility rule; everything else single-colon is a pseudo-class. */
+const LEGACY_PSEUDO_ELEMENTS = new Set(['before', 'after', 'first-line', 'first-letter'])
+
+/**
+ * Determines what a selector does to the render target relative to the class's base element. The subject anchor is `&` (nested rules) or the class selector itself (top-level rules, possibly wrapped in `:where(...)`). Pseudo-elements and combinator tails after the anchor change the target; pseudo-classes and ancestor prefixes only add conditions.
+ */
+function analyzeSelector(selector: string): { contextFragment: string; conditional: boolean } {
+    // Comma lists don't occur in single-candidate output; analyzing the first part keeps the scanner total in case they ever do.
+    let subject = selector.split(',')[0]!.trim()
+
+    // Unwrap a `:where(...)` / `:is(...)` enclosing the entire selector — it only changes specificity, not the target.
+    const wrapper = /^:(?:where|is)\((.*)\)$/.exec(subject)
+    if (wrapper) {
+        subject = wrapper[1]!.trim()
+    }
+
+    // Anchor: `&` or the first class selector (class names may contain escaped characters like `\%`).
+    const anchorMatch = /&|\.(?:[\w-]|\\.)+/.exec(subject)
+    if (!anchorMatch) {
+        // No recognizable anchor means the block targets something unrelated (not emitted by current Tailwind); give it a distinct context so it can never collide with base declarations.
+        return { contextFragment: subject.replace(/\s+/g, ' '), conditional: false }
+    }
+
+    // Anything before the anchor is ancestor context (`.dark .foo`), a condition on the same target.
+    let conditional = anchorMatch.index > 0
+    let contextFragment = ''
+    let rest = subject.slice(anchorMatch.index + anchorMatch[0].length)
+
+    while (rest !== '') {
+        const pseudo = /^::?([\w-]+)(\((?:[^()]|\([^()]*\))*\))?/.exec(rest)
+        if (pseudo) {
+            const isPseudoElement =
+                pseudo[0].startsWith('::') || LEGACY_PSEUDO_ELEMENTS.has(pseudo[1]!)
+            if (isPseudoElement) {
+                contextFragment += `::${pseudo[1]!}`
+            } else {
+                conditional = true
+            }
+            rest = rest.slice(pseudo[0].length)
+            continue
+        }
+
+        const compound = /^(?:\.(?:[\w-]|\\.)+|\[[^\]]*\])/.exec(rest)
+        if (compound) {
+            // Additional class or attribute requirements on the same element are conditions.
+            conditional = true
+            rest = rest.slice(compound[0].length)
+            continue
+        }
+
+        // A combinator: the remainder selects a different element and becomes part of the target context.
+        contextFragment += (contextFragment === '' ? '' : ' ') + rest.trim().replace(/\s+/g, ' ')
+        break
+    }
+
+    return { contextFragment, conditional }
+}
 
 /** Proper-subset check over property names, used to recognize classes whose declarations span multiple groups' signatures. */
 export function haveProperSubset(subset: Set<string>, superset: Set<string>): boolean {

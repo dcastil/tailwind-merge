@@ -245,6 +245,35 @@ describe('theme with wild value names and mixed blocks', async () => {
     })
 })
 
+// Numeric-named color tokens in a compat sub-namespace, distilled from supabase's `--background-color-200`. The number shadows scale steps of utilities that consult the namespace: `mask-b-from-200` stops being a spacing-based stop position and becomes a color stop, which composes with position stops instead of conflicting. The shared mask scaffolding (`mask-composite: intersect` re-declared identically by every mask utility) also exercises the oracle's idempotent-re-declaration rule.
+describe('theme with a numeric-named sub-namespace color token', async () => {
+    const { twMerge, plan, designSystem } = await generateFixture(`
+@import 'tailwindcss';
+@theme {
+    --background-color-200: #e2e8f0;
+}
+`)
+
+    test('conforms to Tailwind conflict semantics across the class list', () => {
+        assertTailwindConformance(designSystem, twMerge, plan)
+    })
+
+    test('the numeric name is a background color and merges as one', () => {
+        expect(twMerge('bg-200 bg-red-500')).toBe('bg-red-500')
+        expect(twMerge('bg-red-500 bg-200')).toBe('bg-200')
+    })
+
+    test('mask stops treat the numeric name as a color, composing with positions', () => {
+        expect(twMerge('mask-b-from-200 mask-b-from-red-500')).toBe('mask-b-from-red-500')
+        expect(twMerge('mask-b-from-100% mask-b-from-200')).toBe('mask-b-from-100% mask-b-from-200')
+        expect(twMerge('mask-b-from-200 mask-b-from-4')).toBe('mask-b-from-200 mask-b-from-4')
+    })
+
+    test('nothing ends up unassigned', () => {
+        expect(plan.report.unassignedClasses).toEqual([])
+    })
+})
+
 // Multi-file setups resolve @import chains through Tailwind's own loader; the theme lives in a separate tokens file.
 describe('theme split across imported files', async () => {
     const fixtureDirectory = fileURLToPath(new URL('fixtures/multi-file/', import.meta.url))

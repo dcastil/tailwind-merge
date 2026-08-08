@@ -4,7 +4,14 @@ import { expect } from 'vitest'
 import { createTailwindMerge, twMerge as defaultTwMerge } from 'tailwind-merge'
 
 import { ConfigPlan, generate } from '../src'
-import { DesignSystemAccess, declaredDeclarations, loadDesignSystems } from '../src/design-system'
+import { fullyCovers } from '../src/custom-utilities'
+import {
+    DeclarationEntry,
+    DesignSystemAccess,
+    declaredDeclarations,
+    loadDesignSystems,
+    qualifiedProperty,
+} from '../src/design-system'
 
 export const fixtureBase = fileURLToPath(new URL('.', import.meta.url))
 
@@ -81,16 +88,23 @@ export function assertTailwindConformance(
             firstDeclarations !== null &&
             secondDeclarations !== null &&
             declarationsConflict(firstDeclarations, secondDeclarations)
-        const oracleResult = conflictExpected ? second : input
 
-        if (generatedResult === oracleResult) {
-            improvementsOverDefault.push(`${input} → ${oracleResult} (default: ${defaultResult})`)
+        // Interference means the pair must merge. Without interference the pair normally must stay — except when the second class fully subsumes the first (identical scaffolding plus overridden state, like supabase's `hit-area` vs `hit-area-0`): removing the first is lossless there, so both keeping and merging count as correct.
+        const acceptableResults = conflictExpected ? [second] : [input]
+        if (!conflictExpected && fullyCovers(secondDeclarations, firstDeclarations)) {
+            acceptableResults.push(second)
+        }
+
+        if (acceptableResults.includes(generatedResult)) {
+            improvementsOverDefault.push(
+                `${input} → ${generatedResult} (default: ${defaultResult})`,
+            )
         } else {
             failures.push({
                 input,
                 generated: generatedResult,
                 default: defaultResult,
-                oracle: oracleResult,
+                oracle: acceptableResults.join(' | '),
             })
         }
     }
@@ -101,32 +115,36 @@ export function assertTailwindConformance(
 }
 
 /**
- * Whether two classes' compiled declarations conflict. Identical property-name sets always conflict (color utilities often differ only in custom-property values). Otherwise a conflict needs interference on a real CSS property — overlap on `--tw-*` custom properties alone is composition, not conflict — with one exception: re-declaring the same property with identical `var()`-composed text (like `border-spacing: var(--tw-border-spacing-x) var(--tw-border-spacing-y)`) carries its state in the custom properties and doesn't conflict by itself.
+ * Whether two classes' compiled declarations conflict. Identical signatures (same render targets and property names) always conflict — color utilities often differ only in custom-property values. Otherwise a conflict needs interference on a real CSS property, and interference is bounded three ways: overlap on `--tw-*` custom properties alone is composition, not conflict; declarations on different render targets (a `border-color` on `::after` vs one on the element itself) never touch each other; and re-declaring the same property with byte-identical text (shared scaffolding like `mask-composite: intersect` or `var()`-composed state carriers) is idempotent and conflicts with nothing. Conditional declarations (media queries, `:hover`-style guards, dark-mode wrappers) also don't count as interference — they overlap only sometimes, and the generated config conservatively keeps such classes side by side.
  */
-function declarationsConflict(first: Map<string, string>, second: Map<string, string>): boolean {
+function declarationsConflict(first: DeclarationEntry[], second: DeclarationEntry[]): boolean {
+    const firstSignature = new Set(first.map(qualifiedProperty))
+    const secondSignature = new Set(second.map(qualifiedProperty))
     if (
-        first.size === second.size &&
-        [...first.keys()].every((property) => second.has(property))
+        firstSignature.size === secondSignature.size &&
+        [...firstSignature].every((key) => secondSignature.has(key))
     ) {
         return true
     }
 
-    for (const [firstProperty, firstValue] of first) {
-        if (firstProperty.startsWith('--')) {
+    for (const firstEntry of first) {
+        if (firstEntry.property.startsWith('--') || firstEntry.conditional) {
             continue
         }
-        for (const [secondProperty, secondValue] of second) {
-            if (secondProperty.startsWith('--')) {
+        for (const secondEntry of second) {
+            if (secondEntry.property.startsWith('--') || secondEntry.conditional) {
                 continue
             }
-            if (!propertiesInterfere(firstProperty, secondProperty)) {
+            if (firstEntry.context !== secondEntry.context) {
                 continue
             }
-            const isSharedComposition =
-                firstProperty === secondProperty &&
-                firstValue === secondValue &&
-                firstValue.includes('var(--tw-')
-            if (!isSharedComposition) {
+            if (!propertiesInterfere(firstEntry.property, secondEntry.property)) {
+                continue
+            }
+            const isIdempotentRedeclaration =
+                firstEntry.property === secondEntry.property &&
+                firstEntry.value === secondEntry.value
+            if (!isIdempotentRedeclaration) {
                 return true
             }
         }

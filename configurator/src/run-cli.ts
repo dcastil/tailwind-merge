@@ -59,6 +59,22 @@ export async function runCli(argv: string[]): Promise<number> {
             `Self-conflict groups for custom utilities: ${plan.report.customUtilityGroups.join(', ')}`,
         )
     }
+    const aliased = Object.entries(plan.report.aliasedUtilityClasses)
+    if (aliased.length > 0) {
+        console.log(
+            `Custom utilities joining built-in groups as aliases: ${aliased
+                .map(([className, classGroupId]) => `${className} → ${classGroupId}`)
+                .join(', ')}`,
+        )
+    }
+    const utilityConflicts = Object.entries(plan.report.customUtilityConflicts)
+    if (utilityConflicts.length > 0) {
+        console.log(
+            `Inferred overrides for custom utilities: ${utilityConflicts
+                .map(([classGroupId, covered]) => `${classGroupId} overrides ${covered.join(', ')}`)
+                .join('; ')}`,
+        )
+    }
     const augmented = Object.entries(plan.report.augmentedClassGroups)
     if (augmented.length > 0) {
         console.log(
