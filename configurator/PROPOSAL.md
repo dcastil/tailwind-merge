@@ -47,7 +47,7 @@ Non-goals for v1:
 - `createTailwindMerge` never imports the default config ([src/lib/create-tailwind-merge.ts:1-4](../src/lib/create-tailwind-merge.ts)); with `"sideEffects": false` and the pure-call annotations from the build, a consumer importing only `createTailwindMerge` + `validators` sheds the entire default config. The CI metrics action already measures per-export bundle sizes on every PR (`.github/actions/metrics-report`), so the claim is continuously verified and the configurator's output can be measured with the same tooling.
 - `validators` is a public namespace export ([src/index.ts:17](../src/index.ts)) — generated code can reference every validator by name without duplicating any code.
 - Ready-made equivalence oracles exist: `tests/class-map.test.ts` fingerprints the whole class-group trie structurally via `createClassMap`, and ~250 behavioral assertions (strongest corpus: `tests/tailwind-css-versions.test.ts`) are all of the shape `expect(twMerge(x)).toBe(y)` with an established pattern of testing custom `createTailwindMerge` instances. Both can be run against a generated config with a small parametrization refactor.
-- Found in passing: the theme-key table in [docs/configuration.md](../docs/configuration.md) lists 18 keys but the real set is 19 — `text-shadow` is missing from the docs. Worth fixing independently of this project.
+- Found in passing: the theme-key table in [docs/configuration.md](../docs/configuration.md) was missing the 19th key `text-shadow` (fixed on `main` in the meantime).
 
 ### 3.2 Tailwind v4 JS API (verified with a working spike against 4.3.3)
 
@@ -178,7 +178,7 @@ The repo is already a pnpm workspace (`pnpm-workspace.yaml` lists `.` and `.gith
 ## 8. Phased plan
 
 - **P0 — research + feasibility spike.** Done (this document; spike verified against 4.3.3).
-- **P1 — vanilla exactness.** Skeleton-transform generator + emitter with scale compression, existing-class gate + divergence snapshot, size report. Exit: generated-from-vanilla-CSS matches current `twMerge` on all existing vanilla classes, the divergence report contains only intended exactness wins, bundle ≤ parity.
+- **P1 — vanilla exactness.** Done. Skeleton-transform generator + emitter with scale compression, full-sweep differential over all ~23k consecutive class-list pairs with Tailwind-as-oracle adjudication (`candidatesToCss` declaration overlap), intended-divergence snapshot, size measurement. Result: zero oracle failures; the only divergences from current `twMerge` on existing classes are two cases around `shadow-inner` where the default config is provably wrong today; vanilla bundle at compressed parity (7,787 B vs 7,463 B brotli, +4.3%) with a known tuning backlog on the minified delta.
 - **P2 — real themes.** Overrides, extensions, resets, compat sub-namespaces via sentinel probing, `--spacing` logic, compound keys (`--text-*--line-height`). Exit: Replit-style CSS produces correct merges; regression scenarios from #684/#657/#631 pass.
 - **P3 — ecosystem completeness.** Prefix, `@config`/`@plugin` end-to-end tests, `--check` CI mode, tailwind version matrix, and custom `@utility` in its bounded form (see below).
 - **P4 — future.** Used-class scanning ("minification" of the config), bundler plugins with virtual modules + HMR, and — with adoption data in hand — reopening the upstream conversation with the Tailwind team.
