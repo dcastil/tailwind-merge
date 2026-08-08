@@ -56,7 +56,7 @@ function fromTheme<
 
 Function to retrieve values from a theme scale, to be used in class groups.
 
-`fromTheme` doesn't return the values from the theme scale, but rather another function which is used by tailwind-merge internally to retrieve the theme values. tailwind-merge can differentiate the theme getter function from a validator because it has a `isThemeGetter` property set to `true`.
+`fromTheme` doesn't return the values from the theme scale, but rather another function which is used by tailwind-merge internally to retrieve the theme values. tailwind-merge can differentiate the theme getter function from a validator because it has a `isThemeGetter` property set to `true`. The returned function also exposes the key it was created with as a `themeKey` property, which allows tooling like config generators to identify the referenced theme scale without invoking the getter.
 
 When using TypeScript, the function only allows passing the default theme group IDs as the `key` argument. If you use custom theme group IDs, you need to pass them as the generic type argument `AdditionalThemeGroupIds`. In case you aren't using the default tailwind-merge config and use a different set of theme group IDs entirely, you can also pass them as the generic type argument `DefaultThemeGroupIdsInner`. If you want to allow any keys, you can call it as `fromTheme<string>('anything-goes-here')`.
 
@@ -304,6 +304,19 @@ const twMerge = createTailwindMerge(getDefaultConfig, (config) =>
 )
 ```
 
+## `createClassGroupUtils`
+
+```ts
+function createClassGroupUtils(config: AnyConfig): {
+    getClassGroupId(className: string): string | undefined
+    getConflictingClassGroupIds(classGroupId: string, hasPostfixModifier: boolean): readonly string[]
+}
+```
+
+Advanced function that builds the class classification utilities tailwind-merge uses internally from a config: `getClassGroupId` returns the ID of the class group a base class name (without modifiers) belongs to, or `undefined` for classes the config doesn't know, and `getConflictingClassGroupIds` returns the IDs of class groups that a class group removes when it appears later in the input.
+
+This is primarily meant for tooling that needs to inspect how a config classifies classes, like config generators or debugging utilities. Note that it computes a large data structure on every call, so you should call it once and reuse the returned functions.
+
 ## `validators`
 
 ```ts
@@ -460,6 +473,34 @@ type ClassValidator = (value: string) => boolean
 ```
 
 TypeScript type for class validators accepted in class definitions within [`extendTailwindMerge`](#extendtailwindmerge) and [`createTailwindMerge`](#createtailwindmerge).
+
+## `AnyConfig`
+
+```ts
+type AnyConfig = Config<string, string>
+```
+
+TypeScript type for a config object with arbitrary class group and theme group IDs. Useful for code that processes configs generically, like functions accepting any config as an argument.
+
+## `ClassGroup`
+
+```ts
+type ClassGroup<ThemeGroupIds extends string> = readonly ClassDefinition<ThemeGroupIds>[]
+```
+
+TypeScript type for a single class group within the `classGroups` object of the [`Config`](#config) type: an array of class name parts, [validators](#classvalidator), [theme getters](#fromtheme) and nested objects.
+
+## `ThemeGetter`
+
+```ts
+interface ThemeGetter {
+    (theme: ThemeObject): ClassGroup
+    isThemeGetter: true
+    themeKey?: string
+}
+```
+
+TypeScript type for the functions returned by [`fromTheme`](#fromtheme). The `themeKey` property is present on getters created with `fromTheme` and names the theme scale the getter reads.
 
 ---
 

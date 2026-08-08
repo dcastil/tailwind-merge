@@ -175,6 +175,10 @@ export type ClassValidator = (classPart: string) => boolean
 export interface ThemeGetter {
     (theme: ThemeObject<AnyThemeGroupIds>): ClassGroup<AnyClassGroupIds>
     isThemeGetter: true
+    /**
+     * The theme key the getter reads. Set on getters created with `fromTheme` so that tooling (e.g. config generators) can identify the referenced theme scale without invoking the getter. Optional because theme getters can be hand-written.
+     */
+    themeKey?: string
 }
 type ClassObject<ThemeGroupIds extends string> = Record<
     string,

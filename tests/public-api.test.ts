@@ -1,12 +1,16 @@
 import { expect, test } from 'vitest'
 
 import {
+    AnyConfig,
+    ClassGroup,
     ClassNameValue,
     ClassValidator,
     Config,
     ConfigExtension,
     DefaultClassGroupIds,
     DefaultThemeGroupIds,
+    ThemeGetter,
+    createClassGroupUtils,
     createTailwindMerge,
     extendTailwindMerge,
     fromTheme,
@@ -56,17 +60,32 @@ test('has correct export types', () => {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const noRun = () => {
         const config: Config<DefaultClassGroupIds, DefaultThemeGroupIds> = getDefaultConfig()
+        const anyConfig: AnyConfig = getDefaultConfig()
         const classNameValue: ClassNameValue = 'some-class'
         const classValidator: ClassValidator = (value: string) => false
+        const themeGetter: ThemeGetter = fromTheme('spacing')
+        const classGroup: ClassGroup<string> = ['some-class', classValidator, themeGetter]
 
         twMerge(classNameValue, classNameValue, classNameValue)
         twJoin(classNameValue, classNameValue, classNameValue)
 
         return {
             config,
+            anyConfig,
             classValidator,
+            classGroup,
         }
     }
+})
+
+test('createClassGroupUtils has correct inputs and outputs', () => {
+    const classGroupUtils = createClassGroupUtils(getDefaultConfig())
+
+    expect(classGroupUtils.getClassGroupId).toStrictEqual(expect.any(Function))
+    expect(classGroupUtils.getConflictingClassGroupIds).toStrictEqual(expect.any(Function))
+    expect(classGroupUtils.getClassGroupId('bg-red-500')).toBe('bg-color')
+    expect(classGroupUtils.getClassGroupId('not-a-tailwind-class-at-all')).toBeUndefined()
+    expect(classGroupUtils.getConflictingClassGroupIds('px', false)).toContain('pr')
 })
 
 test('twMerge() has correct inputs and outputs', () => {
@@ -207,6 +226,7 @@ test('fromTheme has correct inputs and outputs', () => {
     expect(fromTheme('spacing')).toStrictEqual(expect.any(Function))
     expect(fromTheme<string>('foo')).toStrictEqual(expect.any(Function))
     expect(fromTheme<string>('foo').isThemeGetter).toBe(true)
+    expect(fromTheme<string>('foo').themeKey).toBe('foo')
     expect(fromTheme<string>('foo')({ foo: ['hello'] })).toStrictEqual(['hello'])
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars

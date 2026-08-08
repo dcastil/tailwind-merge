@@ -1,3 +1,4 @@
+export { createClassGroupUtils } from './lib/class-group-utils'
 export { createTailwindMerge } from './lib/create-tailwind-merge'
 export { getDefaultConfig } from './lib/default-config'
 export { extendTailwindMerge } from './lib/extend-tailwind-merge'
@@ -6,6 +7,8 @@ export { mergeConfigs } from './lib/merge-configs'
 export { twJoin, type ClassNameValue } from './lib/tw-join'
 export { twMerge } from './lib/tw-merge'
 export {
+    type AnyConfig,
+    type ClassGroup,
     type ClassValidator,
     type Config,
     type ConfigExtension,
@@ -13,5 +16,6 @@ export {
     type DefaultThemeGroupIds,
     type ExperimentalParseClassNameParam,
     type ParsedClassName as ExperimentalParsedClassName,
+    type ThemeGetter,
 } from './lib/types'
 export * as validators from './lib/validators'
