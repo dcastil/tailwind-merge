@@ -11,6 +11,7 @@ import { afterEach, beforeAll, expect, test, vi } from 'vitest'
 import { discoverCssRoot } from '../src/discovery'
 import tailwindMerge, { type TailwindMergeOptions } from '../src/index'
 import * as fallbackRuntime from '../src/runtime'
+import { describeTailwindSkew, tailwindVersionSkewWarning } from '../src/tailwind-versions'
 
 const RUNTIME_SPECIFIER = '@tailwind-merge/vite/runtime'
 
@@ -280,4 +281,12 @@ test('discovery reports ambiguous roots instead of guessing', async () => {
     await expect(discoverCssRoot(path.join(fixturesDirectory, 'ambiguous'))).rejects.toThrow(
         'multiple Tailwind CSS roots',
     )
+})
+
+test('tailwind version skew is detected on minor gaps and quiet otherwise', () => {
+    expect(describeTailwindSkew('4.3.3', '4.3.9')).toBeNull()
+    expect(describeTailwindSkew('4.3.3', '4.4.0')).toContain('update @tailwind-merge/vite')
+    expect(describeTailwindSkew('4.4.0', '4.3.3')).toContain('update @tailwindcss/vite')
+    // The workspace resolves both sides to the same line, so the real check stays quiet — also proving the resolution path works.
+    expect(tailwindVersionSkewWarning(packageDirectory)).toBeNull()
 })
