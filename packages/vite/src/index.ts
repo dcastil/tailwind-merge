@@ -1,5 +1,4 @@
 import path from 'node:path'
-import { fileURLToPath } from 'node:url'
 
 import type { Plugin, ResolvedConfig, ViteDevServer } from 'vite'
 
@@ -135,16 +134,10 @@ export default function tailwindMerge(options: TailwindMergeOptions = {}): Plugi
             })
         },
 
-        async resolveId(source, importer) {
-            if (source === RUNTIME_SPECIFIER || isRuntimeFilePath(source)) {
+        async resolveId(source) {
+            // Only the bare specifier is intercepted. If the user aliases the subpath elsewhere, that's their path to use — the plugin doesn't chase it. The generated module's own imports need no interception either: they go through this package's real tailwind-merge re-export, resolvable from anywhere because the plugin package is the user's direct dependency (PROPOSAL.md §11.3).
+            if (source === RUNTIME_SPECIFIER) {
                 return (await cssRoot) === null ? null : VIRTUAL_MODULE_ID
-            }
-            // The generated module imports 'tailwind-merge'. Resolving it from this package's own runtime file makes the single-install story work: the user's project needs no tailwind-merge dependency, the plugin's copy is used (PROPOSAL.md §11.3).
-            if (
-                (source === 'tailwind-merge' || source.startsWith('tailwind-merge/')) &&
-                importer === VIRTUAL_MODULE_ID
-            ) {
-                return this.resolve(source, RUNTIME_FILE_PATH, { skipSelf: true })
             }
         },
 
@@ -182,13 +175,5 @@ export default function tailwindMerge(options: TailwindMergeOptions = {}): Plugi
 
 const RUNTIME_SPECIFIER = '@tailwind-merge/vite/runtime'
 
-/** The on-disk fallback module — also the base the plugin resolves tailwind-merge from, and the file aliases or self-references may resolve the subpath to. */
-const RUNTIME_FILE_PATH = fileURLToPath(new URL('runtime.ts', import.meta.url))
-
-/** The \0 prefix marks the module as virtual for other plugins. The served code is already plain JavaScript (generation strips the configurator's TypeScript), so no extension is needed to route it through further transforms. */
+/** The \0 prefix marks the module as virtual for other plugins. The served code is already plain JavaScript (the configurator emits `format: 'js'`), so no extension is needed to route it through further transforms. */
 const VIRTUAL_MODULE_ID = '\0@tailwind-merge/vite/runtime'
-
-/** True when a resolveId source is the runtime file itself — how the subpath arrives when an alias or a package self-reference resolved it before this plugin saw the bare specifier. */
-function isRuntimeFilePath(source: string): boolean {
-    return !source.includes('?') && path.normalize(source) === RUNTIME_FILE_PATH
-}

@@ -36,6 +36,7 @@ export async function generateRuntimeModule(options: {
             base,
             cacheSize: options.cacheSize,
             format: 'js',
+            importSource: INTERNAL_TAILWIND_MERGE,
             banner: `// Source: ${path.relative(options.root, options.cssPath) || options.cssPath} (served in-memory by @tailwind-merge/vite)`,
         }),
         collectCssDependencies(css, base),
@@ -52,11 +53,16 @@ export async function generateRuntimeModule(options: {
 }
 
 /**
- * Appended to the configurator's emitted module (which exports `getConfig` and `twMerge` and already imports `createTailwindMerge` from tailwind-merge) so the virtual module's export surface mirrors runtime.ts. The `import` specifiers here resolve through the plugin's importer-scoped redirect, so the user's project needs no tailwind-merge dependency of its own. Plain JavaScript on purpose — types live in runtime.ts, which is what TypeScript resolves for the subpath.
+ * Where the virtual module imports tailwind-merge's API from: this package's own re-export (src/tailwind-merge.ts). A virtual module has no filesystem location, so a bare 'tailwind-merge' would resolve from the project root and fail under strict package managers — the plugin package itself is the one specifier guaranteed resolvable from anywhere in the user's project, being their direct dependency.
+ */
+const INTERNAL_TAILWIND_MERGE = '@tailwind-merge/vite/tailwind-merge'
+
+/**
+ * Appended to the configurator's emitted module (which exports `getConfig` and `twMerge` and already imports `createTailwindMerge`) so the virtual module's export surface mirrors runtime.ts. Plain JavaScript on purpose — types live in runtime.ts, which is what TypeScript resolves for the subpath.
  */
 const RUNTIME_APPENDIX = `
-export { createTailwindMerge, mergeConfigs, twJoin, validators } from 'tailwind-merge'
-import { mergeConfigs as mergeConfigsForExtend } from 'tailwind-merge'
+export { createTailwindMerge, mergeConfigs, twJoin, validators } from '${INTERNAL_TAILWIND_MERGE}'
+import { mergeConfigs as mergeConfigsForExtend } from '${INTERNAL_TAILWIND_MERGE}'
 
 // Like tailwind-merge's extendTailwindMerge, but extending this project's generated config instead of the default one.
 export const extendTailwindMerge = (configExtension, ...createConfig) =>
@@ -66,10 +72,10 @@ export const extendTailwindMerge = (configExtension, ...createConfig) =>
 `
 
 /**
- * Served for the virtual module when generation has never succeeded (the CSS is broken from the start, or a `@plugin` package is missing): the same default-config surface as runtime.ts, inlined so its imports go through the plugin's tailwind-merge redirect instead of resolving the subpath again. Once a generation has succeeded, later failures keep serving the last good module instead.
+ * Served for the virtual module when generation has never succeeded (the CSS is broken from the start, or a `@plugin` package is missing): the same default-config surface as runtime.ts. Once a generation has succeeded, later failures keep serving the last good module instead.
  */
 export const FALLBACK_MODULE_CODE = `
-export { createTailwindMerge, extendTailwindMerge, getDefaultConfig as getConfig, mergeConfigs, twJoin, twMerge, validators } from 'tailwind-merge'
+export { createTailwindMerge, extendTailwindMerge, getDefaultConfig as getConfig, mergeConfigs, twJoin, twMerge, validators } from '${INTERNAL_TAILWIND_MERGE}'
 `
 
 /**

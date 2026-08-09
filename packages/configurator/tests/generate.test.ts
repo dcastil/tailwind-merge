@@ -5,6 +5,7 @@ import { createTailwindMerge, twMerge as defaultTwMerge } from 'tailwind-merge'
 
 import { generate } from '../src'
 import { loadDesignSystems } from '../src/design-system'
+import { emitModule } from '../src/emit'
 
 import { assertTailwindConformance } from './fixture-utils'
 
@@ -109,5 +110,12 @@ describe('generate from vanilla Tailwind CSS', () => {
                 .replace(', type Config', '')
                 .replace(' satisfies Config<string, never>', ''),
         )
+    })
+
+    test('importSource substitutes the module the emitted code imports from', () => {
+        const emitted = emitModule(plan, { importSource: '@tailwind-merge/vite/tailwind-merge' })
+
+        expect(emitted).toContain("from '@tailwind-merge/vite/tailwind-merge'")
+        expect(emitted).not.toContain("from 'tailwind-merge'")
     })
 })

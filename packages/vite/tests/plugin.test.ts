@@ -1,6 +1,8 @@
+import { execFile } from 'node:child_process'
 import { cp, mkdir, rm, symlink, writeFile } from 'node:fs/promises'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { promisify } from 'node:util'
 
 import { type ViteDevServer, build, createServer } from 'vite'
 import { afterEach, beforeAll, expect, test, vi } from 'vitest'
@@ -26,7 +28,7 @@ const libraryAliases = [
 ]
 
 beforeAll(async () => {
-    for (const fixture of ['app', 'no-tailwind']) {
+    for (const fixture of ['app', 'no-tailwind', 'consumer-types', 'monorepo/apps/web']) {
         const scopeDirectory = path.join(fixturesDirectory, fixture, 'node_modules', '@tailwind-merge')
         await mkdir(scopeDirectory, { recursive: true })
         // Absolute target so fixture copies keep resolving; ignored by git like any node_modules.
@@ -176,6 +178,44 @@ test('vite build inlines the generated module', async () => {
     // The default config never enters the bundle (getDefaultConfig would only appear via the fallback module).
     expect(code).not.toContain('getDefaultConfig')
 })
+
+test('theme files outside the Vite root regenerate on change (monorepo)', async () => {
+    const monorepo = await copyFixture('monorepo')
+    const server = await startServer(path.join(monorepo, 'apps', 'web'))
+    await new Promise((resolve) => setTimeout(resolve, 500))
+
+    const before = await server.ssrLoadModule(RUNTIME_SPECIFIER)
+    // The theme value comes from a file outside the Vite root and already configures the merge.
+    expect(before.twMerge('text-huge text-sm')).toBe('text-sm')
+    expect(before.twMerge('text-big text-sm')).toBe('text-big text-sm')
+
+    // Vite's watcher only covers the root by default; the plugin registers out-of-root dependencies explicitly. This edit must still trigger regeneration.
+    await writeFile(
+        path.join(monorepo, 'theme', 'tokens.css'),
+        '@theme {\n    --text-huge: 2.5rem;\n    --text-big: 2rem;\n}\n',
+    )
+
+    await vi.waitFor(
+        async () => {
+            const runtime = await server.ssrLoadModule(RUNTIME_SPECIFIER)
+            expect(runtime.twMerge('text-big text-sm')).toBe('text-sm')
+        },
+        { timeout: 10_000, interval: 300 },
+    )
+}, 20_000)
+
+test('a consumer project type-checks the runtime subpath without configuration', async () => {
+    const fixture = path.join(fixturesDirectory, 'consumer-types')
+    const tscBin = path.join(workspaceRoot, 'node_modules', 'typescript', 'bin', 'tsc')
+
+    // On failure the assertion diff carries tsc's error listing.
+    const output = await promisify(execFile)(process.execPath, [tscBin, '-p', fixture]).then(
+        () => '',
+        (error: { stdout?: string; stderr?: string }) =>
+            `${error.stdout ?? ''}${error.stderr ?? ''}`,
+    )
+    expect(output).toBe('')
+}, 30_000)
 
 test('discovery picks the import-graph top among marker files', async () => {
     await expect(
