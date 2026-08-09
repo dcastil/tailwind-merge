@@ -2,23 +2,23 @@ import { fileURLToPath } from 'node:url'
 
 import { describe, expect, test } from 'vitest'
 
-import { assertTailwindConformance, generateFixture } from './fixture-utils'
+import { assertTailwindConformance, css, generateFixture } from './fixture-utils'
 
 // Custom @utility support is empirical, in tiers derived from compiled declarations (see PROPOSAL.md): static utilities matching exactly one built-in group's signature join that group as aliases, every other root becomes a self-conflict group, and a self-conflict utility whose unconditional element-level declarations fully cover another group's gets an override edge so it removes that group's classes when it comes later.
 describe('theme with custom @utility definitions', async () => {
-    const { twMerge, plan, designSystem } = await generateFixture(`
-@import 'tailwindcss';
-@utility btn {
-    padding: 0.5rem 1rem;
-    border-radius: 0.375rem;
-}
-@utility scrollbar-hide {
-    scrollbar-width: none;
-}
-@utility zz-* {
-    tab-size: --value(integer);
-}
-`)
+    const { twMerge, plan, designSystem } = await generateFixture(css`
+        @import 'tailwindcss';
+        @utility btn {
+            padding: 0.5rem 1rem;
+            border-radius: 0.375rem;
+        }
+        @utility scrollbar-hide {
+            scrollbar-width: none;
+        }
+        @utility zz-* {
+            tab-size: --value(integer);
+        }
+    `)
 
     test('conforms to Tailwind conflict semantics across the class list', () => {
         assertTailwindConformance(designSystem, twMerge, plan)
@@ -61,60 +61,63 @@ describe('theme with custom @utility definitions', async () => {
 
 // Utility shapes distilled from real-world files: pseudo-element overlays (shadcn's border-ghost), conditional declarations (shadcn's extend-touch-target), and a composable family sharing scaffolding while carrying state in custom properties (supabase's hit-area). Override inference must see through all three: only unconditional element-level declarations justify removing another class.
 describe('theme with pseudo-element, conditional, and state-carrying custom utilities', async () => {
-    const { twMerge, plan, designSystem } = await generateFixture(`
-@import 'tailwindcss';
-@utility overlay-frame {
-    position: relative;
-    &::after {
-        content: '';
-        position: absolute;
-        inset: 0;
-        border-width: 1px;
-        border-color: red;
-    }
-}
-@utility touch-pad {
-    @media (pointer: coarse) {
-        padding: 1rem;
-    }
-}
-@custom-variant dark (&:is(.dark *));
-@utility frame-line {
-    border-color: red;
-    &:is(.dark *) {
-        border-color: white;
-    }
-}
-@utility expand {
-    position: relative;
-    &::before {
-        content: '';
-        position: absolute;
-        inset: var(--expand-t, 0px) var(--expand-r, 0px) var(--expand-b, 0px) var(--expand-l, 0px);
-    }
-}
-@utility expand-* {
-    position: relative;
-    --expand-t: --spacing(--value(number) * -1);
-    --expand-r: --spacing(--value(number) * -1);
-    --expand-b: --spacing(--value(number) * -1);
-    --expand-l: --spacing(--value(number) * -1);
-    &::before {
-        content: '';
-        position: absolute;
-        inset: var(--expand-t, 0px) var(--expand-r, 0px) var(--expand-b, 0px) var(--expand-l, 0px);
-    }
-}
-@utility expand-t-* {
-    position: relative;
-    --expand-t: --spacing(--value(number) * -1);
-    &::before {
-        content: '';
-        position: absolute;
-        inset: var(--expand-t, 0px) var(--expand-r, 0px) var(--expand-b, 0px) var(--expand-l, 0px);
-    }
-}
-`)
+    const { twMerge, plan, designSystem } = await generateFixture(css`
+        @import 'tailwindcss';
+        @utility overlay-frame {
+            position: relative;
+            &::after {
+                content: '';
+                position: absolute;
+                inset: 0;
+                border-width: 1px;
+                border-color: red;
+            }
+        }
+        @utility touch-pad {
+            @media (pointer: coarse) {
+                padding: 1rem;
+            }
+        }
+        @custom-variant dark (&:is(.dark *));
+        @utility frame-line {
+            border-color: red;
+            &:is(.dark *) {
+                border-color: white;
+            }
+        }
+        @utility expand {
+            position: relative;
+            &::before {
+                content: '';
+                position: absolute;
+                inset: var(--expand-t, 0px) var(--expand-r, 0px) var(--expand-b, 0px)
+                    var(--expand-l, 0px);
+            }
+        }
+        @utility expand-* {
+            position: relative;
+            --expand-t: --spacing(--value(number) * -1);
+            --expand-r: --spacing(--value(number) * -1);
+            --expand-b: --spacing(--value(number) * -1);
+            --expand-l: --spacing(--value(number) * -1);
+            &::before {
+                content: '';
+                position: absolute;
+                inset: var(--expand-t, 0px) var(--expand-r, 0px) var(--expand-b, 0px)
+                    var(--expand-l, 0px);
+            }
+        }
+        @utility expand-t-* {
+            position: relative;
+            --expand-t: --spacing(--value(number) * -1);
+            &::before {
+                content: '';
+                position: absolute;
+                inset: var(--expand-t, 0px) var(--expand-r, 0px) var(--expand-b, 0px)
+                    var(--expand-l, 0px);
+            }
+        }
+    `)
 
     test('conforms to Tailwind conflict semantics across the class list', () => {
         assertTailwindConformance(designSystem, twMerge, plan)
@@ -160,10 +163,10 @@ describe('theme with pseudo-element, conditional, and state-carrying custom util
 describe('theme with a JS plugin via @plugin', async () => {
     const fixtureDirectory = fileURLToPath(new URL('fixtures/plugin/', import.meta.url))
     const { twMerge, plan, designSystem } = await generateFixture(
-        `
-@import 'tailwindcss';
-@plugin './plugin.mjs';
-`,
+        css`
+            @import 'tailwindcss';
+            @plugin './plugin.mjs';
+        `,
         fixtureDirectory,
     )
 
@@ -187,10 +190,10 @@ describe('theme with a JS plugin via @plugin', async () => {
 describe('theme from a legacy JS config via @config', async () => {
     const fixtureDirectory = fileURLToPath(new URL('fixtures/js-config/', import.meta.url))
     const { twMerge, plan, designSystem } = await generateFixture(
-        `
-@import 'tailwindcss';
-@config './tailwind.config.cjs';
-`,
+        css`
+            @import 'tailwindcss';
+            @config './tailwind.config.cjs';
+        `,
         fixtureDirectory,
     )
 
@@ -203,9 +206,7 @@ describe('theme from a legacy JS config via @config', async () => {
         expect(twMerge('bg-brand-500 bg-red-500')).toBe('bg-red-500')
         expect(twMerge('z-header z-modal')).toBe('z-modal')
         expect(twMerge('border-hairline border-2')).toBe('border-2')
-        expect(twMerge('border-hairline border-brand-500')).toBe(
-            'border-hairline border-brand-500',
-        )
+        expect(twMerge('border-hairline border-brand-500')).toBe('border-hairline border-brand-500')
     })
 
     test('leaves nothing unassigned', () => {
@@ -215,13 +216,13 @@ describe('theme from a legacy JS config via @config', async () => {
 
 // Prefix mode: the design system stores theme variables prefixed and candidates carry a variant-like prefix. The conformance sweep doesn't apply — the class list is unprefixed while real candidates are prefixed, so the default-config baseline is meaningless here — making this the one fixture family verified by curated expectations only.
 describe('theme with an import prefix', async () => {
-    const { twMerge, plan } = await generateFixture(`
-@import 'tailwindcss' prefix(tw);
-@theme {
-    --color-brand-500: #33f;
-    --text-huge: 2.5rem;
-}
-`)
+    const { twMerge, plan } = await generateFixture(css`
+        @import 'tailwindcss' prefix(tw);
+        @theme {
+            --color-brand-500: #33f;
+            --text-huge: 2.5rem;
+        }
+    `)
 
     test('prefixed classes merge', () => {
         expect(twMerge('tw:p-2 tw:p-4')).toBe('tw:p-4')

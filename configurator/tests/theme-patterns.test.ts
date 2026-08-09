@@ -3,39 +3,39 @@ import { fileURLToPath } from 'node:url'
 
 import { describe, expect, test } from 'vitest'
 
-import { assertTailwindConformance, generateFixture } from './fixture-utils'
+import { assertTailwindConformance, css, generateFixture } from './fixture-utils'
 
 // The semantic-token pattern popular in component libraries: `@theme inline` mapping semantic color names to CSS variables defined elsewhere, radius derived from a base variable, and custom animations. Notable edge: names like `border`, `input`, and `ring` collide with utility roots, and single-word names have no numeric families.
 describe('semantic-token theme', async () => {
-    const { code, twMerge, plan, designSystem } = await generateFixture(`
-@import 'tailwindcss';
-@custom-variant dark (&:is(.dark *));
-@theme inline {
-    --color-background: var(--background);
-    --color-foreground: var(--foreground);
-    --color-card: var(--card);
-    --color-card-foreground: var(--card-foreground);
-    --color-primary: var(--primary);
-    --color-primary-foreground: var(--primary-foreground);
-    --color-secondary: var(--secondary);
-    --color-muted: var(--muted);
-    --color-muted-foreground: var(--muted-foreground);
-    --color-accent: var(--accent);
-    --color-destructive: var(--destructive);
-    --color-border: var(--border);
-    --color-input: var(--input);
-    --color-ring: var(--ring);
-    --color-chart-1: var(--chart-1);
-    --color-chart-2: var(--chart-2);
-    --color-chart-3: var(--chart-3);
-    --radius-sm: calc(var(--radius) - 4px);
-    --radius-md: calc(var(--radius) - 2px);
-    --radius-lg: var(--radius);
-    --radius-xl: calc(var(--radius) + 4px);
-    --animate-accordion-down: accordion-down 0.2s ease-out;
-    --animate-accordion-up: accordion-up 0.2s ease-out;
-}
-`)
+    const { code, twMerge, plan, designSystem } = await generateFixture(css`
+        @import 'tailwindcss';
+        @custom-variant dark (&:is(.dark *));
+        @theme inline {
+            --color-background: var(--background);
+            --color-foreground: var(--foreground);
+            --color-card: var(--card);
+            --color-card-foreground: var(--card-foreground);
+            --color-primary: var(--primary);
+            --color-primary-foreground: var(--primary-foreground);
+            --color-secondary: var(--secondary);
+            --color-muted: var(--muted);
+            --color-muted-foreground: var(--muted-foreground);
+            --color-accent: var(--accent);
+            --color-destructive: var(--destructive);
+            --color-border: var(--border);
+            --color-input: var(--input);
+            --color-ring: var(--ring);
+            --color-chart-1: var(--chart-1);
+            --color-chart-2: var(--chart-2);
+            --color-chart-3: var(--chart-3);
+            --radius-sm: calc(var(--radius) - 4px);
+            --radius-md: calc(var(--radius) - 2px);
+            --radius-lg: var(--radius);
+            --radius-xl: calc(var(--radius) + 4px);
+            --animate-accordion-down: accordion-down 0.2s ease-out;
+            --animate-accordion-up: accordion-up 0.2s ease-out;
+        }
+    `)
 
     test('emitted module matches its file snapshot', async () => {
         await expect(code).toMatchFileSnapshot('./__snapshots__/semantic-tokens.snap.ts')
@@ -61,9 +61,7 @@ describe('semantic-token theme', async () => {
     test('derived radius values and custom animations merge', () => {
         expect(twMerge('rounded-sm rounded-xl')).toBe('rounded-xl')
         expect(twMerge('animate-accordion-down animate-spin')).toBe('animate-spin')
-        expect(twMerge('animate-accordion-down animate-accordion-up')).toBe(
-            'animate-accordion-up',
-        )
+        expect(twMerge('animate-accordion-down animate-accordion-up')).toBe('animate-accordion-up')
     })
 
     test('needs no augmentations — everything flows through standard namespaces', () => {
@@ -74,21 +72,21 @@ describe('semantic-token theme', async () => {
 
 // Value names that deliberately collide with built-in static utilities and with each other across namespaces. The conformance sweep is the main check here: whatever Tailwind's resolution decides for these collisions, the generated config must agree with it.
 describe('theme with adversarial value names', async () => {
-    const { twMerge, plan, designSystem } = await generateFixture(`
-@import 'tailwindcss';
-@theme {
-    --color-auto: #001;
-    --color-xl: #002;
-    --color-solid: #003;
-    --color-bottom: #004;
-    --spacing-auto: 1px;
-    --text-color-huge: #005;
-    --text-huge: 3rem;
-    --z-index-auto: 30;
-    --leading-none: 1.15;
-    --shadow-inner: 0 0 1px #000;
-}
-`)
+    const { twMerge, plan, designSystem } = await generateFixture(css`
+        @import 'tailwindcss';
+        @theme {
+            --color-auto: #001;
+            --color-xl: #002;
+            --color-solid: #003;
+            --color-bottom: #004;
+            --spacing-auto: 1px;
+            --text-color-huge: #005;
+            --text-huge: 3rem;
+            --z-index-auto: 30;
+            --leading-none: 1.15;
+            --shadow-inner: 0 0 1px #000;
+        }
+    `)
 
     test('conforms to Tailwind conflict semantics across the class list', () => {
         assertTailwindConformance(designSystem, twMerge, plan)
@@ -135,23 +133,23 @@ describe('theme with adversarial value names', async () => {
 
 // Broad extension of many standard namespaces at once, without any resets — the bread-and-butter case of a team adding values everywhere.
 describe('theme extending many namespaces', async () => {
-    const { twMerge, plan, designSystem } = await generateFixture(`
-@import 'tailwindcss';
-@theme {
-    --container-8xl: 88rem;
-    --tracking-tightest: -0.06em;
-    --aspect-golden: 1.618;
-    --ease-snappy: cubic-bezier(0.2, 0, 0, 1);
-    --blur-4xl: 96px;
-    --radius-pill: 999px;
-    --font-display: 'Satoshi', sans-serif;
-    --font-weight-950: 950;
-    --text-shadow-glow: 0 0 8px #fff;
-    --drop-shadow-heavy: 0 4px 6px rgb(0 0 0 / 40%);
-    --inset-shadow-deep: inset 0 4px 8px rgb(0 0 0 / 30%);
-    --perspective-cinema: 2400px;
-}
-`)
+    const { twMerge, plan, designSystem } = await generateFixture(css`
+        @import 'tailwindcss';
+        @theme {
+            --container-8xl: 88rem;
+            --tracking-tightest: -0.06em;
+            --aspect-golden: 1.618;
+            --ease-snappy: cubic-bezier(0.2, 0, 0, 1);
+            --blur-4xl: 96px;
+            --radius-pill: 999px;
+            --font-display: 'Satoshi', sans-serif;
+            --font-weight-950: 950;
+            --text-shadow-glow: 0 0 8px #fff;
+            --drop-shadow-heavy: 0 4px 6px rgb(0 0 0 / 40%);
+            --inset-shadow-deep: inset 0 4px 8px rgb(0 0 0 / 30%);
+            --perspective-cinema: 2400px;
+        }
+    `)
 
     test('conforms to Tailwind conflict semantics across the class list', () => {
         assertTailwindConformance(designSystem, twMerge, plan)
@@ -189,35 +187,39 @@ describe('theme extending many namespaces', async () => {
 
 // Name shapes and constructs collected from real-world v4 files: reset-then-re-added color keywords, numeric-alpha suffixes forming families, underscore and camelCase names, dotted values, a bare namespace-root variable, keyframes inside @theme, a second @theme block with an option, junk keys in wrong namespaces, and :root variables that mimic theme keys but must not become tokens.
 describe('theme with wild value names and mixed blocks', async () => {
-    const { twMerge, plan, designSystem } = await generateFixture(`
-@import 'tailwindcss';
-@theme {
-    --color-*: initial;
-    --color-inherit: inherit;
-    --color-current: currentColor;
-    --color-transparent: transparent;
-    --color-black-10: rgb(0 0 0 / 10%);
-    --color-black-30: rgb(0 0 0 / 30%);
-    --color-_hidden-100: #001;
-    --color-code_block-1: #002;
-    --shadow: 0 1px 2px rgb(0 0 0 / 5%);
-    --spacing-4.5: 1.125rem;
-    --animate-fadeIn: fadeIn 0.3s ease-out;
-    @keyframes fadeIn {
-        from { opacity: 0; }
-        to { opacity: 1; }
-    }
-    --container-padding: 2rem;
-    --transition-speed: 0.2s;
-}
-@theme static {
-    --radius-huge: 2rem;
-}
-:root {
-    --shadow-x: 4px;
-    --color-fake-500: #003;
-}
-`)
+    const { twMerge, plan, designSystem } = await generateFixture(css`
+        @import 'tailwindcss';
+        @theme {
+            --color-*: initial;
+            --color-inherit: inherit;
+            --color-current: currentColor;
+            --color-transparent: transparent;
+            --color-black-10: rgb(0 0 0 / 10%);
+            --color-black-30: rgb(0 0 0 / 30%);
+            --color-_hidden-100: #001;
+            --color-code_block-1: #002;
+            --shadow: 0 1px 2px rgb(0 0 0 / 5%);
+            --spacing-4.5: 1.125rem;
+            --animate-fadeIn: fadeIn 0.3s ease-out;
+            @keyframes fadeIn {
+                from {
+                    opacity: 0;
+                }
+                to {
+                    opacity: 1;
+                }
+            }
+            --container-padding: 2rem;
+            --transition-speed: 0.2s;
+        }
+        @theme static {
+            --radius-huge: 2rem;
+        }
+        :root {
+            --shadow-x: 4px;
+            --color-fake-500: #003;
+        }
+    `)
 
     test('conforms to Tailwind conflict semantics across the class list', () => {
         assertTailwindConformance(designSystem, twMerge, plan)
@@ -247,12 +249,12 @@ describe('theme with wild value names and mixed blocks', async () => {
 
 // Numeric-named color tokens in a compat sub-namespace, distilled from supabase's `--background-color-200`. The number shadows scale steps of utilities that consult the namespace: `mask-b-from-200` stops being a spacing-based stop position and becomes a color stop, which composes with position stops instead of conflicting. The shared mask scaffolding (`mask-composite: intersect` re-declared identically by every mask utility) also exercises the oracle's idempotent-re-declaration rule.
 describe('theme with a numeric-named sub-namespace color token', async () => {
-    const { twMerge, plan, designSystem } = await generateFixture(`
-@import 'tailwindcss';
-@theme {
-    --background-color-200: #e2e8f0;
-}
-`)
+    const { twMerge, plan, designSystem } = await generateFixture(css`
+        @import 'tailwindcss';
+        @theme {
+            --background-color-200: #e2e8f0;
+        }
+    `)
 
     test('conforms to Tailwind conflict semantics across the class list', () => {
         assertTailwindConformance(designSystem, twMerge, plan)
