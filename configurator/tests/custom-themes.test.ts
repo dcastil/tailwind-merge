@@ -1,25 +1,25 @@
 import { describe, expect, test } from 'vitest'
 
-import { assertTailwindConformance, generateFixture } from './fixture-utils'
+import { assertTailwindConformance, css, generateFixture } from './fixture-utils'
 
 // Modeled on a typical design-system setup: the color palette reset and replaced with a custom one, utility-specific compat sub-namespaces (--background-color-*, --text-color-*), a custom font size with a compound line-height key, and namespaces tailwind-merge has no theme key for (--z-index-*, --border-width-*). Reproduces the scenarios from issues #684 (custom --text-* misread as color), #657 (--z-index), and #631 (--border-width).
-const designSystemCss = `
-@import 'tailwindcss';
-@theme {
-    --color-*: initial;
-    --color-brand-100: #eef;
-    --color-brand-500: #33f;
-    --background-color-surface: #fff;
-    --text-color-primary: #111;
-    --text-color-secondary: #666;
-    --text-huge: 2.5rem;
-    --text-huge--line-height: 1.1;
-    --spacing-big: 30rem;
-    --radius-control: 8px;
-    --z-index-header: 10;
-    --z-index-modal: 100;
-    --border-width-hairline: 0.5px;
-}
+const designSystemCss = css`
+    @import 'tailwindcss';
+    @theme {
+        --color-*: initial;
+        --color-brand-100: #eef;
+        --color-brand-500: #33f;
+        --background-color-surface: #fff;
+        --text-color-primary: #111;
+        --text-color-secondary: #666;
+        --text-huge: 2.5rem;
+        --text-huge--line-height: 1.1;
+        --spacing-big: 30rem;
+        --radius-control: 8px;
+        --z-index-header: 10;
+        --z-index-modal: 100;
+        --border-width-hairline: 0.5px;
+    }
 `
 
 describe('design-system theme with compat sub-namespaces and resets', async () => {
@@ -60,9 +60,7 @@ describe('design-system theme with compat sub-namespaces and resets', async () =
 
     test('border-width values without a theme key merge (#631)', () => {
         expect(twMerge('border-hairline border-2')).toBe('border-2')
-        expect(twMerge('border-hairline border-brand-500')).toBe(
-            'border-hairline border-brand-500',
-        )
+        expect(twMerge('border-hairline border-brand-500')).toBe('border-hairline border-brand-500')
     })
 
     test('reset color palette values stop merging', () => {
@@ -81,15 +79,15 @@ describe('design-system theme with compat sub-namespaces and resets', async () =
 })
 
 describe('theme with disabled spacing multiplier', async () => {
-    const { code, twMerge, plan, designSystem } = await generateFixture(`
-@import 'tailwindcss';
-@theme {
-    --spacing: initial;
-    --spacing-*: initial;
-    --spacing-sm: 8px;
-    --spacing-lg: 24px;
-}
-`)
+    const { code, twMerge, plan, designSystem } = await generateFixture(css`
+        @import 'tailwindcss';
+        @theme {
+            --spacing: initial;
+            --spacing-*: initial;
+            --spacing-sm: 8px;
+            --spacing-lg: 24px;
+        }
+    `)
 
     test('emitted module matches its file snapshot', async () => {
         await expect(code).toMatchFileSnapshot('./__snapshots__/spacing-named.snap.ts')
@@ -115,17 +113,17 @@ describe('theme with disabled spacing multiplier', async () => {
 
 // Heavy resets document what pruning does and doesn't do: scales empty out, but class groups survive because they still accept arbitrary values — so reset theme values stop merging while the arbitrary syntax keeps working.
 describe('minimal theme with heavy resets', async () => {
-    const { code, twMerge, plan, designSystem } = await generateFixture(`
-@import 'tailwindcss';
-@theme {
-    --color-*: initial;
-    --color-ink: #111;
-    --color-paper: #fff;
-    --shadow-*: initial;
-    --animate-*: initial;
-    --blur-*: initial;
-}
-`)
+    const { code, twMerge, plan, designSystem } = await generateFixture(css`
+        @import 'tailwindcss';
+        @theme {
+            --color-*: initial;
+            --color-ink: #111;
+            --color-paper: #fff;
+            --shadow-*: initial;
+            --animate-*: initial;
+            --blur-*: initial;
+        }
+    `)
 
     test('emitted module matches its file snapshot', async () => {
         await expect(code).toMatchFileSnapshot('./__snapshots__/minimal-resets.snap.ts')

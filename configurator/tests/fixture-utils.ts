@@ -16,6 +16,28 @@ import {
 export const fixtureBase = fileURLToPath(new URL('.', import.meta.url))
 
 /**
+ * Tagged template for fixture CSS. Strips the common leading indentation (and enclosing blank lines) so fixtures indent naturally with the surrounding test code — and the `css` tag itself follows the convention editors and Prettier recognize for embedded languages (like graphql`` or styled-components), so fixtures get CSS syntax highlighting and formatting.
+ */
+export function css(strings: TemplateStringsArray, ...values: unknown[]): string {
+    const text = strings.reduce((joined, part, index) => joined + String(values[index - 1]) + part)
+
+    const lines = text.split('\n')
+    if (lines[0]?.trim() === '') {
+        lines.shift()
+    }
+    while (lines.length > 0 && lines[lines.length - 1]!.trim() === '') {
+        lines.pop()
+    }
+
+    const indentWidths = lines
+        .filter((line) => line.trim() !== '')
+        .map((line) => /^\s*/.exec(line)![0].length)
+    const commonIndent = indentWidths.length === 0 ? 0 : Math.min(...indentWidths)
+
+    return `${lines.map((line) => line.slice(commonIndent)).join('\n')}\n`
+}
+
+/**
  * Generates a config from fixture CSS and bundles everything fixture tests need: the merge function built from the materialized config, the plan report, the emitted code, and the loaded design system for conformance sweeps.
  */
 export async function generateFixture(css: string, base: string = fixtureBase) {
