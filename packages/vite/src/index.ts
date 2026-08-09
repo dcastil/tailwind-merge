@@ -4,7 +4,6 @@ import type { Plugin, ResolvedConfig, ViteDevServer } from 'vite'
 
 import { discoverCssRoot } from './discovery'
 import { FALLBACK_MODULE_CODE, GeneratedRuntimeModule, generateRuntimeModule } from './generation'
-import { tailwindVersionSkewWarning } from './tailwind-versions'
 
 export interface TailwindMergeOptions {
     /** Path to the project's Tailwind CSS entrypoint, relative to the Vite root. When omitted, the entrypoint is auto-detected by scanning the root for CSS files with Tailwind markers — only ambiguous projects (several independent roots) need to set this. */
@@ -118,10 +117,6 @@ export default function tailwindMerge(options: TailwindMergeOptions = {}): Plugi
 
         configResolved(resolvedConfig) {
             config = resolvedConfig
-            const skewWarning = tailwindVersionSkewWarning(config.root)
-            if (skewWarning !== null) {
-                config.logger.warn(skewWarning)
-            }
             cssRoot = locateCssRoot()
             generation = cssRoot.then((cssPath) => (cssPath === null ? null : regenerate(cssPath)))
             // Ambiguity errors also surface on the first runtime import; log right away so they are visible even before that.
