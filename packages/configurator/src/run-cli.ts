@@ -10,9 +10,9 @@ import { generate } from './generate'
 export async function runCli(argv: string[]): Promise<number> {
     const args = parseArguments(argv)
 
-    if (!args.input || !args.output) {
+    if (!args.input || !args.output || (args.format && args.format !== 'ts' && args.format !== 'js')) {
         console.error(
-            'Usage: tailwind-merge-configurator --input <tailwind-css-entrypoint> --output <generated-module-path> [--check]',
+            'Usage: tailwind-merge-configurator --input <tailwind-css-entrypoint> --output <generated-module-path> [--format ts|js] [--check]',
         )
         return 1
     }
@@ -21,11 +21,19 @@ export async function runCli(argv: string[]): Promise<number> {
     const outputPath = resolve(args.output)
     const css = await readFile(inputPath, 'utf8')
 
+    // Not every project uses TypeScript, so the emitted language follows the output file's extension unless --format overrides it. Invalid --format values were rejected above, so the fallthrough here only happens when the flag is absent.
+    const format: 'ts' | 'js' =
+        args.format === 'js' || args.format === 'ts'
+            ? args.format
+            : /\.[cm]?js$/.test(outputPath)
+              ? 'js'
+              : 'ts'
+
     // The generated-file notice itself is emitted unconditionally by emitModule; the CLI adds provenance. The hash makes the emitted module deterministic per input state, which is what allows --check to compare full file contents.
     const contentHash = createHash('sha256').update(css).digest('hex').slice(0, 16)
     const banner = `// Source: ${relative(dirname(outputPath), inputPath)} (sha256 ${contentHash})`
 
-    const { code, plan } = await generate({ css, base: dirname(inputPath), banner })
+    const { code, plan } = await generate({ css, base: dirname(inputPath), banner, format })
     const displayPath = relative(process.cwd(), outputPath)
 
     if (args.check) {
@@ -100,7 +108,9 @@ export async function runCli(argv: string[]): Promise<number> {
 }
 
 function parseArguments(argv: string[]) {
-    const args: { input?: string; output?: string; check: boolean } = { check: false }
+    const args: { input?: string; output?: string; format?: string; check: boolean } = {
+        check: false,
+    }
 
     for (let index = 0; index < argv.length; index++) {
         const flag = argv[index]
@@ -108,6 +118,8 @@ function parseArguments(argv: string[]) {
             args.input = argv[++index]
         } else if (flag === '--output' || flag === '-o') {
             args.output = argv[++index]
+        } else if (flag === '--format') {
+            args.format = argv[++index]
         } else if (flag === '--check') {
             args.check = true
         }

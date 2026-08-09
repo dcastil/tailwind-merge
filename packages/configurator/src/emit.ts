@@ -4,6 +4,10 @@ export interface EmitOptions {
     /** Additional comment lines placed below the standard generated-file notice, e.g. provenance info like the input path and content hash. */
     banner?: string
     /**
+     * Output language. 'ts' (default) emits TypeScript whose config object is checked with `satisfies`; 'js' emits plain JavaScript with byte-identical runtime behavior — for projects that don't use TypeScript, and for consumers that must serve the module without a transform step (the Vite plugin's in-memory module, which Vite's own esbuild transform does not reliably process for virtual ids).
+     */
+    format?: 'ts' | 'js'
+    /**
      * How much repeated content is deduplicated into shared consts, measured on the vanilla theme (minified / gzip / brotli in bytes):
      * - 'scales' (default): only resolved theme scales become shared consts, everything else stays inline (31,989 / 8,822 / 7,706). Best compressed size, which is what network transfer pays — compressors handle inline repetition nearly for free, while extra references add entropy.
      * - 'aggressive': additionally hoists every repeated array/object that pays for itself and spreads mined runs (28,492 / 9,364 / 8,197). Best minified-uncompressed size, at the cost of compressed size.
@@ -20,13 +24,14 @@ export interface EmitOptions {
  * Two measured insights shape the output. Validators are destructured once and referenced as bare identifiers because property accesses like `v.isArbitraryVariable` survive minification while local bindings get mangled. And sharing is applied selectively (see EmitOptions.sharing): deduplicating repetition into consts shrinks the minified size but *grows* the compressed size, since references add entropy where gzip/brotli handled the repetition nearly for free — so the default shares only theme scales, emitted as references or spreads (e.g. `['none', ...scale7]`). Sharing array identity across class groups is safe because tailwind-merge never mutates config arrays. Output is deterministic for identical input so a future `--check` mode can diff against the file on disk.
  */
 export function emitModule(plan: ConfigPlan, options: EmitOptions = {}): string {
+    const format = options.format ?? 'ts'
     const candidates = collectConstantCandidates(plan, options.sharing ?? 'scales')
 
     // First pass with every candidate available determines which consts are actually referenced (directly from the config or transitively from other used consts). The second pass re-serializes with final sequential names for just the used ones, so decisions are identical and numbering has no gaps.
-    const firstPass = serializeAll(plan, candidates, provisionalNames(candidates))
+    const firstPass = serializeAll(plan, candidates, provisionalNames(candidates), format)
     const usedCanonicals = resolveTransitiveUsage(candidates, firstPass)
     const finalNames = assignNames(candidates, usedCanonicals)
-    const secondPass = serializeAll(plan, candidates, finalNames)
+    const secondPass = serializeAll(plan, candidates, finalNames, format)
     const { configBody, constantBodies } = secondPass
 
     const lines: string[] = []
@@ -38,7 +43,11 @@ export function emitModule(plan: ConfigPlan, options: EmitOptions = {}): string 
     }
     lines.push('')
 
-    lines.push("import { createTailwindMerge, validators as v, type Config } from 'tailwind-merge'")
+    lines.push(
+        format === 'ts'
+            ? "import { createTailwindMerge, validators as v, type Config } from 'tailwind-merge'"
+            : "import { createTailwindMerge, validators as v } from 'tailwind-merge'",
+    )
     lines.push('')
     lines.push('/**')
     lines.push(
@@ -316,6 +325,7 @@ function serializeAll(
     plan: ConfigPlan,
     candidates: CandidateMap,
     names: Map<string, string>,
+    format: 'ts' | 'js',
 ): SerializedOutput {
     const directUsage = new Set<string>()
     const usageByConstant = new Map<string, Set<string>>()
@@ -378,7 +388,7 @@ function serializeAll(
     configBody.push(
         `${INDENT}${INDENT}orderSensitiveModifiers: ${serializeStringArray(plan.orderSensitiveModifiers)},`,
     )
-    configBody.push(`${INDENT}} satisfies Config<string, never>`)
+    configBody.push(format === 'ts' ? `${INDENT}} satisfies Config<string, never>` : `${INDENT}}`)
 
     return { configBody, constantBodies, directUsage, usageByConstant }
 }

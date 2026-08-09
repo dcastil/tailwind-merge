@@ -211,7 +211,7 @@ Custom `@utility` scope (decided in the 2026-08-08 interview as self-conflict-on
 
 Still open, to resolve during implementation:
 
-1. Emission details: TS vs JS default, `cacheSize` passthrough, multiple CSS entrypoints (multi-theme monorepos), deterministic formatting (prettier config of the host repo vs fixed style).
+1. Emission details: `cacheSize` passthrough, multiple CSS entrypoints (multi-theme monorepos), deterministic formatting (prettier config of the host repo vs fixed style). TS vs JS is resolved (2026-08-09, prompted by the Vite plugin needing transform-free output): `EmitOptions.format` emits either language with byte-identical runtime behavior, the CLI infers the format from the output extension with `--format` as override, and the plugin generates `'js'`.
 2. Naming and eventual packaging (working assumption: separate package, working name `tailwind-merge-configurator`).
 3. Small additive tailwind-merge API candidates that would benefit the configurator without any runtime fork (see option F): individual validator exports, `themeKey` on theme getters, a public class-map/classification hook.
 
@@ -266,7 +266,7 @@ The virtual module's content is the configurator's `emitModule` output plus a sm
 Three things the prototype established that the research had not predicted (each encoded in `packages/vite/tests/plugin.test.ts`):
 
 - **`enforce: 'pre'` is load-bearing, not stylistic.** The subpath is a real, installable package path, so Vite's core resolver can resolve it — and core plugins run before un-enforced user plugins in the `resolveId` chain. Without `enforce: 'pre'` the redirect never fires anywhere and the fallback is served silently; the failure mode is invisible because everything still works, just with default behavior.
-- **The virtual module must be served as plain JavaScript.** The configurator emits TypeScript (a type import, `satisfies`), and Vite's own esbuild transform does not reliably process `\0`-prefixed virtual ids. Generation therefore runs the composed module through Vite's public `transformWithEsbuild` once; the change-gate hash is computed on the transformed output, which stays deterministic.
+- **The virtual module must be served as plain JavaScript.** The configurator emitted TypeScript (a type import, `satisfies`), and Vite's own esbuild transform does not reliably process `\0`-prefixed virtual ids, so the raw module reached the parser with TS syntax and failed. First fixed by piping through Vite's `transformWithEsbuild`; properly fixed the same day by teaching the emitter a `format: 'js'` mode (Dany's call — the CLI needs it for non-TS projects anyway), which the plugin now uses, keeping the served module transform-free end to end.
 - **A `resolve.alias` entry for the subpath disables the plugin.** Alias rewriting consumes the specifier before any plugin's `resolveId` runs and the result does not re-enter the chain — a user aliasing the subpath would silently get the fallback. Worth a documentation warning; it is also why the plugin tests give fixtures a real `node_modules` symlink instead of aliasing the subpath.
 
 Explicitly rejected for v1: intercepting bare `import { twMerge } from 'tailwind-merge'` and redirecting it to the generated module. It would make existing app code and even third-party UI libraries theme-aware with zero migration, but silently changing the behavior of a package the user (or their dependencies) explicitly installed is too magical for a first release — worth revisiting later as an opt-in flag once trust is established.

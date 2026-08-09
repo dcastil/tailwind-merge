@@ -4,11 +4,10 @@ import path from 'node:path'
 
 import { compile } from '@tailwindcss/node'
 import { generate } from 'tailwind-merge-configurator'
-import { transformWithEsbuild } from 'vite'
 
 /** A generated runtime module ready to serve as the virtual `@tailwind-merge/vite/runtime`. */
 export interface GeneratedRuntimeModule {
-    /** JavaScript source of the module: the configurator's emitted module plus the runtime appendix, with TypeScript syntax already stripped — Vite's own esbuild transform does not reliably process extension-less virtual ids, so the plugin serves ready-to-parse JS. */
+    /** JavaScript source of the module: the configurator's emitted module (in its `format: 'js'` shape — Vite's own esbuild transform does not reliably process virtual ids, so the served code must parse as-is) plus the runtime appendix. */
     code: string
     /** sha-256 of `code` — the dev loop's change gate: regenerations that produce identical output must not invalidate or reload anything. */
     hash: string
@@ -36,17 +35,14 @@ export async function generateRuntimeModule(options: {
             css,
             base,
             cacheSize: options.cacheSize,
+            format: 'js',
             banner: `// Source: ${path.relative(options.root, options.cssPath) || options.cssPath} (served in-memory by @tailwind-merge/vite)`,
         }),
         collectCssDependencies(css, base),
     ])
     dependencies.add(options.cssPath)
 
-    // The configurator emits TypeScript (type imports, `satisfies`); strip it here with Vite's esbuild so every consumer of the virtual module — dev SSR, client, and Rollup builds — parses plain JavaScript. Deterministic, so hashing the output stays a valid change gate.
-    const { code } = await transformWithEsbuild(
-        result.code + RUNTIME_APPENDIX,
-        'tailwind-merge-runtime.ts',
-    )
+    const code = result.code + RUNTIME_APPENDIX
     return {
         code,
         hash: createHash('sha256').update(code).digest('hex'),
