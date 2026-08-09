@@ -82,3 +82,4 @@ Definition of done for every PR/change:
 - Class groups/conflicts/default config: run `tests/default-config.test.ts`, `tests/class-group-conflicts.test.ts`, `tests/tailwind-css-versions.test.ts`.
 - Public API/types: run `tests/public-api.test.ts`, `tests/type-generics.test.ts`, and `pnpm test:types`.
 - Release/package surface: run `pnpm build` and `pnpm test:exports`.
+- Configurator or Vite plugin: run `pnpm vitest --config scripts/vitest.config.mts --no-watch packages/<name>/tests` and `pnpm exec tsc -p packages/<name>/tsconfig.json`.
