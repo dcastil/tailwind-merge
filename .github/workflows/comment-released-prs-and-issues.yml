@@ -59,7 +59,7 @@ jobs:
                   # Read package metadata from the published main commit as inert JSON instead of checking out the triggering SHA.
                   version="$(gh api \
                     -H "Accept: application/vnd.github.v3.raw+json" \
-                    "/repos/${GITHUB_REPOSITORY}/contents/package.json?ref=${HEAD_SHA}" \
+                    "/repos/${GITHUB_REPOSITORY}/contents/packages/tailwind-merge/package.json?ref=${HEAD_SHA}" \
                     | node -p 'JSON.parse(require("node:fs").readFileSync(0, "utf8")).version')"
                   echo "head_tag=v${version}-dev.${HEAD_SHA}" >> "$GITHUB_OUTPUT"
             - uses: ./.github/actions/release-commenter

@@ -6,7 +6,7 @@ The standalone tailwind-merge package can't know *your* theme, so its default co
 
 - A custom font size `--text-huge: 2.5rem` produces `text-huge`, which the default config misreads as a text **color** — so `twMerge('text-huge text-sm')` keeps both classes and your element gets an ambiguous font size ([tailwind-merge#684](https://github.com/dcastil/tailwind-merge/issues/684)).
 - Whole namespaces the default config doesn't model — `--z-index-*`, `--border-width-*`, utility-specific colors like `--text-color-*` — silently fall through to wrong groups.
-- The manual fix is [configuring tailwind-merge by hand](https://github.com/dcastil/tailwind-merge/blob/main/docs/configuration.md) and keeping that configuration in sync with your theme forever.
+- The manual fix is [configuring tailwind-merge by hand](https://github.com/dcastil/tailwind-merge/blob/main/packages/tailwind-merge/docs/configuration.md) and keeping that configuration in sync with your theme forever.
 
 This plugin removes the whole problem class. At dev-server start and at build time, it loads your CSS through Tailwind's own APIs — the same resolution your real build performs, including theme overrides, resets, `@utility`, `@plugin`, `@config`, and prefixes — and generates a tailwind-merge configuration that matches it exactly. Custom utilities even get conflict inference: a `btn` utility that sets padding will correctly override an earlier `p-4`.
 

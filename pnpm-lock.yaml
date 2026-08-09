@@ -4,82 +4,49 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
+catalogs:
+  default:
+    '@types/node':
+      specifier: ^24.13.3
+      version: 24.13.3
+    eslint:
+      specifier: ^9.39.5
+      version: 9.39.5
+    typescript:
+      specifier: ^6.0.3
+      version: 6.0.3
+    vitest:
+      specifier: ^4.1.10
+      version: 4.1.10
+
 importers:
 
   .:
     devDependencies:
-      '@babel/core':
-        specifier: ^8.0.1
-        version: 8.0.1
-      '@babel/preset-env':
-        specifier: ^8.0.2
-        version: 8.0.2(@babel/core@8.0.1)
-      '@codspeed/vitest-plugin':
-        specifier: ^5.7.1
-        version: 5.7.1(debug@4.4.3(supports-color@7.2.0))(supports-color@7.2.0)(tinybench@2.9.0)(vite@7.3.3(@types/node@24.13.3)(jiti@2.7.0)(lightningcss@1.32.0))(vitest@4.1.10)
-      '@rollup/plugin-babel':
-        specifier: ^7.1.0
-        version: 7.1.0(@babel/core@8.0.1)(rollup@4.62.3)(supports-color@7.2.0)
-      '@rollup/plugin-node-resolve':
-        specifier: ^16.0.3
-        version: 16.0.3(rollup@4.62.3)
-      '@rollup/plugin-typescript':
-        specifier: ^12.3.0
-        version: 12.3.0(rollup@4.62.3)(tslib@2.8.1)(typescript@6.0.3)
-      '@types/node':
-        specifier: ^24.13.3
-        version: 24.13.3
       '@vitest/coverage-v8':
         specifier: ^4.1.10
         version: 4.1.10(vitest@4.1.10)
       '@vitest/eslint-plugin':
         specifier: ^1.6.24
         version: 1.6.24(@typescript-eslint/eslint-plugin@8.65.0(@typescript-eslint/parser@8.65.0(eslint@9.39.5(jiti@2.7.0)(supports-color@7.2.0))(supports-color@7.2.0)(typescript@6.0.3))(eslint@9.39.5(jiti@2.7.0)(supports-color@7.2.0))(supports-color@7.2.0)(typescript@6.0.3))(eslint@9.39.5(jiti@2.7.0)(supports-color@7.2.0))(supports-color@7.2.0)(typescript@6.0.3)(vitest@4.1.10)
-      babel-plugin-annotate-pure-calls:
-        specifier: ^0.5.0
-        version: 0.5.0(@babel/core@8.0.1)
-      babel-plugin-polyfill-regenerator:
-        specifier: ^1.0.0
-        version: 1.0.0(@babel/core@8.0.1)
       eslint:
-        specifier: ^9.39.5
+        specifier: 'catalog:'
         version: 9.39.5(jiti@2.7.0)(supports-color@7.2.0)
       eslint-plugin-import:
         specifier: ^2.32.0
         version: 2.32.0(@typescript-eslint/parser@8.65.0(eslint@9.39.5(jiti@2.7.0)(supports-color@7.2.0))(supports-color@7.2.0)(typescript@6.0.3))(eslint@9.39.5(jiti@2.7.0)(supports-color@7.2.0))(supports-color@7.2.0)
-      globby:
-        specifier: ^16.2.2
-        version: 16.2.2
       prettier:
         specifier: ^3.9.6
         version: 3.9.6
-      rollup:
-        specifier: ^4.62.3
-        version: 4.62.3
-      rollup-plugin-delete:
-        specifier: ^3.0.2
-        version: 3.0.2(rollup@4.62.3)
-      rollup-plugin-dts:
-        specifier: ^6.4.1
-        version: 6.4.1(rollup@4.62.3)(typescript@6.0.3)
-      tslib:
-        specifier: ^2.8.1
-        version: 2.8.1
       typescript:
-        specifier: ^6.0.3
+        specifier: 'catalog:'
         version: 6.0.3
-      typescript-compat:
-        specifier: npm:typescript@3.8.3
-        version: typescript@3.8.3
       typescript-eslint:
         specifier: ^8.65.0
         version: 8.65.0(eslint@9.39.5(jiti@2.7.0)(supports-color@7.2.0))(supports-color@7.2.0)(typescript@6.0.3)
       vitest:
-        specifier: ^4.1.10
+        specifier: 'catalog:'
         version: 4.1.10(@types/node@24.13.3)(@vitest/coverage-v8@4.1.10)(vite@7.3.3(@types/node@24.13.3)(jiti@2.7.0)(lightningcss@1.32.0))
-      zx:
-        specifier: ^8.8.5
-        version: 8.8.5
 
   .github/actions/metrics-report:
     dependencies:
@@ -108,14 +75,83 @@ importers:
         specifier: ^4.3.3
         version: 4.3.3
       '@types/node':
-        specifier: ^24.13.3
+        specifier: 'catalog:'
         version: 24.13.3
+      eslint:
+        specifier: 'catalog:'
+        version: 9.39.5(jiti@2.7.0)(supports-color@7.2.0)
       tailwind-merge:
         specifier: workspace:*
-        version: link:../..
+        version: link:../tailwind-merge
       tailwindcss:
         specifier: ^4.3.3
         version: 4.3.3
+      typescript:
+        specifier: 'catalog:'
+        version: 6.0.3
+      vitest:
+        specifier: 'catalog:'
+        version: 4.1.10(@types/node@24.13.3)(@vitest/coverage-v8@4.1.10)(vite@7.3.3(@types/node@24.13.3)(jiti@2.7.0)(lightningcss@1.32.0))
+
+  packages/tailwind-merge:
+    devDependencies:
+      '@babel/core':
+        specifier: ^8.0.1
+        version: 8.0.1
+      '@babel/preset-env':
+        specifier: ^8.0.2
+        version: 8.0.2(@babel/core@8.0.1)
+      '@codspeed/vitest-plugin':
+        specifier: ^5.7.1
+        version: 5.7.1(debug@4.4.3(supports-color@7.2.0))(supports-color@7.2.0)(tinybench@2.9.0)(vite@7.3.3(@types/node@24.13.3)(jiti@2.7.0)(lightningcss@1.32.0))(vitest@4.1.10)
+      '@rollup/plugin-babel':
+        specifier: ^7.1.0
+        version: 7.1.0(@babel/core@8.0.1)(rollup@4.62.3)(supports-color@7.2.0)
+      '@rollup/plugin-node-resolve':
+        specifier: ^16.0.3
+        version: 16.0.3(rollup@4.62.3)
+      '@rollup/plugin-typescript':
+        specifier: ^12.3.0
+        version: 12.3.0(rollup@4.62.3)(tslib@2.8.1)(typescript@6.0.3)
+      '@types/node':
+        specifier: 'catalog:'
+        version: 24.13.3
+      babel-plugin-annotate-pure-calls:
+        specifier: ^0.5.0
+        version: 0.5.0(@babel/core@8.0.1)
+      babel-plugin-polyfill-regenerator:
+        specifier: ^1.0.0
+        version: 1.0.0(@babel/core@8.0.1)
+      eslint:
+        specifier: 'catalog:'
+        version: 9.39.5(jiti@2.7.0)(supports-color@7.2.0)
+      globby:
+        specifier: ^16.2.2
+        version: 16.2.2
+      rollup:
+        specifier: ^4.62.3
+        version: 4.62.3
+      rollup-plugin-delete:
+        specifier: ^3.0.2
+        version: 3.0.2(rollup@4.62.3)
+      rollup-plugin-dts:
+        specifier: ^6.4.1
+        version: 6.4.1(rollup@4.62.3)(typescript@6.0.3)
+      tslib:
+        specifier: ^2.8.1
+        version: 2.8.1
+      typescript:
+        specifier: 'catalog:'
+        version: 6.0.3
+      typescript-compat:
+        specifier: npm:typescript@3.8.3
+        version: typescript@3.8.3
+      vitest:
+        specifier: 'catalog:'
+        version: 4.1.10(@types/node@24.13.3)(@vitest/coverage-v8@4.1.10)(vite@7.3.3(@types/node@24.13.3)(jiti@2.7.0)(lightningcss@1.32.0))
+      zx:
+        specifier: ^8.8.5
+        version: 8.8.5
 
   packages/vite:
     dependencies:
@@ -124,7 +160,7 @@ importers:
         version: 4.3.3
       tailwind-merge:
         specifier: workspace:*
-        version: link:../..
+        version: link:../tailwind-merge
       tailwind-merge-configurator:
         specifier: workspace:*
         version: link:../configurator
@@ -133,14 +169,23 @@ importers:
         specifier: ~4.3.3
         version: 4.3.3(vite@7.3.3(@types/node@24.13.3)(jiti@2.7.0)(lightningcss@1.32.0))
       '@types/node':
-        specifier: ^24.13.3
+        specifier: 'catalog:'
         version: 24.13.3
+      eslint:
+        specifier: 'catalog:'
+        version: 9.39.5(jiti@2.7.0)(supports-color@7.2.0)
       tailwindcss:
         specifier: ~4.3.3
         version: 4.3.3
+      typescript:
+        specifier: 'catalog:'
+        version: 6.0.3
       vite:
         specifier: ^7.3.3
         version: 7.3.3(@types/node@24.13.3)(jiti@2.7.0)(lightningcss@1.32.0)
+      vitest:
+        specifier: 'catalog:'
+        version: 4.1.10(@types/node@24.13.3)(@vitest/coverage-v8@4.1.10)(vite@7.3.3(@types/node@24.13.3)(jiti@2.7.0)(lightningcss@1.32.0))
 
 packages:
 
@@ -161,10 +206,6 @@ packages:
 
   '@actions/io@3.0.2':
     resolution: {integrity: sha512-nRBchcMM+QK1pdjO7/idu86rbJI5YHUKCvKs0KxnSYbVe3F51UfGxuZX4Qy/fWlp6l7gWFwIkrOzN+oUK03kfw==}
-
-  '@babel/code-frame@7.29.0':
-    resolution: {integrity: sha512-9NhCeYjq9+3uxgdtp20LSiJXJvN0FeCtNGpJxuMFZ1Kv3cWUNb6DOhJwUvcVCzKGR66cw4njwM6hrJLqgOwbcw==}
-    engines: {node: '>=6.9.0'}
 
   '@babel/code-frame@7.29.7':
     resolution: {integrity: sha512-Aup7aUOfpbAUg2ROOJN6Iw5f9DMBlzu0mIkm/malLQFN/YQgO48wCj0Kxa3sEHJvPVFg7siR+qRInwXd2qhQKw==}
@@ -275,10 +316,6 @@ packages:
   '@babel/helper-string-parser@8.0.0':
     resolution: {integrity: sha512-6mJgmFFFIIO82vvoLt9XtRC7/TkzXfts1t/SpRX4IHSzMgqoPYCWesVu1udUPUWioAE/2fcG6WuI8zrkE1gwrg==}
     engines: {node: ^22.18.0 || >=24.11.0}
-
-  '@babel/helper-validator-identifier@7.28.5':
-    resolution: {integrity: sha512-qSs4ifwzKJSV39ucNjsvc6WVHs6b7S03sOh2OcHF9UHfVPqWWALUsNUVzhSBiItjRZoLHx7nIarVjqKVusUZ1Q==}
-    engines: {node: '>=6.9.0'}
 
   '@babel/helper-validator-identifier@7.29.7':
     resolution: {integrity: sha512-qehxGkRj55h/ff8EMaJ+cYhyaKlHIxqYDn682wQD7RNp9UujOQsHog2uS0r2vzr4pW+sXf90NeeayjcNaX3fFg==}
@@ -3109,13 +3146,6 @@ snapshots:
 
   '@actions/io@3.0.2': {}
 
-  '@babel/code-frame@7.29.0':
-    dependencies:
-      '@babel/helper-validator-identifier': 7.28.5
-      js-tokens: 4.0.0
-      picocolors: 1.1.1
-    optional: true
-
   '@babel/code-frame@7.29.7':
     dependencies:
       '@babel/helper-validator-identifier': 7.29.7
@@ -3260,9 +3290,6 @@ snapshots:
   '@babel/helper-string-parser@7.29.7': {}
 
   '@babel/helper-string-parser@8.0.0': {}
-
-  '@babel/helper-validator-identifier@7.28.5':
-    optional: true
 
   '@babel/helper-validator-identifier@7.29.7': {}
 
@@ -5704,7 +5731,7 @@ snapshots:
       rollup: 4.62.3
       typescript: 6.0.3
     optionalDependencies:
-      '@babel/code-frame': 7.29.0
+      '@babel/code-frame': 7.29.7
 
   rollup@4.62.3:
     dependencies:

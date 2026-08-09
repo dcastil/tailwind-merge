@@ -1,9 +1,10 @@
 /.claude/
 /.pnpm-store/
 /.vscode/
-/configurator/dist/
-/configurator/tests/.tmp-*/
-/dist/
+/packages/configurator/dist/
+/packages/configurator/tests/.tmp-*/
+/packages/tailwind-merge/dist/
+/packages/vite/tests/.tmp-*/
 coverage
 node_modules/
 .DS_Store

@@ -12,6 +12,9 @@
         "./tailwind-merge": "./src/tailwind-merge.ts"
     },
     "scripts": {
+        "lint": "eslint --max-warnings 0 .",
+        "test": "vitest --no-watch",
+        "test:watch": "vitest",
         "test:types": "tsc --noEmit"
     },
     "peerDependencies": {
@@ -31,8 +34,11 @@
     },
     "devDependencies": {
         "@tailwindcss/vite": "~4.3.3",
-        "@types/node": "^24.13.3",
+        "@types/node": "catalog:",
+        "eslint": "catalog:",
         "tailwindcss": "~4.3.3",
-        "vite": "^7.3.3"
+        "typescript": "catalog:",
+        "vite": "^7.3.3",
+        "vitest": "catalog:"
     }
 }

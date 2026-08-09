@@ -1,7 +1,13 @@
 packages:
-  - .
   - .github/actions/metrics-report
   - packages/*
+
+# Tool versions shared across workspace packages so per-package devDependencies cannot drift. Only tools consumed by more than one workspace project belong here; single-consumer dependencies stay pinned in their package manifest.
+catalog:
+  '@types/node': ^24.13.3
+  eslint: ^9.39.5
+  typescript: ^6.0.3
+  vitest: ^4.1.10
 
 minimumReleaseAge: 4320
 minimumReleaseAgeStrict: true
