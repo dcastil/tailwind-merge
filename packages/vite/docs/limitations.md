@@ -1,0 +1,8 @@
+# Limitations
+
+- **One Tailwind root per app.** A Vite app with several independent Tailwind themes has no single correct `twMerge`; the plugin errors and asks you to pick one via the `css` option. Monorepos are fine — each app's Vite config gets its own plugin instance and its own generated config, including theme files imported from shared packages outside the app's root.
+- **Vite only, version 6 and up.** Other bundlers (Next.js/Turbopack, webpack) may get sibling plugins on the same core later. Vite 5 support could be added if there's demand.
+- **Tailwind CSS v4 only, currently the v4.3 line.** The version range widens as the test matrix does. The plugin warns at startup when its Tailwind engine and your `@tailwindcss/vite` drift apart ([details](./how-it-works.md#version-alignment)).
+- **Framework coverage.** Plain Vite (including SSR module loading) is what the test suite exercises today. SvelteKit, React Router, Nuxt, Astro and friends run on Vite and are expected to work — reports from real setups are very welcome while the plugin is pre-1.0.
+- **Aliasing the runtime subpath disables the plugin.** A `resolve.alias` entry for `@tailwind-merge/vite/runtime` rewrites the import before any plugin can act — that's standard Vite semantics and treated as intentional: whatever you alias to is what you get.
+- **Classes must exist at generation time.** The config is generated from your CSS configuration, not from the classes your app uses. Everything your Tailwind setup can produce merges correctly; classes from a Tailwind setup *other* than the detected one (e.g. a second config in the same app) won't.
