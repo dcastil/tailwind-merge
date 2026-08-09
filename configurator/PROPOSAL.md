@@ -217,7 +217,7 @@ Still open, to resolve during implementation:
 
 ## 10. Field test against real-world CSS (2026-08-09)
 
-Before making the package shippable, the generator ran against six public Tailwind v4 entrypoints — configurations nobody would invent in a fixture — via a temporary probe test (real CSS downloaded to a temp dir, never committed; imports of npm packages not present in this workspace stripped and recorded). Per file: generate, then the full conformance sweep.
+Before making the package shippable, the generator ran against six public Tailwind v4 entrypoints — configurations nobody would invent in a fixture. Per file: generate, then the full conformance sweep. Initially a temporary probe over downloaded files; the six projects are all permissively licensed, so pinned, attributed copies now live in `tests/fixtures/real-world/` (see its README for sources and preprocessing) and run permanently in `real-world.test.ts`, with each generated module committed as a reviewable snapshot — which doubles as documentation of what output looks like for real projects.
 
 | Project | Preprocessing deviations | Pairs checked | Result |
 | --- | --- | --- | --- |
