@@ -10,6 +10,7 @@ import {
     DesignSystemAccess,
     declaredDeclarations,
     loadDesignSystems,
+    propertyCovers,
     qualifiedProperty,
 } from '../src/design-system'
 
@@ -176,21 +177,8 @@ function declarationsConflict(first: DeclarationEntry[], second: DeclarationEntr
 }
 
 /**
- * Whether setting one CSS property interferes with the other. Beyond equality this covers shorthands, exploiting CSS's systematic naming: a shorthand's name is either a dash-prefix of its longhands (`inset` → `inset-block-end`, `font` → `font-size`) or shares first and last segment with them (`border-radius` → `border-bottom-right-radius`, `border-color` → `border-top-color`).
+ * Whether setting one CSS property interferes with the other: either controls the other per the shared shorthand-naming relation (`propertyCovers`), which also knows the naming exceptions where a dash prefix lies (`color` vs `color-scheme`).
  */
 function propertiesInterfere(first: string, second: string): boolean {
-    if (first === second) {
-        return true
-    }
-    if (first.startsWith(`${second}-`) || second.startsWith(`${first}-`)) {
-        return true
-    }
-    const firstSegments = first.split('-')
-    const secondSegments = second.split('-')
-    return (
-        firstSegments[0] === secondSegments[0] &&
-        firstSegments.length > 1 &&
-        secondSegments.length > 1 &&
-        firstSegments[firstSegments.length - 1] === secondSegments[secondSegments.length - 1]
-    )
+    return propertyCovers(first, second) || propertyCovers(second, first)
 }

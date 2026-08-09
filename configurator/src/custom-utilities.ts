@@ -3,6 +3,7 @@ import {
     DesignSystemAccess,
     declaredDeclarations,
     declaredProperties,
+    propertyCovers,
 } from './design-system'
 import { PlanValue } from './plan'
 
@@ -314,21 +315,4 @@ function functionalRootExemplar(project: DesignSystemAccess, root: string): stri
         }
     }
     return null
-}
-
-/**
- * Whether setting `property` fully overrides `target`, exploiting CSS's systematic shorthand naming: identity, dash-prefix (`padding` → `padding-inline`, `inset` → `inset-block-end`), or shared first and last segment with fewer segments (`border-radius` → `border-top-left-radius`, `border-color` → `border-top-color`).
- */
-function propertyCovers(property: string, target: string): boolean {
-    if (property === target || target.startsWith(`${property}-`)) {
-        return true
-    }
-    const propertySegments = property.split('-')
-    const targetSegments = target.split('-')
-    return (
-        propertySegments.length < targetSegments.length &&
-        propertySegments.length > 1 &&
-        propertySegments[0] === targetSegments[0] &&
-        propertySegments[propertySegments.length - 1] === targetSegments[targetSegments.length - 1]
-    )
 }
