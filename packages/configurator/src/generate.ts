@@ -20,6 +20,8 @@ export interface GenerateOptions {
     banner?: string
     /** Output language of the emitted module — see `EmitOptions.format`. Defaults to TypeScript. */
     format?: 'ts' | 'js'
+    /** Module specifier the emitted code imports tailwind-merge's API from — see `EmitOptions.importSource`. */
+    importSource?: string
 }
 
 export interface GenerateResult {
@@ -76,7 +78,11 @@ export async function generate(options: GenerateOptions): Promise<GenerateResult
     )
 
     return {
-        code: emitModule(plan, { banner: options.banner, format: options.format }),
+        code: emitModule(plan, {
+            banner: options.banner,
+            format: options.format,
+            importSource: options.importSource,
+        }),
         config: materializeConfig(plan),
         plan,
     }

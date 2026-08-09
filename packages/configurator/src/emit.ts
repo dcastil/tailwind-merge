@@ -8,6 +8,10 @@ export interface EmitOptions {
      */
     format?: 'ts' | 'js'
     /**
+     * Module specifier the emitted code imports tailwind-merge's API from. Defaults to 'tailwind-merge'. A bundler plugin serving the module virtually has no filesystem location to resolve a bare 'tailwind-merge' from, so it substitutes a specifier of its own package that re-exports tailwind-merge — resolvable from anywhere because the plugin package is the user's direct dependency.
+     */
+    importSource?: string
+    /**
      * How much repeated content is deduplicated into shared consts, measured on the vanilla theme (minified / gzip / brotli in bytes):
      * - 'scales' (default): only resolved theme scales become shared consts, everything else stays inline (31,989 / 8,822 / 7,706). Best compressed size, which is what network transfer pays — compressors handle inline repetition nearly for free, while extra references add entropy.
      * - 'aggressive': additionally hoists every repeated array/object that pays for itself and spreads mined runs (28,492 / 9,364 / 8,197). Best minified-uncompressed size, at the cost of compressed size.
@@ -43,10 +47,11 @@ export function emitModule(plan: ConfigPlan, options: EmitOptions = {}): string 
     }
     lines.push('')
 
+    const importSource = options.importSource ?? 'tailwind-merge'
     lines.push(
         format === 'ts'
-            ? "import { createTailwindMerge, validators as v, type Config } from 'tailwind-merge'"
-            : "import { createTailwindMerge, validators as v } from 'tailwind-merge'",
+            ? `import { createTailwindMerge, validators as v, type Config } from '${importSource}'`
+            : `import { createTailwindMerge, validators as v } from '${importSource}'`,
     )
     lines.push('')
     lines.push('/**')
