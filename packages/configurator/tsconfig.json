@@ -12,8 +12,8 @@
         "moduleResolution": "Bundler",
         // Maps the package name to the library source so type-checking works without a prior `pnpm build` (the published types live in dist/). Runtime resolution in tests goes through the pnpm workspace link instead.
         "paths": {
-            "tailwind-merge": ["../src/index.ts"],
-            "tailwind-merge/unstable-do-not-import": ["../src/unstable-do-not-import.ts"]
+            "tailwind-merge": ["../../src/index.ts"],
+            "tailwind-merge/unstable-do-not-import": ["../../src/unstable-do-not-import.ts"]
         },
         // Emit
         "noEmit": true,

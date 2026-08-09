@@ -10,8 +10,8 @@ export default typescriptPlugin.config(
             'coverage/**/*',
             'dist/**/*',
             'node_modules/**/*',
-            'configurator/dist/**/*',
-            'configurator/tests/.tmp-*/**/*',
+            'packages/configurator/dist/**/*',
+            'packages/configurator/tests/.tmp-*/**/*',
         ],
     },
     {
@@ -181,13 +181,17 @@ export default typescriptPlugin.config(
         },
     },
     {
-        files: ['scripts/**/*.?(m|c)@(t|j)s', 'configurator/src/cli.ts', 'configurator/src/run-cli.ts'],
+        files: [
+            'scripts/**/*.?(m|c)@(t|j)s',
+            'packages/configurator/src/cli.ts',
+            'packages/configurator/src/run-cli.ts',
+        ],
         rules: {
             'no-console': 'off',
         },
     },
     {
-        files: ['configurator/tests/**/*.test.ts'],
+        files: ['packages/configurator/tests/**/*.test.ts'],
         rules: {
             'vitest/expect-expect': [
                 'error',
@@ -197,7 +201,7 @@ export default typescriptPlugin.config(
     },
     {
         // Tailwind's plugin loader expects the plugin function as the module's default export.
-        files: ['configurator/tests/fixtures/**/*'],
+        files: ['packages/configurator/tests/fixtures/**/*'],
         rules: {
             'import/no-default-export': 'off',
         },
