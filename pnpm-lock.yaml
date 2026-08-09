@@ -120,7 +120,7 @@ importers:
   packages/vite:
     dependencies:
       '@tailwindcss/node':
-        specifier: ^4.3.3
+        specifier: ~4.3.3
         version: 4.3.3
       tailwind-merge:
         specifier: workspace:*
@@ -130,13 +130,13 @@ importers:
         version: link:../configurator
     devDependencies:
       '@tailwindcss/vite':
-        specifier: ^4.3.3
+        specifier: ~4.3.3
         version: 4.3.3(vite@7.3.3(@types/node@24.13.3)(jiti@2.7.0)(lightningcss@1.32.0))
       '@types/node':
         specifier: ^24.13.3
         version: 24.13.3
       tailwindcss:
-        specifier: ^4.3.3
+        specifier: ~4.3.3
         version: 4.3.3
       vite:
         specifier: ^7.3.3
