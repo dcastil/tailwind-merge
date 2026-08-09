@@ -7,7 +7,7 @@
         "target": "ESNext",
         "noEmit": true,
         "paths": {
-            "tailwind-merge": ["../../../../../src/index.ts"]
+            "tailwind-merge": ["../../../../tailwind-merge/src/index.ts"]
         }
     },
     "include": ["main.ts"]

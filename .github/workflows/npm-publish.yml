@@ -24,11 +24,11 @@ jobs:
                   package-manager-cache: false
             - run: corepack enable
             - run: pnpm install --frozen-lockfile
-            - run: pnpm build
+            - run: pnpm --filter tailwind-merge build
             - uses: actions/upload-artifact@v7
               with:
                   name: build-output
-                  path: dist
+                  path: packages/tailwind-merge/dist
                   if-no-files-found: error
 
     publish-dev:
@@ -53,9 +53,10 @@ jobs:
             - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
               with:
                   name: build-output
-                  path: dist
+                  path: packages/tailwind-merge/dist
                   digest-mismatch: error
             - name: Set dev package version
+              working-directory: packages/tailwind-merge
               run: |
                   node --input-type=module <<'EOF'
                   import fs from 'node:fs'
@@ -65,6 +66,7 @@ jobs:
                   fs.writeFileSync('package.json', `${JSON.stringify(packageJson, null, 4)}\n`)
                   EOF
             - run: npm publish --access public --tag dev --ignore-scripts
+              working-directory: packages/tailwind-merge
 
     build-prod:
         if: github.event_name == 'release' && github.event.action == 'published'
@@ -82,12 +84,12 @@ jobs:
             - run: pnpm install --frozen-lockfile
             - run: pnpm lint
             - run: pnpm test
-            - run: pnpm build
-            - run: pnpm test:exports
+            - run: pnpm --filter tailwind-merge build
+            - run: pnpm --filter tailwind-merge test:exports
             - uses: actions/upload-artifact@v7
               with:
                   name: build-output
-                  path: dist
+                  path: packages/tailwind-merge/dist
                   if-no-files-found: error
 
     publish-prod:
@@ -112,6 +114,7 @@ jobs:
             - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
               with:
                   name: build-output
-                  path: dist
+                  path: packages/tailwind-merge/dist
                   digest-mismatch: error
             - run: npm publish --ignore-scripts
+              working-directory: packages/tailwind-merge

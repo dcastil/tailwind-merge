@@ -43,11 +43,11 @@ function applyStaticLinks(docsOverviewContent) {
     const nextDocsOverviewContent = docsOverviewContent
         .replace(
             /(["'`(])\.\.\/(assets\/[^\s]+)(["'`)])/g,
-            `$1https://github.com/dcastil/tailwind-merge/raw/${version}/$2$3`,
+            `$1https://github.com/dcastil/tailwind-merge/raw/${version}/packages/tailwind-merge/$2$3`,
         )
         .replace(
             /(["'`(])\.\/([^\s]+\.md)(["'`)])/g,
-            `$1https://github.com/dcastil/tailwind-merge/blob/${version}/docs/$2$3`,
+            `$1https://github.com/dcastil/tailwind-merge/blob/${version}/packages/tailwind-merge/docs/$2$3`,
         )
 
     if (nextDocsOverviewContent === docsOverviewContent) {

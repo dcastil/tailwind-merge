@@ -19,13 +19,16 @@ const fixturesDirectory = path.join(testsDirectory, 'fixtures')
 const packageDirectory = path.resolve(testsDirectory, '..')
 const workspaceRoot = path.resolve(testsDirectory, '../../..')
 
-// The servers spawned by these tests resolve tailwind-merge to the library source, since dist/ may not be built — mirroring scripts/vitest.config.mts. The runtime subpath deliberately has no alias: an alias consumes the specifier before any plugin's resolveId runs, which would bypass the plugin's redirect (a sharp edge worth knowing about — a user aliasing the subpath disables the plugin). Instead, the fixtures get a real node_modules symlink to this package, resolving exactly like an installed project.
+// The servers spawned by these tests resolve tailwind-merge to the library source, since dist/ may not be built — mirroring this package's vitest.config.mts. The runtime subpath deliberately has no alias: an alias consumes the specifier before any plugin's resolveId runs, which would bypass the plugin's redirect (a sharp edge worth knowing about — a user aliasing the subpath disables the plugin). Instead, the fixtures get a real node_modules symlink to this package, resolving exactly like an installed project.
 const libraryAliases = [
     {
         find: 'tailwind-merge/unstable-do-not-import',
-        replacement: path.join(workspaceRoot, 'src/unstable-do-not-import.ts'),
+        replacement: path.join(workspaceRoot, 'packages/tailwind-merge/src/unstable-do-not-import.ts'),
     },
-    { find: 'tailwind-merge', replacement: path.join(workspaceRoot, 'src/index.ts') },
+    {
+        find: 'tailwind-merge',
+        replacement: path.join(workspaceRoot, 'packages/tailwind-merge/src/index.ts'),
+    },
 ]
 
 beforeAll(async () => {

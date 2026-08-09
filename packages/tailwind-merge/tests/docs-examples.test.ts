@@ -1,4 +1,5 @@
 import fs from 'fs'
+import { fileURLToPath } from 'url'
 
 import { globby } from 'globby'
 import { expect, test } from 'vitest'
@@ -22,6 +23,8 @@ test('docs examples', () => {
 
 async function forEachFile(patterns: string | string[], callback: (fileContent: string) => void) {
     const paths = await globby(patterns, {
+        // Anchored to the package root so the patterns resolve identically whether Vitest runs from the repo root (projects mode) or from this package.
+        cwd: fileURLToPath(new URL('..', import.meta.url)),
         dot: true,
         absolute: true,
         onlyFiles: true,

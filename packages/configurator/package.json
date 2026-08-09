@@ -10,6 +10,9 @@
         ".": "./src/index.ts"
     },
     "scripts": {
+        "lint": "eslint --max-warnings 0 .",
+        "test": "vitest --no-watch",
+        "test:watch": "vitest",
         "test:types": "tsc --noEmit"
     },
     "peerDependencies": {
@@ -19,8 +22,11 @@
     },
     "devDependencies": {
         "@tailwindcss/node": "^4.3.3",
-        "@types/node": "^24.13.3",
+        "@types/node": "catalog:",
+        "eslint": "catalog:",
         "tailwind-merge": "workspace:*",
-        "tailwindcss": "^4.3.3"
+        "tailwindcss": "^4.3.3",
+        "typescript": "catalog:",
+        "vitest": "catalog:"
     }
 }

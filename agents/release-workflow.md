@@ -7,7 +7,7 @@ Use this guide when preparing release changelog entries and GitHub release text.
 - Applies to release preparation tasks like `v3.4.1`.
 - Covers:
   - Draft release ingestion from GitHub.
-  - Changelog updates in `docs/changelog/*-changelog.md`.
+  - Changelog updates in `packages/tailwind-merge/docs/changelog/*-changelog.md`.
   - Sponsor section generation and ordering.
   - GitHub Releases UI text formatting.
   - Release comments on PRs/issues via `.github/actions/release-commenter`.
@@ -55,7 +55,7 @@ gh workflow run comment-released-prs-and-issues.yml \
 
 ## Commands
 
-Bump package versions with `pnpm version <version|patch|minor|major>`. pnpm runs the existing `preversion`, `version`, and `postversion` lifecycle scripts and creates the version commit/tag, so the README regeneration in `scripts/update-readme.mjs` stays part of the version step.
+Bump package versions with `pnpm version <version|patch|minor|major>` run inside the package directory (for the library: `packages/tailwind-merge/`). pnpm runs the existing `preversion`, `version`, and `postversion` lifecycle scripts and creates the version commit/tag, so the README regeneration in the library's `scripts/update-readme.mjs` stays part of the version step.
 
 Fetch draft release:
 
@@ -78,8 +78,8 @@ gh api graphql -f query='query($login:String!){ user(login:$login){ public: spon
 ## Changelog authoring rules
 
 1. Update the matching major-version changelog file:
-   - v3 releases: `docs/changelog/v3-changelog.md`
-   - v2 releases: `docs/changelog/v2-changelog.md`
+   - v3 releases: `packages/tailwind-merge/docs/changelog/v3-changelog.md`
+   - v2 releases: `packages/tailwind-merge/docs/changelog/v2-changelog.md`
 2. Add new version section at the top:
    - `## vX.Y.Z`
 3. Keep category headings from draft release:

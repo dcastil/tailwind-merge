@@ -28,4 +28,4 @@ jobs:
               with:
                   # This public repository uses CodSpeed tokenless uploads so PR benchmark code does not receive a long-lived upload token or OIDC permission.
                   mode: simulation
-                  run: pnpm bench
+                  run: pnpm --filter tailwind-merge bench

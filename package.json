@@ -1,102 +1,24 @@
 {
-    "name": "tailwind-merge",
-    "version": "3.6.0",
-    "description": "Merge Tailwind CSS classes without style conflicts",
-    "keywords": [
-        "tailwindcss",
-        "tailwind",
-        "css",
-        "classes",
-        "className",
-        "classList",
-        "merge",
-        "conflict",
-        "override"
-    ],
-    "homepage": "https://github.com/dcastil/tailwind-merge",
-    "bugs": {
-        "url": "https://github.com/dcastil/tailwind-merge/issues"
-    },
-    "funding": {
-        "type": "github",
-        "url": "https://github.com/sponsors/dcastil"
-    },
+    "name": "tailwind-merge-monorepo",
+    "version": "0.0.0",
+    "private": true,
     "license": "MIT",
     "author": "Dany Castillo",
-    "files": [
-        "dist",
-        "src"
-    ],
-    "source": "src/index.ts",
-    "exports": {
-        ".": {
-            "types": "./dist/types.d.ts",
-            "require": "./dist/bundle-cjs.js",
-            "import": "./dist/bundle-mjs.mjs",
-            "default": "./dist/bundle-mjs.mjs"
-        },
-        "./es5": {
-            "types": "./dist/types.d.ts",
-            "require": "./dist/es5/bundle-cjs.js",
-            "import": "./dist/es5/bundle-mjs.mjs",
-            "default": "./dist/es5/bundle-mjs.mjs"
-        },
-        "./unstable-do-not-import": {
-            "types": "./dist/unstable-types.d.ts",
-            "require": "./dist/unstable-cjs.js",
-            "import": "./dist/unstable-mjs.mjs",
-            "default": "./dist/unstable-mjs.mjs"
-        }
-    },
-    "main": "./dist/bundle-cjs.js",
-    "types": "./dist/types.d.ts",
-    "repository": {
-        "type": "git",
-        "url": "https://github.com/dcastil/tailwind-merge.git"
-    },
-    "sideEffects": false,
     "scripts": {
-        "build": "rollup --config scripts/rollup.config.mjs --forceExit",
-        "bench": "vitest bench --config scripts/vitest.config.mts --no-watch",
-        "test": "vitest --config scripts/vitest.config.mts --no-watch --coverage",
-        "test:watch": "vitest --config scripts/vitest.config.mts",
-        "test:exports": "node scripts/test-built-package-exports.cjs && node scripts/test-built-package-exports.mjs && pnpm test:types:compat",
-        "test:types": "tsc --noEmit && tsc --noEmit --project tests/tsconfig.json",
-        "test:types:compat": "node node_modules/typescript-compat/bin/tsc --project scripts/typescript-compatibility/tsconfig.json",
-        "lint": "eslint --max-warnings 0 '**'",
-        "preversion": "if [ -n \"$DANYS_MACHINE\" ]; then git checkout main && git pull; fi",
-        "version": "zx scripts/update-readme.mjs",
-        "postversion": "if [ -n \"$DANYS_MACHINE\" ]; then git push --follow-tags && open https://github.com/dcastil/tailwind-merge/releases; fi"
+        "lint": "eslint --max-warnings 0 . && pnpm --recursive lint",
+        "test": "vitest --no-watch --coverage",
+        "test:watch": "vitest",
+        "test:types": "pnpm --recursive test:types"
     },
-    "dependencies": {},
     "devDependencies": {
-        "@babel/core": "^8.0.1",
-        "@babel/preset-env": "^8.0.2",
-        "@codspeed/vitest-plugin": "^5.7.1",
-        "@rollup/plugin-babel": "^7.1.0",
-        "@rollup/plugin-node-resolve": "^16.0.3",
-        "@rollup/plugin-typescript": "^12.3.0",
-        "@types/node": "^24.13.3",
         "@vitest/coverage-v8": "^4.1.10",
         "@vitest/eslint-plugin": "^1.6.24",
-        "babel-plugin-annotate-pure-calls": "^0.5.0",
-        "babel-plugin-polyfill-regenerator": "^1.0.0",
-        "eslint": "^9.39.5",
+        "eslint": "catalog:",
         "eslint-plugin-import": "^2.32.0",
-        "globby": "^16.2.2",
         "prettier": "^3.9.6",
-        "rollup": "^4.62.3",
-        "rollup-plugin-delete": "^3.0.2",
-        "rollup-plugin-dts": "^6.4.1",
-        "tslib": "^2.8.1",
-        "typescript": "^6.0.3",
-        "typescript-compat": "npm:typescript@3.8.3",
+        "typescript": "catalog:",
         "typescript-eslint": "^8.65.0",
-        "vitest": "^4.1.10",
-        "zx": "^8.8.5"
-    },
-    "publishConfig": {
-        "provenance": true
+        "vitest": "catalog:"
     },
     "packageManager": "pnpm@11.18.0",
     "devEngines": {

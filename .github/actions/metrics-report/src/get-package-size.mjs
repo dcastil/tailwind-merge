@@ -10,7 +10,7 @@ import { exec } from '@actions/exec'
 import { transform } from 'esbuild'
 import { rollup } from 'rollup'
 
-import { actionRootPath, repoRootPath } from './utils/path.mjs'
+import { actionRootPath, getLibraryRootPath, repoRootPath } from './utils/path.mjs'
 
 /**
  * @typedef {object} GetPackageSizeOptions
@@ -53,7 +53,8 @@ async function buildPackage({ shouldOmitFailures }) {
     }
 
     core.info('Building package')
-    const buildExitCode = await exec('pnpm build', [], {
+    // Filtering by package name works for both repo layouts: since the monorepo restructure the library is the packages/tailwind-merge workspace package, and on pre-restructure base branches the root package carries the same name.
+    const buildExitCode = await exec('pnpm --filter tailwind-merge build', [], {
         cwd: repoRootPath,
         ignoreReturnCode: shouldOmitFailures,
     })
@@ -88,7 +89,10 @@ async function getEntryPointSizes({ shouldOmitFailures }) {
 
     const maybeEntryPointSizes = await Promise.all(
         entryPointConfigs.map(async (entryPointConfig, entryPointIndex) => {
-            const entryPointBundlePath = path.resolve(repoRootPath, entryPointConfig.bundlePath)
+            const entryPointBundlePath = path.resolve(
+                getLibraryRootPath(),
+                entryPointConfig.bundlePath,
+            )
 
             const bundle = await getBundle(entryPointConfig, entryPointBundlePath).catch(
                 (error) => {
@@ -141,7 +145,7 @@ async function getEntryPointSizes({ shouldOmitFailures }) {
  * @returns {Promise<EntryPointConfiguration[]>}
  */
 async function getEntryPointConfigs() {
-    const packageJson = await fs.readFile(path.join(repoRootPath, 'package.json'), 'utf8')
+    const packageJson = await fs.readFile(path.join(getLibraryRootPath(), 'package.json'), 'utf8')
     const pkg = JSON.parse(packageJson)
 
     return Object.entries(pkg.exports).flatMap(([relativeEntryPointPath, bundleObject]) => {
