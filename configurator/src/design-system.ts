@@ -236,6 +236,45 @@ function analyzeSelector(selector: string): { contextFragment: string; condition
     return { contextFragment, conditional }
 }
 
+/**
+ * Dash-prefixed properties that their prefix property does NOT control, breaking CSS's otherwise systematic shorthand naming: `color` is unrelated to `color-scheme`, the `outline` shorthand excludes `outline-offset`, the `flex` shorthand covers grow/shrink/basis but not wrap/direction, and so on. These are web-platform facts (stable, not Tailwind-versioned), so a small maintained list is acceptable where everything else stays derived.
+ */
+const UNCONTROLLED_DASH_PREFIXED_PROPERTIES = new Set([
+    'color-scheme',
+    'overflow-wrap',
+    'overflow-anchor',
+    'outline-offset',
+    'flex-wrap',
+    'flex-direction',
+    'flex-flow',
+    'border-spacing',
+    'border-collapse',
+    'background-blend-mode',
+    'mask-border',
+    'animation-composition',
+    'animation-timeline',
+])
+
+/**
+ * Whether setting `property` fully controls `target`, exploiting CSS's systematic shorthand naming: identity, dash-prefix (`padding` → `padding-inline`, `inset` → `inset-block-end`), or shared first and last segment with fewer segments (`border-radius` → `border-top-left-radius`, `border-color` → `border-top-color`) — minus the enumerated naming exceptions where a dash prefix lies about the relationship.
+ */
+export function propertyCovers(property: string, target: string): boolean {
+    if (property === target) {
+        return true
+    }
+    if (target.startsWith(`${property}-`)) {
+        return !UNCONTROLLED_DASH_PREFIXED_PROPERTIES.has(target)
+    }
+    const propertySegments = property.split('-')
+    const targetSegments = target.split('-')
+    return (
+        propertySegments.length < targetSegments.length &&
+        propertySegments.length > 1 &&
+        propertySegments[0] === targetSegments[0] &&
+        propertySegments[propertySegments.length - 1] === targetSegments[targetSegments.length - 1]
+    )
+}
+
 /** Proper-subset check over property names, used to recognize classes whose declarations span multiple groups' signatures. */
 export function haveProperSubset(subset: Set<string>, superset: Set<string>): boolean {
     return subset.size < superset.size && [...subset].every((property) => superset.has(property))
