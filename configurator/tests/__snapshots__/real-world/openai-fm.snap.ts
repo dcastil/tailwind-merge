@@ -78,7 +78,7 @@ export const getConfig = () => {
             olive: [isNumber],
             mist: [isNumber],
             taupe: [isNumber],
-            black: [isNumber],
+            black: ['10', '50'],
         },
         'black',
         'white',

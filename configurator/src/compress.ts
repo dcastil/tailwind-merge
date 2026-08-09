@@ -95,56 +95,61 @@ function encodeWithValidators(names: string[]): ScaleEncoding[] {
 }
 
 /**
- * Collapses names sharing a first segment and a numeric tail into `{ family: [isNumber] }` entries, which is how color palettes compress (many families × many shades become one nested validator per family). Names outside qualifying families stay enumerated, and a family only qualifies with at least 2 members so single values don't lose their exact match.
+ * Collapses names sharing a first segment into one nested entry per family, with the tails themselves encoded recursively through `encodeScale` — so numeric shades still end in a validator (`{ red: [isNumber] }`), word tails enumerate without repeating the prefix (`{ gap: ['narrow', 'wide'] }`), and multi-segment names factor further (`{ background: [{ alternative: [isNumber] }] }`). Each family keeps the factored form only when it estimates smaller than enumerating its members, so short families don't pay the object overhead. Structural factoring measures smaller on minified AND compressed output (unlike reference-based sharing, it removes repetition without adding entropy — see EmitOptions.sharing for that contrast).
  */
 function encodeAsFamilies(names: string[]): ScaleEncoding | null {
-    const familyTails = new Map<string, string[]>()
+    const families = new Map<string, { tails: string[]; enumeratedCost: number }>()
 
     for (const name of names) {
         const separatorIndex = name.indexOf('-')
         if (separatorIndex > 0) {
-            const family = name.slice(0, separatorIndex)
+            const familyName = name.slice(0, separatorIndex)
             const tail = name.slice(separatorIndex + 1)
-            const tails = familyTails.get(family)
-            if (tails) {
-                tails.push(tail)
-            } else {
-                familyTails.set(family, [tail])
+            let family = families.get(familyName)
+            if (!family) {
+                family = { tails: [], enumeratedCost: 0 }
+                families.set(familyName, family)
             }
+            family.tails.push(tail)
+            family.enumeratedCost += name.length + 4
         }
     }
 
-    const qualifiedFamilies = new Set<string>()
-    for (const [family, tails] of familyTails) {
-        if (tails.length >= 2 && tails.every(validators.isNumber)) {
-            qualifiedFamilies.add(family)
+    const factoredFamilies = new Map<string, PlanValue[]>()
+    for (const [familyName, { tails, enumeratedCost }] of families) {
+        if (tails.length < 2) {
+            continue
+        }
+        const tailEncoding = encodeScale(tails)
+        if (familyName.length + 4 + estimateCost(tailEncoding.items) < enumeratedCost) {
+            factoredFamilies.set(familyName, tailEncoding.items)
         }
     }
 
-    if (qualifiedFamilies.size === 0) {
+    if (factoredFamilies.size === 0) {
         return null
     }
 
-    // Emit in original theme order: the first member of a qualified family becomes the shared object (all families in one object literal), other members are skipped, everything else stays enumerated.
+    // Emit in original theme order: the first member of a factored family becomes the shared object (all families in one object literal), other members are skipped, everything else stays enumerated.
     const items: PlanValue[] = []
     const familiesObject: PlanValue = { kind: 'object', entries: [] }
     const emittedFamilies = new Set<string>()
 
     for (const name of names) {
         const separatorIndex = name.indexOf('-')
-        const family = separatorIndex > 0 ? name.slice(0, separatorIndex) : null
+        const familyName = separatorIndex > 0 ? name.slice(0, separatorIndex) : null
 
-        if (family === null || !qualifiedFamilies.has(family)) {
+        if (familyName === null || !factoredFamilies.has(familyName)) {
             items.push(literal(name))
             continue
         }
 
-        if (!emittedFamilies.has(family)) {
-            emittedFamilies.add(family)
+        if (!emittedFamilies.has(familyName)) {
+            emittedFamilies.add(familyName)
             if (familiesObject.entries.length === 0) {
                 items.push(familiesObject)
             }
-            familiesObject.entries.push([family, [{ kind: 'validator', name: 'isNumber' }]])
+            familiesObject.entries.push([familyName, factoredFamilies.get(familyName)!])
         }
     }
 
