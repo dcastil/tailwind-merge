@@ -6,6 +6,9 @@
     "license": "MIT",
     "author": "Dany Castillo",
     "type": "module",
+    "exports": {
+        ".": "./src/index.ts"
+    },
     "scripts": {
         "test:types": "tsc --noEmit"
     },
