@@ -97,4 +97,17 @@ describe('generate from vanilla Tailwind CSS', () => {
         // A file snapshot instead of an inline one: the committed artifact is reviewable as real TypeScript and, living inside tests/, is type-checked against the library's public types by the package's `test:types` script.
         await expect(code).toMatchFileSnapshot('./__snapshots__/vanilla.snap.ts')
     })
+
+    test("format: 'js' emits the same module minus the TypeScript syntax", async () => {
+        const { code: jsCode } = await generate({ css: vanillaCss, base, format: 'js' })
+
+        expect(jsCode).not.toContain('type Config')
+        expect(jsCode).not.toContain('satisfies')
+        // The exact delta to the TypeScript emission: the type import and the `satisfies` check — nothing that affects runtime behavior. This equality is deliberate; if the emitter grows another TS-only construct, this test forces the js format to account for it.
+        expect(jsCode).toBe(
+            code
+                .replace(', type Config', '')
+                .replace(' satisfies Config<string, never>', ''),
+        )
+    })
 })

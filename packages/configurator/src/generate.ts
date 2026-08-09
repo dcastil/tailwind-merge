@@ -18,6 +18,8 @@ export interface GenerateOptions {
     cacheSize?: number
     /** Comment lines placed below the generated-file notice at the top of the emitted module, e.g. provenance info like input path and content hash. */
     banner?: string
+    /** Output language of the emitted module — see `EmitOptions.format`. Defaults to TypeScript. */
+    format?: 'ts' | 'js'
 }
 
 export interface GenerateResult {
@@ -74,7 +76,7 @@ export async function generate(options: GenerateOptions): Promise<GenerateResult
     )
 
     return {
-        code: emitModule(plan, { banner: options.banner }),
+        code: emitModule(plan, { banner: options.banner, format: options.format }),
         config: materializeConfig(plan),
         plan,
     }

@@ -51,5 +51,26 @@ describe('CLI with --check mode', () => {
     test('fails with usage message when arguments are missing', async () => {
         expect(await runCli([])).toBe(1)
         expect(await runCli(['--input', inputPath])).toBe(1)
+        expect(await runCli(['--input', inputPath, '--output', outputPath, '--format', 'tsx'])).toBe(
+            1,
+        )
+    })
+
+    test('a .js output emits JavaScript, and --format overrides the inference', async () => {
+        await writeFile(inputPath, "@import 'tailwindcss';\n@theme { --color-brand-500: #33f; }\n")
+
+        const jsPath = join(directory, 'tw-merge.generated.js')
+        expect(await runCli(['--input', inputPath, '--output', jsPath])).toBe(0)
+        const jsCode = await readFile(jsPath, 'utf8')
+        expect(jsCode).not.toContain('satisfies')
+        expect(jsCode).not.toContain('type Config')
+        // --check compares against the same inferred format, so a js output stays reproducible.
+        expect(await runCli(['--input', inputPath, '--output', jsPath, '--check'])).toBe(0)
+
+        const forcedPath = join(directory, 'tw-merge.forced.ts')
+        expect(
+            await runCli(['--input', inputPath, '--output', forcedPath, '--format', 'js']),
+        ).toBe(0)
+        expect(await readFile(forcedPath, 'utf8')).not.toContain('satisfies')
     })
 })
