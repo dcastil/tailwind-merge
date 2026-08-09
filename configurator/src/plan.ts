@@ -269,7 +269,7 @@ export function applyAugmentations(
 }
 
 /**
- * Removes the item that makes `className` resolve into this group: either a top-level full-class literal, or a literal value inside an object entry whose key prefixes the class name. Returns false when the claim comes from something else (a validator or a compressed family), which the caller reports instead of guessing.
+ * Removes the item that makes `className` resolve into this group: a full-class literal, or a literal reached through object entries whose keys prefix the class name — recursively, because the family encoding nests (`background-alternative-200` may live at `{ background: [{ alternative: ['200'] }] }`). Returns false when the claim comes from something else (a validator), which the caller reports instead of guessing.
  */
 function removeClassClaim(items: PlanValue[], className: string): boolean {
     for (let index = 0; index < items.length; index++) {
@@ -282,15 +282,10 @@ function removeClassClaim(items: PlanValue[], className: string): boolean {
 
         if (item.kind === 'object') {
             for (const [key, entryItems] of item.entries) {
-                if (!className.startsWith(`${key}-`)) {
-                    continue
-                }
-                const valueName = className.slice(key.length + 1)
-                const valueIndex = entryItems.findIndex(
-                    (entryItem) => entryItem.kind === 'class' && entryItem.value === valueName,
-                )
-                if (valueIndex !== -1) {
-                    entryItems.splice(valueIndex, 1)
+                if (
+                    className.startsWith(`${key}-`) &&
+                    removeClassClaim(entryItems, className.slice(key.length + 1))
+                ) {
                     return true
                 }
             }

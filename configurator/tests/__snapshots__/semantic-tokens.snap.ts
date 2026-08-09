@@ -101,8 +101,8 @@ export const getConfig = () => {
     const scaleShadow = ['inner', isTshirtSize]
     /** The `--ease-*` theme values. */
     const scaleEase = ['in', 'out', 'in-out']
-    /** The `--animate-*` theme values. */
-    const scaleAnimate = ['spin', 'ping', 'pulse', 'bounce', 'accordion-down', 'accordion-up']
+    /** The `--animate-*` theme values, with families sharing numeric suffixes compressed into nested matchers. */
+    const scaleAnimate = ['spin', 'ping', 'pulse', 'bounce', { accordion: ['down', 'up'] }]
     /** The `--perspective-*` theme values. */
     const scalePerspective = ['dramatic', 'near', 'normal', 'midrange', 'distant']
 

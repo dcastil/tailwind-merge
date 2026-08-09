@@ -46,8 +46,8 @@ export const getConfig = () => {
     const scaleTracking = ['tighter', 'tight', 'normal', 'wide', 'wider', 'widest']
     /** The `--leading-*` theme values. */
     const scaleLeading = ['tight', 'snug', 'normal', 'relaxed', 'loose']
-    /** Color keywords plus the `--color-*` theme values, with families sharing numeric suffixes compressed into nested matchers. */
-    const scaleColor = ['inherit', 'current', 'transparent', { brand: [isNumber] }]
+    /** Color keywords plus the `--color-*` theme values. */
+    const scaleColor = ['inherit', 'current', 'transparent', 'brand-100', 'brand-500']
     /** The `--radius-*` theme values: enumerated outliers plus the `isTshirtSize` pattern covering the rest. */
     const scaleRadius = ['control', isTshirtSize]
     /** The `--shadow-*` theme values: enumerated outliers plus the `isTshirtSize` pattern covering the rest. */
