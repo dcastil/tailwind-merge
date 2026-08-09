@@ -71,7 +71,32 @@ jobs:
     build-prod:
         if: github.event_name == 'release' && github.event.action == 'published'
         runs-on: ubuntu-latest
+        outputs:
+            package-name: ${{ steps.resolve_package.outputs.name }}
+            package-dir: ${{ steps.resolve_package.outputs.dir }}
         steps:
+            - name: Resolve the released package from the release tag
+              id: resolve_package
+              env:
+                  RELEASE_TAG: ${{ github.event.release.tag_name }}
+              run: |
+                  # Release tags are namespaced per package (<package-name>@<version>); plain v-prefixed tags predate the monorepo and belong to tailwind-merge.
+                  case "$RELEASE_TAG" in
+                      tailwind-merge@*|v*)
+                          name=tailwind-merge
+                          dir=packages/tailwind-merge
+                          ;;
+                      @tailwind-merge/vite@*)
+                          name=@tailwind-merge/vite
+                          dir=packages/vite
+                          ;;
+                      *)
+                          echo "::error::Cannot resolve a workspace package from release tag ${RELEASE_TAG}"
+                          exit 1
+                          ;;
+                  esac
+                  echo "name=${name}" >> "$GITHUB_OUTPUT"
+                  echo "dir=${dir}" >> "$GITHUB_OUTPUT"
             - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
               with:
                   persist-credentials: false
@@ -84,12 +109,17 @@ jobs:
             - run: pnpm install --frozen-lockfile
             - run: pnpm lint
             - run: pnpm test
-            - run: pnpm --filter tailwind-merge build
-            - run: pnpm --filter tailwind-merge test:exports
+            - run: pnpm --filter "$PACKAGE_NAME" build
+              env:
+                  PACKAGE_NAME: ${{ steps.resolve_package.outputs.name }}
+            # --if-present because only tailwind-merge ships packaged-exports smoke tests so far; a package gaining a build step should add its own release gate here.
+            - run: pnpm --filter "$PACKAGE_NAME" run --if-present test:exports
+              env:
+                  PACKAGE_NAME: ${{ steps.resolve_package.outputs.name }}
             - uses: actions/upload-artifact@v7
               with:
                   name: build-output
-                  path: packages/tailwind-merge/dist
+                  path: ${{ steps.resolve_package.outputs.dir }}/dist
                   if-no-files-found: error
 
     publish-prod:
@@ -114,7 +144,8 @@ jobs:
             - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
               with:
                   name: build-output
-                  path: packages/tailwind-merge/dist
+                  path: ${{ needs.build-prod.outputs.package-dir }}/dist
                   digest-mismatch: error
-            - run: npm publish --ignore-scripts
-              working-directory: packages/tailwind-merge
+            # --access public covers the first publish of scoped packages (@tailwind-merge/*); it is the default for the unscoped tailwind-merge anyway.
+            - run: npm publish --access public --ignore-scripts
+              working-directory: ${{ needs.build-prod.outputs.package-dir }}

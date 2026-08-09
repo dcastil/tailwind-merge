@@ -79,8 +79,10 @@ function applyStaticLinks(docsOverviewContent) {
 function getVersion() {
     const gitRefVersionRegex = /^\d+.\d+.\d+-[^.]+\.(?<gitRef>[\da-f]+)$/
 
+    // Release tags are namespaced per package (`tailwind-merge@<version>`) since the monorepo migration; SHA-suffixed dev versions link to the commit itself instead.
     return (
-        packageJson.version.match(gitRefVersionRegex)?.groups?.gitRef || 'v' + packageJson.version
+        packageJson.version.match(gitRefVersionRegex)?.groups?.gitRef ||
+        `${packageJson.name}@${packageJson.version}`
     )
 }
 
