@@ -54,7 +54,7 @@ Monorepo conventions:
 1. Treat `packages/tailwind-merge/src/lib/default-config.ts` as the behavioral source of truth for default class groups and conflicts.
 2. If behavior changes, update tests in `packages/tailwind-merge/tests/` in the same change.
 3. If public behavior/docs change, update docs in `packages/tailwind-merge/docs/` (not directly in a `README.md`).
-4. The library's `README.md` is version-generated from its `docs/README.md`; do not regenerate it during normal development changes.
+4. The library's `README.md` and the generated section of the repo-level `README.md` are version-generated from the library's `docs/README.md`; do not regenerate them during normal development changes.
 5. Avoid manual edits to `dist/` and `coverage/` directories; they are generated artifacts.
 6. Validate packaging paths with `pnpm --filter tailwind-merge build && pnpm --filter tailwind-merge test:exports` when touching exports/build tooling.
 
@@ -73,7 +73,7 @@ Required when relevant:
 1. Update `packages/tailwind-merge/docs/*.md` (or the owning package's docs) for any user-visible behavior, API, version support, or limitation changes.
 2. Update `AGENTS.md` whenever repository-wide agent workflow, repo conventions, required commands, or high-level guardrails change.
 3. Update the relevant file in `agents/` whenever specialized architecture, workflow, CI, release, or testing guidance changes.
-4. Do not regenerate `README.md` during normal development. It is intentionally generated as part of the version/release flow so repo visitors are routed to docs for the latest release.
+4. Do not regenerate the READMEs during normal development. The library `README.md` and the marked section of the repo-level `README.md` are intentionally generated as part of the version/release flow so visitors are routed to docs for the latest release.
 
 Definition of done for every PR/change:
 
