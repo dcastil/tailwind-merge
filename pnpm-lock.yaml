@@ -117,6 +117,28 @@ importers:
         specifier: ^4.3.3
         version: 4.3.3
 
+  packages/vite:
+    dependencies:
+      tailwind-merge:
+        specifier: workspace:*
+        version: link:../..
+      tailwind-merge-configurator:
+        specifier: workspace:*
+        version: link:../configurator
+    devDependencies:
+      '@tailwindcss/node':
+        specifier: ^4.3.3
+        version: 4.3.3
+      '@types/node':
+        specifier: ^24.13.3
+        version: 24.13.3
+      tailwindcss:
+        specifier: ^4.3.3
+        version: 4.3.3
+      vite:
+        specifier: ^7.3.3
+        version: 7.3.3(@types/node@24.13.3)(jiti@2.7.0)(lightningcss@1.32.0)
+
 packages:
 
   '@actions/core@3.0.1':

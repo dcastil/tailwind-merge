@@ -1,0 +1,34 @@
+{
+    "compilerOptions": {
+        // Type Checking — mirrors the root tsconfig so shared source files compile identically
+        "allowUnreachableCode": false,
+        "allowUnusedLabels": false,
+        "noFallthroughCasesInSwitch": true,
+        "noImplicitOverride": true,
+        "noUncheckedIndexedAccess": true,
+        "strict": true,
+        // Modules
+        "module": "ESNext",
+        "moduleResolution": "Bundler",
+        // Maps the package names to workspace source so type-checking works without a prior build. Runtime resolution in tests goes through the pnpm workspace links instead.
+        "paths": {
+            "tailwind-merge": ["../../src/index.ts"],
+            "tailwind-merge/unstable-do-not-import": ["../../src/unstable-do-not-import.ts"],
+            "tailwind-merge-configurator": ["../configurator/src/index.ts"],
+            "@tailwind-merge/vite/runtime": ["./src/runtime.ts"]
+        },
+        // Emit
+        "noEmit": true,
+        // @tailwindcss/node ships type declarations whose relative imports don't resolve under Bundler module resolution. This package only touches small slices of that API, so skipping lib checks is safe.
+        "skipLibCheck": true,
+        "types": ["node"],
+        // Interop Constraints
+        "esModuleInterop": true,
+        "forceConsistentCasingInFileNames": true,
+        // Language and Environment
+        "target": "ESNext"
+    },
+    "include": ["src/**/*", "tests/**/*"],
+    // Fixtures are consumer-app inputs for the Vite servers the tests spawn (CSS side-effect imports, browser globals), not package code — they are exercised by running them, not by this tsconfig.
+    "exclude": ["tests/fixtures", "tests/.tmp-*"]
+}

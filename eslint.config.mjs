@@ -12,6 +12,7 @@ export default typescriptPlugin.config(
             'node_modules/**/*',
             'packages/configurator/dist/**/*',
             'packages/configurator/tests/.tmp-*/**/*',
+            'packages/vite/tests/.tmp-*/**/*',
         ],
     },
     {
@@ -202,6 +203,13 @@ export default typescriptPlugin.config(
     {
         // Tailwind's plugin loader expects the plugin function as the module's default export.
         files: ['packages/configurator/tests/fixtures/**/*'],
+        rules: {
+            'import/no-default-export': 'off',
+        },
+    },
+    {
+        // Vite plugin factories are conventionally default exports, matching @tailwindcss/vite.
+        files: ['packages/vite/src/index.ts'],
         rules: {
             'import/no-default-export': 'off',
         },
