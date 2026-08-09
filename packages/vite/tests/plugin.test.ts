@@ -4,7 +4,8 @@ import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { promisify } from 'node:util'
 
-import { type ViteDevServer, build, createServer } from 'vite'
+import tailwindcss from '@tailwindcss/vite'
+import { type PluginOption, type ViteDevServer, build, createServer } from 'vite'
 import { afterEach, beforeAll, expect, test, vi } from 'vitest'
 
 import { discoverCssRoot } from '../src/discovery'
@@ -49,12 +50,16 @@ afterEach(async () => {
     )
 })
 
-async function startServer(root: string, options?: TailwindMergeOptions) {
+async function startServer(
+    root: string,
+    options?: TailwindMergeOptions,
+    leadingPlugins: PluginOption[] = [],
+) {
     activeServer = await createServer({
         root,
         configFile: false,
         logLevel: 'silent',
-        plugins: [tailwindMerge(options)],
+        plugins: [...leadingPlugins, tailwindMerge(options)],
         resolve: { alias: libraryAliases },
         // Middleware mode needs no HTTP server; the fixed HMR port keeps parallel test runs from racing over the default one.
         server: { middlewareMode: true, hmr: { port: 24799 } },
@@ -177,6 +182,54 @@ test('vite build inlines the generated module', async () => {
     expect(code).toContain('huge')
     // The default config never enters the bundle (getDefaultConfig would only appear via the fallback module).
     expect(code).not.toContain('getDefaultConfig')
+})
+
+test('the client pipeline resolves the subpath to the virtual module', async () => {
+    const server = await startServer(path.join(fixturesDirectory, 'app'))
+    const transformed = await server.transformRequest('/main.ts')
+
+    // Vite encodes the \0 virtual prefix as __x00__ when rewriting client imports — the presence proves the client environment served the generated module, not the on-disk fallback.
+    expect(transformed?.code).toContain('__x00__@tailwind-merge/vite/runtime')
+})
+
+test('coexists with @tailwindcss/vite in dev', async () => {
+    const server = await startServer(path.join(fixturesDirectory, 'app'), undefined, [
+        tailwindcss(),
+    ])
+
+    const runtime = await server.ssrLoadModule(RUNTIME_SPECIFIER)
+    expect(runtime.twMerge('text-huge text-sm')).toBe('text-sm')
+
+    // Tailwind's own pipeline keeps working next to the plugin: the compiled stylesheet carries the utilities scanned from the fixture source and the custom theme variable.
+    const css = await server.transformRequest('/app.css')
+    expect(css?.code).toContain('text-sm')
+    expect(css?.code).toContain('--text-huge')
+})
+
+test('coexists with @tailwindcss/vite in build', async () => {
+    const result = await build({
+        root: path.join(fixturesDirectory, 'app'),
+        configFile: false,
+        logLevel: 'silent',
+        plugins: [tailwindcss(), tailwindMerge()],
+        resolve: { alias: libraryAliases },
+        build: { write: false, minify: false },
+    })
+
+    const output = (Array.isArray(result) ? result[0] : result) as {
+        output: { type: string; code?: string; source?: string | Uint8Array; fileName: string }[]
+    }
+    const js = output.output
+        .filter((chunk) => chunk.type === 'chunk')
+        .map((chunk) => chunk.code)
+        .join('\n')
+    expect(js).toContain('huge')
+    expect(js).not.toContain('getDefaultConfig')
+
+    const cssAsset = output.output.find(
+        (entry) => entry.type === 'asset' && entry.fileName.endsWith('.css'),
+    )
+    expect(String(cssAsset?.source)).toContain('text-sm')
 })
 
 test('theme files outside the Vite root regenerate on change (monorepo)', async () => {
