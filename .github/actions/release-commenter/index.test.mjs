@@ -8,11 +8,14 @@ import { afterEach, expect, test, vi } from 'vitest'
 const require = createRequire(import.meta.url)
 const {
     __testing: {
+        checkGuardViolations,
         filterTargetsWithoutReleaseComments,
         findReleaseComment,
         formatPostedCommentsSummary,
         getIssueCommentUrl,
+        npmVersionFromTag,
         parseTag,
+        pickBaseTag,
         pickShaPrereleaseCandidatePool,
         postCommentsAndLabels,
         releaseCommentMarker,
@@ -71,21 +74,172 @@ test('filters prerelease targets that already have release comments', async () =
 
     const targets = await filterTargetsWithoutReleaseComments(
         [669, 670, 671],
+        'tailwind-merge',
+        'tailwind-merge',
         async (issueNumber) => commentsByIssueNumber.get(issueNumber) || [],
     )
 
     expect(targets).toEqual([670])
 })
 
+test('keeps prerelease targets whose existing release comments belong to another package', async () => {
+    const comments = [
+        {
+            body: `Done.\n\n${releaseCommentMarker('@tailwind-merge/vite@0.1.0-dev.1c12c561babd1b9260220d2e6af7a3e1fb58f2bb', true, null)}`,
+            html_url: 'https://github.com/dcastil/tailwind-merge/pull/700#issuecomment-1',
+        },
+    ]
+
+    const targets = await filterTargetsWithoutReleaseComments(
+        [700],
+        'tailwind-merge',
+        'tailwind-merge',
+        async () => comments,
+    )
+
+    expect(targets).toEqual([700])
+})
+
 test('ignores release-commenter markers when the tag is not semver-compatible', () => {
     expect(
-        findReleaseComment([
-            {
-                body: '<!-- release-commenter: tag=not-a-semver-tag; prerelease=true -->',
-                html_url: 'https://github.com/dcastil/tailwind-merge/pull/669#issuecomment-1',
-            },
-        ]),
+        findReleaseComment(
+            [
+                {
+                    body: '<!-- release-commenter: tag=not-a-semver-tag; prerelease=true -->',
+                    html_url: 'https://github.com/dcastil/tailwind-merge/pull/669#issuecomment-1',
+                },
+            ],
+            'tailwind-merge',
+            'tailwind-merge',
+        ),
     ).toBeNull()
+})
+
+test('parses namespaced, scoped, legacy, and plain tags with their package names', () => {
+    expect(parseTag('tailwind-merge@3.7.0')).toMatchObject({
+        packageName: 'tailwind-merge',
+        major: 3,
+        minor: 7,
+        patch: 0,
+        isPrerelease: false,
+    })
+    expect(parseTag('@tailwind-merge/vite@0.1.0')).toMatchObject({
+        packageName: '@tailwind-merge/vite',
+        major: 0,
+        minor: 1,
+        patch: 0,
+        isPrerelease: false,
+    })
+    expect(parseTag('refs/tags/tailwind-merge@3.7.1')).toMatchObject({
+        packageName: 'tailwind-merge',
+        major: 3,
+        minor: 7,
+        patch: 1,
+    })
+    expect(
+        parseTag('tailwind-merge@3.7.0-dev.1c12c561babd1b9260220d2e6af7a3e1fb58f2bb'),
+    ).toMatchObject({
+        packageName: 'tailwind-merge',
+        isPrerelease: true,
+    })
+    expect(parseTag('v3.6.0')).toMatchObject({ packageName: null, major: 3, minor: 6, patch: 0 })
+    expect(parseTag('3.6.0-dev.abc1234')).toMatchObject({ packageName: null, isPrerelease: true })
+    expect(parseTag('tailwind-merge@not-a-version')).toBeNull()
+    expect(parseTag('@1.2.3')).toBeNull()
+})
+
+test('derives npm versions from tags by dropping package and legacy prefixes', () => {
+    expect(npmVersionFromTag('tailwind-merge@3.7.0-dev.abc1234')).toBe('3.7.0-dev.abc1234')
+    expect(npmVersionFromTag('@tailwind-merge/vite@0.1.0')).toBe('0.1.0')
+    expect(npmVersionFromTag('v3.6.0')).toBe('3.6.0')
+    expect(npmVersionFromTag('refs/tags/v3.6.0')).toBe('3.6.0')
+})
+
+test('picks base tags only from the same package, with legacy tags owned by the fallback package', () => {
+    const releases = [
+        { tag_name: 'v3.5.0' },
+        { tag_name: 'v3.6.0' },
+        { tag_name: 'tailwind-merge@3.7.0' },
+        { tag_name: '@tailwind-merge/vite@0.1.0' },
+    ]
+
+    expect(
+        pickBaseTag(
+            'tailwind-merge@3.7.1',
+            parseVersion('tailwind-merge@3.7.1'),
+            releases,
+            '',
+            'tailwind-merge',
+        ),
+    ).toBe('tailwind-merge@3.7.0')
+
+    // The transition case: the first namespaced release compares against the pre-monorepo history.
+    expect(
+        pickBaseTag(
+            'tailwind-merge@3.7.0',
+            parseVersion('tailwind-merge@3.7.0'),
+            [{ tag_name: 'v3.5.0' }, { tag_name: 'v3.6.0' }],
+            '',
+            'tailwind-merge',
+        ),
+    ).toBe('v3.6.0')
+
+    expect(
+        pickBaseTag(
+            '@tailwind-merge/vite@0.2.0',
+            parseVersion('@tailwind-merge/vite@0.2.0'),
+            releases,
+            '',
+            'tailwind-merge',
+        ),
+    ).toBe('@tailwind-merge/vite@0.1.0')
+
+    // A brand-new package has no history: its first release cannot resolve a base and fails by design.
+    expect(() =>
+        pickBaseTag(
+            '@tailwind-merge/vite@0.1.0',
+            parseVersion('@tailwind-merge/vite@0.1.0'),
+            [{ tag_name: 'v3.6.0' }],
+            '',
+            'tailwind-merge',
+        ),
+    ).toThrow(/package @tailwind-merge\/vite/)
+})
+
+test('stable-release guard ignores existing comments from other packages', async () => {
+    const commentsPage = [
+        {
+            body: `Done.\n\n${releaseCommentMarker('v3.6.0', false, null)}`,
+            html_url: 'https://github.com/dcastil/tailwind-merge/pull/701#issuecomment-1',
+        },
+    ]
+    globalThis.fetch = vi.fn(async () => ({
+        ok: true,
+        status: 200,
+        json: async () => commentsPage,
+    }))
+
+    const violationsForOtherPackage = await checkGuardViolations(
+        'token',
+        'dcastil',
+        'tailwind-merge',
+        [701],
+        parseVersion('@tailwind-merge/vite@0.2.0'),
+        'tailwind-merge',
+    )
+    expect(violationsForOtherPackage).toEqual([])
+
+    const violationsForSamePackage = await checkGuardViolations(
+        'token',
+        'dcastil',
+        'tailwind-merge',
+        [701],
+        parseVersion('tailwind-merge@3.7.0'),
+        'tailwind-merge',
+    )
+    expect(violationsForSamePackage).toMatchObject([
+        { issueNumber: 701, kind: 'previous-release', existingTag: 'v3.6.0' },
+    ])
 })
 
 test('keeps every candidate from previous core version for first dev release after version bump', () => {

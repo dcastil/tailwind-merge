@@ -28,8 +28,12 @@ inputs:
         required: false
         default: 'false'
     npm-package-name:
-        description: 'Optional npm package name for SHA-based prerelease base resolution'
+        description: 'Optional npm package name override; defaults to the package resolved from the tag prefix'
         required: false
+    fallback-package-name:
+        description: 'Package that owns tags without a package prefix (the pre-monorepo v* history)'
+        required: false
+        default: 'tailwind-merge'
 runs:
     using: 'node24'
     main: 'index.js'

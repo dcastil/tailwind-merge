@@ -2,24 +2,39 @@
 
 Use this guide when preparing release changelog entries and GitHub release text.
 
+## Release model
+
+Releases are per package. Each release belongs to exactly one workspace package and its git tag is namespaced with the package name:
+
+- `tailwind-merge@3.7.0`
+- `@tailwind-merge/vite@0.1.0`
+
+Tags without a package prefix (`v3.6.0` and earlier) are the pre-monorepo history and belong to `tailwind-merge`; all release tooling treats them that way via a fallback, so the first namespaced tailwind-merge release compares against the last `v*` release seamlessly.
+
+The tag and version-commit format comes from each package's `.npmrc` (`tag-version-prefix`, `message`), which `npm version` reads when `pnpm version` runs in the package directory. pnpm itself reads no settings from `.npmrc` — repo-level pnpm settings live in `pnpm-workspace.yaml` — so don't delete these files as stale.
+
 ## Scope
 
-- Applies to release preparation tasks like `v3.4.1`.
+- Applies to release preparation tasks like `tailwind-merge@3.4.1`.
 - Covers:
   - Draft release ingestion from GitHub.
-  - Changelog updates in `packages/tailwind-merge/docs/changelog/*-changelog.md`.
+  - Changelog updates in `packages/tailwind-merge/docs/changelog/*-changelog.md` (the vite package gets its own changelog location with its first release).
   - Sponsor section generation and ordering.
   - GitHub Releases UI text formatting.
   - Release comments on PRs/issues via `.github/actions/release-commenter`.
 
-## Inputs to collect first
+## Release drafting
 
-1. Release tag and base compare range (for example `v3.4.0...v3.4.1`).
-2. Draft release body from GitHub.
-3. Current active GitHub sponsors.
-4. Sponsor payout input from thanks.dev for the relevant time window.
+`.github/workflows/draft-release.yml` maintains one draft per package via release-drafter with per-package configs (`config-name`): `.github/release-drafter-tailwind-merge.yml` and `.github/release-drafter-vite.yml`. Each config scopes itself with `tag-prefix` (previous-release lookup and version resolution consider only that package's tags) and `include-paths` (only PRs touching the package appear in its draft). Consequences to know:
 
-`thanks.dev` input must come from the user. Do not infer or invent this data.
+- A PR touching both packages appears in both drafts — correct, since both releases ship it.
+- A PR touching neither package directory (repo infrastructure, CI, root docs) appears in no draft; mention it by hand in a changelog if it matters to users.
+- First namespaced release per package: `tag-prefix` matches no existing release, so the draft's proposed version is wrong. Set the tag name and title by hand when publishing (for example `tailwind-merge@3.7.0` following `v3.6.0`), and write the Full Changelog compare line manually (`v3.6.0...tailwind-merge@3.7.0`).
+- The autolabeler section lives only in the tailwind-merge config; labels are repo-wide.
+
+## Publishing
+
+`.github/workflows/npm-publish.yml` routes `release.published` events by tag prefix: `tailwind-merge@*` and legacy `v*` build and publish `packages/tailwind-merge`, `@tailwind-merge/vite@*` builds and publishes `packages/vite`, and unknown prefixes fail the run. The build job runs repo-wide lint and tests plus the released package's `build` and (if present) `test:exports`; publishing happens from the package directory in an isolated OIDC job. Dev releases on `main` pushes remain tailwind-merge-only for now.
 
 ## Release commenter behavior
 
@@ -28,16 +43,17 @@ The workflow `.github/workflows/comment-released-prs-and-issues.yml` uses the lo
 - It runs for:
   - published GitHub releases,
   - manual workflow dispatch,
-  - completed successful `npm Publish` runs triggered by `push` on `main` (dev-release comment pass).
-- Automatic base-tag selection is semver-aware:
-  - Stable release tags compare to the previous stable semver tag.
-  - Prerelease tags with a SHA suffix (for example `v3.4.1-dev.<sha>`) resolve base from npm-published versions with the same prerelease prefix and pick the nearest ancestor commit.
+  - completed successful `npm Publish` runs triggered by `push` on `main` (dev-release comment pass, tailwind-merge only; the synthetic head tag is `tailwind-merge@<version>-dev.<sha>`).
+- All comparisons are scoped to the released tag's package. Legacy un-prefixed tags belong to the `fallback-package-name` input (default `tailwind-merge`).
+- Automatic base-tag selection is semver-aware within the package:
+  - Stable release tags compare to the package's previous stable tag (legacy `v*` tags included for tailwind-merge).
+  - Prerelease tags with a SHA suffix (for example `tailwind-merge@3.4.1-dev.<sha>`) resolve base from npm-published versions of the package — the npm package name is derived from the tag prefix — with the same prerelease prefix, picking the nearest ancestor commit.
   - For SHA-suffixed prereleases, if no prior dev release exists for the same core version, resolution falls back to all dev releases from the highest lower core version (same prerelease prefix) and picks the nearest ancestor commit.
   - SHA-suffixed prerelease comments link to the npm published version page instead of GitHub release tags.
-  - Other prerelease tags compare to the previous semver tag (including prereleases).
-- If no valid base tag is found, the action fails.
-- The action fails before posting if any target issue/PR already has a previous stable release-comment.
-- For prereleases, targets that already have any previous release-comment are skipped so repeated `-dev.*` ranges do not post duplicate dev comments. Later stable releases can still comment after a prerelease.
+  - Other prerelease tags compare to the previous semver tag of the same package (including prereleases).
+- If no valid base tag is found, the action fails. This is expected for the very first release of a brand-new package (no history): either accept the failed commenter run or trigger manually with an explicit `base_tag`.
+- The action fails before posting if any target issue/PR already has a previous stable release-comment for the same package. Comments from other packages' releases never block — a PR touching two packages legitimately receives one comment per package.
+- For prereleases, targets that already have a release-comment for the same package are skipped so repeated `-dev.*` ranges do not post duplicate dev comments. Later stable releases can still comment after a prerelease.
 - Posted comment URLs are logged and added to the workflow run summary so all comments from one run can be inspected together.
 - Manual trigger supports optional overrides:
   - `head_tag`
@@ -49,13 +65,22 @@ Manual dry run example:
 
 ```bash
 gh workflow run comment-released-prs-and-issues.yml \
-  -f head_tag=v3.4.1 \
+  -f head_tag=tailwind-merge@3.4.1 \
   -f dry_run=true
 ```
 
+## Inputs to collect first
+
+1. Release tag and base compare range (for example `tailwind-merge@3.4.0...tailwind-merge@3.4.1`).
+2. Draft release body from GitHub.
+3. Current active GitHub sponsors.
+4. Sponsor payout input from thanks.dev for the relevant time window.
+
+`thanks.dev` input must come from the user. Do not infer or invent this data.
+
 ## Commands
 
-Bump package versions with `pnpm version <version|patch|minor|major>` run inside the package directory (for the library: `packages/tailwind-merge/`). pnpm runs the existing `preversion`, `version`, and `postversion` lifecycle scripts and creates the version commit/tag, so the README regeneration in the library's `scripts/update-readme.mjs` stays part of the version step.
+Bump a package's version with `pnpm version <version|patch|minor|major>` run inside the package directory (for the library: `packages/tailwind-merge/`). pnpm runs the existing `preversion`, `version`, and `postversion` lifecycle scripts and creates the version commit and namespaced tag from the package's `.npmrc`. For the library, the `version` step regenerates both the package README and the generated section of the repo-level README via `scripts/update-readme.mjs`, with links pinned to the new release tag.
 
 Fetch draft release:
 
@@ -84,8 +109,8 @@ gh api graphql -f query='query($login:String!){ user(login:$login){ public: spon
    - `## vX.Y.Z`
 3. Keep category headings from draft release:
    - `### Bug Fixes`, `### New Features`, `### Documentation`, `### Other`, etc.
-4. Keep full compare link in docs style:
-   - `**Full Changelog**: [\`vA.B.C...vX.Y.Z\`](https://github.com/dcastil/tailwind-merge/compare/vA.B.C...vX.Y.Z)`
+4. Keep full compare link in docs style, using the real tag names:
+   - `**Full Changelog**: [\`tailwind-merge@A.B.C...tailwind-merge@X.Y.Z\`](https://github.com/dcastil/tailwind-merge/compare/tailwind-merge@A.B.C...tailwind-merge@X.Y.Z)` (the base is `vA.B.C` when it predates the monorepo)
 
 ## Sponsor rules
 
@@ -108,7 +133,7 @@ When producing text for GitHub Releases UI, transform docs formatting:
    - `[@name](https://github.com/name)` -> `@name`
 3. Convert markdown PR links to plain URLs.
 4. Use plain compare URL:
-   - `**Full Changelog**: https://github.com/dcastil/tailwind-merge/compare/vA.B.C...vX.Y.Z`
+   - `**Full Changelog**: https://github.com/dcastil/tailwind-merge/compare/tailwind-merge@A.B.C...tailwind-merge@X.Y.Z`
 
 ## Final output contract
 

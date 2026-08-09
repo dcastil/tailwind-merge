@@ -129,8 +129,8 @@ Treat this section as the source of truth for CI and publish security guardrails
 - Local JavaScript GitHub Actions use `runs.using: node24`; keep action scripts compatible with the declared runner and avoid runtime-fragile ESM features, such as JSON module import assertion syntax, when a simple filesystem read works across supported Node versions.
 - `.github/workflows/metrics-report.yml` keeps PR code execution in a read-only `generate-report` job and posts comments from a separate `post-comment` job that checks out trusted base-repo code. The metrics report action itself only writes the generated comment body to the artifact path and must not post PR comments directly. If a transition PR introduces or moves the trusted posting script, the workflow should skip the `post-comment` job at the job level until that script exists in the base checkout rather than running PR-provided posting code with write permissions.
 - `.github/workflows/npm-publish.yml`:
-  - publishes `dev` tag on `main` pushes,
-  - publishes production on release events,
+  - publishes `dev` tag on `main` pushes (tailwind-merge only for now),
+  - publishes production on release events, routing by the namespaced tag prefix (`tailwind-merge@*` and legacy `v*` map to `packages/tailwind-merge`, `@tailwind-merge/vite@*` to `packages/vite`, anything else fails),
   - keeps dependency installation, linting, tests, and builds in non-OIDC jobs,
   - avoids dependency caches in the publish workflow,
   - grants `id-token: write` only to minimal publish jobs that download the verified `dist` artifact and run `npm publish --ignore-scripts`,

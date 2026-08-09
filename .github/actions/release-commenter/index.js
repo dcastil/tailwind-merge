@@ -28,6 +28,7 @@ if (require.main === module) {
 
 /**
  * @typedef {{
+ *   packageName: string | null
  *   major: number
  *   minor: number
  *   patch: number
@@ -245,12 +246,17 @@ async function main() {
     }
     const shaPrereleaseContext = getShaPrereleaseContext(currentVersion)
 
+    // Releases are per package with namespaced tags; un-prefixed tags (legacy v* history) belong to the fallback package. All base-tag selection and existing-comment guards are scoped to the current tag's package so the packages release independently of each other.
+    const fallbackPackageName = getInput('fallback-package-name', 'tailwind-merge')
+    const currentPackageName = resolveTagPackageName(currentVersion, fallbackPackageName)
+
     log(`Current tag: ${currentTag}`)
+    log(`Current package: ${currentPackageName}`)
     log(`Dry run: ${dryRun}`)
 
     const currentRelease = await getCurrentRelease(token, owner, repo, currentTag, payload?.release)
     const releaseLabel = currentRelease.name || currentRelease.tag
-    const npmPackageName = npmPackageNameInput || repo
+    const npmPackageName = npmPackageNameInput || currentPackageName
     const releaseUrl = shaPrereleaseContext
         ? npmVersionUrl(npmPackageName, currentTag)
         : currentRelease.htmlUrl
@@ -282,6 +288,7 @@ async function main() {
         shaPrereleaseContext,
         baseTagInput,
         npmPackageName,
+        fallbackPackageName,
     )
 
     log(`Base ref: ${baseRef}`)
@@ -313,8 +320,12 @@ async function main() {
     }
 
     if (currentVersion.isPrerelease) {
-        targets = await filterTargetsWithoutReleaseComments(targets, async (issueNumber) =>
-            requestPaginated(token, `/repos/${owner}/${repo}/issues/${issueNumber}/comments`),
+        targets = await filterTargetsWithoutReleaseComments(
+            targets,
+            currentPackageName,
+            fallbackPackageName,
+            async (issueNumber) =>
+                requestPaginated(token, `/repos/${owner}/${repo}/issues/${issueNumber}/comments`),
         )
         if (!targets.length) {
             log('All prerelease targets already have release comments. Nothing to do.')
@@ -322,7 +333,14 @@ async function main() {
         }
     }
 
-    const guardViolations = await checkGuardViolations(token, owner, repo, targets, currentVersion)
+    const guardViolations = await checkGuardViolations(
+        token,
+        owner,
+        repo,
+        targets,
+        currentVersion,
+        fallbackPackageName,
+    )
     if (guardViolations.length > 0) {
         const details = guardViolations
             .slice(0, 20)
@@ -371,6 +389,7 @@ async function main() {
  * @param {ShaPrereleaseContext | null} shaPrereleaseContext
  * @param {string} baseTagInput
  * @param {string} npmPackageName
+ * @param {string} fallbackPackageName
  * @returns {Promise<CompareRefs>}
  */
 async function resolveCompareRefs(
@@ -382,6 +401,7 @@ async function resolveCompareRefs(
     shaPrereleaseContext,
     baseTagInput,
     npmPackageName,
+    fallbackPackageName,
 ) {
     let baseRef = ''
     let headRef = currentTag
@@ -410,7 +430,7 @@ async function resolveCompareRefs(
         const releases = await requestPaginated(token, `/repos/${owner}/${repo}/releases`)
         /** @type {ReleaseRecord[]} */
         const publishedReleases = releases.filter((release) => !release.draft)
-        baseRef = pickBaseTag(currentTag, currentVersion, publishedReleases, '')
+        baseRef = pickBaseTag(currentTag, currentVersion, publishedReleases, '', fallbackPackageName)
     }
 
     return { baseRef, headRef }
@@ -560,17 +580,26 @@ async function collectLinkedIssuesAndPrs(token, owner, repo, commits, skipLabels
 }
 
 /**
- * Removes targets that already received any release-commenter comment.
+ * Removes targets that already received a release-commenter comment for the same package.
  *
  * Prerelease runs can cover an overlapping compare range after a version bump because their
  * base is resolved from npm-published SHA prereleases. The first prerelease comment is the useful
  * signal for a PR or issue; later prerelease passes should keep moving without adding more noise.
+ * Comments for other packages don't count: a PR touching two packages legitimately receives one
+ * comment per package release.
  *
  * @param {number[]} targetNumbers
+ * @param {string} currentPackageName
+ * @param {string} fallbackPackageName
  * @param {(issueNumber: number) => Promise<IssueComment[]>} loadComments
  * @returns {Promise<number[]>}
  */
-async function filterTargetsWithoutReleaseComments(targetNumbers, loadComments) {
+async function filterTargetsWithoutReleaseComments(
+    targetNumbers,
+    currentPackageName,
+    fallbackPackageName,
+    loadComments,
+) {
     /** @type {number[]} */
     const nextTargets = []
     /** @type {SkippedTarget[]} */
@@ -578,7 +607,11 @@ async function filterTargetsWithoutReleaseComments(targetNumbers, loadComments) 
 
     for (const issueNumber of targetNumbers) {
         const comments = await loadComments(issueNumber)
-        const existingReleaseComment = findReleaseComment(comments)
+        const existingReleaseComment = findReleaseComment(
+            comments,
+            currentPackageName,
+            fallbackPackageName,
+        )
 
         if (existingReleaseComment) {
             skippedTargets.push({
@@ -604,15 +637,23 @@ async function filterTargetsWithoutReleaseComments(targetNumbers, loadComments) 
 }
 
 /**
- * Finds the first release-commenter marker or legacy release URL in a list of comments.
+ * Finds the first release-commenter marker or legacy release URL in a list of comments that belongs to the given package.
  *
  * @param {IssueComment[]} comments
+ * @param {string} currentPackageName
+ * @param {string} fallbackPackageName
  * @returns {ReleaseComment | null}
  */
-function findReleaseComment(comments) {
+function findReleaseComment(comments, currentPackageName, fallbackPackageName) {
     for (const comment of comments) {
         const existingTag = extractReleaseTagFromComment(comment.body || '')
-        if (!existingTag || !parseTag(existingTag)) continue
+        if (!existingTag) continue
+
+        const existingVersion = parseTag(existingTag)
+        if (!existingVersion) continue
+        if (resolveTagPackageName(existingVersion, fallbackPackageName) !== currentPackageName) {
+            continue
+        }
 
         return {
             tag: existingTag,
@@ -644,20 +685,30 @@ function formatSkippedTargetDetails(skippedTargets) {
 }
 
 /**
- * Validates that targets do not already have release comments that would make this run unsafe.
+ * Validates that targets do not already have release comments that would make this run unsafe. The guard is scoped to the current tag's package: comments left by another package's releases are expected on pull requests that touched both packages and never count as violations.
  *
  * @param {string} token
  * @param {string} owner
  * @param {string} repo
  * @param {number[]} targetNumbers
  * @param {ParsedTag} currentVersion
+ * @param {string} fallbackPackageName
  * @returns {Promise<GuardViolation[]>}
  */
-async function checkGuardViolations(token, owner, repo, targetNumbers, currentVersion) {
+async function checkGuardViolations(
+    token,
+    owner,
+    repo,
+    targetNumbers,
+    currentVersion,
+    fallbackPackageName,
+) {
     if (currentVersion.isPrerelease) {
         log('Current release is a prerelease, skipping stable-release duplicate guard')
         return []
     }
+
+    const currentPackageName = resolveTagPackageName(currentVersion, fallbackPackageName)
 
     /** @type {GuardViolation[]} */
     const violations = []
@@ -676,6 +727,11 @@ async function checkGuardViolations(token, owner, repo, targetNumbers, currentVe
 
             const existingVersion = parseTag(existingTag)
             if (!existingVersion) continue
+            if (
+                resolveTagPackageName(existingVersion, fallbackPackageName) !== currentPackageName
+            ) {
+                continue
+            }
 
             if (compareSemver(existingVersion, currentVersion) === 0) {
                 violations.push({
@@ -851,22 +907,60 @@ function parseBooleanInput(rawValue) {
 }
 
 /**
- * Parses a semver tag with optional `v` or `refs/tags/` prefixes.
+ * @typedef {{
+ *   packageName: string | null
+ *   versionText: string
+ * }} TagNameSplit
+ */
+
+/**
+ * Splits an optional package prefix off a tag and normalizes the version text. Monorepo release tags are `<package-name>@<version>` where the package name may itself be scoped (`@scope/name`), so the split happens at the last `@` past position 0; tags without a package prefix are the repo's pre-monorepo history and keep the legacy leading-`v` handling.
+ *
+ * @param {string} rawTag
+ * @returns {TagNameSplit}
+ */
+function splitTagPackageName(rawTag) {
+    let normalized = rawTag.trim()
+    if (normalized.startsWith('refs/tags/')) {
+        normalized = normalized.slice('refs/tags/'.length)
+    }
+
+    const separatorIndex = normalized.lastIndexOf('@')
+    if (separatorIndex > 0) {
+        return {
+            packageName: normalized.slice(0, separatorIndex),
+            versionText: normalized.slice(separatorIndex + 1),
+        }
+    }
+
+    return {
+        packageName: null,
+        versionText: normalized.startsWith('v') ? normalized.slice(1) : normalized,
+    }
+}
+
+/**
+ * Resolves which package a parsed tag belongs to. Tags without a package prefix (legacy `v*` and plain npm version strings) belong to the fallback package, so the pre-monorepo release history stays attached to it.
+ *
+ * @param {ParsedTag} version
+ * @param {string} fallbackPackageName
+ * @returns {string}
+ */
+function resolveTagPackageName(version, fallbackPackageName) {
+    return version.packageName ?? fallbackPackageName
+}
+
+/**
+ * Parses a semver tag with an optional `<package-name>@` namespace prefix and optional legacy `v` or `refs/tags/` prefixes.
  *
  * @param {string | null | undefined} tag
  * @returns {ParsedTag | null}
  */
 function parseTag(tag) {
     if (!tag) return null
-    let normalized = tag.trim()
-    if (normalized.startsWith('refs/tags/')) {
-        normalized = normalized.slice('refs/tags/'.length)
-    }
-    if (normalized.startsWith('v')) {
-        normalized = normalized.slice(1)
-    }
+    const { packageName, versionText } = splitTagPackageName(tag)
 
-    const match = normalized.match(
+    const match = versionText.match(
         /^(\d+)\.(\d+)\.(\d+)(?:-([0-9A-Za-z.-]+))?(?:\+([0-9A-Za-z.-]+))?$/,
     )
     if (!match) return null
@@ -875,6 +969,7 @@ function parseTag(tag) {
     const prerelease = prereleaseRaw ? prereleaseRaw.split('.') : []
 
     return {
+        packageName,
         major: Number.parseInt(majorRaw, 10),
         minor: Number.parseInt(minorRaw, 10),
         patch: Number.parseInt(patchRaw, 10),
@@ -1227,20 +1322,13 @@ function npmRegistryPath(packageName) {
 }
 
 /**
- * Converts a git-like tag string into an npm version string.
+ * Converts a git-like tag string into an npm version string, dropping any package namespace prefix.
  *
  * @param {string} tag
  * @returns {string}
  */
 function npmVersionFromTag(tag) {
-    let normalized = tag
-    if (normalized.startsWith('refs/tags/')) {
-        normalized = normalized.slice('refs/tags/'.length)
-    }
-    if (normalized.startsWith('v')) {
-        normalized = normalized.slice(1)
-    }
-    return normalized
+    return splitTagPackageName(tag).versionText
 }
 
 /**
@@ -1568,15 +1656,16 @@ async function getCurrentRelease(token, owner, repo, currentTag, payloadRelease)
 }
 
 /**
- * Picks the most recent semver-compatible base tag for comparison.
+ * Picks the most recent semver-compatible base tag for comparison, considering only releases of the same package. Legacy un-prefixed tags count as the fallback package's releases, so the first namespaced release still finds the pre-monorepo history as its base. A brand-new package has no release history at all, so its very first release fails here by design — run the workflow manually with a base-tag input if comments are wanted for it.
  *
  * @param {string} currentTag
  * @param {ParsedTag} currentVersion
  * @param {ReleaseRecord[]} allReleases
  * @param {string} manualBaseTag
+ * @param {string} fallbackPackageName
  * @returns {string}
  */
-function pickBaseTag(currentTag, currentVersion, allReleases, manualBaseTag) {
+function pickBaseTag(currentTag, currentVersion, allReleases, manualBaseTag, fallbackPackageName) {
     if (manualBaseTag) {
         const parsedManualTag = parseTag(manualBaseTag)
         if (!parsedManualTag) {
@@ -1585,11 +1674,14 @@ function pickBaseTag(currentTag, currentVersion, allReleases, manualBaseTag) {
         return manualBaseTag
     }
 
+    const currentPackageName = resolveTagPackageName(currentVersion, fallbackPackageName)
+
     /** @type {Array<{tag: string, version: ParsedTag}>} */
     const parsedReleases = []
     for (const release of allReleases) {
         const version = parseTag(release.tag_name)
         if (!version) continue
+        if (resolveTagPackageName(version, fallbackPackageName) !== currentPackageName) continue
         parsedReleases.push({ tag: release.tag_name, version })
     }
 
@@ -1601,7 +1693,9 @@ function pickBaseTag(currentTag, currentVersion, allReleases, manualBaseTag) {
 
     if (!candidates.length) {
         const mode = currentVersion.isPrerelease ? 'all semver tags' : 'stable tags'
-        throw new Error(`Could not find previous release tag for ${currentTag} in ${mode}`)
+        throw new Error(
+            `Could not find previous release tag for ${currentTag} (package ${currentPackageName}) in ${mode}`,
+        )
     }
 
     return candidates[0].tag
@@ -1621,12 +1715,15 @@ function shouldSkipPr(skipLabels, prLabels) {
 
 module.exports = {
     __testing: {
+        checkGuardViolations,
         compareCoreVersion,
         filterTargetsWithoutReleaseComments,
         findReleaseComment,
         formatPostedCommentsSummary,
         getIssueCommentUrl,
+        npmVersionFromTag,
         parseTag,
+        pickBaseTag,
         pickShaPrereleaseCandidatePool,
         postCommentsAndLabels,
         releaseCommentMarker,
