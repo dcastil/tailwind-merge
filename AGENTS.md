@@ -74,6 +74,7 @@ Required when relevant:
 2. Update `AGENTS.md` whenever repository-wide agent workflow, repo conventions, required commands, or high-level guardrails change.
 3. Update the relevant file in `agents/` whenever specialized architecture, workflow, CI, release, or testing guidance changes.
 4. Do not regenerate the READMEs during normal development. The library `README.md` and the marked section of the repo-level `README.md` are intentionally generated as part of the version/release flow so visitors are routed to docs for the latest release.
+5. Never reference repo files through `blob/main`/`raw/main`/`tree/main` URLs — they break whenever a file moves. Within the repo use relative links; where a link must be absolute (published docs, JSDoc, release notes), pin it to the latest release tag whose tree contains the file (e.g. `blob/v3.6.0/docs/...`, `blob/tailwind-merge@3.7.0/packages/tailwind-merge/docs/...`).
 
 Definition of done for every PR/change:
 

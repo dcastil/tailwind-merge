@@ -30,6 +30,7 @@ The tag and version-commit format comes from each package's `.npmrc` (`tag-versi
 - A PR touching both packages appears in both drafts — correct, since both releases ship it.
 - A PR touching neither package directory (repo infrastructure, CI, root docs) appears in no draft; mention it by hand in a changelog if it matters to users.
 - First namespaced release per package: `tag-prefix` matches no existing release, so the draft's proposed version is wrong. Set the tag name and title by hand when publishing (for example `tailwind-merge@3.7.0` following `v3.6.0`), and write the Full Changelog compare line manually (`v3.6.0...tailwind-merge@3.7.0`).
+- Before the first `@tailwind-merge/vite` release: its docs pin tailwind-merge doc links to the newest tag containing them (currently `v3.6.0` with pre-monorepo paths); bump them to the freshly released `tailwind-merge@<version>` tag with `packages/tailwind-merge/` paths so the published plugin docs reference the tailwind-merge version they actually require.
 - The autolabeler section lives only in the tailwind-merge config; labels are repo-wide.
 
 ## Publishing
