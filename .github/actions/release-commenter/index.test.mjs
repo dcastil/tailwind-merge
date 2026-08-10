@@ -194,11 +194,22 @@ test('picks base tags only from the same package, with legacy tags owned by the 
         ),
     ).toBe('@tailwind-merge/vite@0.1.0')
 
-    // A brand-new package has no history: its first release cannot resolve a base and fails by design.
-    expect(() =>
+    // 0.1.0 is always a package's first version, so having no history is expected and skips instead of failing.
+    expect(
         pickBaseTag(
             '@tailwind-merge/vite@0.1.0',
             parseVersion('@tailwind-merge/vite@0.1.0'),
+            [{ tag_name: 'v3.6.0' }],
+            '',
+            'tailwind-merge',
+        ),
+    ).toBeNull()
+
+    // Above 0.1.0, missing same-package history means release tooling is broken — that still fails loudly.
+    expect(() =>
+        pickBaseTag(
+            '@tailwind-merge/vite@0.2.0',
+            parseVersion('@tailwind-merge/vite@0.2.0'),
             [{ tag_name: 'v3.6.0' }],
             '',
             'tailwind-merge',

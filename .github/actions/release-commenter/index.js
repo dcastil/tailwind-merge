@@ -185,8 +185,10 @@ if (require.main === module) {
  */
 
 /**
+ * `baseRef` is null only for a package's 0.1.0 first release, where no base exists to compare against.
+ *
  * @typedef {{
- *   baseRef: string
+ *   baseRef: string | null
  *   headRef: string
  * }} CompareRefs
  */
@@ -290,6 +292,13 @@ async function main() {
         npmPackageName,
         fallbackPackageName,
     )
+
+    if (baseRef === null) {
+        log(
+            `${currentTag} is the first release of ${currentPackageName} (0.1.0 with no prior release history) — there is no base to compare against, skipping release comments.`,
+        )
+        return
+    }
 
     log(`Base ref: ${baseRef}`)
     log(`Head ref: ${headRef}`)
@@ -1656,14 +1665,16 @@ async function getCurrentRelease(token, owner, repo, currentTag, payloadRelease)
 }
 
 /**
- * Picks the most recent semver-compatible base tag for comparison, considering only releases of the same package. Legacy un-prefixed tags count as the fallback package's releases, so the first namespaced release still finds the pre-monorepo history as its base. A brand-new package has no release history at all, so its very first release fails here by design — run the workflow manually with a base-tag input if comments are wanted for it.
+ * Picks the most recent semver-compatible base tag for comparison, considering only releases of the same package. Legacy un-prefixed tags count as the fallback package's releases, so the first namespaced release still finds the pre-monorepo history as its base.
+ *
+ * Returns null for a 0.1.0 release with no same-package history: 0.1.0 is always a package's first version in this repo, so having no base is the expected state rather than an error, and the caller skips commenting (use a manual base-tag input if comments are wanted for a first release). Every other empty result still throws — for a version above 0.1.0, missing history means release tooling is broken, and failing loudly beats silently skipping comments.
  *
  * @param {string} currentTag
  * @param {ParsedTag} currentVersion
  * @param {ReleaseRecord[]} allReleases
  * @param {string} manualBaseTag
  * @param {string} fallbackPackageName
- * @returns {string}
+ * @returns {string | null}
  */
 function pickBaseTag(currentTag, currentVersion, allReleases, manualBaseTag, fallbackPackageName) {
     if (manualBaseTag) {
@@ -1692,6 +1703,10 @@ function pickBaseTag(currentTag, currentVersion, allReleases, manualBaseTag, fal
         .sort((left, right) => compareSemver(right.version, left.version))
 
     if (!candidates.length) {
+        if (isFirstReleaseVersion(currentVersion)) {
+            return null
+        }
+
         const mode = currentVersion.isPrerelease ? 'all semver tags' : 'stable tags'
         throw new Error(
             `Could not find previous release tag for ${currentTag} (package ${currentPackageName}) in ${mode}`,
@@ -1699,6 +1714,16 @@ function pickBaseTag(currentTag, currentVersion, allReleases, manualBaseTag, fal
     }
 
     return candidates[0].tag
+}
+
+/**
+ * Checks for the stable 0.1.0 version that every package in this repo starts its release history with.
+ *
+ * @param {ParsedTag} version
+ * @returns {boolean}
+ */
+function isFirstReleaseVersion(version) {
+    return version.major === 0 && version.minor === 1 && version.patch === 0 && !version.isPrerelease
 }
 
 /**
