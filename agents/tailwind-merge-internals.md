@@ -106,6 +106,7 @@ Recommended local sequence for non-trivial changes:
   - Both scripts execute the default and ES5 bundles so build-tool upgrades cannot break only the legacy entry point unnoticed.
 - `pnpm test:types` type-checks both the source and the test suite with the development compiler. `scripts/typescript-compatibility/consumer.ts` separately compiles the built declaration bundle with the `typescript-compat` compiler alias pinned to TypeScript 3.8.3. `pnpm test:exports` includes the compatibility check because TypeScript 3.8 is the documented minimum consumer version; keep the alias excluded from Renovate updates and treat any increase to this floor as a major-version change.
 - `scripts/update-readme.mjs` (run in the `version` script via `zx`) generates two targets from `docs/README.md`: the package `README.md` shipped to npm, and the section between the `tailwind-merge-docs` markers in the repo-level `README.md`; it fails the version step loudly when the repo README's markers are missing.
+- The `version` script also runs the repo-wide `scripts/update-pinned-links.mjs` (repo root, dependency-free Node), which re-pins every link pinned to the package's newest existing tag onto the tag being released, verifying targets against the working tree and failing loudly — without touching anything — when a linked path no longer resolves. Older-tag links are deliberately historical and stay untouched.
 
 ## CI Behavior And Security
 
