@@ -205,7 +205,7 @@ type NoInferString<T extends string> = T extends infer S ? S & string : never
  * If you want to use a scale that is not supported in the `ThemeObject` type,
  * consider using `classGroups` instead of `theme`.
  *
- * @see https://github.com/dcastil/tailwind-merge/blob/main/packages/tailwind-merge/docs/configuration.md#theme
+ * @see https://github.com/dcastil/tailwind-merge/blob/v3.6.0/docs/configuration.md#theme
  *      (the list of supported keys may vary between `tailwind-merge` versions)
  */
 export type DefaultThemeGroupIds =

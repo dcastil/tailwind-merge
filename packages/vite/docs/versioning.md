@@ -7,4 +7,4 @@ This package follows [SemVer](https://semver.org), with the pre-1.0 reading spel
 - The stable surface the versioning promises apply to is the **plugin's options** and the **`@tailwind-merge/vite/runtime` exports**. Everything else — the shape of the generated module, the internal `/tailwind-merge` subpath, the config-generation machinery — is internal and may change in any release.
 - The bundled tailwind-merge version is an implementation detail: the plugin upgrades it deliberately, and generated code and runtime always ship in lockstep, so they cannot drift apart.
 
-Once 1.0.0 ships, breaking changes will only happen in major releases, following the same practice as [tailwind-merge's versioning](https://github.com/dcastil/tailwind-merge/blob/main/packages/tailwind-merge/docs/versioning.md).
+Once 1.0.0 ships, breaking changes will only happen in major releases, following the same practice as [tailwind-merge's versioning](https://github.com/dcastil/tailwind-merge/blob/v3.6.0/docs/versioning.md).
