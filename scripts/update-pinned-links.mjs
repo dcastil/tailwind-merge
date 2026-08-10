@@ -4,8 +4,11 @@
 // Model: absolute links into this repo are pinned to release tags per the AGENTS.md link policy.
 // Links that should track the latest release of a package are, by construction, pinned to that
 // package's newest existing tag — this script rewrites exactly those, repo-wide, to the tag the
-// running release is about to create. Links pinned to older tags are deliberately historical
-// (changelogs, migration guides, old threads) and are never touched.
+// running release is about to create. Links pinned to older tags are deliberately historical and
+// are never touched. Two escape hatches cover historical links that sit at the newest tag anyway:
+// changelog directories are excluded wholesale (their entries always describe a specific release,
+// including the newest one), and a line containing the skip marker keeps its links untouched for
+// the rare historical link elsewhere (put e.g. `<!-- update-pinned-links:skip -->` on the link's line).
 //
 // Every rewritten link is verified against the working tree, which is what the new tag will
 // contain. A path that no longer exists fails the version step loudly so a release can never
@@ -24,6 +27,12 @@ const packageDir = process.cwd()
 // Tags without a package prefix (v3.6.0 and earlier) are the pre-monorepo history and belong to tailwind-merge, mirroring the fallback in the release-commenter action.
 const LEGACY_TAG_OWNER = 'tailwind-merge'
 
+// Files whose path contains one of these segments hold historical records: every link in them describes a specific past release, so they are never re-pinned, even when a link sits at the newest tag (a changelog entry for the latest release does exactly that).
+const HISTORICAL_PATH_SEGMENTS = ['docs/changelog/']
+
+// A line containing this marker keeps its links untouched — the opt-out for a deliberately historical link outside the excluded directories. Works as an HTML comment in Markdown and a code comment elsewhere.
+const SKIP_MARKER = 'update-pinned-links:skip'
+
 const manifest = JSON.parse(fs.readFileSync(path.join(packageDir, 'package.json'), 'utf8'))
 const newTag = `${manifest.name}@${manifest.version}`
 
@@ -41,24 +50,36 @@ const linkRegex = new RegExp(
     'g',
 )
 
-const trackedFiles = findFilesMentioning(previousTag)
+const trackedFiles = findFilesMentioning(previousTag).filter(
+    (file) => !HISTORICAL_PATH_SEGMENTS.some((segment) => file.includes(segment)),
+)
 
-// Two passes so a failure leaves the working tree untouched: first compute every replacement and collect unresolvable links, then write only when the whole run is clean.
+// Two passes so a failure leaves the working tree untouched: first compute every replacement and collect unresolvable links, then write — and only then log the rewrites — when the whole run is clean. Processing is line-scoped so the skip marker can shield individual links.
 const unresolvedLinks = []
+const plannedRewrites = []
 const pendingWrites = []
 
 for (const file of trackedFiles) {
     const filePath = path.join(repoRoot, file)
     const content = fs.readFileSync(filePath, 'utf8')
 
-    const nextContent = content.replace(linkRegex, (match, base, linkedPath) => {
-        const resolvedPath = resolveLinkedPath(linkedPath)
-        if (resolvedPath === null) {
-            unresolvedLinks.push(`${file}: ${match}`)
-            return match
-        }
-        return `${base}/${newTag}/${resolvedPath}`
-    })
+    const nextContent = content
+        .split('\n')
+        .map((line) => {
+            if (line.includes(SKIP_MARKER)) return line
+
+            return line.replace(linkRegex, (match, base, linkedPath) => {
+                const resolvedPath = resolveLinkedPath(linkedPath)
+                if (resolvedPath === null) {
+                    unresolvedLinks.push(`${file}: ${match}`)
+                    return match
+                }
+                const replacement = `${base}/${newTag}/${resolvedPath}`
+                plannedRewrites.push(`${file}: ${match} -> ${replacement}`)
+                return replacement
+            })
+        })
+        .join('\n')
 
     if (nextContent !== content) {
         pendingWrites.push({ file, filePath, nextContent })
@@ -70,6 +91,10 @@ if (unresolvedLinks.length > 0) {
         `[update-pinned-links] ${unresolvedLinks.length} link(s) point at paths that do not exist in the tree the new tag will contain. Fix the paths or re-pin them to an old tag by hand, then rerun:\n${unresolvedLinks.join('\n')}`,
     )
     process.exit(1)
+}
+
+for (const rewrite of plannedRewrites) {
+    console.log(`[update-pinned-links] ${rewrite}`)
 }
 
 for (const { file, filePath, nextContent } of pendingWrites) {
