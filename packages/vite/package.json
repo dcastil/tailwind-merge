@@ -15,7 +15,8 @@
         "lint": "eslint --max-warnings 0 .",
         "test": "vitest --no-watch",
         "test:watch": "vitest",
-        "test:types": "tsc --noEmit"
+        "test:types": "tsc --noEmit",
+        "version": "node ../../scripts/update-pinned-links.mjs"
     },
     "peerDependencies": {
         "@tailwindcss/vite": "~4.3.3",

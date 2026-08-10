@@ -30,7 +30,7 @@ The tag and version-commit format comes from each package's `.npmrc` (`tag-versi
 - A PR touching both packages appears in both drafts — correct, since both releases ship it.
 - A PR touching neither package directory (repo infrastructure, CI, root docs) appears in no draft; mention it by hand in a changelog if it matters to users.
 - First namespaced release per package: `tag-prefix` matches no existing release, so the draft's proposed version is wrong. Set the tag name and title by hand when publishing (for example `tailwind-merge@3.7.0` following `v3.6.0`), and write the Full Changelog compare line manually (`v3.6.0...tailwind-merge@3.7.0`).
-- Before the first `@tailwind-merge/vite` release: its docs pin tailwind-merge doc links to the newest tag containing them (currently `v3.6.0` with pre-monorepo paths); bump them to the freshly released `tailwind-merge@<version>` tag with `packages/tailwind-merge/` paths so the published plugin docs reference the tailwind-merge version they actually require.
+- Tag-pinned file links repo-wide (the AGENTS.md link policy) are maintained automatically: each publishable package's `version` lifecycle runs `scripts/update-pinned-links.mjs`, which rewrites every link pinned to that package's newest existing tag to the tag being released, verifies each target path against the working tree (failing the version step loudly on unresolvable paths, touching nothing), remaps pre-monorepo root paths into the package directory, and leaves links pinned to older tags alone as deliberately historical. First release of a package is a no-op for it. Concretely: the tailwind-merge 3.7.0 release will re-pin the vite docs' `v3.6.0` links to `tailwind-merge@3.7.0` with `packages/tailwind-merge/` paths on its own.
 - The autolabeler section lives only in the tailwind-merge config; labels are repo-wide.
 
 ## Publishing
@@ -81,7 +81,7 @@ gh workflow run comment-released-prs-and-issues.yml \
 
 ## Commands
 
-Bump a package's version with `pnpm version <version|patch|minor|major>` run inside the package directory (for the library: `packages/tailwind-merge/`). pnpm runs the existing `preversion`, `version`, and `postversion` lifecycle scripts and creates the version commit and namespaced tag from the package's `.npmrc`. For the library, the `version` step regenerates both the package README and the generated section of the repo-level README via `scripts/update-readme.mjs`, with links pinned to the new release tag.
+Bump a package's version with `pnpm version <version|patch|minor|major>` run inside the package directory (for the library: `packages/tailwind-merge/`). pnpm runs the existing `preversion`, `version`, and `postversion` lifecycle scripts and creates the version commit and namespaced tag from the package's `.npmrc`. The `version` step first re-pins tag-pinned links repo-wide via the shared `scripts/update-pinned-links.mjs` (see Release drafting notes above); for the library it then regenerates both the package README and the generated section of the repo-level README via its own `scripts/update-readme.mjs`, with links pinned to the new release tag.
 
 Fetch draft release:
 

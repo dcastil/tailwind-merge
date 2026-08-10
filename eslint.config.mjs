@@ -12,4 +12,10 @@ export default [
         ],
     },
     ...baseConfig,
+    {
+        files: ['scripts/**/*.?(m|c)@(t|j)s'],
+        rules: {
+            'no-console': 'off',
+        },
+    },
 ]
