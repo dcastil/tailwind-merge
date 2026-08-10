@@ -7,8 +7,9 @@
 // running release is about to create. Links pinned to older tags are deliberately historical and
 // are never touched. Two escape hatches cover historical links that sit at the newest tag anyway:
 // changelog directories are excluded wholesale (their entries always describe a specific release,
-// including the newest one), and a line containing the skip marker keeps its links untouched for
-// the rare historical link elsewhere (put e.g. `<!-- update-pinned-links:skip -->` on the link's line).
+// including the newest one), and a link carrying the `twm-historical` query parameter (e.g.
+// `blob/v3.6.0/docs/foo.md?twm-historical`) is kept as-is — the marker travels inside the URL, so
+// it is link-scoped, survives copy-paste, and GitHub ignores it when serving the page.
 //
 // Every rewritten link is verified against the working tree, which is what the new tag will
 // contain. A path that no longer exists fails the version step loudly so a release can never
@@ -30,8 +31,8 @@ const LEGACY_TAG_OWNER = 'tailwind-merge'
 // Files whose path contains one of these segments hold historical records: every link in them describes a specific past release, so they are never re-pinned, even when a link sits at the newest tag (a changelog entry for the latest release does exactly that).
 const HISTORICAL_PATH_SEGMENTS = ['docs/changelog/']
 
-// A line containing this marker keeps its links untouched — the opt-out for a deliberately historical link outside the excluded directories. Works as an HTML comment in Markdown and a code comment elsewhere.
-const SKIP_MARKER = 'update-pinned-links:skip'
+// A link whose query string carries this parameter is deliberately historical and stays untouched — the opt-out for a historical link outside the excluded directories.
+const HISTORICAL_QUERY_PARAMETER = 'twm-historical'
 
 const manifest = JSON.parse(fs.readFileSync(path.join(packageDir, 'package.json'), 'utf8'))
 const newTag = `${manifest.name}@${manifest.version}`
@@ -44,9 +45,9 @@ if (!previousTag) {
 
 console.log(`[update-pinned-links] Re-pinning links from ${previousTag} to ${newTag}`)
 
-// Matches the pinned-link forms the repo uses: github.com blob/raw/tree URLs and raw.githubusercontent.com URLs. The path capture stops at characters that end a URL in Markdown or code; fragments and queries stay in place untouched.
+// Matches the pinned-link forms the repo uses: github.com blob/raw/tree URLs and raw.githubusercontent.com URLs. The path capture stops at characters that end a URL in Markdown or code; the query string is captured so the historical marker can be detected and re-emitted, and fragments stay in place untouched after it.
 const linkRegex = new RegExp(
-    `(https?://(?:www\\.)?(?:github\\.com/dcastil/tailwind-merge/(?:blob|raw|tree)|raw\\.githubusercontent\\.com/dcastil/tailwind-merge))/${escapeRegex(previousTag)}/([^\\s)\\]"'\`<>*\\\\#?]*)`,
+    `(https?://(?:www\\.)?(?:github\\.com/dcastil/tailwind-merge/(?:blob|raw|tree)|raw\\.githubusercontent\\.com/dcastil/tailwind-merge))/${escapeRegex(previousTag)}/([^\\s)\\]"'\`<>*\\\\#?]*)(\\?[^\\s)\\]"'\`<>*\\\\#]*)?`,
     'g',
 )
 
@@ -54,7 +55,7 @@ const trackedFiles = findFilesMentioning(previousTag).filter(
     (file) => !HISTORICAL_PATH_SEGMENTS.some((segment) => file.includes(segment)),
 )
 
-// Two passes so a failure leaves the working tree untouched: first compute every replacement and collect unresolvable links, then write — and only then log the rewrites — when the whole run is clean. Processing is line-scoped so the skip marker can shield individual links.
+// Two passes so a failure leaves the working tree untouched: first compute every replacement and collect unresolvable links, then write — and only then log the rewrites — when the whole run is clean.
 const unresolvedLinks = []
 const plannedRewrites = []
 const pendingWrites = []
@@ -63,23 +64,19 @@ for (const file of trackedFiles) {
     const filePath = path.join(repoRoot, file)
     const content = fs.readFileSync(filePath, 'utf8')
 
-    const nextContent = content
-        .split('\n')
-        .map((line) => {
-            if (line.includes(SKIP_MARKER)) return line
+    const nextContent = content.replace(linkRegex, (match, base, linkedPath, query = '') => {
+        // Marked links are deliberately historical: left as-is and exempt from path validation, since they may legitimately point at paths that no longer exist.
+        if (query.includes(HISTORICAL_QUERY_PARAMETER)) return match
 
-            return line.replace(linkRegex, (match, base, linkedPath) => {
-                const resolvedPath = resolveLinkedPath(linkedPath)
-                if (resolvedPath === null) {
-                    unresolvedLinks.push(`${file}: ${match}`)
-                    return match
-                }
-                const replacement = `${base}/${newTag}/${resolvedPath}`
-                plannedRewrites.push(`${file}: ${match} -> ${replacement}`)
-                return replacement
-            })
-        })
-        .join('\n')
+        const resolvedPath = resolveLinkedPath(linkedPath)
+        if (resolvedPath === null) {
+            unresolvedLinks.push(`${file}: ${match}`)
+            return match
+        }
+        const replacement = `${base}/${newTag}/${resolvedPath}${query}`
+        plannedRewrites.push(`${file}: ${match} -> ${replacement}`)
+        return replacement
+    })
 
     if (nextContent !== content) {
         pendingWrites.push({ file, filePath, nextContent })
