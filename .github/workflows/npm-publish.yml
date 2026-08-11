@@ -47,9 +47,9 @@ jobs:
               uses: actions/setup-node@v6
               with:
                   node-version: 24.18.1
-                  # More info: https://docs.github.com/en/actions/publishing-packages/publishing-nodejs-packages#publishing-packages-to-the-npm-registry
-                  registry-url: 'https://registry.npmjs.org'
+                  # No registry-url on purpose: it would write an .npmrc auth line referencing the unset NODE_AUTH_TOKEN, which pnpm's config loader rejects. pnpm publishes to its default registry through npm trusted publishing (OIDC), needing no token plumbing.
                   package-manager-cache: false
+            - run: corepack enable
             - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
               with:
                   name: build-output
@@ -65,7 +65,8 @@ jobs:
                   packageJson.version = `${packageJson.version}-dev.${process.env.GITHUB_SHA}`
                   fs.writeFileSync('package.json', `${JSON.stringify(packageJson, null, 4)}\n`)
                   EOF
-            - run: npm publish --access public --tag dev --ignore-scripts
+            # pnpm instead of npm so publishing matches the release flow: publishConfig field overrides are applied at pack time and trusted publishing runs through pnpm's native OIDC flow. --provenance must be explicit (pnpm does not read publishConfig.provenance); --no-git-checks because the version stamp above dirties the tree and the checkout is a detached HEAD.
+            - run: pnpm publish --access public --tag dev --provenance --ignore-scripts --no-git-checks
               working-directory: packages/tailwind-merge
 
     build-prod:
@@ -109,11 +110,12 @@ jobs:
             - run: pnpm install --frozen-lockfile
             - run: pnpm lint
             - run: pnpm test
-            - run: pnpm --filter "$PACKAGE_NAME" build
+            # The library builds in every release flow: the vite package's test:exports verifies its packed tarball against tailwind-merge's published shape (dist and types). For a tailwind-merge release the two filters name the same package and it builds once; for a vite release pnpm's topological order builds the library first.
+            - run: pnpm --filter tailwind-merge --filter "$PACKAGE_NAME" build
               env:
                   PACKAGE_NAME: ${{ steps.resolve_package.outputs.name }}
-            # --if-present because only tailwind-merge ships packaged-exports smoke tests so far; a package gaining a build step should add its own release gate here.
-            - run: pnpm --filter "$PACKAGE_NAME" run --if-present test:exports
+            # Both packages ship a test:exports release gate: the library's built-bundle smoke tests, the vite package's packed-tarball verification.
+            - run: pnpm --filter "$PACKAGE_NAME" test:exports
               env:
                   PACKAGE_NAME: ${{ steps.resolve_package.outputs.name }}
             - uses: actions/upload-artifact@v7
@@ -138,14 +140,14 @@ jobs:
               uses: actions/setup-node@v6
               with:
                   node-version: 24.18.1
-                  # More info: https://docs.github.com/en/actions/publishing-packages/publishing-nodejs-packages#publishing-packages-to-the-npm-registry
-                  registry-url: 'https://registry.npmjs.org'
+                  # No registry-url on purpose: it would write an .npmrc auth line referencing the unset NODE_AUTH_TOKEN, which pnpm's config loader rejects. pnpm publishes to its default registry through npm trusted publishing (OIDC), needing no token plumbing.
                   package-manager-cache: false
+            - run: corepack enable
             - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
               with:
                   name: build-output
                   path: ${{ needs.build-prod.outputs.package-dir }}/dist
                   digest-mismatch: error
-            # --access public covers the first publish of scoped packages (@tailwind-merge/*); it is the default for the unscoped tailwind-merge anyway.
-            - run: npm publish --access public --ignore-scripts
+            # pnpm instead of npm: pnpm applies publishConfig field overrides at pack time (the vite package swaps its dist exports in that way) and implements npm trusted publishing natively (GitHub OIDC id-token, exchanged per package at the registry, publishing through npm's own libnpmpublish vendored inside pnpm). --provenance must be explicit because pnpm does not read publishConfig.provenance; --no-git-checks because the checkout is a detached HEAD. --access public covers the first publish of scoped packages (@tailwind-merge/*); it is the default for the unscoped tailwind-merge anyway.
+            - run: pnpm publish --access public --provenance --ignore-scripts --no-git-checks
               working-directory: ${{ needs.build-prod.outputs.package-dir }}
