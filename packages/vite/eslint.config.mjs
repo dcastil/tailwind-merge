@@ -2,7 +2,7 @@ import { baseConfig } from '../../eslint.config.base.mjs'
 
 export default [
     {
-        ignores: ['node_modules/**/*', 'tests/.tmp-*/**/*'],
+        ignores: ['dist/**/*', 'node_modules/**/*', 'tests/.tmp-*/**/*'],
     },
     ...baseConfig,
     {
@@ -10,6 +10,12 @@ export default [
         files: ['src/index.ts'],
         rules: {
             'import/no-default-export': 'off',
+        },
+    },
+    {
+        files: ['scripts/**/*.?(m|c)@(t|j)s'],
+        rules: {
+            'no-console': 'off',
         },
     },
 ]

@@ -4,6 +4,7 @@
 /packages/configurator/dist/
 /packages/configurator/tests/.tmp-*/
 /packages/tailwind-merge/dist/
+/packages/vite/dist/
 /packages/vite/tests/.tmp-*/
 coverage
 node_modules/

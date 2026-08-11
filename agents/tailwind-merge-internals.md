@@ -108,6 +108,17 @@ Recommended local sequence for non-trivial changes:
 - `scripts/update-readme.mjs` (run in the `version` script via `zx`) generates two targets from `docs/README.md`: the package `README.md` shipped to npm, and the section between the `tailwind-merge-docs` markers in the repo-level `README.md`; it fails the version step loudly when the repo README's markers are missing.
 - The `version` script also runs the repo-wide `scripts/update-pinned-links.mjs` (repo root, dependency-free Node), which re-pins every link pinned to the package's newest existing tag onto the tag being released, verifying targets against the working tree and failing loudly — without touching anything — when a linked path no longer resolves. Older-tag links are deliberately historical and stay untouched, changelog directories are excluded from scanning entirely, and the `twm-historical` query parameter on a link shields it individually for the rare historical link elsewhere.
 
+### Build and packaging of the vite package
+
+`packages/vite` builds with tsdown (`tsdown.config.ts`), the rolldown-based library bundler; tsdown is a single-consumer dependency pinned in the package manifest, not the catalog.
+
+- Output is ESM-only (`dist/*.mjs` plus `.d.mts` declarations, fixed extensions via `platform: 'node'`), following `@tailwindcss/vite`'s shipped shape. One bundle and one declaration file per subpath — `.`, `./runtime`, `./tailwind-merge` — because the latter two are load-bearing runtime contracts: `resolveId` intercepts exactly `@tailwind-merge/vite/runtime`, and the generated virtual module imports `@tailwind-merge/vite/tailwind-merge`.
+- The configurator is inlined into `dist/index.mjs` and lives in `devDependencies` (an unpublished package must not appear in the published dependency fields). tsdown bundles it as local source because the workspace link resolves outside `node_modules`. Two guardrails in `tsdown.config.ts` fail the build on drift: `deps.onlyBundle: []` (nothing may be bundled from `node_modules`) and `deps.onlyImport` (the output may import only the declared runtime dependencies and peers).
+- Declaration maps need `dts: { sourcemap: true }` explicitly — with only the top-level `sourcemap` setting, tsdown 0.22 emits a `sourceMappingURL` comment into the `.d.mts` files without the map. Both map kinds resolve into the shipped `src/`.
+- The workspace `exports` keep pointing at `src/*.ts` so every test and fixture stays buildless; `publishConfig.exports` carries the dist mapping, which pnpm swaps in at pack/publish time. This swap is pnpm behavior that `npm publish` does not perform — before the first `@tailwind-merge/vite` release, the npm-publish workflow's publish step must run through pnpm for this package or it would publish src-pointing exports (details like `--no-git-checks` and OIDC provenance belong to that CI change).
+- `pnpm --filter @tailwind-merge/vite test:exports` (`scripts/test-packed-package.mjs`) is the release gate for the packed shape: it packs with pnpm, asserts the tarball's file list and the swapped dist exports, verifies every export target ships, moves the extracted package into a temp-directory consumer layout (library and `@tailwindcss/node` linked next to it), imports all three subpaths through ordinary resolution, and type-checks the consumer-types fixture's `main.ts` against the bundled declarations plus the library's published types. It requires both the vite package's and the library's `build` first and keeps its scratch directory when a check fails.
+- Signal for the library's eventual build migration: tsdown 0.22 handled multi-entry ESM, declaration bundling, and subpath-preserving externals without friction; what it was not asked to do here is the library's CJS/ES5/Babel-assumptions story, which remains the open question for that migration.
+
 ## CI Behavior And Security
 
 Treat this section as the source of truth for CI and publish security guardrails. Keep detailed CI guidance here instead of duplicating it in `AGENTS.md` unless a rule is critical enough to be visible before opening specialized docs.
@@ -132,6 +143,7 @@ Treat this section as the source of truth for CI and publish security guardrails
 - `.github/workflows/npm-publish.yml`:
   - publishes `dev` tag on `main` pushes (tailwind-merge only for now),
   - publishes production on release events, routing by the namespaced tag prefix (`tailwind-merge@*` and legacy `v*` map to `packages/tailwind-merge`, `@tailwind-merge/vite@*` to `packages/vite`, anything else fails),
+  - currently publishes with `npm publish`, which does not apply `publishConfig.exports` — the vite package's publish step must switch to pnpm before its first release (see the vite build section above),
   - keeps dependency installation, linting, tests, and builds in non-OIDC jobs,
   - avoids dependency caches in the publish workflow,
   - grants `id-token: write` only to minimal publish jobs that download the verified `dist` artifact and run `npm publish --ignore-scripts`,

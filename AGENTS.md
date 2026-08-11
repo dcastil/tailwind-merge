@@ -30,6 +30,7 @@ This repository is a pnpm monorepo hosting `tailwind-merge` — a TypeScript lib
 - Consumer TypeScript support: TypeScript `3.8` and newer; `pnpm test:exports` verifies the generated declarations with the pinned minimum compiler
 - Dependency supply-chain guardrail: `minimumReleaseAge: 4320` in `pnpm-workspace.yaml`, so newly published package versions must be at least three days old before pnpm installs them. Renovate has a matching cooldown in `.github/renovate.json` (see `agents/tailwind-merge-internals.md` for how the two must stay in sync).
 - Dependency build scripts are denied by default unless explicitly allowed in `pnpm-workspace.yaml`; `esbuild` is currently allowed because `.github/actions/metrics-report` needs it.
+- The root manifest's `devEngines.runtime` must encode the real documented Node floor (currently `>=22.18.0`), not a rounded-down one: pnpm validates dependency `engines` against the range's minimum version, and a floor looser than a dependency's own requirement makes pnpm silently skip optional dependencies during install — this is how rolldown's platform binary went missing under an earlier `>=22`, with only a debug-level log mentioning it.
 
 Core commands (repo root):
 - `pnpm install --frozen-lockfile`
@@ -42,6 +43,10 @@ Library-specific commands (run with `pnpm --filter tailwind-merge <script>` from
 - `build`
 - `test:exports`
 - `bench`
+
+Vite-plugin-specific commands (run with `pnpm --filter @tailwind-merge/vite <script>`, or plain `pnpm <script>` inside `packages/vite/`):
+- `build` — tsdown, ESM bundles plus declarations for all three subpaths into `dist/`
+- `test:exports` — packs the tarball and verifies the published shape; requires both this package's and the library's `build` to have run first (see `agents/tailwind-merge-internals.md` for what it checks)
 
 Monorepo conventions:
 - Shared tool versions (eslint, typescript, vitest, @types/node) live in the `catalog:` section of `pnpm-workspace.yaml`; package manifests reference them as `"catalog:"`. Single-consumer dependencies stay pinned in their package manifest.
@@ -91,4 +96,5 @@ All test paths below are relative to `packages/tailwind-merge/`; run single file
 - Public API/types: run `tests/public-api.test.ts`, `tests/type-generics.test.ts`, and `pnpm --filter tailwind-merge test:types`.
 - Release/package surface: run `pnpm --filter tailwind-merge build` and `pnpm --filter tailwind-merge test:exports`.
 - Configurator or Vite plugin: run `pnpm --filter tailwind-merge-configurator test` / `pnpm --filter @tailwind-merge/vite test` and the matching `test:types` script.
+- Vite plugin build/packaging surface: run `pnpm --filter tailwind-merge build`, then `pnpm --filter @tailwind-merge/vite build` and `pnpm --filter @tailwind-merge/vite test:exports`.
 - Repo-wide before finalizing: `pnpm lint`, `pnpm test:types`, `pnpm test` from the root.

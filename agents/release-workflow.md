@@ -35,7 +35,9 @@ The tag and version-commit format comes from each package's `.npmrc` (`tag-versi
 
 ## Publishing
 
-`.github/workflows/npm-publish.yml` routes `release.published` events by tag prefix: `tailwind-merge@*` and legacy `v*` build and publish `packages/tailwind-merge`, `@tailwind-merge/vite@*` builds and publishes `packages/vite`, and unknown prefixes fail the run. The build job runs repo-wide lint and tests plus the released package's `build` and (if present) `test:exports`; publishing happens from the package directory in an isolated OIDC job. Dev releases on `main` pushes remain tailwind-merge-only for now.
+`.github/workflows/npm-publish.yml` routes `release.published` events by tag prefix: `tailwind-merge@*` and legacy `v*` build and publish `packages/tailwind-merge`, `@tailwind-merge/vite@*` builds and publishes `packages/vite`, and unknown prefixes fail the run. The build job runs repo-wide lint and tests plus the released package's `build` and `test:exports` (both packages ship one; the vite package's is the packed-tarball gate `scripts/test-packed-package.mjs`, which needs the library's dist and therefore a library build in any CI wiring that runs it); publishing happens from the package directory in an isolated OIDC job. Dev releases on `main` pushes remain tailwind-merge-only for now.
+
+Blocking caveat for the first `@tailwind-merge/vite` release: the publish step currently runs `npm publish`, which does not apply the package's `publishConfig.exports` swap — publishing the vite package that way would ship src-pointing exports. Switch its publish step to pnpm (which performs the swap at pack time) as part of the vite CI wiring before publishing.
 
 ## Release commenter behavior
 
