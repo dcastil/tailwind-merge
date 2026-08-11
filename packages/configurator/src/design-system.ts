@@ -256,10 +256,27 @@ const UNCONTROLLED_DASH_PREFIXED_PROPERTIES = new Set([
 ])
 
 /**
- * Whether setting `property` fully controls `target`, exploiting CSS's systematic shorthand naming: identity, dash-prefix (`padding` → `padding-inline`, `inset` → `inset-block-end`), or shared first and last segment with fewer segments (`border-radius` → `border-top-left-radius`, `border-color` → `border-top-color`) — minus the enumerated naming exceptions where a dash prefix lies about the relationship.
+ * Shorthands whose longhands don't carry the shorthand's name at all, so no naming rule can find them: `gap` controls `column-gap`/`row-gap`, `place-content` controls the align/justify pair, the `font` shorthand also resets `line-height`. The same maintained-list justification as above applies. Longhand-of-longhand chains don't need entries — utilities always declare the concrete properties these lists name.
+ */
+const IRREGULAR_SHORTHAND_LONGHANDS: Record<string, string[]> = {
+    gap: ['column-gap', 'row-gap'],
+    'place-content': ['align-content', 'justify-content'],
+    'place-items': ['align-items', 'justify-items'],
+    'place-self': ['align-self', 'justify-self'],
+    'flex-flow': ['flex-direction', 'flex-wrap'],
+    columns: ['column-width', 'column-count'],
+    font: ['line-height'],
+    'grid-area': ['grid-row-start', 'grid-row-end', 'grid-column-start', 'grid-column-end'],
+}
+
+/**
+ * Whether setting `property` fully controls `target`, exploiting CSS's systematic shorthand naming: identity, dash-prefix (`padding` → `padding-inline`, `inset` → `inset-block-end`), or shared first and last segment with fewer segments (`border-radius` → `border-top-left-radius`, `border-color` → `border-top-color`) — corrected by the two enumerated exception lists where CSS naming lies about the relationship, in either direction.
  */
 export function propertyCovers(property: string, target: string): boolean {
     if (property === target) {
+        return true
+    }
+    if (IRREGULAR_SHORTHAND_LONGHANDS[property]?.includes(target)) {
         return true
     }
     if (target.startsWith(`${property}-`)) {

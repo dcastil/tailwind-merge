@@ -63,7 +63,30 @@ const PROJECTS = [
             expect(twMerge('ease-out ease-snap')).toBe('ease-snap')
         },
     },
+    {
+        name: 'replit',
+        entry: 'replit/theme.css',
+        // The design system that motivated this project: utility-specific color sub-namespaces (--text-color-*, --border-color-*, --outline-color-*) and dedicated spacing namespaces (--padding-*, --gap-*, --inset-*) invisible to the default config. border-thin is a width, not a color, so it composes with border colors instead of wrongly conflicting; p-md/gap-md merge within their utilities; custom easings and outline offsets merge as scale values.
+        curated: (twMerge: (classList: string) => string) => {
+            expect(twMerge('text-secondary-text text-placeholder-text')).toBe(
+                'text-placeholder-text',
+            )
+            expect(twMerge('text-secondary-text text-sm')).toBe('text-secondary-text text-sm')
+            expect(twMerge('border-thin border-surface-border-subtle')).toBe(
+                'border-thin border-surface-border-subtle',
+            )
+            expect(twMerge('border-thin border-thick')).toBe('border-thick')
+            expect(twMerge('p-md p-4')).toBe('p-4')
+            expect(twMerge('gap-md gap-2')).toBe('gap-2')
+            expect(twMerge('inset-xs inset-2xl')).toBe('inset-2xl')
+            expect(twMerge('ease-snappy ease-chill')).toBe('ease-chill')
+            expect(twMerge('outline-offset-thin outline-offset-2')).toBe('outline-offset-2')
+        },
+    },
 ]
+
+// Generation and the sweep take a few seconds per project when the whole workspace's suites run in parallel, so the tests sharing the fixture promise get an explicit timeout well above the 5 s default.
+const FIXTURE_TIMEOUT = 60_000
 
 describe.each(PROJECTS)('$name', ({ name, entry, curated }) => {
     const entryUrl = new URL(`fixtures/real-world/${entry}`, import.meta.url)
@@ -71,24 +94,40 @@ describe.each(PROJECTS)('$name', ({ name, entry, curated }) => {
         generateFixture(css, fileURLToPath(new URL('.', entryUrl))),
     )
 
-    test('conforms to Tailwind conflict semantics across the class list', async () => {
-        const { twMerge, plan, designSystem } = await fixturePromise
-        assertTailwindConformance(designSystem, twMerge, plan)
-    })
+    test(
+        'conforms to Tailwind conflict semantics across the class list',
+        async () => {
+            const { twMerge, plan, designSystem } = await fixturePromise
+            assertTailwindConformance(designSystem, twMerge, plan)
+        },
+        FIXTURE_TIMEOUT,
+    )
 
-    test('leaves nothing unassigned', async () => {
-        const { plan } = await fixturePromise
-        expect(plan.report.unassignedClasses).toEqual([])
-    })
+    test(
+        'leaves nothing unassigned',
+        async () => {
+            const { plan } = await fixturePromise
+            expect(plan.report.unassignedClasses).toEqual([])
+        },
+        FIXTURE_TIMEOUT,
+    )
 
     // eslint-disable-next-line vitest/expect-expect -- the assertions live in each project's `curated` callback above
-    test('project-specific merges work', async () => {
-        const { twMerge } = await fixturePromise
-        curated(twMerge)
-    })
+    test(
+        'project-specific merges work',
+        async () => {
+            const { twMerge } = await fixturePromise
+            curated(twMerge)
+        },
+        FIXTURE_TIMEOUT,
+    )
 
-    test('emitted module matches its file snapshot', async () => {
-        const { code } = await fixturePromise
-        await expect(code).toMatchFileSnapshot(`./__snapshots__/real-world/${name}.snap.ts`)
-    })
+    test(
+        'emitted module matches its file snapshot',
+        async () => {
+            const { code } = await fixturePromise
+            await expect(code).toMatchFileSnapshot(`./__snapshots__/real-world/${name}.snap.ts`)
+        },
+        FIXTURE_TIMEOUT,
+    )
 })
