@@ -6,6 +6,16 @@ export default [
     },
     ...baseConfig,
     {
+        // Type-only imports must be marked so Node's built-in type stripping can run src/ directly (`node src/cli.ts`); the inline style keeps mixed value/type imports on one line. This is the lint-level stand-in for verbatimModuleSyntax, which can't be enabled in tsconfig because it would also apply to the library sources reached through the paths mapping.
+        files: ['src/**/*.ts', 'tests/**/*.ts'],
+        rules: {
+            '@typescript-eslint/consistent-type-imports': [
+                'error',
+                { fixStyle: 'inline-type-imports' },
+            ],
+        },
+    },
+    {
         files: ['src/cli.ts', 'src/run-cli.ts'],
         rules: {
             'no-console': 'off',

@@ -1,4 +1,4 @@
-import { DesignSystemAccess } from './design-system'
+import { type DesignSystemAccess } from './design-system.ts'
 
 export interface ThemeSnapshot {
     /** Class name prefix configured via `@import 'tailwindcss' prefix(…)`, or `null` without one. */

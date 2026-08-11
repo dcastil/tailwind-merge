@@ -1,6 +1,6 @@
 import { validators } from 'tailwind-merge'
 
-import { PlanValue, ValidatorName } from './plan'
+import { type PlanValue, type ValidatorName } from './plan.ts'
 
 export interface ScaleEncoding {
     items: PlanValue[]

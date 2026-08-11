@@ -10,6 +10,8 @@
         // Modules
         "module": "ESNext",
         "moduleResolution": "Bundler",
+        // Relative imports in src/ carry explicit .ts extensions and type-only imports are explicitly marked, so the CLI runs directly under Node's built-in type stripping (`node src/cli.ts`) without a build or loader. The type-marking half of that contract is enforced by the consistent-type-imports lint rule (verbatimModuleSyntax would be the compiler-level equivalent, but it would also apply to the library sources reached through the paths mapping below, which don't follow it).
+        "allowImportingTsExtensions": true,
         // Maps the package name to the library source so type-checking works without a prior `pnpm build` (the published types live in dist/). Runtime resolution in tests goes through the pnpm workspace link instead.
         "paths": {
             "tailwind-merge": ["../tailwind-merge/src/index.ts"],
