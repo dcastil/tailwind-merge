@@ -10,13 +10,15 @@
         // Modules
         "module": "ESNext",
         "moduleResolution": "Bundler",
+        // The configurator sources reached through the paths mapping below use explicit .ts import extensions (they run directly under Node's type stripping), so this package's type-check must allow them too.
+        "allowImportingTsExtensions": true,
         // Maps the package names to workspace source so type-checking works without a prior build. Runtime resolution in tests goes through the pnpm workspace links instead.
         "paths": {
             "tailwind-merge": ["../tailwind-merge/src/index.ts"],
             "tailwind-merge/unstable-do-not-import": [
                 "../tailwind-merge/src/unstable-do-not-import.ts"
             ],
-            "tailwind-merge-configurator": ["../configurator/src/index.ts"],
+            "@tailwind-merge/configurator": ["../configurator/src/index.ts"],
             "@tailwind-merge/vite/runtime": ["./src/runtime.ts"]
         },
         // Emit

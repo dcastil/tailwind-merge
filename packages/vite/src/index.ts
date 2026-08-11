@@ -15,7 +15,7 @@ export interface TailwindMergeOptions {
 /**
  * Vite plugin that configures tailwind-merge for the project's own Tailwind CSS.
  *
- * Add it next to `@tailwindcss/vite` and import from the runtime subpath: `import { twMerge } from '@tailwind-merge/vite/runtime'`. While Vite runs, that import resolves to an in-memory module generated from the project's Tailwind theme by tailwind-merge-configurator; outside Vite it resolves to the real runtime.ts and serves default tailwind-merge behavior. Design and rationale live in ../configurator/PROPOSAL.md §11.
+ * Add it next to `@tailwindcss/vite` and import from the runtime subpath: `import { twMerge } from '@tailwind-merge/vite/runtime'`. While Vite runs, that import resolves to an in-memory module generated from the project's Tailwind theme by @tailwind-merge/configurator; outside Vite it resolves to the real runtime.ts and serves default tailwind-merge behavior. Design and rationale live in ../configurator/PROPOSAL.md §11.
  *
  * The dev loop is deliberately quiet: generation reads only the CSS configuration (never which classes the app uses), regenerates only when a file of the CSS graph changes, and even then triggers a full reload only when the generated module actually changed — editing utility classes in app.css causes no churn.
  */

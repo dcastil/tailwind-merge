@@ -95,6 +95,6 @@ All test paths below are relative to `packages/tailwind-merge/`; run single file
 - Class groups/conflicts/default config: run `tests/default-config.test.ts`, `tests/class-group-conflicts.test.ts`, `tests/tailwind-css-versions.test.ts`.
 - Public API/types: run `tests/public-api.test.ts`, `tests/type-generics.test.ts`, and `pnpm --filter tailwind-merge test:types`.
 - Release/package surface: run `pnpm --filter tailwind-merge build` and `pnpm --filter tailwind-merge test:exports`.
-- Configurator or Vite plugin: run `pnpm --filter tailwind-merge-configurator test` / `pnpm --filter @tailwind-merge/vite test` and the matching `test:types` script.
+- Configurator or Vite plugin: run `pnpm --filter @tailwind-merge/configurator test` / `pnpm --filter @tailwind-merge/vite test` and the matching `test:types` script.
 - Vite plugin build/packaging surface: run `pnpm --filter tailwind-merge build`, then `pnpm --filter @tailwind-merge/vite build` and `pnpm --filter @tailwind-merge/vite test:exports`.
 - Repo-wide before finalizing: `pnpm lint`, `pnpm test:types`, `pnpm test` from the root.

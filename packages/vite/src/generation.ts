@@ -3,7 +3,7 @@ import { readFile } from 'node:fs/promises'
 import path from 'node:path'
 
 import { compile } from '@tailwindcss/node'
-import { generate } from 'tailwind-merge-configurator'
+import { generate } from '@tailwind-merge/configurator'
 
 /** A generated runtime module ready to serve as the virtual `@tailwind-merge/vite/runtime`. */
 export interface GeneratedRuntimeModule {
