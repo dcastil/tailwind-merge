@@ -12,7 +12,7 @@ export async function runCli(argv: string[]): Promise<number> {
 
     if (!args.input || !args.output || (args.format && args.format !== 'ts' && args.format !== 'js')) {
         console.error(
-            'Usage: tailwind-merge-configurator --input <tailwind-css-entrypoint> --output <generated-module-path> [--format ts|js] [--check]',
+            'Usage: @tailwind-merge/configurator --input <tailwind-css-entrypoint> --output <generated-module-path> [--format ts|js] [--check]',
         )
         return 1
     }

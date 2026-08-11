@@ -162,6 +162,9 @@ importers:
         specifier: workspace:*
         version: link:../tailwind-merge
     devDependencies:
+      '@tailwind-merge/configurator':
+        specifier: workspace:*
+        version: link:../configurator
       '@tailwindcss/vite':
         specifier: ~4.3.3
         version: 4.3.3(vite@7.3.3(@types/node@24.13.3)(jiti@2.7.0)(lightningcss@1.32.0))
@@ -171,9 +174,6 @@ importers:
       eslint:
         specifier: 'catalog:'
         version: 9.39.5(jiti@2.7.0)(supports-color@7.2.0)
-      tailwind-merge-configurator:
-        specifier: workspace:*
-        version: link:../configurator
       tailwindcss:
         specifier: ~4.3.3
         version: 4.3.3
@@ -5574,9 +5574,9 @@ snapshots:
     dependencies:
       reusify: 1.1.0
 
-  fdir@6.5.0(picomatch@4.0.4):
+  fdir@6.5.0(picomatch@4.0.5):
     optionalDependencies:
-      picomatch: 4.0.4
+      picomatch: 4.0.5
 
   file-entry-cache@8.0.0:
     dependencies:
@@ -6455,8 +6455,8 @@ snapshots:
 
   tinyglobby@0.2.17:
     dependencies:
-      fdir: 6.5.0(picomatch@4.0.4)
-      picomatch: 4.0.4
+      fdir: 6.5.0(picomatch@4.0.5)
+      picomatch: 4.0.5
 
   tinyrainbow@3.1.0: {}
 
@@ -6606,8 +6606,8 @@ snapshots:
   vite@7.3.3(@types/node@24.13.3)(jiti@2.7.0)(lightningcss@1.32.0):
     dependencies:
       esbuild: 0.27.7
-      fdir: 6.5.0(picomatch@4.0.4)
-      picomatch: 4.0.4
+      fdir: 6.5.0(picomatch@4.0.5)
+      picomatch: 4.0.5
       postcss: 8.5.15
       rollup: 4.62.3
       tinyglobby: 0.2.17

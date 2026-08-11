@@ -1,10 +1,10 @@
-# tailwind-merge-configurator
+# @tailwind-merge/configurator
 
 A build tool that generates a project-specific [tailwind-merge](https://github.com/dcastil/tailwind-merge) setup from your [Tailwind CSS](https://tailwindcss.com) v4 entrypoint. It loads your fully resolved theme through Tailwind's own APIs and emits a standalone module exporting a `twMerge` that knows your design system exactly — custom scales, utility-specific color namespaces like `--text-color-*`, resets, prefixes, `@config`/`@plugin` contributions, and custom `@utility` definitions included, with nothing to maintain by hand.
 
 ```ts
 import { readFile, writeFile } from 'node:fs/promises'
-import { generate } from 'tailwind-merge-configurator'
+import { generate } from '@tailwind-merge/configurator'
 
 const { code, plan } = await generate({
     css: await readFile('src/app.css', 'utf8'),
@@ -45,7 +45,7 @@ pnpm install --frozen-lockfile
 pnpm --filter tailwind-merge build
 ```
 
-Then either script against the JS API (a plain `.mjs`/`.ts` file importing `tailwind-merge-configurator` works anywhere inside the workspace), or use the CLI directly:
+Then either script against the JS API (a plain `.mjs`/`.ts` file importing `@tailwind-merge/configurator` works anywhere inside the workspace), or use the CLI directly:
 
 ```bash
 node packages/configurator/src/cli.ts --input path/to/app.css --output path/to/tw-merge.generated.ts
@@ -56,7 +56,7 @@ The emitted file is self-contained — copy it into any project. Regenerate when
 ## JS API
 
 ```ts
-import { generate } from 'tailwind-merge-configurator'
+import { generate } from '@tailwind-merge/configurator'
 
 const { code, config, plan } = await generate(options)
 ```

@@ -1,5 +1,5 @@
 {
-    "name": "tailwind-merge-configurator",
+    "name": "@tailwind-merge/configurator",
     "version": "0.0.0",
     "private": true,
     "description": "Generates a project-specific tailwind-merge setup from a Tailwind CSS v4 entrypoint. Prototype, see PROPOSAL.md.",
