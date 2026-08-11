@@ -2,7 +2,7 @@ import { createHash } from 'node:crypto'
 import { mkdir, readFile, writeFile } from 'node:fs/promises'
 import { dirname, relative, resolve } from 'node:path'
 
-import { generate } from './generate'
+import { generate } from './generate.ts'
 
 /**
  * The CLI's behavior as a function returning the process exit code, separated from the executable entry in cli.ts so tests can drive it. Kept deliberately thin: the generation pipeline in generate.ts is the product, and future integrations (bundler plugins) should reuse the library rather than the CLI.

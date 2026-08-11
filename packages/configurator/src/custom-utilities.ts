@@ -1,11 +1,11 @@
 import {
-    DeclarationEntry,
-    DesignSystemAccess,
+    type DeclarationEntry,
+    type DesignSystemAccess,
     declaredDeclarations,
     declaredProperties,
     propertyCovers,
-} from './design-system'
-import { PlanValue } from './plan'
+} from './design-system.ts'
+import { type PlanValue } from './plan.ts'
 
 export interface CustomUtilityPlan {
     /** Self-conflict groups to register (group ID → items), for utilities that are not aliases of a built-in group. */

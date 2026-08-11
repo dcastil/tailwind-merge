@@ -3,11 +3,11 @@ import { fileURLToPath } from 'node:url'
 import { expect } from 'vitest'
 import { createTailwindMerge, twMerge as defaultTwMerge } from 'tailwind-merge'
 
-import { ConfigPlan, generate } from '../src'
+import { type ConfigPlan, generate } from '../src'
 import { fullyCovers } from '../src/custom-utilities'
 import {
-    DeclarationEntry,
-    DesignSystemAccess,
+    type DeclarationEntry,
+    type DesignSystemAccess,
     declaredDeclarations,
     loadDesignSystems,
     propertyCovers,

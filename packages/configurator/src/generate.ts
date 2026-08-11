@@ -1,13 +1,13 @@
 import { getDefaultConfig } from 'tailwind-merge'
-import { AnyConfig, createClassGroupUtils } from 'tailwind-merge/unstable-do-not-import'
+import { type AnyConfig, createClassGroupUtils } from 'tailwind-merge/unstable-do-not-import'
 
-import { buildAugmentations } from './augment'
-import { buildCustomUtilityPlan } from './custom-utilities'
-import { loadDesignSystems } from './design-system'
-import { emitModule } from './emit'
-import { materializeConfig } from './materialize'
-import { ConfigPlan, applyAugmentations, applyCustomUtilityPlan, buildPlan } from './plan'
-import { snapshotTheme } from './snapshot'
+import { buildAugmentations } from './augment.ts'
+import { buildCustomUtilityPlan } from './custom-utilities.ts'
+import { loadDesignSystems } from './design-system.ts'
+import { emitModule } from './emit.ts'
+import { materializeConfig } from './materialize.ts'
+import { type ConfigPlan, applyAugmentations, applyCustomUtilityPlan, buildPlan } from './plan.ts'
+import { snapshotTheme } from './snapshot.ts'
 
 export interface GenerateOptions {
     /** Content of the project's Tailwind CSS entrypoint (the file containing `@import 'tailwindcss'` and `@theme` customizations). */

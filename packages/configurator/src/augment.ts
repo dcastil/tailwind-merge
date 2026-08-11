@@ -1,9 +1,9 @@
 import {
-    DesignSystemAccess,
+    type DesignSystemAccess,
     declaredProperties,
     haveProperSubset,
     havePropertiesEqual,
-} from './design-system'
+} from './design-system.ts'
 
 export interface CollisionResolution {
     className: string

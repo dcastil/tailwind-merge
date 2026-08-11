@@ -1,4 +1,4 @@
-import { ConfigPlan, PlanValue } from './plan'
+import { type ConfigPlan, type PlanValue } from './plan.ts'
 
 export interface EmitOptions {
     /** Additional comment lines placed below the standard generated-file notice, e.g. provenance info like the input path and content hash. */

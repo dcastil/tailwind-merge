@@ -1,7 +1,7 @@
 import { validators } from 'tailwind-merge'
-import { AnyConfig, ClassGroup } from 'tailwind-merge/unstable-do-not-import'
+import { type AnyConfig, type ClassGroup } from 'tailwind-merge/unstable-do-not-import'
 
-import { ConfigPlan, PlanValue } from './plan'
+import { type ConfigPlan, type PlanValue } from './plan.ts'
 
 /**
  * Turns a plan into a runtime config object, the in-memory equivalent of the emitted module.

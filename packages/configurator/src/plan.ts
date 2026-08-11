@@ -1,8 +1,8 @@
 import { getDefaultConfig, validators } from 'tailwind-merge'
-import { ClassGroup, ThemeGetter } from 'tailwind-merge/unstable-do-not-import'
+import { type ClassGroup, type ThemeGetter } from 'tailwind-merge/unstable-do-not-import'
 
-import { ScaleEncoding, encodeScale } from './compress'
-import { ThemeSnapshot } from './snapshot'
+import { type ScaleEncoding, encodeScale } from './compress.ts'
+import { type ThemeSnapshot } from './snapshot.ts'
 
 /**
  * Serializable representation of one class definition within a class group.
