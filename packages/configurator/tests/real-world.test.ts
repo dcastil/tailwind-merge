@@ -81,6 +81,9 @@ const PROJECTS = [
             expect(twMerge('inset-xs inset-2xl')).toBe('inset-2xl')
             expect(twMerge('ease-snappy ease-chill')).toBe('ease-chill')
             expect(twMerge('outline-offset-thin outline-offset-2')).toBe('outline-offset-2')
+            // The deprecated start-*/end-* spellings compile from --inset-* too, but Tailwind never suggests them — alias probing covers them.
+            expect(twMerge('start-xs start-2xl')).toBe('start-2xl')
+            expect(twMerge('end-sm inset-e-xl')).toBe('inset-e-xl')
         },
     },
 ]

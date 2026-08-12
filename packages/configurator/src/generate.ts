@@ -67,6 +67,17 @@ export async function generate(options: GenerateOptions): Promise<GenerateResult
         materializeConfig({ ...plan, prefix: null }),
     )
 
+    // Top-level class-name prefixes per group, so augmentation can probe a value under a group's other spellings (the `start` group holds both `inset-s` and the deprecated `start`, but Tailwind's class list only ever suggests `inset-s-*`).
+    const groupPrefixKeys = new Map<string, string[]>()
+    for (const [groupId, items] of plan.classGroups) {
+        const prefixes = items.flatMap((item) =>
+            item.kind === 'object' ? item.entries.map(([key]) => key) : [],
+        )
+        if (prefixes.length > 0) {
+            groupPrefixKeys.set(groupId, prefixes)
+        }
+    }
+
     applyAugmentations(
         plan,
         buildAugmentations({
@@ -74,6 +85,7 @@ export async function generate(options: GenerateOptions): Promise<GenerateResult
             vanilla,
             projectClassGroupId: projectClassGroupUtils.getClassGroupId,
             vanillaClassGroupId: vanillaClassGroupUtils.getClassGroupId,
+            groupPrefixKeys,
         }),
     )
 

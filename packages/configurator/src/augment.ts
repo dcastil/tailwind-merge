@@ -1,5 +1,7 @@
 import {
+    type DeclarationEntry,
     type DesignSystemAccess,
+    declaredDeclarations,
     declaredProperties,
     haveProperSubset,
     havePropertiesEqual,
@@ -31,6 +33,8 @@ export interface BuildAugmentationsOptions {
     projectClassGroupId: (className: string) => string | undefined
     /** Classifies a class name against a config generated from the vanilla theme, used to bucket vanilla sibling classes into candidate groups. */
     vanillaClassGroupId: (className: string) => string | undefined
+    /** Class-name prefixes per group ID, from the group definitions' object keys. Groups listing several prefixes (`start` holds both `inset-s` and the deprecated `start` spelling) drive alias-spelling expansion: Tailwind's class list only suggests one spelling, so the others must be probed. */
+    groupPrefixKeys: Map<string, string[]>
 }
 
 /**
@@ -43,6 +47,7 @@ export function buildAugmentations({
     vanilla,
     projectClassGroupId,
     vanillaClassGroupId,
+    groupPrefixKeys,
 }: BuildAugmentationsOptions): AugmentationResult {
     const vanillaClassNames = vanilla.getClassList().map(([className]) => className)
     const vanillaClassNameSet = new Set(vanillaClassNames)
@@ -96,6 +101,23 @@ export function buildAugmentations({
             groupClassNames.push(registrationName)
         } else {
             assignments.set(targetGroupId, [registrationName])
+        }
+
+        // Alias-spelling expansion: the class list only suggests one spelling of utilities that exist under several names (`inset-s-sm` but never the deprecated `start-sm`), so a value assigned through one of a group's prefixes is probed under the group's other prefixes. Only spellings Tailwind compiles to the identical declarations join — empirically verified, like everything else here.
+        for (const aliasName of aliasSpellings(registrationName, targetGroupId, groupPrefixKeys)) {
+            if (handledNames.has(aliasName) || projectClassGroupId(aliasName) === targetGroupId) {
+                continue
+            }
+            const aliasDeclarations = declaredDeclarations(project, aliasName)
+            const classDeclarations = declaredDeclarations(project, registrationName)
+            if (
+                aliasDeclarations !== null &&
+                classDeclarations !== null &&
+                declarationsEqual(aliasDeclarations, classDeclarations)
+            ) {
+                handledNames.add(aliasName)
+                assignments.get(targetGroupId)!.push(aliasName)
+            }
         }
     }
 
@@ -233,4 +255,46 @@ function classifyByProperties(
 function firstNameSegment(className: string): string {
     const separatorIndex = className.indexOf('-')
     return separatorIndex === -1 ? className : className.slice(0, separatorIndex)
+}
+
+/**
+ * The same value under the target group's other class-name prefixes: `inset-s-sm` assigned to the `start` group (prefixes `inset-s` and `start`) yields the candidate `start-sm`. The longest matching prefix decides where the value part begins, so a prefix that happens to prefix another never mis-splits the name.
+ */
+function aliasSpellings(
+    className: string,
+    groupId: string,
+    groupPrefixKeys: Map<string, string[]>,
+): string[] {
+    const prefixes = groupPrefixKeys.get(groupId)
+    if (!prefixes || prefixes.length < 2) {
+        return []
+    }
+
+    const matchedPrefix = prefixes
+        .filter((prefix) => className.startsWith(`${prefix}-`))
+        .sort((first, second) => second.length - first.length)[0]
+    if (matchedPrefix === undefined) {
+        return []
+    }
+
+    const value = className.slice(matchedPrefix.length + 1)
+    return prefixes
+        .filter((prefix) => prefix !== matchedPrefix)
+        .map((prefix) => `${prefix}-${value}`)
+}
+
+/** Exact equality of two compiled declaration lists — the bar for treating two spellings as the same utility. */
+function declarationsEqual(first: DeclarationEntry[], second: DeclarationEntry[]): boolean {
+    return (
+        first.length === second.length &&
+        first.every((entry, index) => {
+            const other = second[index]!
+            return (
+                entry.context === other.context &&
+                entry.conditional === other.conditional &&
+                entry.property === other.property &&
+                entry.value === other.value
+            )
+        })
+    )
 }
