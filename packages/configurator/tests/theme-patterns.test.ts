@@ -276,6 +276,41 @@ describe('theme with a numeric-named sub-namespace color token', async () => {
     })
 })
 
+// Named values on a namespace whose utilities exist under several spellings: --inset-* feeds the modern inset-s-*/inset-e-* AND the deprecated start-*/end-* utilities, but Tailwind's class list only suggests the modern spelling. The augmentation pass must probe the group's other prefixes so the suggestion-less spellings merge too — they compile to the identical declarations.
+describe('theme with named values on alias-spelled utilities', async () => {
+    const { twMerge, plan, designSystem } = await generateFixture(css`
+        @import 'tailwindcss';
+        @theme {
+            --inset-xs: 2px;
+            --inset-sm: 4px;
+            --inset-2xl: 20px;
+        }
+    `)
+
+    test('conforms to Tailwind conflict semantics across the class list', () => {
+        assertTailwindConformance(designSystem, twMerge, plan)
+    })
+
+    test('both spellings merge, within themselves and against each other', () => {
+        expect(twMerge('inset-s-xs inset-s-2xl')).toBe('inset-s-2xl')
+        expect(twMerge('start-xs start-2xl')).toBe('start-2xl')
+        expect(twMerge('end-xs end-sm')).toBe('end-sm')
+        expect(twMerge('start-xs inset-s-sm')).toBe('inset-s-sm')
+        expect(twMerge('inset-e-xs end-2xl')).toBe('end-2xl')
+        expect(twMerge('-start-xs -start-sm')).toBe('-start-sm')
+    })
+
+    test('the alias spellings are registered alongside the suggested ones', () => {
+        expect(plan.report.augmentedClassGroups['start']).toEqual(
+            expect.arrayContaining(['inset-s-xs', 'start-xs']),
+        )
+        expect(plan.report.augmentedClassGroups['end']).toEqual(
+            expect.arrayContaining(['inset-e-xs', 'end-xs']),
+        )
+        expect(plan.report.unassignedClasses).toEqual([])
+    })
+})
+
 // Multi-file setups resolve @import chains through Tailwind's own loader; the theme lives in a separate tokens file.
 describe('theme split across imported files', async () => {
     const fixtureDirectory = fileURLToPath(new URL('fixtures/multi-file/', import.meta.url))
