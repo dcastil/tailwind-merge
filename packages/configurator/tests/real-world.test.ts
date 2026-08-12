@@ -91,49 +91,30 @@ const PROJECTS = [
     },
 ]
 
-// Generation and the sweep take a few seconds per project when the whole workspace's suites run in parallel, so the tests sharing the fixture promise get an explicit timeout well above the 5 s default.
-const FIXTURE_TIMEOUT = 60_000
-
 describe.each(PROJECTS)('$name', ({ name, entry, curated }) => {
     const entryUrl = new URL(`fixtures/real-world/${entry}`, import.meta.url)
     const fixturePromise = readFile(entryUrl, 'utf8').then((css) =>
         generateFixture(css, fileURLToPath(new URL('.', entryUrl))),
     )
 
-    test(
-        'conforms to Tailwind conflict semantics across the class list',
-        async () => {
-            const { twMerge, plan, designSystem } = await fixturePromise
-            assertTailwindConformance(designSystem, twMerge, plan)
-        },
-        FIXTURE_TIMEOUT,
-    )
+    test('conforms to Tailwind conflict semantics across the class list', async () => {
+        const { twMerge, plan, designSystem } = await fixturePromise
+        assertTailwindConformance(designSystem, twMerge, plan)
+    })
 
-    test(
-        'leaves nothing unassigned',
-        async () => {
-            const { plan } = await fixturePromise
-            expect(plan.report.unassignedClasses).toEqual([])
-        },
-        FIXTURE_TIMEOUT,
-    )
+    test('leaves nothing unassigned', async () => {
+        const { plan } = await fixturePromise
+        expect(plan.report.unassignedClasses).toEqual([])
+    })
 
     // eslint-disable-next-line vitest/expect-expect -- the assertions live in each project's `curated` callback above
-    test(
-        'project-specific merges work',
-        async () => {
-            const { twMerge } = await fixturePromise
-            curated(twMerge)
-        },
-        FIXTURE_TIMEOUT,
-    )
+    test('project-specific merges work', async () => {
+        const { twMerge } = await fixturePromise
+        curated(twMerge)
+    })
 
-    test(
-        'emitted module matches its file snapshot',
-        async () => {
-            const { code } = await fixturePromise
-            await expect(code).toMatchFileSnapshot(`./__snapshots__/real-world/${name}.snap.ts`)
-        },
-        FIXTURE_TIMEOUT,
-    )
+    test('emitted module matches its file snapshot', async () => {
+        const { code } = await fixturePromise
+        await expect(code).toMatchFileSnapshot(`./__snapshots__/real-world/${name}.snap.ts`)
+    })
 })
