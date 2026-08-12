@@ -1,8 +1,3 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`generate from vanilla Tailwind CSS > matches Tailwind conflict semantics across the design-system class list 1`] = `
-[
-  "shadow-initial shadow-inner → shadow-initial shadow-inner (default: shadow-inner)",
-  "shadow-inner shadow-lg → shadow-lg (default: shadow-inner shadow-lg)",
-]
-`;
+exports[`generate from vanilla Tailwind CSS > matches Tailwind conflict semantics across the design-system class list 1`] = `[]`;
