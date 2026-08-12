@@ -84,6 +84,9 @@ const PROJECTS = [
             // The deprecated start-*/end-* spellings compile from --inset-* too, but Tailwind never suggests them — alias probing covers them.
             expect(twMerge('start-xs start-2xl')).toBe('start-2xl')
             expect(twMerge('end-sm inset-e-xl')).toBe('inset-e-xl')
+            // Axis shorthands compile to logical properties in v4 and evict the logical sides — the default-config fix this fixture's design system prompted (PR #705), inherited since the rebase onto main.
+            expect(twMerge('ps-md px-xl')).toBe('px-xl')
+            expect(twMerge('start-sm inset-x-lg')).toBe('inset-x-lg')
         },
     },
 ]
