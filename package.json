@@ -83,7 +83,7 @@
         "rollup-plugin-delete": "^3.0.2",
         "rollup-plugin-dts": "^6.4.1",
         "tslib": "^2.8.1",
-        "typescript": "^6.0.3",
+        "typescript": "^7.0.2",
         "typescript-compat": "npm:typescript@3.8.3",
         "typescript-eslint": "^8.65.0",
         "vitest": "^4.1.10",
