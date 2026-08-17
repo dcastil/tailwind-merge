@@ -2,8 +2,9 @@ import { fileURLToPath } from 'node:url'
 
 import { expect } from 'vitest'
 import { createTailwindMerge, twMerge as defaultTwMerge } from 'tailwind-merge'
+import { type AnyConfig, createClassGroupUtils } from 'tailwind-merge/unstable-do-not-import'
 
-import { type ConfigPlan, generate } from '../src'
+import { type ConfigPlan, type GenerateOptions, generate } from '../src'
 import { fullyCovers } from '../src/custom-utilities'
 import {
     type DeclarationEntry,
@@ -41,12 +42,17 @@ export function css(strings: TemplateStringsArray, ...values: unknown[]): string
 /**
  * Generates a config from fixture CSS and bundles everything fixture tests need: the merge function built from the materialized config, the plan report, the emitted code, and the loaded design system for conformance sweeps.
  */
-export async function generateFixture(css: string, base: string = fixtureBase) {
-    const { code, config, plan } = await generate({ css, base })
+export async function generateFixture(
+    css: string,
+    base: string = fixtureBase,
+    options: Omit<GenerateOptions, 'css' | 'base'> = {},
+) {
+    const { code, config, plan } = await generate({ css, base, ...options })
     const { project } = await loadDesignSystems({ css, base })
 
     return {
         code,
+        config,
         plan,
         twMerge: createTailwindMerge(() => config),
         designSystem: project,
@@ -135,6 +141,32 @@ export function assertTailwindConformance(
     expect(failures).toEqual([])
 
     return { checkedPairs, adjudicated, improvementsOverDefault }
+}
+
+/**
+ * The exactness undermatch gate: for every class name the design system compiles, the exact and compact configs must classify into the same group — 'exact' may only drop matches for names that produce no CSS. The conformance sweep cannot police this side of exactness: an undermatched real class keeps its pair intact, which is also what the default config does, so the two sides agree and the oracle is never consulted. Classification parity against compact (whose coverage the sweep does verify) closes that hole.
+ */
+export function assertExactClassificationParity(
+    designSystem: DesignSystemAccess,
+    exactConfig: AnyConfig,
+    compactConfig: AnyConfig,
+): void {
+    const exactClassGroupId = createClassGroupUtils(exactConfig).getClassGroupId
+    const compactClassGroupId = createClassGroupUtils(compactConfig).getClassGroupId
+
+    const mismatches: { className: string; exact?: string; compact?: string }[] = []
+    for (const [className] of designSystem.getClassList()) {
+        if (declaredDeclarations(designSystem, className) === null) {
+            continue
+        }
+        const exactGroupId = exactClassGroupId(className)
+        const compactGroupId = compactClassGroupId(className)
+        if (exactGroupId !== compactGroupId) {
+            mismatches.push({ className, exact: exactGroupId, compact: compactGroupId })
+        }
+    }
+
+    expect(mismatches).toEqual([])
 }
 
 /**

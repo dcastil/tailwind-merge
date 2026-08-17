@@ -1,7 +1,7 @@
 import { getDefaultConfig, validators } from 'tailwind-merge'
 import { type ClassGroup, type ThemeGetter } from 'tailwind-merge/unstable-do-not-import'
 
-import { type ScaleEncoding, encodeScale } from './compress.ts'
+import { type EncodingMode, type ScaleEncoding, encodeScale } from './compress.ts'
 import { type ThemeSnapshot } from './snapshot.ts'
 
 /**
@@ -30,6 +30,8 @@ export interface ConfigPlan {
 }
 
 export interface PlanReport {
+    /** Which encoding mode the plan was built with — see `EncodingMode` for the tradeoff. */
+    encoding: EncodingMode
     /** Chosen encoding strategy per theme scale, for CLI output and tests. */
     scaleStrategies: Record<string, string>
     /** Self-conflict groups created for utilities the project registers beyond the built-ins (`@utility` and `@plugin`), by group ID. */
@@ -61,6 +63,8 @@ export interface ScalePlan {
 export interface BuildPlanOptions {
     snapshot: ThemeSnapshot
     cacheSize?: number
+    /** How finite value sets are encoded — see `EncodingMode`. Defaults to 'compact'. */
+    encoding?: EncodingMode
 }
 
 /**
@@ -68,17 +72,17 @@ export interface BuildPlanOptions {
  *
  * Walking `getDefaultConfig()` instead of maintaining a parallel structure means class group semantics, group ordering (which decides validator precedence in the class map), and conflict relationships automatically stay in sync with tailwind-merge.
  */
-export function buildPlan({ snapshot, cacheSize }: BuildPlanOptions): ConfigPlan {
+export function buildPlan({ snapshot, cacheSize, encoding = 'compact' }: BuildPlanOptions): ConfigPlan {
     const skeleton = getDefaultConfig()
     const scaleEncodings = new Map<string, ScaleEncoding>()
 
     function resolveScale(themeKey: string): ScaleEncoding {
-        let encoding = scaleEncodings.get(themeKey)
-        if (!encoding) {
-            encoding = encodeThemeScale(themeKey, snapshot)
-            scaleEncodings.set(themeKey, encoding)
+        let scaleEncoding = scaleEncodings.get(themeKey)
+        if (!scaleEncoding) {
+            scaleEncoding = encodeThemeScale(themeKey, snapshot, encoding)
+            scaleEncodings.set(themeKey, scaleEncoding)
         }
-        return encoding
+        return scaleEncoding
     }
 
     function planGroup(group: ClassGroup<string>): PlanValue[] {
@@ -155,8 +159,12 @@ export function buildPlan({ snapshot, cacheSize }: BuildPlanOptions): ConfigPlan
         ),
         orderSensitiveModifiers: [...skeleton.orderSensitiveModifiers],
         report: {
+            encoding,
             scaleStrategies: Object.fromEntries(
-                [...scaleEncodings].map(([themeKey, encoding]) => [themeKey, encoding.strategy]),
+                [...scaleEncodings].map(([themeKey, scaleEncoding]) => [
+                    themeKey,
+                    scaleEncoding.strategy,
+                ]),
             ),
             prunedClassGroups,
             customUtilityGroups: [],
@@ -318,35 +326,39 @@ const UTILITY_STATIC_CLASSES: Record<string, string[]> = {
 /**
  * Encodes the scale for one theme key, applying per-key knowledge on top of the generic encoding.
  */
-function encodeThemeScale(themeKey: string, snapshot: ThemeSnapshot): ScaleEncoding {
+function encodeThemeScale(
+    themeKey: string,
+    snapshot: ThemeSnapshot,
+    encoding: EncodingMode,
+): ScaleEncoding {
     const scale = snapshot.scales.get(themeKey)
     const names = scale?.names ?? []
 
     if (themeKey === 'color') {
-        const encoding = encodeScale(names)
+        const scaleEncoding = encodeScale(names, encoding)
         return {
             items: [
                 ...COLOR_KEYWORDS.map((value): PlanValue => ({ kind: 'class', value })),
-                ...encoding.items,
+                ...scaleEncoding.items,
             ],
-            strategy: encoding.strategy,
+            strategy: scaleEncoding.strategy,
         }
     }
 
     if (themeKey === 'spacing') {
-        // The static `px` value (1px) is utility semantics and exists regardless of the theme. The numeric scale (`p-13` via multiplication) only exists while the bare `--spacing` multiplier variable is set, so the number validator must not be emitted without it.
-        const encoding = encodeScale(names)
+        // The static `px` value (1px) is utility semantics and exists regardless of the theme. The numeric scale (`p-13` via multiplication) only exists while the bare `--spacing` multiplier variable is set, so the number validator must not be emitted without it — and stays in exact mode too, because the multiplier genuinely makes every number compile.
+        const scaleEncoding = encodeScale(names, encoding)
         const items: PlanValue[] = [{ kind: 'class', value: 'px' }]
-        let strategy = encoding.strategy
+        let strategy = scaleEncoding.strategy
         if (scale?.hasBareValue) {
             items.push({ kind: 'validator', name: 'isNumber' })
-            strategy = names.length === 0 ? 'multiplier' : `multiplier+${encoding.strategy}`
+            strategy = names.length === 0 ? 'multiplier' : `multiplier+${scaleEncoding.strategy}`
         }
-        items.push(...encoding.items)
+        items.push(...scaleEncoding.items)
         return { items, strategy }
     }
 
-    return encodeScale(names)
+    return encodeScale(names, encoding)
 }
 
 /**

@@ -91,6 +91,16 @@ export function qualifiedProperty(entry: { context: string; property: string }):
     return entry.context === '' ? entry.property : `${entry.context} ${entry.property}`
 }
 
+/**
+ * Whether each class name compiles to CSS, checked in one `candidatesToCss` batch. Tailwind only compiles *prefixed* candidates when the theme defines a prefix (`tw:p-2` compiles, plain `p-2` does not) while `getClassList()` names stay unprefixed, so this helper adds the prefix before compiling — use it over raw `candidatesToCss` whenever the answer must hold for prefixed themes too.
+ */
+export function classesCompile(designSystem: DesignSystemAccess, classNames: string[]): boolean[] {
+    const prefix = designSystem.theme.prefix
+    const candidates =
+        prefix === null ? classNames : classNames.map((className) => `${prefix}:${className}`)
+    return designSystem.candidatesToCss(candidates).map((compiledCss) => compiledCss !== null)
+}
+
 const declarationsCache = new WeakMap<DesignSystemAccess, Map<string, DeclarationEntry[] | null>>()
 
 interface BlockFrame {

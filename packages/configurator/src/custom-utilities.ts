@@ -1,11 +1,13 @@
+import { type EncodingMode, encodeScale } from './compress.ts'
 import {
     type DeclarationEntry,
     type DesignSystemAccess,
+    classesCompile,
     declaredDeclarations,
     declaredProperties,
     propertyCovers,
 } from './design-system.ts'
-import { type PlanValue } from './plan.ts'
+import { type PlanValue, type ValidatorName } from './plan.ts'
 
 export interface CustomUtilityPlan {
     /** Self-conflict groups to register (group ID → items), for utilities that are not aliases of a built-in group. */
@@ -21,6 +23,8 @@ export interface BuildCustomUtilityPlanOptions {
     vanilla: DesignSystemAccess
     /** Classifies a class name against a config generated from the vanilla theme, used to find one exemplar class per built-in group. */
     vanillaClassGroupId: (className: string) => string | undefined
+    /** How functional utilities' value spaces are encoded — see `EncodingMode`. */
+    encoding: EncodingMode
 }
 
 /**
@@ -38,6 +42,7 @@ export function buildCustomUtilityPlan({
     project,
     vanilla,
     vanillaClassGroupId,
+    encoding,
 }: BuildCustomUtilityPlanOptions): CustomUtilityPlan {
     const vanillaRoots = new Set([
         ...vanilla.utilities.keys('static'),
@@ -81,6 +86,14 @@ export function buildCustomUtilityPlan({
         }
     }
 
+    const functionalValueTails =
+        encoding === 'exact'
+            ? collectFunctionalValueTails(project, functionalRootSet, [
+                  ...functionalRoots,
+                  ...staticRoots,
+              ])
+            : null
+
     for (const root of functionalRoots) {
         const groupId = customUtilityGroupId(root)
         const items: PlanValue[] = []
@@ -90,9 +103,17 @@ export function buildCustomUtilityPlan({
         ) {
             items.push({ kind: 'class', value: root })
         }
-        // `isAny` under the root makes every `root-*` value self-conflict, which is right for a functional utility: whatever values it accepts, they all set the same declarations. Nonexistent values overmatching is as harmless here as everywhere else.
-        items.push({ kind: 'object', entries: [[root, [{ kind: 'validator', name: 'isAny' }]]] })
-        groups.set(groupId, items)
+        // 'compact': `isAny` under the root makes every `root-*` value self-conflict — right in that whatever values the utility accepts all set the same declarations, but it also hands nonexistent values eviction power over real ones (see `EncodingMode`). 'exact' therefore enumerates the compile-verified named values and keeps only the validators whose whole value kind probes as accepted.
+        const valueItems =
+            functionalValueTails === null
+                ? [{ kind: 'validator', name: 'isAny' } satisfies PlanValue]
+                : exactFunctionalValueItems(project, root, functionalValueTails.get(root) ?? [])
+        if (valueItems.length > 0) {
+            items.push({ kind: 'object', entries: [[root, valueItems]] })
+        }
+        if (items.length > 0) {
+            groups.set(groupId, items)
+        }
     }
 
     return {
@@ -105,6 +126,110 @@ export function buildCustomUtilityPlan({
 /** Group IDs get a `utility.` prefix so they cannot collide with the skeleton's group IDs and are recognizable in reports and the emitted config. */
 function customUtilityGroupId(root: string): string {
     return `utility.${root}`
+}
+
+/**
+ * Named values per functional root, from the class list in suggestion order. A class belongs to the longest custom root prefixing it, so `foo-bar-2` counts as a value of a `foo-bar` root rather than as `bar-2` under `foo`, and a class that *is* a static root stays out of value enumeration (the static branches above handle it). One pass over the class list serves every root.
+ */
+function collectFunctionalValueTails(
+    project: DesignSystemAccess,
+    functionalRootSet: Set<string>,
+    allCustomRoots: string[],
+): Map<string, string[]> {
+    const tailsByRoot = new Map<string, string[]>()
+    const seenClassNames = new Set<string>()
+
+    for (const [className] of project.getClassList()) {
+        if (seenClassNames.has(className)) {
+            continue
+        }
+        seenClassNames.add(className)
+
+        let owningRoot: string | null = null
+        for (const root of allCustomRoots) {
+            if (
+                className.startsWith(`${root}-`) &&
+                (owningRoot === null || root.length > owningRoot.length)
+            ) {
+                owningRoot = root
+            }
+        }
+        if (owningRoot === null || !functionalRootSet.has(owningRoot)) {
+            continue
+        }
+
+        let tails = tailsByRoot.get(owningRoot)
+        if (!tails) {
+            tails = []
+            tailsByRoot.set(owningRoot, tails)
+        }
+        tails.push(className.slice(owningRoot.length + 1))
+    }
+
+    return tailsByRoot
+}
+
+/**
+ * Value kinds a functional utility can accept beyond its named values, each proven open-ended by sentinel candidates: when the sentinels compile, Tailwind's value handling accepts the *kind* (`--value(number)` compiles every number), so the matching validator is exact rather than an approximation. Sentinels containing `.`, `/` or `%` cannot collide with named theme tokens (those characters are invalid in CSS custom property names); the integer sentinels could, which is why every kind requires two sentinels — a theme naming both is beyond unlikely.
+ */
+const BARE_VALUE_PROBES: [ValidatorName, string[]][] = [
+    ['isFraction', ['355/113', '19/97']],
+    ['isNumber', ['971.5', '823.25']],
+    ['isInteger', ['9713', '8231']],
+    ['isPercent', ['77.9%', '61.3%']],
+]
+
+/**
+ * One representative arbitrary value per candidate type (length, number, percentage, color, plain ident). Accepting any of them means the utility takes arbitrary values, e.g. `--value([length])` or `--value([*])`.
+ */
+const ARBITRARY_VALUE_PROBES = ['[3px]', '[7]', '[41%]', '[#650a1b]', '[twm-probe]']
+
+const ARBITRARY_VARIABLE_PROBE = '(--twm-probe)'
+
+/**
+ * The exact-mode value matchers of one functional root: the compile-verified named values (scale-encoded, so families still factor), plus validators for every open-ended value kind the probes prove. Remaining approximation: `isArbitraryValue` matches arbitrary values of the wrong *type* (`ll-[red]` on a `--value([length])` utility), because typed arbitrary validators re-implement Tailwind's type inference heuristically and a mismatch there would undermatch real classes — the worse failure. Values a kind probe cannot represent don't exist today (checked against Tailwind 4.3's value handling: named, literal, bare number/integer/percentage/ratio, arbitrary, arbitrary variable), so anything not probed here simply doesn't compile and correctly stays unclassified.
+ */
+function exactFunctionalValueItems(
+    project: DesignSystemAccess,
+    root: string,
+    namedTails: string[],
+): PlanValue[] {
+    const probeTails = [
+        ...BARE_VALUE_PROBES.flatMap(([, sentinels]) => sentinels),
+        ...ARBITRARY_VALUE_PROBES,
+        ARBITRARY_VARIABLE_PROBE,
+    ]
+    const allTails = [...namedTails, ...probeTails]
+    const compileResults = classesCompile(
+        project,
+        allTails.map((tail) => `${root}-${tail}`),
+    )
+    const compiledTails = new Set(allTails.filter((_, index) => compileResults[index]))
+
+    // Suggestions that don't compile produce no CSS and must not gain eviction power — the same rule that motivates exact mode in the first place.
+    const items = encodeScale(
+        namedTails.filter((tail) => compiledTails.has(tail)),
+        'exact',
+    ).items
+
+    const acceptedKinds = BARE_VALUE_PROBES.filter(([, sentinels]) =>
+        sentinels.every((sentinel) => compiledTails.has(sentinel)),
+    ).map(([validatorName]) => validatorName)
+    for (const validatorName of acceptedKinds) {
+        // isNumber accepting every integer makes isInteger redundant beside it.
+        if (validatorName === 'isInteger' && acceptedKinds.includes('isNumber')) {
+            continue
+        }
+        items.push({ kind: 'validator', name: validatorName })
+    }
+    if (ARBITRARY_VALUE_PROBES.some((probe) => compiledTails.has(probe))) {
+        items.push({ kind: 'validator', name: 'isArbitraryValue' })
+    }
+    if (compiledTails.has(ARBITRARY_VARIABLE_PROBE)) {
+        items.push({ kind: 'validator', name: 'isArbitraryVariable' })
+    }
+
+    return items
 }
 
 interface GroupSignatures {

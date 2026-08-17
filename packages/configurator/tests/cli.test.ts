@@ -54,6 +54,9 @@ describe('CLI with --check mode', () => {
         expect(await runCli(['--input', inputPath, '--output', outputPath, '--format', 'tsx'])).toBe(
             1,
         )
+        expect(
+            await runCli(['--input', inputPath, '--output', outputPath, '--encoding', 'tight']),
+        ).toBe(1)
     })
 
     test('a .js output emits JavaScript, and --format overrides the inference', async () => {
@@ -72,5 +75,30 @@ describe('CLI with --check mode', () => {
             await runCli(['--input', inputPath, '--output', forcedPath, '--format', 'js']),
         ).toBe(0)
         expect(await readFile(forcedPath, 'utf8')).not.toContain('satisfies')
+    })
+
+    test('--encoding exact enumerates scales instead of emitting validators for them', async () => {
+        await writeFile(inputPath, "@import 'tailwindcss';\n@theme { --color-brand-500: #33f; }\n")
+
+        const exactPath = join(directory, 'tw-merge.exact.ts')
+        expect(
+            await runCli(['--input', inputPath, '--output', exactPath, '--encoding', 'exact']),
+        ).toBe(0)
+        // The trailing comma pins the destructured-validator list, which holds only validators the config uses — the bare name also appears in emitter boilerplate comments.
+        expect(await readFile(exactPath, 'utf8')).not.toContain('isTshirtSize,')
+
+        // --check regenerates with the flags it is given, so the same flags reproduce the file and flag-less regeneration correctly reports drift.
+        expect(
+            await runCli([
+                '--input',
+                inputPath,
+                '--output',
+                exactPath,
+                '--encoding',
+                'exact',
+                '--check',
+            ]),
+        ).toBe(0)
+        expect(await runCli(['--input', inputPath, '--output', exactPath, '--check'])).toBe(1)
     })
 })

@@ -68,6 +68,7 @@ Options:
 | `css` | yes | Content of your Tailwind CSS entrypoint — the file containing `@import 'tailwindcss'` and your `@theme` customizations. |
 | `base` | yes | Directory used to resolve imports in the CSS (local files, `tailwindcss` itself, `@plugin`/`@config` references), usually the entrypoint's directory. |
 | `cacheSize` | no | LRU cache size passed through to the generated config. Defaults to tailwind-merge's default. |
+| `encoding` | no | `'compact'` (default) or `'exact'` — see [Compact vs exact encoding](#compact-vs-exact-encoding). |
 | `banner` | no | Extra comment lines below the generated-file notice, e.g. provenance info. |
 | `format` | no | `'ts'` (default) or `'js'` — the emitted module's language. |
 | `importSource` | no | Module specifier the emitted code imports tailwind-merge from. Defaults to `'tailwind-merge'`; override when you re-export tailwind-merge from somewhere else (the Vite plugin uses this). |
@@ -78,14 +79,23 @@ Results:
 - `config` — the same config as a runtime object, so you can build a merge function in-process without writing a file: `createTailwindMerge(() => config)`.
 - `plan` — the intermediate representation including `plan.report`, which tells you what the generator did: chosen scale encodings, pruned groups, classes added beyond the standard namespaces, resolved name collisions, custom-utility handling, and — most importantly — `unassignedClasses`: theme-created classes no group could be determined for. An empty list means every class the theme creates is covered; surface non-empty ones as warnings in your pipeline.
 
+## Compact vs exact encoding
+
+By default the generator encodes each theme scale as the smallest matcher that covers all its values — a t-shirt-sized scale becomes the `isTshirtSize` pattern instead of listing every name. That matcher also accepts names *outside* your theme, which has a real merge-semantics consequence: `twMerge('rounded-md', 'rounded-xs')` drops the real `rounded-md` even when `xs` is not in your radius scale, because `rounded-xs` classifies into the radius group and wins by ordering despite producing no CSS. In short: the compact config is correct for correct usage of your theme's tokens, and class names outside the theme (which linting normally rules out) can evict real classes.
+
+With `encoding: 'exact'`, matchers only accept what actually exists: theme scales enumerate their values, and custom functional utilities enumerate their compile-verified named values, keeping a pattern only where probing proves the utility accepts a whole open-ended value kind (bare numbers, arbitrary values, …). A class that compiles to no CSS then never merges anything away. Genuinely open-ended values — the bare `--spacing` multiplier, arbitrary values like `rounded-[3px]` — keep working in both modes.
+
+The price is bundle size, and it is smaller than it sounds because compression eats enumeration: across the seven real-world fixture projects, exact mode adds 5–8% minified (one outlier with huge numeric color families: +30%) but only 1–2.5% brotli-compressed (worst case +5.3%) — on the order of 100–500 bytes over the wire.
+
 ## CLI
 
 ```
-node packages/configurator/src/cli.ts --input <tailwind-css-entrypoint> --output <generated-module-path> [--format ts|js] [--check]
+node packages/configurator/src/cli.ts --input <tailwind-css-entrypoint> --output <generated-module-path> [--format ts|js] [--encoding compact|exact] [--check]
 ```
 
 - Without `--format`, the emitted language follows the output file's extension.
-- `--check` regenerates in memory and compares against the file on disk without writing, exiting non-zero when it's missing or out of date — wire it into CI to catch a theme changing without the generated module being refreshed.
+- `--encoding exact` switches to [exact encoding](#compact-vs-exact-encoding).
+- `--check` regenerates in memory and compares against the file on disk without writing, exiting non-zero when it's missing or out of date — wire it into CI to catch a theme changing without the generated module being refreshed. Pass the same `--format`/`--encoding` flags as the generating run, since the comparison regenerates with the flags it is given.
 - The report (including `unassignedClasses` warnings) is printed to the console.
 - Output is deterministic per input state, and the header records a content hash of the input, so diffs only appear when behavior actually changes.
 

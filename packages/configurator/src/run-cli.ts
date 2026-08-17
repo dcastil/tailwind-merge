@@ -10,9 +10,14 @@ import { generate } from './generate.ts'
 export async function runCli(argv: string[]): Promise<number> {
     const args = parseArguments(argv)
 
-    if (!args.input || !args.output || (args.format && args.format !== 'ts' && args.format !== 'js')) {
+    if (
+        !args.input ||
+        !args.output ||
+        (args.format && args.format !== 'ts' && args.format !== 'js') ||
+        (args.encoding && args.encoding !== 'compact' && args.encoding !== 'exact')
+    ) {
         console.error(
-            'Usage: @tailwind-merge/configurator --input <tailwind-css-entrypoint> --output <generated-module-path> [--format ts|js] [--check]',
+            'Usage: @tailwind-merge/configurator --input <tailwind-css-entrypoint> --output <generated-module-path> [--format ts|js] [--encoding compact|exact] [--check]',
         )
         return 1
     }
@@ -29,11 +34,21 @@ export async function runCli(argv: string[]): Promise<number> {
               ? 'js'
               : 'ts'
 
+    // Invalid --encoding values were rejected above; absence falls through to generate's default.
+    const encoding =
+        args.encoding === 'compact' || args.encoding === 'exact' ? args.encoding : undefined
+
     // The generated-file notice itself is emitted unconditionally by emitModule; the CLI adds provenance. The hash makes the emitted module deterministic per input state, which is what allows --check to compare full file contents.
     const contentHash = createHash('sha256').update(css).digest('hex').slice(0, 16)
     const banner = `// Source: ${relative(dirname(outputPath), inputPath)} (sha256 ${contentHash})`
 
-    const { code, plan } = await generate({ css, base: dirname(inputPath), banner, format })
+    const { code, plan } = await generate({
+        css,
+        base: dirname(inputPath),
+        banner,
+        format,
+        encoding,
+    })
     const displayPath = relative(process.cwd(), outputPath)
 
     if (args.check) {
@@ -53,7 +68,9 @@ export async function runCli(argv: string[]): Promise<number> {
     await mkdir(dirname(outputPath), { recursive: true })
     await writeFile(outputPath, code)
 
-    console.log(`Generated ${displayPath} with ${plan.classGroups.size} class groups`)
+    console.log(
+        `Generated ${displayPath} with ${plan.classGroups.size} class groups (${plan.report.encoding} encoding)`,
+    )
     console.log(
         `Scale encodings: ${Object.entries(plan.report.scaleStrategies)
             .map(([themeKey, strategy]) => `${themeKey}=${strategy}`)
@@ -108,7 +125,13 @@ export async function runCli(argv: string[]): Promise<number> {
 }
 
 function parseArguments(argv: string[]) {
-    const args: { input?: string; output?: string; format?: string; check: boolean } = {
+    const args: {
+        input?: string
+        output?: string
+        format?: string
+        encoding?: string
+        check: boolean
+    } = {
         check: false,
     }
 
@@ -120,6 +143,8 @@ function parseArguments(argv: string[]) {
             args.output = argv[++index]
         } else if (flag === '--format') {
             args.format = argv[++index]
+        } else if (flag === '--encoding') {
+            args.encoding = argv[++index]
         } else if (flag === '--check') {
             args.check = true
         }
