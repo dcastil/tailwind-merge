@@ -925,9 +925,19 @@ export const getDefaultConfig = () => {
              * Font Size
              * @see https://tailwindcss.com/docs/font-size
              */
-            'font-size': [
-                { text: ['base', themeText, isArbitraryVariableLength, isArbitraryLength] },
-            ],
+            'font-size': [{ text: ['base', themeText] }],
+            /**
+             * Font Size with arbitrary value
+             *
+             * In contrast to the named font-size utilities (which also set a
+             * line-height), arbitrary font-size values like `text-[1.5rem]` or
+             * `text-[length:12px]` only set the `font-size` property and don't
+             * affect the line-height. They therefore must not override
+             * `leading-*` classes, so they live in their own class group.
+             * @see https://tailwindcss.com/docs/font-size
+             * @see https://github.com/dcastil/tailwind-merge/issues/573
+             */
+            'font-size-arbitrary': [{ text: [isArbitraryVariableLength, isArbitraryLength] }],
             /**
              * Font Smoothing
              * @see https://tailwindcss.com/docs/font-smoothing
@@ -2465,7 +2475,8 @@ export const getDefaultConfig = () => {
             mx: ['ms', 'me', 'mr', 'ml'],
             my: ['mbs', 'mbe', 'mt', 'mb'],
             size: ['w', 'h'],
-            'font-size': ['leading'],
+            'font-size': ['font-size-arbitrary', 'leading'],
+            'font-size-arbitrary': ['font-size'],
             'fvn-normal': [
                 'fvn-ordinal',
                 'fvn-slashed-zero',
@@ -2567,6 +2578,7 @@ export const getDefaultConfig = () => {
         },
         conflictingClassGroupModifiers: {
             'font-size': ['leading'],
+            'font-size-arbitrary': ['leading'],
         },
         postfixLookupClassGroups: ['container-type'],
         orderSensitiveModifiers: [
