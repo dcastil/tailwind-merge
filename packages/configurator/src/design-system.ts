@@ -51,7 +51,7 @@ export interface DeclarationEntry {
 }
 
 /**
- * Compiles a class through Tailwind and returns its declarations, or null when the class produces no CSS. `@property` registrations and `@keyframes` bodies are skipped: composable utilities share the former without conflicting, and the latter describe animation frames, not what the class sets on an element. Values matter to the conflict oracle: two classes re-declaring the same property with identical text are idempotent together and carry their real state elsewhere (usually in custom properties).
+ * Compiles a class through Tailwind and returns its declarations, or null when the class produces no CSS. Callers pass unprefixed class names (the form `getClassList()` uses everywhere); the candidate is prefixed automatically when the theme defines a prefix, because Tailwind only compiles `tw:p-2`-style candidates there — without this, every declaration-based pass silently saw prefixed themes as producing no CSS. `@property` registrations and `@keyframes` bodies are skipped: composable utilities share the former without conflicting, and the latter describe animation frames, not what the class sets on an element. Values matter to the conflict oracle: two classes re-declaring the same property with identical text are idempotent together and carry their real state elsewhere (usually in custom properties).
  */
 export function declaredDeclarations(
     designSystem: DesignSystemAccess,
@@ -65,7 +65,7 @@ export function declaredDeclarations(
 
     let declarations = cache.get(className)
     if (declarations === undefined) {
-        const css = designSystem.candidatesToCss([className])[0] ?? null
+        const css = designSystem.candidatesToCss([toCandidate(designSystem, className)])[0] ?? null
         declarations = css === null ? null : parseDeclarations(css)
         cache.set(className, declarations)
     }
@@ -92,13 +92,17 @@ export function qualifiedProperty(entry: { context: string; property: string }):
 }
 
 /**
- * Whether each class name compiles to CSS, checked in one `candidatesToCss` batch. Tailwind only compiles *prefixed* candidates when the theme defines a prefix (`tw:p-2` compiles, plain `p-2` does not) while `getClassList()` names stay unprefixed, so this helper adds the prefix before compiling — use it over raw `candidatesToCss` whenever the answer must hold for prefixed themes too.
+ * Whether each class name compiles to CSS, checked in one `candidatesToCss` batch — the batched boolean form of the prefix-aware compilation `declaredDeclarations` does per class. Use one of the two over raw `candidatesToCss` so the answer holds for prefixed themes.
  */
 export function classesCompile(designSystem: DesignSystemAccess, classNames: string[]): boolean[] {
-    const prefix = designSystem.theme.prefix
-    const candidates =
-        prefix === null ? classNames : classNames.map((className) => `${prefix}:${className}`)
+    const candidates = classNames.map((className) => toCandidate(designSystem, className))
     return designSystem.candidatesToCss(candidates).map((compiledCss) => compiledCss !== null)
+}
+
+/** The candidate string Tailwind compiles for a class name: prefixed under a theme prefix (`tw:p-2`), the name itself otherwise. Class lists and everything downstream of them stay unprefixed, so the prefix exists only at this compilation boundary. */
+function toCandidate(designSystem: DesignSystemAccess, className: string): string {
+    const prefix = designSystem.theme.prefix
+    return prefix === null ? className : `${prefix}:${className}`
 }
 
 const declarationsCache = new WeakMap<DesignSystemAccess, Map<string, DeclarationEntry[] | null>>()
