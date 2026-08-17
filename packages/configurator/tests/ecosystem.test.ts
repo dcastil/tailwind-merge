@@ -214,13 +214,21 @@ describe('theme from a legacy JS config via @config', async () => {
     })
 })
 
-// Prefix mode: the design system stores theme variables prefixed and candidates carry a variant-like prefix. The conformance sweep doesn't apply — the class list is unprefixed while real candidates are prefixed, so the default-config baseline is meaningless here — making this the one fixture family verified by curated expectations only.
+// Prefix mode: the design system stores theme variables prefixed and candidates carry a variant-like prefix. The conformance sweep doesn't apply — the class list is unprefixed while real candidates are prefixed, so the default-config baseline is meaningless here — making this the one fixture family verified by curated expectations only. The fixture deliberately exercises every declaration-probing pass (augmentation via a compat sub-namespace, custom-utility aliasing and override inference): Tailwind only compiles prefixed candidates, and these passes once fed it unprefixed names, silently no-oping for prefixed themes while the standard-namespace tests above stayed green.
 describe('theme with an import prefix', async () => {
     const { twMerge, plan } = await generateFixture(css`
         @import 'tailwindcss' prefix(tw);
         @theme {
             --color-brand-500: #33f;
             --text-huge: 2.5rem;
+            --text-color-primary: #123;
+        }
+        @utility scrollbar-hide {
+            scrollbar-width: none;
+        }
+        @utility btn {
+            padding: 0.5rem 1rem;
+            border-radius: 0.375rem;
         }
     `)
 
@@ -235,7 +243,22 @@ describe('theme with an import prefix', async () => {
         expect(twMerge('p-2 p-4')).toBe('p-2 p-4')
     })
 
-    test('reports the prefix', () => {
+    test('sub-namespace classes classify through augmentation', () => {
+        expect(plan.report.augmentedClassGroups['text-color']).toContain('text-primary')
+        expect(twMerge('tw:text-primary tw:text-red-500')).toBe('tw:text-red-500')
+        expect(twMerge('tw:text-primary tw:text-sm')).toBe('tw:text-primary tw:text-sm')
+    })
+
+    test('custom utilities alias and override like in unprefixed themes', () => {
+        expect(plan.report.aliasedUtilityClasses).toEqual({ 'scrollbar-hide': 'scrollbar-w' })
+        expect(twMerge('tw:scrollbar-hide tw:scrollbar-thin')).toBe('tw:scrollbar-thin')
+        expect(plan.report.customUtilityConflicts['utility.btn']).toContain('p')
+        expect(twMerge('tw:p-4 tw:btn')).toBe('tw:btn')
+        expect(twMerge('tw:btn tw:p-4')).toBe('tw:btn tw:p-4')
+    })
+
+    test('reports the prefix and leaves nothing unassigned', () => {
         expect(plan.prefix).toBe('tw')
+        expect(plan.report.unassignedClasses).toEqual([])
     })
 })
