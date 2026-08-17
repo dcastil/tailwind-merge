@@ -2,6 +2,16 @@ import { validators } from 'tailwind-merge'
 
 import { type PlanValue, type ValidatorName } from './plan.ts'
 
+/**
+ * How finite value sets (theme scales, custom-utility value spaces) are encoded into class-group matchers.
+ *
+ * - 'compact': smallest emitted representation wins, even when a validator matches names beyond the actual set. The classic overmatch premise "merging a class that produces no CSS is harmless" turned out to be wrong for merge semantics — a classified class gains eviction power, so `twMerge('rounded-md', 'rounded-xs')` drops the real `rounded-md` when `rounded-xs` isn't in the theme but matches the scale's validator (first reported from the field, 2026-08-13). Compact stays the default because the damage is limited to class names outside the theme, which linting normally rules out — the config is correct for correct usage of the theme's tokens.
+ * - 'exact': a matcher may only accept names that exist. Costs bundle size (enumeration instead of validators); buys eviction-proofness for inputs that produce no CSS.
+ *
+ * Genuinely open-ended value spaces (the bare `--spacing` multiplier, arbitrary values, bare numbers on utilities that accept any) keep their validators in both modes — a validator is only "overmatching" when the real value set is finite.
+ */
+export type EncodingMode = 'compact' | 'exact'
+
 export interface ScaleEncoding {
     items: PlanValue[]
     /** Which encoding won, for reporting. Not part of the generated output. */
@@ -9,23 +19,23 @@ export interface ScaleEncoding {
 }
 
 /**
- * Encodes a theme scale's value names into the smallest class-group representation.
+ * Encodes a theme scale's value names into the smallest class-group representation the mode allows.
  *
- * Policy (see PROPOSAL.md): the encoding must never fail to match a name that exists in the theme, but it may overmatch names that don't exist when that makes the output smaller — merging a class that produces no CSS is harmless, missing a class that does is a bug. Candidates are compared by estimated emitted size:
+ * Policy (see PROPOSAL.md): the encoding must never fail to match a name that exists in the theme; whether it may overmatch names that don't exist is what `EncodingMode` decides. Candidates are compared by estimated emitted size:
  * - plain enumeration of all names
- * - a validator covering all names, plus enumerated outliers (e.g. t-shirt sizes with a `base` outlier)
- * - families with a shared numeric tail collapsed into nested validators (e.g. `{ red: [isNumber] }` for `red-50` … `red-950`)
+ * - 'compact' only: a validator covering all names, plus enumerated outliers (e.g. t-shirt sizes with a `base` outlier)
+ * - families with a shared first segment collapsed into a nested entry (e.g. `{ red: [isNumber] }` for `red-50` … `red-950` — in 'exact' mode the tails enumerate instead, staying exact because only listed prefix+tail combinations match)
  *
  * The family encoding also mirrors Tailwind's own resolution order better than a flat validator: a named part match wins over sibling validators in the class map, exactly like Tailwind prefers a color namespace hit over a bare value interpretation.
  */
-export function encodeScale(names: string[]): ScaleEncoding {
+export function encodeScale(names: string[], encoding: EncodingMode): ScaleEncoding {
     if (names.length === 0) {
         return { items: [], strategy: 'empty' }
     }
 
     const candidates = [
-        ...encodeWithValidators(names),
-        encodeAsFamilies(names),
+        ...(encoding === 'compact' ? encodeWithValidators(names) : []),
+        encodeAsFamilies(names, encoding),
         { items: names.map(literal), strategy: 'enumerated' },
     ].filter((candidate): candidate is ScaleEncoding => candidate !== null)
 
@@ -97,7 +107,7 @@ function encodeWithValidators(names: string[]): ScaleEncoding[] {
 /**
  * Collapses names sharing a first segment into one nested entry per family, with the tails themselves encoded recursively through `encodeScale` — so numeric shades still end in a validator (`{ red: [isNumber] }`), word tails enumerate without repeating the prefix (`{ gap: ['narrow', 'wide'] }`), and multi-segment names factor further (`{ background: [{ alternative: [isNumber] }] }`). Each family keeps the factored form only when it estimates smaller than enumerating its members, so short families don't pay the object overhead. Structural factoring measures smaller on minified AND compressed output (unlike reference-based sharing, it removes repetition without adding entropy — see EmitOptions.sharing for that contrast).
  */
-function encodeAsFamilies(names: string[]): ScaleEncoding | null {
+function encodeAsFamilies(names: string[], encoding: EncodingMode): ScaleEncoding | null {
     const families = new Map<string, { tails: string[]; enumeratedCost: number }>()
 
     for (const name of names) {
@@ -120,7 +130,7 @@ function encodeAsFamilies(names: string[]): ScaleEncoding | null {
         if (tails.length < 2) {
             continue
         }
-        const tailEncoding = encodeScale(tails)
+        const tailEncoding = encodeScale(tails, encoding)
         if (familyName.length + 4 + estimateCost(tailEncoding.items) < enumeratedCost) {
             factoredFamilies.set(familyName, tailEncoding.items)
         }

@@ -2,6 +2,7 @@ import { getDefaultConfig } from 'tailwind-merge'
 import { type AnyConfig, createClassGroupUtils } from 'tailwind-merge/unstable-do-not-import'
 
 import { buildAugmentations } from './augment.ts'
+import { type EncodingMode } from './compress.ts'
 import { buildCustomUtilityPlan } from './custom-utilities.ts'
 import { loadDesignSystems } from './design-system.ts'
 import { emitModule } from './emit.ts'
@@ -16,6 +17,8 @@ export interface GenerateOptions {
     base: string
     /** LRU cache size passed through to the generated config. Defaults to the default config's value. */
     cacheSize?: number
+    /** How finite value sets (theme scales, custom-utility values) are encoded. 'compact' (default) picks the smallest matcher even when it accepts names beyond the theme — smallest bundle, but a nonexistent name like `rounded-xs` on a t-shirt scale can evict a real class. 'exact' only matches names that exist, so classes that produce no CSS never merge anything away — larger output, exact merge behavior. See `EncodingMode`. */
+    encoding?: EncodingMode
     /** Comment lines placed below the generated-file notice at the top of the emitted module, e.g. provenance info like input path and content hash. */
     banner?: string
     /** Output language of the emitted module — see `EmitOptions.format`. Defaults to TypeScript. */
@@ -43,13 +46,15 @@ export interface GenerateResult {
 export async function generate(options: GenerateOptions): Promise<GenerateResult> {
     const themeKeys = Object.keys(getDefaultConfig().theme)
     const { project, vanilla } = await loadDesignSystems({ css: options.css, base: options.base })
+    const encoding = options.encoding ?? 'compact'
 
     const plan = buildPlan({
         snapshot: snapshotTheme(project, themeKeys),
         cacheSize: options.cacheSize,
+        encoding,
     })
 
-    // Both classifiers reuse the configurator's own output: the pre-augmentation project config decides which new classes are already covered, the vanilla config buckets sibling classes into the candidate groups for classification. They run without the prefix because class-list names are unprefixed — the prefix only applies to real candidates like `tw:bg-red-500`.
+    // Both classifiers reuse the configurator's own output: the pre-augmentation project config decides which new classes are already covered, the vanilla config buckets sibling classes into the candidate groups for classification. They run without the prefix because class-list names are unprefixed — the prefix only applies to real candidates like `tw:bg-red-500`. The vanilla classifier always runs compact: real class names classify identically under both encodings, and compact skips the probing work.
     const vanillaPlan = buildPlan({ snapshot: snapshotTheme(vanilla, themeKeys) })
     const vanillaClassGroupUtils = createClassGroupUtils(materializeConfig(vanillaPlan))
 
@@ -60,6 +65,7 @@ export async function generate(options: GenerateOptions): Promise<GenerateResult
             project,
             vanilla,
             vanillaClassGroupId: vanillaClassGroupUtils.getClassGroupId,
+            encoding,
         }),
     )
 

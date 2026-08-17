@@ -3,7 +3,11 @@ import { fileURLToPath } from 'node:url'
 
 import { describe, expect, test } from 'vitest'
 
-import { assertTailwindConformance, generateFixture } from './fixture-utils'
+import {
+    assertExactClassificationParity,
+    assertTailwindConformance,
+    generateFixture,
+} from './fixture-utils'
 
 // Pinned CSS entrypoints of six public Tailwind v4 projects (see fixtures/real-world/README.md for sources, licenses, and preprocessing). Each runs the full pipeline: generation, the conformance sweep over every consecutive class-list pair, and a snapshot of the emitted module — which doubles as documentation of what generated output looks like for real projects. One curated expectation per project pins the finding that made it worth including.
 const PROJECTS = [
@@ -116,5 +120,36 @@ describe.each(PROJECTS)('$name', ({ name, entry, curated }) => {
     test('emitted module matches its file snapshot', async () => {
         const { code } = await fixturePromise
         await expect(code).toMatchFileSnapshot(`./__snapshots__/real-world/${name}.snap.ts`)
+    })
+})
+
+// The exact-encoding option came out of this fixture's design system (field feedback: a nonexistent name matching a compact scale validator evicted a real class). One real-world theme running exact mode end to end keeps the option honest at scale — the sweep for conflict semantics, the parity gate against undermatch — without doubling the whole suite; behavioral specifics live in exact-encoding.test.ts.
+describe('replit with exact encoding', () => {
+    const entryUrl = new URL('fixtures/real-world/replit/theme.css', import.meta.url)
+    const fixturesPromise = readFile(entryUrl, 'utf8').then((css) => {
+        const base = fileURLToPath(new URL('.', entryUrl))
+        return Promise.all([
+            generateFixture(css, base, { encoding: 'exact' }),
+            generateFixture(css, base),
+        ])
+    })
+
+    test('conforms to Tailwind conflict semantics across the class list', async () => {
+        const [exact] = await fixturesPromise
+        assertTailwindConformance(exact.designSystem, exact.twMerge, exact.plan)
+    })
+
+    // eslint-disable-next-line vitest/expect-expect -- the assertions live in assertExactClassificationParity
+    test('classifies every compiling class exactly like compact mode', async () => {
+        const [exact, compact] = await fixturesPromise
+        assertExactClassificationParity(exact.designSystem, exact.config, compact.config)
+    })
+
+    test('no scale falls back to a validator strategy', async () => {
+        const [exact] = await fixturesPromise
+        expect(exact.plan.report.encoding).toBe('exact')
+        for (const strategy of Object.values(exact.plan.report.scaleStrategies)) {
+            expect(strategy).not.toMatch(/validator:|mixed:/)
+        }
     })
 })
