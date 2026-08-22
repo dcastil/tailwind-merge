@@ -271,6 +271,9 @@ test('supports Tailwind CSS v4.2 features', () => {
     expect(twMerge('max-inline-none max-inline-10')).toBe('max-inline-10')
     expect(twMerge('min-block-auto min-block-lh min-block-10')).toBe('min-block-10')
     expect(twMerge('max-block-none max-block-lh max-block-10')).toBe('max-block-10')
+    expect(twMerge('inline-2xl inline-3xl')).toBe('inline-3xl')
+    expect(twMerge('min-inline-xs min-inline-1/2')).toBe('min-inline-1/2')
+    expect(twMerge('max-inline-svw max-inline-xl')).toBe('max-inline-xl')
 
     expect(twMerge('w-10 inline-20')).toBe('w-10 inline-20')
     expect(twMerge('h-10 block-20')).toBe('h-10 block-20')

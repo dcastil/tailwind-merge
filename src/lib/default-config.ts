@@ -140,6 +140,7 @@ export const getDefaultConfig = () => {
         ] as const
     const scaleSizingInline = () =>
         [
+            themeContainer,
             isFraction,
             'screen',
             'full',
@@ -835,32 +836,32 @@ export const getDefaultConfig = () => {
             size: [{ size: scaleSizing() }],
             /**
              * Inline Size
-             * @see https://tailwindcss.com/docs/width
+             * @see https://tailwindcss.com/docs/inline-size
              */
             'inline-size': [{ inline: ['auto', ...scaleSizingInline()] }],
             /**
              * Min-Inline Size
-             * @see https://tailwindcss.com/docs/min-width
+             * @see https://tailwindcss.com/docs/min-inline-size
              */
             'min-inline-size': [{ 'min-inline': ['auto', ...scaleSizingInline()] }],
             /**
              * Max-Inline Size
-             * @see https://tailwindcss.com/docs/max-width
+             * @see https://tailwindcss.com/docs/max-inline-size
              */
             'max-inline-size': [{ 'max-inline': ['none', ...scaleSizingInline()] }],
             /**
              * Block Size
-             * @see https://tailwindcss.com/docs/height
+             * @see https://tailwindcss.com/docs/block-size
              */
             'block-size': [{ block: ['auto', ...scaleSizingBlock()] }],
             /**
              * Min-Block Size
-             * @see https://tailwindcss.com/docs/min-height
+             * @see https://tailwindcss.com/docs/min-block-size
              */
             'min-block-size': [{ 'min-block': ['auto', ...scaleSizingBlock()] }],
             /**
              * Max-Block Size
-             * @see https://tailwindcss.com/docs/max-height
+             * @see https://tailwindcss.com/docs/max-block-size
              */
             'max-block-size': [{ 'max-block': ['none', ...scaleSizingBlock()] }],
             /**
