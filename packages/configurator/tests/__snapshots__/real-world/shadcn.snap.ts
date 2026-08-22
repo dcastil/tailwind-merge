@@ -1649,7 +1649,7 @@ export const getConfig = () => {
             'touch-y': ['touch'],
             'touch-pz': ['touch'],
             'utility.section-soft': ['bg-image', 'gradient-from', 'gradient-to'],
-            'utility.container-wrapper': ['me', 'ms', 'mx', 'pe', 'ps', 'px', 'w'],
+            'utility.container-wrapper': ['me', 'ml', 'mr', 'ms', 'mx', 'pe', 'pl', 'pr', 'ps', 'px', 'w'],
             'utility.no-scrollbar': ['scrollbar-w'],
             'utility.border-ghost': ['position'],
         },

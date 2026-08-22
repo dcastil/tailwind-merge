@@ -118,7 +118,8 @@ export function buildPlan({ snapshot, cacheSize, encoding = 'compact' }: BuildPl
                         'Theme getter without a themeKey property — the configurator requires a tailwind-merge version that exposes it',
                     )
                 }
-                return resolveScale(definition.themeKey).items
+                // Every group gets its own copy of the scale, nested family objects included: collision corrections later remove single claims from one group's copy (`xl` from the drop-shadow copy of the color scale while `text-xl` stays a color), which must never leak into the other groups or the shared scale const. The emitter recognizes scale runs structurally, so copies cost nothing in the output.
+                return cloneValues(resolveScale(definition.themeKey).items)
             }
 
             const name = validatorNames.get(definition)
@@ -246,7 +247,7 @@ export function applyAugmentations(
         collisions: {
             className: string
             claimingGroupId: string
-            vanillaGroupId: string
+            ownerGroupId: string
             resolution: 'restore' | 'neutralize'
         }[]
         unassigned: { className: string; reason: string }[]
@@ -268,28 +269,64 @@ export function applyAugmentations(
 
     plan.report.unassignedClasses = [...augmentations.unassigned]
 
-    // Collisions are resolved by removing claims. Each group array holds its own copy of the scale items, so a removed value keeps working for every other utility root (with `--color-xl`, removing `xl` under `drop-shadow` leaves `text-xl` a color). 'restore' removes only the new claim — the original group's own machinery then classifies the class again. 'neutralize' removes the claims of both groups, because a class compiling into multiple rules at once must not be merged away in either direction.
-    for (const { className, claimingGroupId, vanillaGroupId, resolution } of augmentations.collisions) {
+    // Collisions are resolved by removing claims, which works on each group's own copy of the scale items (with `--color-xl`, removing `xl` under `drop-shadow` leaves `text-xl` a color). 'restore' removes the wrong group's claim so the owner's own machinery classifies the class again; 'neutralize' removes the claims of both groups, because a class compiling into multiple rules at once must not be merged away in either direction. A claim that is not a removable literal (a validator like `isNumber`, or a factored family's `{ x: [isNumber] }`) can still be outranked: tailwind-merge's class map always prefers an exact literal path over a validator, so 'restore' then appends the class to the owner group as a literal, and 'neutralize' gives it a conflict-free group of its own — either way the class ends up exactly where Tailwind's compiled output says it belongs.
+    for (const { className, claimingGroupId, ownerGroupId, resolution } of augmentations.collisions) {
         const groupIdsToRemoveFrom =
-            resolution === 'restore' ? [claimingGroupId] : [claimingGroupId, vanillaGroupId]
+            resolution === 'restore' ? [claimingGroupId] : [claimingGroupId, ownerGroupId]
         const removedFromGroupIds = groupIdsToRemoveFrom.filter((groupId) => {
             const items = plan.classGroups.get(groupId)
             return items !== undefined && removeClassClaim(items, className)
         })
+        const fullyRemoved = removedFromGroupIds.length === groupIdsToRemoveFrom.length
 
-        if (removedFromGroupIds.length === groupIdsToRemoveFrom.length) {
+        if (resolution === 'restore') {
+            const ownerItems = plan.classGroups.get(ownerGroupId)
+            if (!fullyRemoved && ownerItems !== undefined && !hasClassClaim(ownerItems, className)) {
+                ownerItems.push({ kind: 'class', value: className })
+            }
             plan.report.resolvedCollisions.push({
                 className,
-                keptGroupId: resolution === 'restore' ? vanillaGroupId : null,
+                keptGroupId: ownerGroupId,
                 removedFromGroupIds,
             })
         } else {
-            plan.report.unassignedClasses.push({
-                className,
-                reason: `name collision with ${claimingGroupId} could not be fully resolved (a claim is not a plain value that can be removed)`,
-            })
+            if (!fullyRemoved) {
+                plan.classGroups.set(neutralizedGroupId(className), [{ kind: 'class', value: className }])
+            }
+            plan.report.resolvedCollisions.push({ className, keptGroupId: null, removedFromGroupIds })
         }
     }
+}
+
+/** Group ID for a neutralized class that keeps a validator-based claim somewhere: a group of its own, referenced by no conflict map, so the class behaves like a non-Tailwind class while still outranking the validator through its literal path. */
+function neutralizedGroupId(className: string): string {
+    return `collision.${className}`
+}
+
+/** Whether `className` already resolves into these items through a literal — the check that keeps a restore from appending a duplicate literal to the owner group. Mirrors the walk in `removeClassClaim`. */
+function hasClassClaim(items: PlanValue[], className: string): boolean {
+    return items.some((item) => {
+        if (item.kind === 'class') {
+            return item.value === className
+        }
+        if (item.kind === 'object') {
+            return item.entries.some(
+                ([key, entryItems]) =>
+                    className.startsWith(`${key}-`) &&
+                    hasClassClaim(entryItems, className.slice(key.length + 1)),
+            )
+        }
+        return false
+    })
+}
+
+/** Deep copy of plan values, so group arrays can be edited independently of each other and of the shared scale definitions. */
+function cloneValues(values: PlanValue[]): PlanValue[] {
+    return values.map((value) =>
+        value.kind === 'object'
+            ? { kind: 'object', entries: value.entries.map(([key, items]) => [key, cloneValues(items)]) }
+            : value,
+    )
 }
 
 /**

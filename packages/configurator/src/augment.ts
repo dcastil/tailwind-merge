@@ -9,11 +9,11 @@ import {
 
 export interface CollisionResolution {
     className: string
-    /** The group whose scale value wrongly claimed the class. */
+    /** The group whose scale value wrongly claims the class. */
     claimingGroupId: string
-    /** The group the class resolved to before the theme changed it. */
-    vanillaGroupId: string
-    /** 'restore': the original classification is still correct, remove the new claim. 'neutralize': the class now resolves through multiple utilities at once, so it must not belong to any group — remove every claim and let it pass through unmerged. */
+    /** The group that owns the class according to its compiled declarations: for an existing class the group it resolved to before the theme changed it, for a theme-created class the group its declarations match. */
+    ownerGroupId: string
+    /** 'restore': the owner's classification is the correct one, take the claim away from the claiming group. 'neutralize': the class now resolves through multiple utilities at once, so it must not belong to any group — take every claim away and let it pass through unmerged. */
     resolution: 'restore' | 'neutralize'
 }
 
@@ -60,6 +60,7 @@ export function buildAugmentations({
     const exemplarsByFirstSegment = collectExemplars(vanillaClassNames, vanillaClassGroupId)
 
     const assignments = new Map<string, string[]>()
+    const collisions: CollisionResolution[] = []
     const unassigned: { className: string; reason: string }[] = []
     const handledNames = new Set<string>()
 
@@ -92,8 +93,18 @@ export function buildAugmentations({
             continue
         }
 
-        if (projectClassGroupId(registrationName) === targetGroupId) {
+        const claimingGroupId = projectClassGroupId(registrationName)
+        if (claimingGroupId === targetGroupId) {
             continue
+        }
+        if (claimingGroupId !== undefined) {
+            // Another group's scale already claims the new class — a theme value name that exists in two namespaces one utility reads (`--shadow-brand` next to `--color-brand` makes `shadow-brand` a box shadow, yet the color scale's `brand` claims it for shadow-color too), or a numeric color token shadowing a bare-number value (`--color-4` vs `decoration-4`, which Tailwind keeps as a thickness). Appending the class to its owner group below is not enough when both claims are literals on the same path — the later group in the config would win — so the wrong claim is also removed like any other collision.
+            collisions.push({
+                className: registrationName,
+                claimingGroupId,
+                ownerGroupId: targetGroupId,
+                resolution: 'restore',
+            })
         }
 
         const groupClassNames = assignments.get(targetGroupId)
@@ -121,9 +132,7 @@ export function buildAugmentations({
         }
     }
 
-    // Collision corrections: a theme value name can shadow a class that already exists (`--color-bottom` vs the `bg-bottom` position, `--color-xl` vs the `drop-shadow-xl` size). Which side Tailwind resolves differs per utility — `text-xl` genuinely becomes a color while `drop-shadow-xl` stays a size — so every class whose classification changed relative to the vanilla config is re-checked against its compiled output. Classes that now compile into multiple rules at once belong to no group at all.
-    const collisions: CollisionResolution[] = []
-
+    // Collision corrections: a theme value name can shadow a class that already exists (`--color-bottom` vs the `bg-bottom` position, `--color-xl` vs the `drop-shadow-xl` size). Which side Tailwind resolves differs per utility — `text-xl` genuinely becomes a color while `drop-shadow-xl` stays a size — so every class whose classification changed relative to the vanilla config is re-checked against its compiled output. The vanilla compilation of the same class is the most direct evidence: declaring exactly what it declared before means the class still is what it was, and declaring everything it declared before plus what the claiming group's classes declare means Tailwind now emits both interpretations in one rule (`bg-none` with a `--color-none` defined sets background-image and background-color) — such a class belongs to no group at all. Only when neither holds does the signature classification decide.
     for (const className of vanillaClassNames) {
         const projectGroupId = projectClassGroupId(className)
         const vanillaGroupId = vanillaClassGroupId(className)
@@ -146,6 +155,36 @@ export function buildAugmentations({
         }
         handledNames.add(registrationName)
 
+        const vanillaProperties = declaredProperties(vanilla, className)
+        if (vanillaProperties !== null && havePropertiesEqual(properties, vanillaProperties)) {
+            collisions.push({
+                className: registrationName,
+                claimingGroupId: projectGroupId,
+                ownerGroupId: vanillaGroupId,
+                resolution: 'restore',
+            })
+            continue
+        }
+        const claimingSignature = exemplarsByFirstSegment
+            .get(firstNameSegment(className))
+            ?.get(projectGroupId)
+        const claimingProperties =
+            claimingSignature === undefined ? null : declaredProperties(vanilla, claimingSignature)
+        if (
+            vanillaProperties !== null &&
+            claimingProperties !== null &&
+            haveProperSubset(vanillaProperties, properties) &&
+            [...claimingProperties].every((property) => properties.has(property))
+        ) {
+            collisions.push({
+                className: registrationName,
+                claimingGroupId: projectGroupId,
+                ownerGroupId: vanillaGroupId,
+                resolution: 'neutralize',
+            })
+            continue
+        }
+
         const targetGroupId = classifyByProperties(
             className,
             properties,
@@ -161,14 +200,14 @@ export function buildAugmentations({
             collisions.push({
                 className: registrationName,
                 claimingGroupId: projectGroupId,
-                vanillaGroupId,
+                ownerGroupId: vanillaGroupId,
                 resolution: 'neutralize',
             })
         } else if (targetGroupId === vanillaGroupId) {
             collisions.push({
                 className: registrationName,
                 claimingGroupId: projectGroupId,
-                vanillaGroupId,
+                ownerGroupId: vanillaGroupId,
                 resolution: 'restore',
             })
         } else {

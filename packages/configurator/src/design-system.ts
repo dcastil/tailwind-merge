@@ -33,9 +33,19 @@ export async function loadDesignSystems({ css, base }: LoadDesignSystemsOptions)
     ])
 
     return {
-        project: project as unknown as DesignSystemAccess,
-        vanilla: vanilla as unknown as DesignSystemAccess,
+        project: memoizeClassList(project as unknown as DesignSystemAccess),
+        vanilla: memoizeClassList(vanilla as unknown as DesignSystemAccess),
     }
+}
+
+/**
+ * Caches `getClassList()` on a loaded design system. Tailwind rebuilds the list on every call (tens of milliseconds for the ~23k vanilla names), and one generation asks for it several times — the custom-utility pass once per functional root — so on themes with many custom utilities the repeated rebuilds dominated generation time (2.5× on the heaviest real-world fixture). A loaded design system never changes, so caching is safe; consumers replace the object for a new theme.
+ */
+function memoizeClassList(designSystem: DesignSystemAccess): DesignSystemAccess {
+    const original = designSystem.getClassList.bind(designSystem)
+    let classList: ReturnType<DesignSystemAccess['getClassList']> | undefined
+    designSystem.getClassList = () => (classList ??= original())
+    return designSystem
 }
 
 /**
@@ -251,12 +261,13 @@ function analyzeSelector(selector: string): { contextFragment: string; condition
 }
 
 /**
- * Dash-prefixed properties that their prefix property does NOT control, breaking CSS's otherwise systematic shorthand naming: `color` is unrelated to `color-scheme`, the `outline` shorthand excludes `outline-offset`, the `flex` shorthand covers grow/shrink/basis but not wrap/direction, and so on. These are web-platform facts (stable, not Tailwind-versioned), so a small maintained list is acceptable where everything else stays derived.
+ * Dash-prefixed properties that their prefix property does NOT control, breaking CSS's otherwise systematic shorthand naming: `color` is unrelated to `color-scheme`, the `outline` shorthand excludes `outline-offset`, the `flex` shorthand covers grow/shrink/basis but not wrap/direction, `stroke` and `fill` are paints that don't control their `-width`/`-opacity`/`-rule` siblings, and so on. These are web-platform facts (stable, not Tailwind-versioned), so a small maintained list is acceptable where everything else stays derived. The `stroke` entries came out of a theme with a numeric color token, where `stroke-4` (a color) and `stroke-1` (a width) must stay side by side.
  */
 const UNCONTROLLED_DASH_PREFIXED_PROPERTIES = new Set([
     'color-scheme',
     'overflow-wrap',
     'overflow-anchor',
+    'overflow-clip-margin',
     'outline-offset',
     'flex-wrap',
     'flex-direction',
@@ -267,13 +278,36 @@ const UNCONTROLLED_DASH_PREFIXED_PROPERTIES = new Set([
     'mask-border',
     'animation-composition',
     'animation-timeline',
+    'stroke-width',
+    'stroke-dasharray',
+    'stroke-dashoffset',
+    'stroke-linecap',
+    'stroke-linejoin',
+    'stroke-miterlimit',
+    'stroke-opacity',
+    'fill-opacity',
+    'fill-rule',
+    'clip-path',
+    'clip-rule',
+    'text-align-last',
+    'text-decoration-skip-ink',
+    'perspective-origin',
+    'transform-origin',
+    'transform-style',
+    'transform-box',
+    'contain-intrinsic-size',
+    'contain-intrinsic-width',
+    'contain-intrinsic-height',
+    'contain-intrinsic-block-size',
+    'contain-intrinsic-inline-size',
 ])
 
 /**
- * Shorthands whose longhands don't carry the shorthand's name at all, so no naming rule can find them: `gap` controls `column-gap`/`row-gap`, `place-content` controls the align/justify pair, the `font` shorthand also resets `line-height`. The same maintained-list justification as above applies. Longhand-of-longhand chains don't need entries — utilities always declare the concrete properties these lists name.
+ * Shorthands whose longhands don't carry the shorthand's name at all, so no naming rule can find them: `gap` controls `column-gap`/`row-gap`, `inset` controls the four physical offsets, `place-content` controls the align/justify pair, the `font` shorthand also resets `line-height`. The same maintained-list justification as above applies. Longhand-of-longhand chains don't need entries — utilities always declare the concrete properties these lists name.
  */
 const IRREGULAR_SHORTHAND_LONGHANDS: Record<string, string[]> = {
     gap: ['column-gap', 'row-gap'],
+    inset: ['top', 'right', 'bottom', 'left'],
     'place-content': ['align-content', 'justify-content'],
     'place-items': ['align-items', 'justify-items'],
     'place-self': ['align-self', 'justify-self'],
@@ -285,6 +319,8 @@ const IRREGULAR_SHORTHAND_LONGHANDS: Record<string, string[]> = {
 
 /**
  * Whether setting `property` fully controls `target`, exploiting CSS's systematic shorthand naming: identity, dash-prefix (`padding` → `padding-inline`, `inset` → `inset-block-end`), or shared first and last segment with fewer segments (`border-radius` → `border-top-left-radius`, `border-color` → `border-top-color`) — corrected by the two enumerated exception lists where CSS naming lies about the relationship, in either direction.
+ *
+ * On top of the pure naming facts, one policy tailwind-merge's default config has always taken is applied here too: an axis property in the logical `-inline`/`-block` form (`padding-inline`, as `px-*` compiles in v4) controls both physical sides of its axis (`padding-left`, `padding-right`) — the horizontal-tb assumption behind the default config's `px` → `pl`/`pr` edges. Single logical sides stay unrelated to single physical sides (`padding-inline-start` vs `padding-left` depends on the text direction as well), which is also where the default config draws the line.
  */
 export function propertyCovers(property: string, target: string): boolean {
     if (property === target) {
@@ -298,11 +334,40 @@ export function propertyCovers(property: string, target: string): boolean {
     }
     const propertySegments = property.split('-')
     const targetSegments = target.split('-')
-    return (
+    if (
         propertySegments.length < targetSegments.length &&
         propertySegments.length > 1 &&
         propertySegments[0] === targetSegments[0] &&
         propertySegments[propertySegments.length - 1] === targetSegments[targetSegments.length - 1]
+    ) {
+        return true
+    }
+    return physicalSides(property).some((side) => propertyCovers(side, target))
+}
+
+/**
+ * The two physical-side properties an axis property covers under horizontal-tb writing (`padding-inline` → `padding-left`/`padding-right`, `inset-block` → `top`/`bottom`, `border-inline-width` → `border-left-width`/`border-right-width`); empty for everything that isn't an axis property. `inline-size`/`block-size` and their min/max forms are dimensions, not axes, so the segment must not come first or follow `min`/`max`; and a single logical side (`padding-inline-start`) is not an axis either.
+ */
+function physicalSides(property: string): string[] {
+    const segments = property.split('-')
+    const axisIndex = segments.findIndex(
+        (segment, index) =>
+            (segment === 'inline' || segment === 'block') &&
+            index > 0 &&
+            segments[index - 1] !== 'min' &&
+            segments[index - 1] !== 'max' &&
+            segments[index + 1] !== 'start' &&
+            segments[index + 1] !== 'end',
+    )
+    if (axisIndex === -1) {
+        return []
+    }
+    const sides = segments[axisIndex] === 'inline' ? ['left', 'right'] : ['top', 'bottom']
+    if (property === 'inset-inline' || property === 'inset-block') {
+        return sides
+    }
+    return sides.map((side) =>
+        [...segments.slice(0, axisIndex), side, ...segments.slice(axisIndex + 1)].join('-'),
     )
 }
 
