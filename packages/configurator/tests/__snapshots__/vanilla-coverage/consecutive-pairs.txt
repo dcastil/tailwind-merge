@@ -6,7 +6,6 @@
 (unclassified) → max-inline-size  |  max-inline-xs max-inline-1/2  |  kept both, Tailwind: merge
 (unclassified) → min-inline-size  |  min-inline-xs min-inline-1/2  |  kept both, Tailwind: merge
 (unclassified) → translate  |  translate-3d translate-4  |  kept both, Tailwind: merge
-col-end → col-start-end  |  col-end-auto col-span-1  |  kept both, Tailwind: merge
 columns → (unclassified)  |  columns-12 columns-auto  |  kept both, Tailwind: merge
 duration → duration  |  duration-1000 duration-initial  |  merged, Tailwind: keep both
 ease → ease  |  ease-in-out ease-initial  |  merged, Tailwind: keep both
@@ -16,6 +15,5 @@ mask-composite → mask-image-t-from-pos  |  mask-subtract mask-t-from-0  |  kep
 max-h → (unclassified)  |  max-h-min max-h-none  |  kept both, Tailwind: merge
 max-inline-size → (unclassified)  |  max-inline-svw max-inline-xl  |  kept both, Tailwind: merge
 min-inline-size → (unclassified)  |  min-inline-svw min-inline-xl  |  kept both, Tailwind: merge
-row-end → row-start-end  |  row-end-auto row-span-1  |  kept both, Tailwind: merge
 scale → scale-x  |  scale-none scale-x-0  |  kept both, Tailwind: merge
 scale-3d → scale  |  scale-3d scale-50  |  kept both, Tailwind: merge
