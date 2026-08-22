@@ -71,6 +71,10 @@ test('supports Tailwind CSS v4.0 features', () => {
     )
     expect(twMerge('bg-linear-to-r bg-linear-45')).toBe('bg-linear-45')
     expect(twMerge('bg-linear-to-r bg-radial-[something] bg-conic-10')).toBe('bg-conic-10')
+    expect(twMerge('bg-conic bg-conic-10')).toBe('bg-conic-10')
+    expect(twMerge('bg-conic-10 bg-conic')).toBe('bg-conic')
+    expect(twMerge('bg-radial bg-conic/decreasing')).toBe('bg-conic/decreasing')
+    expect(twMerge('bg-red-500 bg-conic')).toBe('bg-red-500 bg-conic')
     expect(twMerge('ring-4 ring-orange inset-ring inset-ring-3 inset-ring-blue')).toBe(
         'ring-4 ring-orange inset-ring-3 inset-ring-blue',
     )

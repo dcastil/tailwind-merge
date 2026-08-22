@@ -1238,7 +1238,7 @@ export const getDefaultConfig = () => {
                                 isArbitraryValue,
                             ],
                             radial: ['', isArbitraryVariable, isArbitraryValue],
-                            conic: [isInteger, isArbitraryVariable, isArbitraryValue],
+                            conic: ['', isInteger, isArbitraryVariable, isArbitraryValue],
                         },
                         isArbitraryVariableImage,
                         isArbitraryImage,
