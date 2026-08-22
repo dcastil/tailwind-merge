@@ -26,7 +26,13 @@ export default [
         rules: {
             'vitest/expect-expect': [
                 'error',
-                { assertFunctionNames: ['expect', 'assertTailwindConformance'] },
+                {
+                    assertFunctionNames: [
+                        'expect',
+                        'assertTailwindConformance',
+                        'assertPruningEquivalence',
+                    ],
+                },
             ],
         },
     },

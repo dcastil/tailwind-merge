@@ -2,11 +2,12 @@ const assert = require('assert')
 
 const { getDefaultConfig, twMerge } = require('..')
 const { twMerge: twMergeEs5 } = require('../dist/es5/bundle-cjs.js')
-const { createClassGroupUtils } = require('../dist/unstable-cjs.js')
+const { createClassGroupUtils, createParseClassName } = require('../dist/unstable-cjs.js')
 
 assertBuiltTwMerge(twMerge)
 assertBuiltTwMerge(twMergeEs5)
 assert(createClassGroupUtils(getDefaultConfig()).getClassGroupId('bg-red-500') === 'bg-color')
+assert(createParseClassName(getDefaultConfig())('hover:p-4').baseClassName === 'p-4')
 
 console.log('[tailwind-merge] Tests for built CJS package exports and ES5 bundle passed.')
 

@@ -52,6 +52,22 @@ export interface PlanReport {
     }[]
     /** Theme-created classes no group could be determined for. Reported so gaps are visible instead of silently unmergeable. */
     unassignedClasses: { className: string; reason: string }[]
+    /** Present when the plan was pruned to a project's used classes (see `prunePlan`). */
+    pruning?: PruneReport
+}
+
+/** What pruning did to a plan, for CLI output, plugin logs, and tests. Counts only — the kept class names are visible in the emitted config itself. */
+export interface PruneReport {
+    /** Distinct class names handed to the pruner (raw scanner tokens included: anything that looked like a class name in the sources). */
+    usedClassCount: number
+    /** How many of them the full config classifies into a class group; the rest are non-Tailwind tokens, arbitrary properties, or class names the theme doesn't produce. */
+    classifiedClassCount: number
+    classGroupsBefore: number
+    classGroupsAfter: number
+    /** Class groups dropped because no used class belongs to them, in plan order. */
+    removedClassGroups: string[]
+    /** Class groups kept in full because a used class classified into them through a path the member-level walk could not attribute — should stay empty; non-empty means a mismatch between the walk and tailwind-merge's class map worth investigating. */
+    unprunedClassGroups: string[]
 }
 
 export interface ScalePlan {
@@ -416,7 +432,7 @@ function dedupeValues(values: PlanValue[]): PlanValue[] {
     })
 }
 
-function filterConflictMap(
+export function filterConflictMap(
     conflictMap: Partial<Record<string, readonly string[]>>,
     classGroups: Map<string, PlanValue[]>,
 ): Map<string, string[]> {

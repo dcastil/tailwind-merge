@@ -36,7 +36,7 @@ export function emitModule(plan: ConfigPlan, options: EmitOptions = {}): string 
     const usedCanonicals = resolveTransitiveUsage(candidates, firstPass)
     const finalNames = assignNames(candidates, usedCanonicals)
     const secondPass = serializeAll(plan, candidates, finalNames, format)
-    const { configBody, constantBodies } = secondPass
+    const { configBody } = secondPass
 
     const lines: string[] = []
 
@@ -79,14 +79,16 @@ export function emitModule(plan: ConfigPlan, options: EmitOptions = {}): string 
         lines.push('')
     }
 
-    for (const [canonical, body] of sortByDependencies(secondPass, finalNames)) {
+    const emittedConstants = sortByDependencies(secondPass, finalNames)
+    for (const [canonical, body] of emittedConstants) {
         const comment = candidates.get(canonical)?.comment
         if (comment) {
             lines.push(`${INDENT}/** ${comment} */`)
         }
         lines.push(`${INDENT}const ${finalNames.get(canonical)} = ${body}`)
     }
-    if (constantBodies.size > 0) {
+    // Only the consts actually emitted earn the separating blank line — a pruned plan can leave every shared-scale candidate unreferenced.
+    if (emittedConstants.length > 0) {
         lines.push('')
     }
 
@@ -620,6 +622,11 @@ const canonicalArrayCache = new WeakMap<PlanValue[], string>()
 const canonicalObjectCache = new WeakMap<Extract<PlanValue, { kind: 'object' }>, string>()
 
 function pushStringRecordMap(lines: string[], property: string, map: Map<string, string[]>) {
+    if (map.size === 0) {
+        // Possible after pruning leaves no conflict edges between the kept groups.
+        lines.push(`${INDENT}${INDENT}${property}: {},`)
+        return
+    }
     lines.push(`${INDENT}${INDENT}${property}: {`)
     for (const [key, values] of map) {
         lines.push(`${INDENT.repeat(3)}${propertyKey(key)}: ${serializeStringArray(values)},`)

@@ -214,3 +214,76 @@ function declarationsConflict(first: DeclarationEntry[], second: DeclarationEntr
 function propertiesInterfere(first: string, second: string): boolean {
     return propertyCovers(first, second) || propertyCovers(second, first)
 }
+
+/**
+ * A deterministic "used classes" sample drawn from a design system's class list: every `stride`-th class name, with a rotating share decorated the way real sources decorate them — variants, the important marker in both spellings, postfix modifiers — plus a few arbitrary values, a negative value, an arbitrary property, and non-class tokens a scanner would also pick up. Stands in for a scanner's output in tests that don't involve real source files.
+ */
+export function sampleUsedClasses(designSystem: DesignSystemAccess, stride: number): string[] {
+    const classNames = designSystem.getClassList().map(([className]) => className)
+    const sample: string[] = []
+
+    for (let index = 0; index < classNames.length; index += stride) {
+        const className = classNames[index]!
+        const variant = index % 5 === 0 ? 'hover:' : index % 7 === 0 ? 'md:dark:' : ''
+        const postfix = index % 13 === 0 ? '/50' : ''
+        const important = index % 11 === 0 ? '!' : ''
+        sample.push(
+            index % 17 === 0
+                ? `${variant}!${className}`
+                : `${variant}${className}${postfix}${important}`,
+        )
+    }
+
+    sample.push(
+        'p-[13px]',
+        'bg-[url(/img.png)]',
+        'w-[calc(100%-2rem)]',
+        'text-(--my-var)',
+        'grid-cols-[1fr_2fr]',
+        '[mask-type:luminance]',
+        '-mt-2',
+        'const',
+        'className',
+        '---',
+    )
+    return sample
+}
+
+/**
+ * The pruning invariant: for class lists made of used classes, the pruned config must merge exactly like the full config — each class alone, each consecutive pair in both orders, a pseudo-random partner from elsewhere in the list, and a share of triples. Classes outside the used set are deliberately not checked here; the pruned config treats them as non-Tailwind classes by design.
+ */
+export function assertPruningEquivalence(
+    fullConfig: AnyConfig,
+    prunedConfig: AnyConfig,
+    usedClasses: string[],
+): { checkedClassLists: number } {
+    const fullTwMerge = createTailwindMerge(() => fullConfig)
+    const prunedTwMerge = createTailwindMerge(() => prunedConfig)
+    const mismatches: { input: string; full: string; pruned: string }[] = []
+    let checkedClassLists = 0
+
+    const check = (input: string) => {
+        checkedClassLists += 1
+        const full = fullTwMerge(input)
+        const pruned = prunedTwMerge(input)
+        if (full !== pruned) {
+            mismatches.push({ input, full, pruned })
+        }
+    }
+
+    for (let index = 0; index < usedClasses.length; index += 1) {
+        const first = usedClasses[index]!
+        const second = usedClasses[(index + 1) % usedClasses.length]!
+        const third = usedClasses[(index * 7919) % usedClasses.length]!
+        check(first)
+        check(`${first} ${second}`)
+        check(`${second} ${first}`)
+        check(`${first} ${third}`)
+        if (index % 3 === 0) {
+            check(`${first} ${second} ${third}`)
+        }
+    }
+
+    expect(mismatches).toEqual([])
+    return { checkedClassLists }
+}

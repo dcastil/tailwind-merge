@@ -8,6 +8,7 @@ import { loadDesignSystems } from './design-system.ts'
 import { emitModule } from './emit.ts'
 import { materializeConfig } from './materialize.ts'
 import { type ConfigPlan, applyAugmentations, applyCustomUtilityPlan, buildPlan } from './plan.ts'
+import { prunePlan } from './prune.ts'
 import { snapshotTheme } from './snapshot.ts'
 
 export interface GenerateOptions {
@@ -25,6 +26,8 @@ export interface GenerateOptions {
     format?: 'ts' | 'js'
     /** Module specifier the emitted code imports tailwind-merge's API from — see `EmitOptions.importSource`. */
     importSource?: string
+    /** Shrinks the generated config to the classes a project uses: class names as a source scanner finds them (variants, important markers, and postfix modifiers included — see `createSourceScanner`). Class groups and scale members no listed class reaches are dropped; every class list made of listed classes merges exactly as with the full config, while classes outside the list pass through unmerged. The result is reported in `plan.report.pruning`. */
+    prune?: { usedClasses: Iterable<string> }
 }
 
 export interface GenerateResult {
@@ -95,13 +98,16 @@ export async function generate(options: GenerateOptions): Promise<GenerateResult
         }),
     )
 
+    // Pruning runs last, on the finished plan: only then does classification see every member a used class could reach (custom utilities, augmented classes, collision corrections included).
+    const finalPlan = options.prune ? prunePlan(plan, options.prune.usedClasses) : plan
+
     return {
-        code: emitModule(plan, {
+        code: emitModule(finalPlan, {
             banner: options.banner,
             format: options.format,
             importSource: options.importSource,
         }),
-        config: materializeConfig(plan),
-        plan,
+        config: materializeConfig(finalPlan),
+        plan: finalPlan,
     }
 }

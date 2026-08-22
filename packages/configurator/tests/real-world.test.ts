@@ -3,10 +3,15 @@ import { fileURLToPath } from 'node:url'
 
 import { describe, expect, test } from 'vitest'
 
+import { materializeConfig } from '../src/materialize'
+import { prunePlan } from '../src/prune'
+
 import {
     assertExactClassificationParity,
+    assertPruningEquivalence,
     assertTailwindConformance,
     generateFixture,
+    sampleUsedClasses,
 } from './fixture-utils'
 
 // Pinned CSS entrypoints of six public Tailwind v4 projects (see fixtures/real-world/README.md for sources, licenses, and preprocessing). Each runs the full pipeline: generation, the conformance sweep over every consecutive class-list pair, and a snapshot of the emitted module — which doubles as documentation of what generated output looks like for real projects. One curated expectation per project pins the finding that made it worth including.
@@ -120,6 +125,17 @@ describe.each(PROJECTS)('$name', ({ name, entry, curated }) => {
     test('emitted module matches its file snapshot', async () => {
         const { code } = await fixturePromise
         await expect(code).toMatchFileSnapshot(`./__snapshots__/real-world/${name}.snap.ts`)
+    })
+
+    // The pruning invariant at real-theme scale: a sampled usage (every 7th class of the class list, decorated with variants/important/postfix) must merge exactly like the full config, and every used class must be attributable to the members the walk keeps.
+    test('pruned to a sampled usage, merges those classes exactly like the full config', async () => {
+        const { config, plan, designSystem } = await fixturePromise
+        const usedClasses = sampleUsedClasses(designSystem, 7)
+        const pruned = prunePlan(plan, usedClasses)
+
+        assertPruningEquivalence(config, materializeConfig(pruned), usedClasses)
+        expect(pruned.report.pruning!.unprunedClassGroups).toEqual([])
+        expect(pruned.classGroups.size).toBeLessThan(plan.classGroups.size)
     })
 })
 

@@ -72,6 +72,7 @@ Options:
 | `banner` | no | Extra comment lines below the generated-file notice, e.g. provenance info. |
 | `format` | no | `'ts'` (default) or `'js'` — the emitted module's language. |
 | `importSource` | no | Module specifier the emitted code imports tailwind-merge from. Defaults to `'tailwind-merge'`; override when you re-export tailwind-merge from somewhere else (the Vite plugin uses this). |
+| `prune` | no | `{ usedClasses }` — prunes the config to the listed class names (raw tokens as found in your sources, variants and modifiers included): class groups and scale members no listed class reaches are dropped, class lists made of listed classes merge exactly as with the full config, classes outside the list pass through unmerged. `plan.report.pruning` tells what happened. |
 
 Results:
 
