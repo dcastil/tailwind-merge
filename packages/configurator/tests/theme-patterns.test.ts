@@ -174,13 +174,11 @@ describe('theme extending many namespaces', async () => {
         expect(twMerge('font-display font-950')).toBe('font-display font-950')
     })
 
-    test('only the container fan-out to logical-property sizing needs augmentation', () => {
-        // `--container-*` also powers the inline-size utilities, which the standard namespace flow doesn't cover — the vanilla-diff pass picks those classes up.
-        expect(plan.report.augmentedClassGroups).toEqual({
-            'inline-size': ['inline-8xl'],
-            'max-inline-size': ['max-inline-8xl'],
-            'min-inline-size': ['min-inline-8xl'],
-        })
+    test('the container fan-out to logical-property sizing flows through the standard scale', () => {
+        // `--container-*` also powers the inline-size utilities. Until tailwind-merge#706 their groups lacked the container scale and the vanilla-diff pass had to pick `inline-8xl` up as an augmentation; now it flows through the standard namespace like `max-w-8xl`.
+        expect(twMerge('inline-8xl inline-sm')).toBe('inline-sm')
+        expect(twMerge('min-inline-8xl min-inline-4')).toBe('min-inline-4')
+        expect(plan.report.augmentedClassGroups).toEqual({})
         expect(plan.report.unassignedClasses).toEqual([])
     })
 })

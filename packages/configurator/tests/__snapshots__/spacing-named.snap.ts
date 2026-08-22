@@ -101,7 +101,7 @@ export const getConfig = () => {
             container: ['container'],
             'container-type': [{ '@container': ['', 'normal', 'size', isArbitraryVariable, isArbitraryValue] }],
             'container-named': [isNamedContainerQuery],
-            columns: [{ columns: [isNumber, isArbitraryValue, isArbitraryVariable, isTshirtSize] }],
+            columns: [{ columns: [isNumber, 'auto', isArbitraryValue, isArbitraryVariable, isTshirtSize] }],
             'break-after': [
                 {
                     'break-after': ['auto', 'avoid', 'all', 'avoid-page', 'page', 'left', 'right', 'column'],
@@ -534,6 +534,7 @@ export const getConfig = () => {
                 {
                     inline: [
                         'auto',
+                        isTshirtSize,
                         isFraction,
                         'screen',
                         'full',
@@ -553,6 +554,7 @@ export const getConfig = () => {
                 {
                     'min-inline': [
                         'auto',
+                        isTshirtSize,
                         isFraction,
                         'screen',
                         'full',
@@ -572,6 +574,7 @@ export const getConfig = () => {
                 {
                     'max-inline': [
                         'none',
+                        isTshirtSize,
                         isFraction,
                         'screen',
                         'full',
@@ -772,6 +775,7 @@ export const getConfig = () => {
                     'max-h': [
                         'screen',
                         'lh',
+                        'none',
                         isFraction,
                         'auto',
                         'full',
@@ -924,7 +928,7 @@ export const getConfig = () => {
                                 isArbitraryValue,
                             ],
                             radial: ['', isArbitraryVariable, isArbitraryValue],
-                            conic: [isInteger, isArbitraryVariable, isArbitraryValue],
+                            conic: ['', isInteger, isArbitraryVariable, isArbitraryValue],
                         },
                         isArbitraryVariableImage,
                         isArbitraryImage,
