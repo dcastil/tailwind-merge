@@ -14,6 +14,8 @@ test('merges classes from same group correctly', () => {
         twMerge('overflow-x-auto hover:overflow-x-hidden hover:overflow-x-auto overflow-x-scroll'),
     ).toBe('hover:overflow-x-auto overflow-x-scroll')
     expect(twMerge('col-span-1 col-span-full')).toBe('col-span-full')
+    expect(twMerge('columns-12 columns-auto')).toBe('columns-auto')
+    expect(twMerge('columns-auto columns-2xl')).toBe('columns-2xl')
     expect(twMerge('gap-2 gap-px basis-px basis-3')).toBe('gap-px basis-3')
 })
 

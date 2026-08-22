@@ -310,7 +310,15 @@ export const getDefaultConfig = () => {
              * @see https://tailwindcss.com/docs/columns
              */
             columns: [
-                { columns: [isNumber, isArbitraryValue, isArbitraryVariable, themeContainer] },
+                {
+                    columns: [
+                        isNumber,
+                        'auto',
+                        isArbitraryValue,
+                        isArbitraryVariable,
+                        themeContainer,
+                    ],
+                },
             ],
             /**
              * Break After
