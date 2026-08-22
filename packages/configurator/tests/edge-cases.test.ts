@@ -1,13 +1,18 @@
 import { describe, expect, test } from 'vitest'
 
 import { declaredDeclarations } from '../src/design-system'
+import { materializeConfig } from '../src/materialize'
+import { prunePlan } from '../src/prune'
 
 import {
+    assertExactClassificationParity,
+    assertPruningEquivalence,
     assertTailwindConformance,
     css,
     expectMerges,
     generateFixture,
     mergeTable,
+    sampleUsedClasses,
 } from './fixture-utils'
 
 // Themes that are unusual but entirely possible to write in Tailwind CSS, chosen to stress the one thing a hand-written config gets wrong first: class names that look alike but mean different things. Every fixture runs the conformance sweep (Tailwind's compiled CSS is the authority) and pins the specific merges that matter with `expectMerges`; the `mergeTable` snapshots document behavior where seeing it is the point.
@@ -454,6 +459,131 @@ describe('custom utilities under built-in prefixes', async () => {
             'calc(2 * 10)',
         ])
         expectMerges(twMerge, { 'z-2 z-3': 'z-3', 'z-2 z-auto': 'z-auto' })
+        expect(plan.report.unassignedClasses).toEqual([])
+    })
+})
+
+// The same collisions under an import prefix: every declaration probe behind the collision corrections compiles prefixed candidates (`tw:border-4`), a path that once silently no-oped for prefixed themes.
+describe('numeric color tokens and two-namespace names under an import prefix', async () => {
+    const { twMerge, plan } = await generateFixture(css`
+        @import 'tailwindcss' prefix(tw);
+        @theme {
+            --color-4: #abc;
+            --shadow-brand: 0 0 1px blue;
+            --color-brand: #f00;
+        }
+    `)
+
+    test('the corrections apply to prefixed classes', () => {
+        expectMerges(twMerge, {
+            'tw:border-4 tw:border-2': 'tw:border-4 tw:border-2',
+            'tw:border-4 tw:border-red-500': 'tw:border-red-500',
+            'tw:decoration-4 tw:decoration-2': 'tw:decoration-2',
+            'tw:shadow-brand tw:shadow-lg': 'tw:shadow-lg',
+            'tw:shadow-brand tw:shadow-red-500': 'tw:shadow-brand tw:shadow-red-500',
+            'tw:text-4 tw:text-lg': 'tw:text-4 tw:text-lg',
+        })
+        expect(plan.report.resolvedCollisions.map(({ className }) => className).sort()).toEqual([
+            'decoration-4',
+            'ring-offset-4',
+            'shadow-brand',
+        ])
+        expect(plan.report.unassignedClasses).toEqual([])
+    })
+})
+
+// The collision corrections under exact encoding and under pruning: exact mode enumerates where compact uses validators, so the claims it removes differ, and the dedicated collision groups must survive pruning like any other group.
+describe('collision corrections under exact encoding and pruning', async () => {
+    const themeCss = css`
+        @import 'tailwindcss';
+        @theme {
+            --color-4: #abc;
+            --color-0: #555;
+            --color-x-2: #222;
+            --color-x-4: #444;
+        }
+    `
+    const exact = await generateFixture(themeCss, undefined, { encoding: 'exact' })
+    const compact = await generateFixture(themeCss)
+
+    test('exact mode conforms to Tailwind conflict semantics across the class list', () => {
+        assertTailwindConformance(exact.designSystem, exact.twMerge, exact.plan)
+    })
+
+    test('exact mode classifies every compiling class exactly like compact mode', () => {
+        assertExactClassificationParity(exact.designSystem, exact.config, compact.config)
+    })
+
+    test('exact mode resolves the same collisions', () => {
+        expectMerges(exact.twMerge, {
+            'border-x-2 border-2': 'border-x-2 border-2',
+            'border-4 border-2': 'border-4 border-2',
+            'decoration-4 decoration-2': 'decoration-2',
+        })
+        expect(exact.plan.report.resolvedCollisions.map(({ className }) => className).sort()).toEqual(
+            compact.plan.report.resolvedCollisions.map(({ className }) => className).sort(),
+        )
+    })
+
+    test('pruning keeps the dedicated collision groups for used classes and merges like the full config', () => {
+        const usedClasses = [
+            ...sampleUsedClasses(compact.designSystem, 13),
+            'border-x-2',
+            'border-x-4',
+            'divide-x-2',
+            'border-4',
+            'decoration-4',
+            'bg-x-2',
+        ]
+        const pruned = prunePlan(compact.plan, usedClasses)
+
+        assertPruningEquivalence(compact.config, materializeConfig(pruned), usedClasses)
+        expect(pruned.classGroups.has('collision.border-x-2')).toBe(true)
+        expect(pruned.report.pruning!.unprunedClassGroups).toEqual([])
+    })
+})
+
+// A custom utility named like a class the theme already creates: Tailwind compiles `bg-brand` as the color utility AND the custom utility in one rule, so the class sets more than the color. It becomes its own group — overriding the groups it fully covers when it comes later, never evicted by a class that only sets part of what it sets.
+describe('custom utilities shadowing theme-derived classes', async () => {
+    const { twMerge, plan, designSystem } = await generateFixture(css`
+        @import 'tailwindcss';
+        @theme {
+            --color-brand: #f00;
+        }
+        @utility bg-brand {
+            background: url(brand.svg) center / cover;
+        }
+        @utility text-brand {
+            color: #f00;
+            text-transform: uppercase;
+        }
+    `)
+
+    test('conforms to Tailwind conflict semantics across the class list', () => {
+        assertTailwindConformance(designSystem, twMerge, plan)
+    })
+
+    test('both utilities compile into one rule, which gets its own group with override edges', () => {
+        expect(declaredDeclarations(designSystem, 'bg-brand')?.map((entry) => entry.property)).toEqual([
+            'background-color',
+            'background',
+        ])
+        expect(plan.report.customUtilityGroups.sort()).toEqual(['utility.bg-brand', 'utility.text-brand'])
+        expect(plan.report.customUtilityConflicts['utility.bg-brand']).toEqual(
+            expect.arrayContaining(['bg-color', 'bg-size', 'bg-position']),
+        )
+        expect(plan.report.customUtilityConflicts['utility.text-brand']).toEqual(
+            expect.arrayContaining(['text-transform', 'text-color']),
+        )
+        expectMerges(twMerge, {
+            'bg-brand bg-red-500': 'bg-brand bg-red-500',
+            'bg-red-500 bg-brand': 'bg-brand',
+            'bg-brand bg-brand': 'bg-brand',
+            'text-brand text-red-500': 'text-brand text-red-500',
+            'text-red-500 text-brand': 'text-brand',
+            'uppercase text-brand': 'text-brand',
+            'text-brand uppercase': 'text-brand uppercase',
+        })
         expect(plan.report.unassignedClasses).toEqual([])
     })
 })
