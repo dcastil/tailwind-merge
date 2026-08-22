@@ -37,13 +37,35 @@ export interface PruneOptions {
 }
 
 /**
+ * What the dev server did in reaction to a file change, reported through `TailwindMergePluginApi.onUpdate` once the plugin has finished processing the change (debounce, regeneration or re-scan, invalidation).
+ */
+export interface PluginUpdate {
+    /** Which kind of file changed: one of the CSS graph (`'config'`), or — with `prune.dev` — any other watched file, which may be a source (`'sources'`). */
+    trigger: 'config' | 'sources'
+    /** Whether a new module was generated. False when a sources change left the used classes unchanged, and when generation failed and the previous module stays in service. */
+    regenerated: boolean
+    /** Whether the served module changed and a full reload was sent. False when regeneration produced identical output — the stability gate. */
+    reloaded: boolean
+}
+
+/**
+ * The plugin's `api` object (Vite's convention for what a plugin exposes to other plugins and tooling). Lets tooling — and this package's own tests — learn when the dev server has finished reacting to an edit instead of guessing with timeouts.
+ */
+export interface TailwindMergePluginApi {
+    /** Subscribes to the dev server's reactions to file changes. Returns the unsubscribe function. */
+    onUpdate(listener: (update: PluginUpdate) => void): () => void
+}
+
+/**
  * Vite plugin that configures tailwind-merge for the project's own Tailwind CSS.
  *
  * Add it next to `@tailwindcss/vite` and import from the runtime subpath: `import { twMerge } from '@tailwind-merge/vite/runtime'`. While Vite runs, that import resolves to an in-memory module generated from the project's Tailwind theme by @tailwind-merge/configurator; outside Vite it resolves to the real runtime.ts and serves default tailwind-merge behavior. Design and rationale live in ../configurator/PROPOSAL.md §11 and §12.
  *
  * The dev loop is deliberately quiet: generation reads only the CSS configuration (never which classes the app uses, unless `prune.dev` asks for it), regenerates only when a file of the CSS graph changes, and even then triggers a full reload only when the generated module actually changed — editing utility classes in app.css causes no churn. Production builds additionally prune the config to the classes found in the project's sources (`prune` option).
  */
-export default function tailwindMerge(options: TailwindMergeOptions = {}): Plugin {
+export default function tailwindMerge(
+    options: TailwindMergeOptions = {},
+): Plugin & { api: TailwindMergePluginApi } {
     let config: ResolvedConfig
     let devServer: ViteDevServer | undefined
     /** Resolves to the discovered (or configured) CSS entrypoint, null when the project has none; rejects on ambiguity. Resolved before the runtime subpath resolves, so redirect vs. fallback is decided exactly once. */
@@ -57,6 +79,7 @@ export default function tailwindMerge(options: TailwindMergeOptions = {}): Plugi
     let pruneActive = false
     let pruneLog = true
     let buildStarts = 0
+    const updateListeners = new Set<(update: PluginUpdate) => void>()
 
     async function locateCssRoot(): Promise<string | null> {
         if (options.css !== undefined) {
@@ -133,16 +156,19 @@ export default function tailwindMerge(options: TailwindMergeOptions = {}): Plugi
         }
     }
 
-    /** Swaps the served module in after a regeneration that produced a real change: invalidates it in every environment and asks the browser to reload. */
-    async function reloadAfter(next: Promise<GeneratedRuntimeModule | null>, previousHash: string) {
+    /** Swaps the served module in after a regeneration that produced a real change: invalidates it in every environment and asks the browser to reload. Resolves to whether that happened. */
+    async function reloadAfter(
+        next: Promise<GeneratedRuntimeModule | null>,
+        previousHash: string,
+    ): Promise<boolean> {
         const generated = await next
         if (!generated || !devServer) {
-            return
+            return false
         }
         watchOutOfRootPaths(generated)
         if (generated.hash === previousHash) {
             // The stability gate: something changed on disk but the generated config didn't (utility edits, comments, formatting, class usage that the config already covers) — nothing to invalidate, no reload.
-            return
+            return false
         }
         for (const environment of Object.values(devServer.environments)) {
             const module = environment.moduleGraph.getModuleById(VIRTUAL_MODULE_ID)
@@ -159,48 +185,70 @@ export default function tailwindMerge(options: TailwindMergeOptions = {}): Plugi
         config.logger.info('[@tailwind-merge/vite] tailwind-merge config changed — reloading', {
             timestamp: true,
         })
+        return true
+    }
+
+    function notifyUpdate(update: PluginUpdate) {
+        for (const listener of updateListeners) {
+            listener(update)
+        }
     }
 
     /** A file of the CSS graph changed: regenerate from scratch (the sources may have changed with it). */
-    function regenerateAndReload() {
+    async function regenerateAndReload() {
         if (!current) {
             return
         }
-        generation = regenerate(current.cssPath)
-        void reloadAfter(generation, current.hash)
+        const previous = current
+        generation = regenerate(previous.cssPath)
+        const reloaded = await reloadAfter(generation, previous.hash)
+        notifyUpdate({ trigger: 'config', regenerated: (await generation) !== previous, reloaded })
     }
 
     /** A source file changed while pruning in dev: re-scan (milliseconds) and regenerate only if the used classes actually changed. */
-    function rescanAndReload() {
+    async function rescanAndReload() {
         if (!current?.pruning) {
             return
         }
+        const previous = current
         let classesHash: string
         try {
-            classesHash = hashClasses(current.pruning.scanner.scan().classes)
+            classesHash = hashClasses(previous.pruning!.scanner.scan().classes)
         } catch (error) {
             config.logger.warn(
                 `[@tailwind-merge/vite] Re-scanning your sources failed, keeping the current tailwind-merge config: ${error instanceof Error ? error.message : String(error)}`,
             )
+            notifyUpdate({ trigger: 'sources', regenerated: false, reloaded: false })
             return
         }
-        if (classesHash === current.pruning.classesHash) {
+        if (classesHash === previous.pruning!.classesHash) {
+            notifyUpdate({ trigger: 'sources', regenerated: false, reloaded: false })
             return
         }
-        generation = regenerate(current.cssPath, { reuseScanner: true })
-        void reloadAfter(generation, current.hash)
+        generation = regenerate(previous.cssPath, { reuseScanner: true })
+        const reloaded = await reloadAfter(generation, previous.hash)
+        notifyUpdate({ trigger: 'sources', regenerated: (await generation) !== previous, reloaded })
     }
 
-    function schedule(task: () => void) {
+    function schedule(task: () => Promise<void>) {
         // Debounced: editors fire several events per save, and one edit can touch multiple files.
         clearTimeout(regenerateTimer)
-        regenerateTimer = setTimeout(task, 100)
+        regenerateTimer = setTimeout(() => void task(), 100)
     }
 
     return {
         name: '@tailwind-merge/vite',
         // The runtime subpath is a real, installable package path, so Vite's own resolver can resolve it. Interception must therefore run before the core plugins — without this, vite:resolve wins and the fallback file gets served everywhere.
         enforce: 'pre',
+
+        api: {
+            onUpdate(listener) {
+                updateListeners.add(listener)
+                return () => {
+                    updateListeners.delete(listener)
+                }
+            },
+        },
 
         config: () => ({
             // The dep optimizer must not prebundle the runtime subpath, or dev would freeze the on-disk fallback before resolveId can redirect it.

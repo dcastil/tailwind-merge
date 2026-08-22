@@ -21,6 +21,19 @@ All options are optional — the zero-argument form is the intended everyday use
 | `encoding`  | `'compact' \| 'exact'` | How theme scales are encoded. `'compact'` (default) picks the smallest matcher even when it accepts names beyond your theme; `'exact'` only matches names that exist, so a class that produces no CSS can never evict one that does — at a small size cost (a few percent compressed; more for palette-heavy component libraries). |
 | `prune`     | `boolean \| PruneOptions` | Prunes the generated configuration to the classes found in your sources in production builds — see [how it works](./how-it-works.md#pruning-to-the-classes-you-use). `true` (default, except in [library mode](./how-it-works.md#library-mode)): prune in `vite build`, full configuration in dev. `false`: never prune. The object form has `build` (default `true`, `false` in library mode), `dev` (default `false` — also prune in the dev server, for debugging), and `log` (default `true` — one log line per generation saying what pruning did). |
 
+### Plugin API
+
+The returned plugin carries an `api` object, Vite's convention for what a plugin exposes to other plugins and tooling:
+
+```ts
+const plugin = tailwindMerge()
+const unsubscribe = plugin.api.onUpdate((update) => {
+    // update: { trigger: 'config' | 'sources', regenerated: boolean, reloaded: boolean }
+})
+```
+
+`onUpdate` reports what the dev server did in reaction to a file change once it has finished processing it — whether the configuration was regenerated and whether the served module changed and a full reload was sent. It exists for tooling (and this package's own tests) that needs to know when the plugin is done with an edit instead of guessing with timeouts; everyday use never needs it.
+
 ## The runtime module
 
 ```ts
