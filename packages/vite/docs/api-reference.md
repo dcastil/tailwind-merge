@@ -18,6 +18,8 @@ All options are optional — the zero-argument form is the intended everyday use
 | ----------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `css`       | `string` | Path to your Tailwind CSS entrypoint, relative to the Vite root. Only needed when auto-detection reports several independent Tailwind roots, or when your entrypoint lives outside the Vite root.        |
 | `cacheSize` | `number` | LRU cache size of the generated `twMerge`, passed through to the generated configuration. Defaults to tailwind-merge's default (500).                                                                     |
+| `encoding`  | `'compact' \| 'exact'` | How theme scales are encoded. `'compact'` (default) picks the smallest matcher even when it accepts names beyond your theme; `'exact'` only matches names that exist, so a class that produces no CSS can never evict one that does — at a small size cost (a few percent compressed; more for palette-heavy component libraries). |
+| `prune`     | `boolean \| PruneOptions` | Prunes the generated configuration to the classes found in your sources in production builds — see [how it works](./how-it-works.md#pruning-to-the-classes-you-use). `true` (default, except in [library mode](./how-it-works.md#library-mode)): prune in `vite build`, full configuration in dev. `false`: never prune. The object form has `build` (default `true`, `false` in library mode), `dev` (default `false` — also prune in the dev server, for debugging), and `log` (default `true` — one log line per generation saying what pruning did). |
 
 ## The runtime module
 

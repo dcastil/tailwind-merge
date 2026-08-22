@@ -5,11 +5,12 @@ import { fileURLToPath } from 'node:url'
 import { promisify } from 'node:util'
 
 import tailwindcss from '@tailwindcss/vite'
-import { type PluginOption, type ViteDevServer, build, createServer } from 'vite'
+import { type PluginOption, type ViteDevServer, build, createLogger, createServer } from 'vite'
 import { afterEach, beforeAll, expect, test, vi } from 'vitest'
 
 import { discoverCssRoot } from '../src/discovery'
 import tailwindMerge, { type TailwindMergeOptions } from '../src/index'
+import { autoDetectBases, resolvePruneOptions } from '../src/prune-options'
 import * as fallbackRuntime from '../src/runtime'
 
 const RUNTIME_SPECIFIER = '@tailwind-merge/vite/runtime'
@@ -70,11 +71,57 @@ async function startServer(
     return activeServer
 }
 
-/** Copies a fixture into a temp directory inside tests/ (not the OS temp dir) so `@import 'tailwindcss'` still resolves through this package's node_modules, mirroring the configurator's CLI test setup. */
+/** Builds a fixture with the plugin, returning the emitted JavaScript and the plugin's log lines (the build itself stays silent). */
+async function buildFixture(
+    root: string,
+    options?: TailwindMergeOptions,
+    buildOptions: Record<string, unknown> = {},
+    leadingPlugins: PluginOption[] = [],
+) {
+    const lines: string[] = []
+    const logger = createLogger('silent')
+    for (const level of ['info', 'warn', 'error'] as const) {
+        logger[level] = (message: string) => {
+            // Only the plugin's own lines; Vite's build progress goes through the same logger.
+            if (message.startsWith('[@tailwind-merge/vite]')) {
+                lines.push(message)
+            }
+        }
+    }
+    const result = await build({
+        root,
+        configFile: false,
+        customLogger: logger,
+        plugins: [...leadingPlugins, tailwindMerge(options)],
+        resolve: { alias: libraryAliases },
+        build: { write: false, minify: false, ...buildOptions },
+    })
+    const output = (Array.isArray(result) ? result[0] : result) as {
+        output: { type: string; code?: string }[]
+    }
+    const code = output.output
+        .filter((chunk) => chunk.type === 'chunk')
+        .map((chunk) => chunk.code)
+        .join('\n')
+    return { code, lines }
+}
+
+/**
+ * Copies a fixture into a temp directory inside tests/ (not the OS temp dir) so `@import 'tailwindcss'` still resolves through this package's node_modules, mirroring the configurator's CLI test setup.
+ *
+ * The copy is nested one level below the temp directory, with the `@tailwind-merge/vite` symlink placed at the temp directory's level instead of inside the copy: the temp directory is gitignored, and Tailwind's scanner switches its ignore rules off for sources inside ignored paths (so `@source` can point into node_modules), which would otherwise make it follow the symlink into this whole package. Kept outside the Vite root, the symlink still resolves for the fixture's imports and stays out of every scan.
+ */
 async function copyFixture(name: string): Promise<string> {
-    const directory = path.join(testsDirectory, `.tmp-${name}-${Date.now()}`)
-    temporaryDirectories.push(directory)
-    await cp(path.join(fixturesDirectory, name), directory, { recursive: true })
+    const temporaryDirectory = path.join(testsDirectory, `.tmp-${name}-${Date.now()}`)
+    temporaryDirectories.push(temporaryDirectory)
+    const directory = path.join(temporaryDirectory, name)
+    await cp(path.join(fixturesDirectory, name), directory, {
+        recursive: true,
+        filter: (source) => !source.includes(`${path.sep}node_modules`),
+    })
+    const scopeDirectory = path.join(temporaryDirectory, 'node_modules', '@tailwind-merge')
+    await mkdir(scopeDirectory, { recursive: true })
+    await symlink(packageDirectory, path.join(scopeDirectory, 'vite'))
     return directory
 }
 
@@ -284,3 +331,166 @@ test('discovery reports ambiguous roots instead of guessing', async () => {
         'multiple Tailwind CSS roots',
     )
 })
+
+test('vite build prunes the generated module to the classes found in the sources and says so', async () => {
+    // With @tailwindcss/vite in the plugin list, automatic source detection starts at the Vite root — the common setup, and the one that keeps this package's own sources (full of class-name literals) out of the scan.
+    const { code, lines } = await buildFixture(path.join(fixturesDirectory, 'app'), undefined, {}, [
+        tailwindcss(),
+    ])
+
+    // The used font-size value survives; a group no source uses (`sr-only`) is gone; the build says what happened.
+    expect(code).toContain('huge')
+    expect(hasLiteral(code, 'sr-only')).toBe(false)
+    expect(lines).toEqual([
+        expect.stringMatching(
+            /Pruned the tailwind-merge config to \d+ of \d+ class groups from the \d+ classes found in your sources/,
+        ),
+    ])
+})
+
+test('prune: false keeps the full config in builds, prune.log silences the report', async () => {
+    const full = await buildFixture(path.join(fixturesDirectory, 'app'), { prune: false }, {}, [
+        tailwindcss(),
+    ])
+    expect(hasLiteral(full.code, 'sr-only')).toBe(true)
+    expect(full.lines).toEqual([])
+
+    const quiet = await buildFixture(
+        path.join(fixturesDirectory, 'app'),
+        { prune: { log: false } },
+        {},
+        [tailwindcss()],
+    )
+    expect(hasLiteral(quiet.code, 'sr-only')).toBe(false)
+    expect(quiet.lines).toEqual([])
+})
+
+test('library builds keep the full config unless pruning is forced', async () => {
+    const lib = { entry: 'main.ts', formats: ['es'], fileName: 'lib' }
+    const library = await buildFixture(path.join(fixturesDirectory, 'app'), undefined, { lib }, [
+        tailwindcss(),
+    ])
+    expect(hasLiteral(library.code, 'sr-only')).toBe(true)
+    expect(library.lines).toEqual([expect.stringContaining('Library build')])
+
+    const forced = await buildFixture(path.join(fixturesDirectory, 'app'), { prune: true }, { lib }, [
+        tailwindcss(),
+    ])
+    expect(hasLiteral(forced.code, 'sr-only')).toBe(false)
+})
+
+test('safelisted classes and sources outside the Vite root are part of the pruned config', async () => {
+    const root = await copyFixture('app')
+    await writeFile(
+        path.join(root, 'app.css'),
+        "@import 'tailwindcss';\n@source inline('underline');\n\n@theme {\n    --text-huge: 2.5rem;\n}\n",
+    )
+    const { code } = await buildFixture(root, undefined, {}, [tailwindcss()])
+    // No file uses `underline`; the safelist keeps it — and proves pruning happened because its siblings are gone.
+    expect(hasLiteral(code, 'underline')).toBe(true)
+    expect(hasLiteral(code, 'overline')).toBe(false)
+
+    // The monorepo fixture registers a package outside the Vite root via @source; its classes count as used.
+    const monorepo = await buildFixture(
+        path.join(fixturesDirectory, 'monorepo', 'apps', 'web'),
+        undefined,
+        {},
+        [tailwindcss()],
+    )
+    expect(hasLiteral(monorepo.code, 'widest')).toBe(true)
+    expect(hasLiteral(monorepo.code, 'sr-only')).toBe(false)
+})
+
+test('dev serves the full config by default and the pruned one with prune.dev', async () => {
+    const full = await startServer(path.join(fixturesDirectory, 'app'))
+    const fullRuntime = await full.ssrLoadModule(RUNTIME_SPECIFIER)
+    expect(Object.keys(fullRuntime.getConfig().classGroups)).toEqual(
+        expect.arrayContaining(['sr', 'font-size']),
+    )
+    await full.close()
+
+    const pruned = await startServer(path.join(fixturesDirectory, 'app'), { prune: { dev: true } }, [
+        tailwindcss(),
+    ])
+    const prunedRuntime = await pruned.ssrLoadModule(RUNTIME_SPECIFIER)
+    const classGroups = Object.keys(prunedRuntime.getConfig().classGroups)
+    expect(classGroups).toContain('font-size')
+    expect(classGroups).not.toContain('sr')
+    // The classes the fixture uses merge exactly like under the full config.
+    expect(prunedRuntime.twMerge('text-huge text-sm')).toBe('text-sm')
+})
+
+test('with prune.dev, a class-usage change regenerates and reloads, an unrelated edit does not', async () => {
+    const root = await copyFixture('app')
+    const server = await startServer(root, { prune: { dev: true } }, [tailwindcss()])
+    await new Promise((resolve) => setTimeout(resolve, 500))
+
+    const before = await server.ssrLoadModule(RUNTIME_SPECIFIER)
+    // No source uses padding classes yet, so they pass through.
+    expect(before.twMerge('p-2 p-4')).toBe('p-2 p-4')
+
+    await writeFile(
+        path.join(root, 'main.ts'),
+        "import './app.css'\nimport { twMerge } from '@tailwind-merge/vite/runtime'\n\ndocument.body.className = twMerge('text-huge text-sm p-4')\n",
+    )
+    let after: Record<string, unknown> | undefined
+    await vi.waitFor(
+        async () => {
+            const loaded = await server.ssrLoadModule(RUNTIME_SPECIFIER)
+            expect(loaded.twMerge('p-2 p-4')).toBe('p-4')
+            after = loaded
+        },
+        { timeout: 10_000, interval: 300 },
+    )
+
+    // Same classes, different text: the re-scan finds no change in used classes, so nothing regenerates.
+    await writeFile(
+        path.join(root, 'main.ts'),
+        "import './app.css'\nimport { twMerge } from '@tailwind-merge/vite/runtime'\n\n// a comment\ndocument.body.className = twMerge('text-huge text-sm p-4')\n",
+    )
+    await new Promise((resolve) => setTimeout(resolve, 3_000))
+    expect(await server.ssrLoadModule(RUNTIME_SPECIFIER)).toBe(after)
+}, 30_000)
+
+test('encoding: exact reaches the generated config', async () => {
+    const compact = await startServer(path.join(fixturesDirectory, 'app'))
+    const compactRuntime = await compact.ssrLoadModule(RUNTIME_SPECIFIER)
+    // 7xl is not a radius value, but matches compact's t-shirt-size pattern.
+    expect(compactRuntime.twMerge('rounded-md rounded-7xl')).toBe('rounded-7xl')
+    await compact.close()
+
+    const exact = await startServer(path.join(fixturesDirectory, 'app'), { encoding: 'exact' })
+    const exactRuntime = await exact.ssrLoadModule(RUNTIME_SPECIFIER)
+    expect(exactRuntime.twMerge('rounded-md rounded-7xl')).toBe('rounded-md rounded-7xl')
+})
+
+test('the prune option resolves against the command and library mode', () => {
+    const resolved = (option: TailwindMergeOptions['prune'], lib: unknown, command = 'build') =>
+        resolvePruneOptions(option, { build: { lib }, command } as never)
+
+    expect(resolved(undefined, false)).toEqual({ build: true, dev: false, log: true, libraryDefault: false })
+    expect(resolved(undefined, { entry: 'x' })).toEqual({ build: false, dev: false, log: true, libraryDefault: true })
+    expect(resolved(undefined, { entry: 'x' }, 'serve').libraryDefault).toBe(false)
+    expect(resolved(true, { entry: 'x' })).toEqual({ build: true, dev: false, log: true, libraryDefault: false })
+    expect(resolved(false, false)).toEqual({ build: false, dev: false, log: false, libraryDefault: false })
+    expect(resolved({ dev: true, log: false }, false)).toEqual({ build: true, dev: true, log: false, libraryDefault: false })
+    expect(resolved({ build: true }, { entry: 'x' })).toEqual({ build: true, dev: false, log: true, libraryDefault: false })
+})
+
+test('automatic source detection starts where the Tailwind integration in use starts', () => {
+    const withVitePlugin = { root: '/repo/apps/web', plugins: [{ name: '@tailwindcss/vite:scan' }] } as never
+    expect(autoDetectBases(withVitePlugin)).toEqual(['/repo/apps/web'])
+
+    // Without @tailwindcss/vite (PostCSS setups default to the working directory), the root and the working directory are both scanned, nested ones collapsing into the outer.
+    const cwd = process.cwd()
+    expect(autoDetectBases({ root: cwd, plugins: [] } as never)).toEqual([cwd])
+    expect(autoDetectBases({ root: path.join(cwd, 'apps', 'web'), plugins: [] } as never)).toEqual([cwd])
+    expect(autoDetectBases({ root: '/somewhere/else', plugins: [] } as never).sort()).toEqual(
+        ['/somewhere/else', cwd].sort(),
+    )
+})
+
+/** Whether the built output contains `value` as a string literal, whichever quote style the bundler printed. */
+function hasLiteral(code: string, value: string): boolean {
+    return new RegExp(`["']${value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}["']`).test(code)
+}

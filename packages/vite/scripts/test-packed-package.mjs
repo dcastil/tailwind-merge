@@ -153,8 +153,8 @@ async function extractAndAssertManifest(tarballPath, entries) {
 
     assert.deepEqual(
         Object.keys(packed.dependencies).sort(),
-        ['@tailwindcss/node', 'tailwind-merge'],
-        'runtime dependencies must be exactly the two external packages — the configurator is inlined and must not be depended on',
+        ['@tailwindcss/node', '@tailwindcss/oxide', 'tailwind-merge'],
+        'runtime dependencies must be exactly the three external packages — the configurator is inlined and must not be depended on',
     )
     assert.deepEqual(Object.keys(packed.peerDependencies).sort(), [
         '@tailwindcss/vite',
@@ -172,7 +172,7 @@ async function extractAndAssertManifest(tarballPath, entries) {
 }
 
 /**
- * Lays the extracted package out as a consumer install: the real directory moves into a scratch node_modules (Node resolves a package's own imports from its real location, so the tarball content must sit inside the consumer tree, not be symlinked into it), with the workspace library and the Tailwind compiler linked next to it the way a package manager would install them. The scratch consumer lives in the OS temp directory so nothing can accidentally resolve through the workspace's node_modules — every resolution this layout serves is one the published package is entitled to.
+ * Lays the extracted package out as a consumer install: the real directory moves into a scratch node_modules (Node resolves a package's own imports from its real location, so the tarball content must sit inside the consumer tree, not be symlinked into it), with the workspace library and the Tailwind compiler and scanner linked next to it the way a package manager would install them. The scratch consumer lives in the OS temp directory so nothing can accidentally resolve through the workspace's node_modules — every resolution this layout serves is one the published package is entitled to.
  */
 async function createConsumerInstall() {
     const consumerDirectory = path.join(scratchDirectory, 'consumer')
@@ -180,12 +180,14 @@ async function createConsumerInstall() {
     await mkdir(scopeDirectory, { recursive: true })
     await rename(path.join(scratchDirectory, 'package'), path.join(scopeDirectory, 'vite'))
     await symlink(libraryDirectory, path.join(consumerDirectory, 'node_modules', 'tailwind-merge'))
-    const tailwindNodeDirectory = path.join(consumerDirectory, 'node_modules', '@tailwindcss')
-    await mkdir(tailwindNodeDirectory, { recursive: true })
-    await symlink(
-        path.join(packageDirectory, 'node_modules', '@tailwindcss', 'node'),
-        path.join(tailwindNodeDirectory, 'node'),
-    )
+    const tailwindScopeDirectory = path.join(consumerDirectory, 'node_modules', '@tailwindcss')
+    await mkdir(tailwindScopeDirectory, { recursive: true })
+    for (const tailwindPackage of ['node', 'oxide']) {
+        await symlink(
+            path.join(packageDirectory, 'node_modules', '@tailwindcss', tailwindPackage),
+            path.join(tailwindScopeDirectory, tailwindPackage),
+        )
+    }
     return consumerDirectory
 }
 

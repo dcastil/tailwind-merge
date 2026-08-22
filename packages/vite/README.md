@@ -24,6 +24,7 @@ twMerge('text-huge text-sm')
 - One install: tailwind-merge ships inside the plugin, you don't add it yourself
 - Nothing written to disk: the generated module is served in-memory, so no checked-in artifacts and no TypeScript-server churn
 - Quiet in development: the config regenerates only when your Tailwind configuration changes, and reloads only when the result actually differs
+- Small in production: the config is pruned to the classes found in your sources — the same files Tailwind scans — which removes 30–55% of the whole tailwind-merge bundle on real projects
 - Requires Vite 6+ and Tailwind CSS v4
 
 > **Status: pre-1.0.** The plugin works and is tested, but treat it as not production-ready until 1.0.0 — see [Versioning](./docs/versioning.md).

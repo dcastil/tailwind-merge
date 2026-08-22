@@ -3,21 +3,45 @@ import path from 'node:path'
 import type { Plugin, ResolvedConfig, ViteDevServer } from 'vite'
 
 import { discoverCssRoot } from './discovery'
-import { FALLBACK_MODULE_CODE, GeneratedRuntimeModule, generateRuntimeModule } from './generation'
+import { autoDetectBases, resolvePruneOptions } from './prune-options'
+import {
+    FALLBACK_MODULE_CODE,
+    GeneratedRuntimeModule,
+    dependenciesChanged,
+    generateRuntimeModule,
+    hashClasses,
+} from './generation'
 
 export interface TailwindMergeOptions {
     /** Path to the project's Tailwind CSS entrypoint, relative to the Vite root. When omitted, the entrypoint is auto-detected by scanning the root for CSS files with Tailwind markers — only ambiguous projects (several independent roots) need to set this. */
     css?: string
     /** LRU cache size of the generated `twMerge`, passed through to the generated config. Defaults to tailwind-merge's default. */
     cacheSize?: number
+    /** How theme scales are encoded in the generated config: `'compact'` (default) picks the smallest matcher even when it accepts names beyond the theme, `'exact'` only matches names that exist, so a class that produces no CSS can never evict one that does — at a small size cost. See the configurator's docs for the tradeoff. */
+    encoding?: 'compact' | 'exact'
+    /**
+     * Prunes the generated config to the classes found in your sources — the same files Tailwind scans, found the same way — so production bundles ship only the class groups and scale values the project uses. Classes Tailwind generates CSS for merge exactly like with the full config; everything else passes through unmerged.
+     *
+     * `true` (the default, except in library mode): prune in `vite build`, serve the full config in dev. `false`: never prune — for projects whose class names reach `twMerge` from outside the scanned sources *and* get their styles from somewhere else than this Tailwind build (server-delivered markup, module federation). The object form configures the details.
+     */
+    prune?: boolean | PruneOptions
+}
+
+export interface PruneOptions {
+    /** Prune production builds. Defaults to `true` — except in library mode (`build.lib`), where the consuming app's classes can't be scanned and the default is `false`. */
+    build?: boolean
+    /** Also prune in the dev server, for debugging differences between dev and build: every source edit that changes the used classes then regenerates and reloads. Defaults to `false`. */
+    dev?: boolean
+    /** Log one line per generation saying what pruning did. Defaults to `true`. */
+    log?: boolean
 }
 
 /**
  * Vite plugin that configures tailwind-merge for the project's own Tailwind CSS.
  *
- * Add it next to `@tailwindcss/vite` and import from the runtime subpath: `import { twMerge } from '@tailwind-merge/vite/runtime'`. While Vite runs, that import resolves to an in-memory module generated from the project's Tailwind theme by @tailwind-merge/configurator; outside Vite it resolves to the real runtime.ts and serves default tailwind-merge behavior. Design and rationale live in ../configurator/PROPOSAL.md §11.
+ * Add it next to `@tailwindcss/vite` and import from the runtime subpath: `import { twMerge } from '@tailwind-merge/vite/runtime'`. While Vite runs, that import resolves to an in-memory module generated from the project's Tailwind theme by @tailwind-merge/configurator; outside Vite it resolves to the real runtime.ts and serves default tailwind-merge behavior. Design and rationale live in ../configurator/PROPOSAL.md §11 and §12.
  *
- * The dev loop is deliberately quiet: generation reads only the CSS configuration (never which classes the app uses), regenerates only when a file of the CSS graph changes, and even then triggers a full reload only when the generated module actually changed — editing utility classes in app.css causes no churn.
+ * The dev loop is deliberately quiet: generation reads only the CSS configuration (never which classes the app uses, unless `prune.dev` asks for it), regenerates only when a file of the CSS graph changes, and even then triggers a full reload only when the generated module actually changed — editing utility classes in app.css causes no churn. Production builds additionally prune the config to the classes found in the project's sources (`prune` option).
  */
 export default function tailwindMerge(options: TailwindMergeOptions = {}): Plugin {
     let config: ResolvedConfig
@@ -29,6 +53,10 @@ export default function tailwindMerge(options: TailwindMergeOptions = {}): Plugi
     /** Last successfully generated module — kept as the serving state across failed regenerations. */
     let current: GeneratedRuntimeModule | null = null
     let regenerateTimer: ReturnType<typeof setTimeout> | undefined
+    /** Whether this run prunes: the `prune` option resolved against the command (build vs. serve) and library mode. */
+    let pruneActive = false
+    let pruneLog = true
+    let buildStarts = 0
 
     async function locateCssRoot(): Promise<string | null> {
         if (options.css !== undefined) {
@@ -43,14 +71,26 @@ export default function tailwindMerge(options: TailwindMergeOptions = {}): Plugi
         return discovered
     }
 
-    /** Regenerates the runtime module, keeping the last good module (already logged) when generation fails. */
-    async function regenerate(cssPath: string): Promise<GeneratedRuntimeModule | null> {
+    /** Regenerates the runtime module, keeping the last good module (already logged) when generation fails. `reuseScanner` keeps the previous scan setup when only the sources changed. */
+    async function regenerate(
+        cssPath: string,
+        { reuseScanner = false }: { reuseScanner?: boolean } = {},
+    ): Promise<GeneratedRuntimeModule | null> {
         try {
-            current = await generateRuntimeModule({
+            const generated = await generateRuntimeModule({
                 cssPath,
                 root: config.root,
                 cacheSize: options.cacheSize,
+                encoding: options.encoding,
+                prune: pruneActive
+                    ? {
+                          autoDetectBases: autoDetectBases(config),
+                          scanner: reuseScanner ? current?.pruning?.scanner : undefined,
+                      }
+                    : undefined,
             })
+            reportPruning(generated)
+            current = generated
         } catch (error) {
             config.logger.error(
                 `[@tailwind-merge/vite] Generating the tailwind-merge config failed${current ? ' — keeping the previous one' : ''}: ${error instanceof Error ? error.message : String(error)}`,
@@ -59,31 +99,49 @@ export default function tailwindMerge(options: TailwindMergeOptions = {}): Plugi
         return current
     }
 
-    /** Dependencies outside the Vite root (a monorepo's shared theme package) are invisible to the dev watcher unless added explicitly. */
-    function watchOutOfRootDependencies(generated: GeneratedRuntimeModule) {
+    /** One line per generation about pruning, so the behavior and its effect are visible where someone debugging a production-only merge difference would look; a failed scan is always reported, since the module then silently holds the full config. */
+    function reportPruning(generated: GeneratedRuntimeModule) {
+        if (generated.pruningError) {
+            config.logger.warn(
+                `[@tailwind-merge/vite] Could not scan your sources, serving the full tailwind-merge config instead: ${generated.pruningError.message}`,
+            )
+        } else if (generated.pruning && pruneLog) {
+            const { classGroupsAfter, classGroupsBefore, classifiedClassCount } =
+                generated.pruning.report
+            config.logger.info(
+                `[@tailwind-merge/vite] Pruned the tailwind-merge config to ${classGroupsAfter} of ${classGroupsBefore} class groups from the ${classifiedClassCount} classes found in your sources`,
+                { timestamp: config.command === 'serve' },
+            )
+        }
+    }
+
+    /** Dependencies and source directories outside the Vite root (a monorepo's shared theme or UI package) are invisible to the dev watcher unless added explicitly. */
+    function watchOutOfRootPaths(generated: GeneratedRuntimeModule) {
         if (!devServer) {
             return
         }
+        const outOfRoot = (filePath: string) => path.relative(config.root, filePath).startsWith('..')
         for (const dependency of generated.dependencies) {
-            if (path.relative(config.root, dependency).startsWith('..')) {
+            if (outOfRoot(dependency)) {
                 devServer.watcher.add(dependency)
+            }
+        }
+        for (const source of generated.pruning?.scanner.sources ?? []) {
+            if (!source.negated && outOfRoot(source.base)) {
+                devServer.watcher.add(source.base)
             }
         }
     }
 
-    async function regenerateAndReload() {
-        if (!current || !devServer) {
+    /** Swaps the served module in after a regeneration that produced a real change: invalidates it in every environment and asks the browser to reload. */
+    async function reloadAfter(next: Promise<GeneratedRuntimeModule | null>, previousHash: string) {
+        const generated = await next
+        if (!generated || !devServer) {
             return
         }
-        const previousHash = current.hash
-        generation = regenerate(current.cssPath)
-        const next = await generation
-        if (!next) {
-            return
-        }
-        watchOutOfRootDependencies(next)
-        if (next.hash === previousHash) {
-            // The stability gate: the CSS graph changed but the generated config didn't (utility edits, comments, formatting) — nothing to invalidate, no reload.
+        watchOutOfRootPaths(generated)
+        if (generated.hash === previousHash) {
+            // The stability gate: something changed on disk but the generated config didn't (utility edits, comments, formatting, class usage that the config already covers) — nothing to invalidate, no reload.
             return
         }
         for (const environment of Object.values(devServer.environments)) {
@@ -103,6 +161,42 @@ export default function tailwindMerge(options: TailwindMergeOptions = {}): Plugi
         })
     }
 
+    /** A file of the CSS graph changed: regenerate from scratch (the sources may have changed with it). */
+    function regenerateAndReload() {
+        if (!current) {
+            return
+        }
+        generation = regenerate(current.cssPath)
+        void reloadAfter(generation, current.hash)
+    }
+
+    /** A source file changed while pruning in dev: re-scan (milliseconds) and regenerate only if the used classes actually changed. */
+    function rescanAndReload() {
+        if (!current?.pruning) {
+            return
+        }
+        let classesHash: string
+        try {
+            classesHash = hashClasses(current.pruning.scanner.scan().classes)
+        } catch (error) {
+            config.logger.warn(
+                `[@tailwind-merge/vite] Re-scanning your sources failed, keeping the current tailwind-merge config: ${error instanceof Error ? error.message : String(error)}`,
+            )
+            return
+        }
+        if (classesHash === current.pruning.classesHash) {
+            return
+        }
+        generation = regenerate(current.cssPath, { reuseScanner: true })
+        void reloadAfter(generation, current.hash)
+    }
+
+    function schedule(task: () => void) {
+        // Debounced: editors fire several events per save, and one edit can touch multiple files.
+        clearTimeout(regenerateTimer)
+        regenerateTimer = setTimeout(task, 100)
+    }
+
     return {
         name: '@tailwind-merge/vite',
         // The runtime subpath is a real, installable package path, so Vite's own resolver can resolve it. Interception must therefore run before the core plugins — without this, vite:resolve wins and the fallback file gets served everywhere.
@@ -117,6 +211,15 @@ export default function tailwindMerge(options: TailwindMergeOptions = {}): Plugi
 
         configResolved(resolvedConfig) {
             config = resolvedConfig
+            const prune = resolvePruneOptions(options.prune, config)
+            pruneActive = config.command === 'build' ? prune.build : prune.dev
+            pruneLog = prune.log
+            if (prune.libraryDefault && pruneLog) {
+                config.logger.info(
+                    '[@tailwind-merge/vite] Library build: serving the full tailwind-merge config, since the classes a consuming app passes in cannot be scanned here',
+                )
+            }
+
             cssRoot = locateCssRoot()
             generation = cssRoot.then((cssPath) => (cssPath === null ? null : regenerate(cssPath)))
             // Ambiguity errors also surface on the first runtime import; log right away so they are visible even before that.
@@ -129,9 +232,31 @@ export default function tailwindMerge(options: TailwindMergeOptions = {}): Plugi
             devServer = server
             void generation?.then((generated) => {
                 if (generated) {
-                    watchOutOfRootDependencies(generated)
+                    watchOutOfRootPaths(generated)
                 }
             })
+        },
+
+        async buildStart() {
+            // The first build uses the generation started at configResolved. Later buildStarts are `vite build --watch` rebuilds (or further environments of one build): refresh only when the CSS graph or the used classes changed, so unchanged rebuilds keep the module and stay quiet.
+            if (config.command !== 'build' || buildStarts++ === 0 || !current) {
+                return
+            }
+            const settled = current
+            generation = (async () => {
+                if (await dependenciesChanged(settled)) {
+                    return regenerate(settled.cssPath)
+                }
+                if (
+                    settled.pruning &&
+                    hashClasses(settled.pruning.scanner.scan().classes) !==
+                        settled.pruning.classesHash
+                ) {
+                    return regenerate(settled.cssPath, { reuseScanner: true })
+                }
+                return settled
+            })()
+            await generation
         },
 
         async resolveId(source) {
@@ -150,9 +275,17 @@ export default function tailwindMerge(options: TailwindMergeOptions = {}): Plugi
                 return FALLBACK_MODULE_CODE
             }
             if (config.command === 'build') {
-                // In `vite build --watch`, Rollup owns the watching — register the CSS graph so config changes rebuild. The dev server intentionally doesn't do this: its watching runs through hotUpdate with the hash gate, and a watch-file link here would full-reload on every CSS edit.
+                // In `vite build --watch`, Rollup owns the watching — register the CSS graph so config changes rebuild, and with pruning the scanned files and source globs too (as @tailwindcss/vite does), so class-usage changes in files outside the module graph rebuild as well. The dev server intentionally doesn't do this: its watching runs through hotUpdate with the hash gate, and a watch-file link here would full-reload on every edit.
                 for (const dependency of generated.dependencies) {
                     this.addWatchFile(dependency)
+                }
+                if (generated.pruning) {
+                    for (const file of generated.pruning.files) {
+                        this.addWatchFile(file)
+                    }
+                    for (const glob of generated.pruning.globs) {
+                        this.addWatchFile(path.join(glob.base, glob.pattern))
+                    }
                 }
             }
             return generated.code
@@ -160,15 +293,15 @@ export default function tailwindMerge(options: TailwindMergeOptions = {}): Plugi
 
         hotUpdate({ file }) {
             // Runs once per environment; the work below spans all environments, so let the client run own it.
-            if (this.environment.name !== 'client') {
+            if (this.environment.name !== 'client' || !current) {
                 return
             }
-            if (!current?.dependencies.has(file)) {
-                return
+            if (current.dependencies.has(file)) {
+                schedule(regenerateAndReload)
+            } else if (current.pruning) {
+                // Any other file may be a source: the re-scan itself decides whether the used classes changed (a new file, a deleted one, an edit).
+                schedule(rescanAndReload)
             }
-            // Debounced: editors fire several events per save, and one theme edit can touch multiple files of the CSS graph.
-            clearTimeout(regenerateTimer)
-            regenerateTimer = setTimeout(() => void regenerateAndReload(), 100)
         },
     }
 }
