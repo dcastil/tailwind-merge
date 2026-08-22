@@ -74,6 +74,9 @@ importers:
       '@tailwindcss/node':
         specifier: ^4.3.3
         version: 4.3.3
+      '@tailwindcss/oxide':
+        specifier: ^4.3.3
+        version: 4.3.3
       '@types/node':
         specifier: 'catalog:'
         version: 24.13.3
@@ -156,6 +159,9 @@ importers:
   packages/vite:
     dependencies:
       '@tailwindcss/node':
+        specifier: ~4.3.3
+        version: 4.3.3
+      '@tailwindcss/oxide':
         specifier: ~4.3.3
         version: 4.3.3
       tailwind-merge:
@@ -2255,6 +2261,7 @@ packages:
   eslint@9.39.5:
     resolution: {integrity: sha512-DgZS62aPLXKlnxILS/AYCoRvHaZeXceIzlXPkkGGzJWSow1aEk0lbTlxUSlyjC8jcaKxAdOnTDz+o1JFSBsyjw==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
+    deprecated: This version is no longer supported. Please see https://eslint.org/version-support for other options.
     hasBin: true
     peerDependencies:
       jiti: '*'

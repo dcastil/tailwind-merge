@@ -17,11 +17,13 @@
     },
     "peerDependencies": {
         "@tailwindcss/node": "^4.3.3",
+        "@tailwindcss/oxide": "^4.3.3",
         "tailwind-merge": "^3.7.0",
         "tailwindcss": "^4.3.3"
     },
     "devDependencies": {
         "@tailwindcss/node": "^4.3.3",
+        "@tailwindcss/oxide": "^4.3.3",
         "@types/node": "catalog:",
         "eslint": "catalog:",
         "tailwind-merge": "workspace:*",

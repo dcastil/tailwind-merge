@@ -1,4 +1,4 @@
-import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises'
+import { mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
 
 import { afterAll, beforeAll, describe, expect, test } from 'vitest'
@@ -75,6 +75,41 @@ describe('CLI with --check mode', () => {
             await runCli(['--input', inputPath, '--output', forcedPath, '--format', 'js']),
         ).toBe(0)
         expect(await readFile(forcedPath, 'utf8')).not.toContain('satisfies')
+    })
+
+    test('--prune keeps only the classes found under the given directory', async () => {
+        await writeFile(inputPath, "@import 'tailwindcss';\n@theme { --color-brand-500: #33f; }\n")
+        await mkdir(join(directory, 'src'), { recursive: true })
+        await writeFile(
+            join(directory, 'src', 'App.html'),
+            '<main class="flex bg-brand-500 hover:bg-brand-500/80 p-4">pruned</main>\n',
+        )
+
+        // Scan the sources only: the generated modules of the other tests live in `directory` and would count as sources — every class-name literal in a generated module is a candidate, which is also why the README tells CLI users to keep the output file out of Tailwind's sources.
+        const sourceDirectory = join(directory, 'src')
+        const prunedPath = join(directory, 'tw-merge.pruned.ts')
+        expect(
+            await runCli(['--input', inputPath, '--output', prunedPath, '--prune', sourceDirectory]),
+        ).toBe(0)
+        const pruned = await readFile(prunedPath, 'utf8')
+        expect(pruned).toContain("display: ['flex']")
+        expect(pruned).toContain('brand')
+        expect(pruned).not.toContain("'font-size'")
+        expect(pruned).not.toContain('isTshirtSize,')
+
+        // --check needs the same flags to reproduce the file; without --prune the full config is out of date.
+        expect(
+            await runCli([
+                '--input',
+                inputPath,
+                '--output',
+                prunedPath,
+                '--prune',
+                sourceDirectory,
+                '--check',
+            ]),
+        ).toBe(0)
+        expect(await runCli(['--input', inputPath, '--output', prunedPath, '--check'])).toBe(1)
     })
 
     test('--encoding exact enumerates scales instead of emitting validators for them', async () => {

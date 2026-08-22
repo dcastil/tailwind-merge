@@ -3,6 +3,7 @@ import { mkdir, readFile, writeFile } from 'node:fs/promises'
 import { dirname, relative, resolve } from 'node:path'
 
 import { generate } from './generate.ts'
+import { createSourceScanner } from './scan.ts'
 
 /**
  * The CLI's behavior as a function returning the process exit code, separated from the executable entry in cli.ts so tests can drive it. Kept deliberately thin: the generation pipeline in generate.ts is the product, and future integrations (bundler plugins) should reuse the library rather than the CLI.
@@ -17,7 +18,7 @@ export async function runCli(argv: string[]): Promise<number> {
         (args.encoding && args.encoding !== 'compact' && args.encoding !== 'exact')
     ) {
         console.error(
-            'Usage: @tailwind-merge/configurator --input <tailwind-css-entrypoint> --output <generated-module-path> [--format ts|js] [--encoding compact|exact] [--check]',
+            'Usage: @tailwind-merge/configurator --input <tailwind-css-entrypoint> --output <generated-module-path> [--format ts|js] [--encoding compact|exact] [--prune [directory]] [--check]',
         )
         return 1
     }
@@ -42,12 +43,27 @@ export async function runCli(argv: string[]): Promise<number> {
     const contentHash = createHash('sha256').update(css).digest('hex').slice(0, 16)
     const banner = `// Source: ${relative(dirname(outputPath), inputPath)} (sha256 ${contentHash})`
 
+    // --prune scans the project the way Tailwind does (its sources and safelist, automatic detection starting at the given directory or the working directory, like Tailwind's CLI) and keeps only the classes found. Opt-in here because a usage-dependent committed file changes with every class a project adds.
+    let scanSummary: string | null = null
+    let usedClasses: string[] | undefined
+    if (args.prune !== undefined) {
+        const scanner = await createSourceScanner({
+            css,
+            base: dirname(inputPath),
+            autoDetectBases: [args.prune],
+        })
+        const scan = scanner.scan()
+        usedClasses = scan.classes
+        scanSummary = `${scan.classes.length} class names in ${scan.files.length} files under ${relative(process.cwd(), args.prune) || '.'}`
+    }
+
     const { code, plan } = await generate({
         css,
         base: dirname(inputPath),
         banner,
         format,
         encoding,
+        prune: usedClasses === undefined ? undefined : { usedClasses },
     })
     const displayPath = relative(process.cwd(), outputPath)
 
@@ -78,6 +94,12 @@ export async function runCli(argv: string[]): Promise<number> {
     )
     if (plan.report.prunedClassGroups.length > 0) {
         console.log(`Pruned class groups: ${plan.report.prunedClassGroups.join(', ')}`)
+    }
+    if (plan.report.pruning) {
+        const { classGroupsAfter, classGroupsBefore, classifiedClassCount } = plan.report.pruning
+        console.log(
+            `Pruned to ${classGroupsAfter} of ${classGroupsBefore} class groups from ${classifiedClassCount} used classes (${scanSummary})`,
+        )
     }
     if (plan.report.customUtilityGroups.length > 0) {
         console.log(
@@ -130,6 +152,8 @@ function parseArguments(argv: string[]) {
         output?: string
         format?: string
         encoding?: string
+        /** Directory automatic source detection starts from; set when --prune is given, defaulting to the working directory. */
+        prune?: string
         check: boolean
     } = {
         check: false,
@@ -145,6 +169,9 @@ function parseArguments(argv: string[]) {
             args.format = argv[++index]
         } else if (flag === '--encoding') {
             args.encoding = argv[++index]
+        } else if (flag === '--prune') {
+            const next = argv[index + 1]
+            args.prune = resolve(next !== undefined && !next.startsWith('-') ? argv[++index]! : '.')
         } else if (flag === '--check') {
             args.check = true
         }

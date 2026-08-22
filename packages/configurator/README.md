@@ -29,7 +29,7 @@ twMerge('text-huge text-sm')
 ## What you need
 
 - Node.js 22.18 or newer (the package runs straight from TypeScript sources; Node's built-in type stripping handles them).
-- Tailwind CSS v4 — `tailwindcss` and `@tailwindcss/node` installed in the project whose CSS you generate from. Verified against `^4.3.3`.
+- Tailwind CSS v4 — `tailwindcss` and `@tailwindcss/node` installed in the project whose CSS you generate from (plus `@tailwindcss/oxide` for pruning). Verified against `^4.3.3`.
 - **At generation time:** the in-repo version of tailwind-merge. Generation uses two APIs that ship with tailwind-merge `3.7.0` (`themeKey` on theme getters and the `tailwind-merge/unstable-do-not-import` entry point). Until 3.7.0 is on npm, run generation from a checkout of this repository, where the workspace wires everything up.
 - **At runtime:** any published tailwind-merge `>=3.6.0`. The generated module imports only the stable public API (`createTailwindMerge` and `validators`), so you can commit it into a project that installs tailwind-merge normally — the configurator's version constraints don't follow it there.
 
@@ -91,14 +91,44 @@ The price is bundle size, and it is smaller than it sounds because compression e
 ## CLI
 
 ```
-node packages/configurator/src/cli.ts --input <tailwind-css-entrypoint> --output <generated-module-path> [--format ts|js] [--encoding compact|exact] [--check]
+node packages/configurator/src/cli.ts --input <tailwind-css-entrypoint> --output <generated-module-path> [--format ts|js] [--encoding compact|exact] [--prune [directory]] [--check]
 ```
 
 - Without `--format`, the emitted language follows the output file's extension.
 - `--encoding exact` switches to [exact encoding](#compact-vs-exact-encoding).
+- `--prune [directory]` scans your project the way Tailwind does and keeps only the classes it finds — see [Pruning to the classes you use](#pruning-to-the-classes-you-use). The directory is where Tailwind's automatic source detection starts (the working directory by default, like Tailwind's CLI); your CSS's `source(…)` and `@source` directives are honored either way.
 - `--check` regenerates in memory and compares against the file on disk without writing, exiting non-zero when it's missing or out of date — wire it into CI to catch a theme changing without the generated module being refreshed. Pass the same `--format`/`--encoding` flags as the generating run, since the comparison regenerates with the flags it is given.
 - The report (including `unassignedClasses` warnings) is printed to the console.
 - Output is deterministic per input state, and the header records a content hash of the input, so diffs only appear when behavior actually changes.
+
+## Pruning to the classes you use
+
+By default the generated config covers every class your Tailwind setup can produce. With `prune` (CLI: `--prune`) it covers only the classes your project uses, which makes it a lot smaller — across real projects the whole bundle (config plus tailwind-merge's engine) shrinks by 30–55% brotli-compressed — and makes classes you don't use pass through unmerged.
+
+"Used" means found the way Tailwind finds them: the same candidate scanner (`@tailwindcss/oxide`), over the same sources — `source(…)`, automatic detection (gitignored files, `node_modules`, binaries, CSS files, and lock files are skipped), every `@source` directive — plus the `@source inline(…)` safelist, minus `@source not inline(…)` exclusions. So every class Tailwind generates CSS for stays in the config and merges exactly like under the full config; anything else has no styles and is treated like a non-Tailwind class. If your CSS is built with sources other than the ones in your entrypoint, or class names reach `twMerge` from outside your code base *and* get their styles from somewhere else, don't prune.
+
+Two things to know:
+
+- **Keep the generated module out of Tailwind's sources.** Every class-name literal in it is a candidate, for Tailwind and for pruning alike, so a generated module inside `src/` makes both treat the full config as "used" (and makes Tailwind generate CSS for static classes nobody uses). Write it somewhere Tailwind doesn't scan, or exclude it with `@source not "./lib/tw-merge.generated.ts"`.
+- **The output follows your code.** Adding a class changes the generated module, so `--prune` suits a build step better than a committed file (`--check` still works, with the same flags).
+
+Programmatically, the scan and the pruning are separate steps, so a build tool can re-scan without regenerating:
+
+```ts
+import { createSourceScanner, generate } from '@tailwind-merge/configurator'
+
+const scanner = await createSourceScanner({
+    css,
+    base: 'src',
+    // Where automatic source detection starts: Tailwind's Vite plugin uses the Vite root, its PostCSS plugin and CLI the working directory.
+    autoDetectBases: [process.cwd()],
+})
+const { classes, files } = scanner.scan() // cheap to repeat after edits
+const { code, plan } = await generate({ css, base: 'src', prune: { usedClasses: classes } })
+console.log(plan.report.pruning) // { usedClassCount, classifiedClassCount, classGroupsBefore, classGroupsAfter, … }
+```
+
+`createSourceScanner` needs `@tailwindcss/oxide` (Tailwind's scanner, a native module every Tailwind v4 install already has) next to `tailwindcss` and `@tailwindcss/node`.
 
 ## Distributing a config with a design system
 
