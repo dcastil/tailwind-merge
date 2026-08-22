@@ -25,5 +25,7 @@ export default defineConfig({
     test: {
         // Generation-heavy tests are this package's normal case: a single test can run several full design-system loads (the CLI --check test runs six), which takes seconds on a loaded CI runner and overflowed vitest's 5 s default there while passing locally. One package-level timeout instead of per-test annotations.
         testTimeout: 60_000,
+        // Sweeps the `.tmp-*` scratch directories of interrupted earlier runs before any worker starts.
+        globalSetup: ['./tests/global-setup.ts'],
     },
 })

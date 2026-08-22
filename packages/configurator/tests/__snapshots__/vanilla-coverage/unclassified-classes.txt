@@ -1,0 +1,9 @@
+bg: bg-conic
+columns: columns-auto
+contain: contain-content contain-inline-size contain-layout contain-none contain-paint contain-size contain-strict contain-style
+inline: inline-2xl inline-2xs inline-3xl inline-3xs inline-4xl inline-5xl inline-6xl inline-7xl inline-lg inline-md inline-sm inline-xl inline-xs
+mask: mask-circle mask-ellipse
+max: max-h-none max-inline-2xl max-inline-2xs max-inline-3xl max-inline-3xs max-inline-4xl max-inline-5xl max-inline-6xl max-inline-7xl max-inline-lg max-inline-md max-inline-sm max-inline-xl max-inline-xs
+min: min-inline-2xl min-inline-2xs min-inline-3xl min-inline-3xs min-inline-4xl min-inline-5xl min-inline-6xl min-inline-7xl min-inline-lg min-inline-md min-inline-sm min-inline-xl min-inline-xs
+transform: transform-border transform-content transform-fill transform-stroke transform-view
+translate: translate-3d

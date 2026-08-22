@@ -155,7 +155,6 @@ describe('replit with exact encoding', () => {
         assertTailwindConformance(exact.designSystem, exact.twMerge, exact.plan)
     })
 
-    // eslint-disable-next-line vitest/expect-expect -- the assertions live in assertExactClassificationParity
     test('classifies every compiling class exactly like compact mode', async () => {
         const [exact, compact] = await fixturesPromise
         assertExactClassificationParity(exact.designSystem, exact.config, compact.config)

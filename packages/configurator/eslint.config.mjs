@@ -29,7 +29,9 @@ export default [
                 {
                     assertFunctionNames: [
                         'expect',
+                        'expectMerges',
                         'assertTailwindConformance',
+                        'assertExactClassificationParity',
                         'assertPruningEquivalence',
                     ],
                 },

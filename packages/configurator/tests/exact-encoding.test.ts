@@ -74,7 +74,6 @@ describe('exact encoding', async () => {
         expect(twMerge('vv-(--a) vv-(--b)')).toBe('vv-(--b)')
     })
 
-    // eslint-disable-next-line vitest/expect-expect -- the assertions live in assertExactClassificationParity
     test('classifies every compiling class exactly like compact mode', () => {
         // The invariant behind "exact only removes matches that don't compile": for real classes the two encodings must be indistinguishable. A probe missing an open-ended value kind would surface here as an exact-side classification gap.
         assertExactClassificationParity(designSystem, exact.config, compact.config)

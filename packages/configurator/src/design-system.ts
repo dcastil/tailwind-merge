@@ -318,7 +318,7 @@ const IRREGULAR_SHORTHAND_LONGHANDS: Record<string, string[]> = {
 }
 
 /**
- * Whether setting `property` fully controls `target`, exploiting CSS's systematic shorthand naming: identity, dash-prefix (`padding` → `padding-inline`, `inset` → `inset-block-end`), or shared first and last segment with fewer segments (`border-radius` → `border-top-left-radius`, `border-color` → `border-top-color`) — corrected by the two enumerated exception lists where CSS naming lies about the relationship, in either direction.
+ * Whether setting `property` fully controls `target`, exploiting CSS's systematic shorthand naming: identity, dash-prefix (`padding` → `padding-inline`, `inset` → `inset-block-end`), or the target spelling the property with side or corner segments inserted (`border-radius` → `border-top-left-radius`, `border-color` → `border-top-color`, see `isSegmentSubsequence`) — corrected by the two enumerated exception lists where CSS naming lies about the relationship, in either direction.
  *
  * On top of the pure naming facts, one policy tailwind-merge's default config has always taken is applied here too: an axis property in the logical `-inline`/`-block` form (`padding-inline`, as `px-*` compiles in v4) controls both physical sides of its axis (`padding-left`, `padding-right`) — the horizontal-tb assumption behind the default config's `px` → `pl`/`pr` edges. Single logical sides stay unrelated to single physical sides (`padding-inline-start` vs `padding-left` depends on the text direction as well), which is also where the default config draws the line.
  */
@@ -332,17 +332,31 @@ export function propertyCovers(property: string, target: string): boolean {
     if (target.startsWith(`${property}-`)) {
         return !UNCONTROLLED_DASH_PREFIXED_PROPERTIES.has(target)
     }
-    const propertySegments = property.split('-')
-    const targetSegments = target.split('-')
-    if (
-        propertySegments.length < targetSegments.length &&
-        propertySegments.length > 1 &&
-        propertySegments[0] === targetSegments[0] &&
-        propertySegments[propertySegments.length - 1] === targetSegments[targetSegments.length - 1]
-    ) {
+    if (isSegmentSubsequence(property.split('-'), target.split('-'))) {
         return true
     }
     return physicalSides(property).some((side) => propertyCovers(side, target))
+}
+
+/**
+ * Whether a shorter property name reads as the longer one with side or corner segments inserted, which is how CSS names the longhands of the side-spanning shorthands: `border-color` → `border-top-color`, `border-radius` → `border-top-left-radius`, `border-inline-color` → `border-inline-start-color`, `border-width` → `border-inline-start-width`. Requiring a real subsequence (same first and last segment, every other segment in order) keeps side-specific longhands from claiming each other — `border-bottom-color` does not cover `border-block-end-color`, which a looser "same first and last segment" rule would say.
+ */
+function isSegmentSubsequence(shorter: string[], longer: string[]): boolean {
+    if (shorter.length < 2 || shorter.length >= longer.length) {
+        return false
+    }
+    if (shorter[0] !== longer[0] || shorter[shorter.length - 1] !== longer[longer.length - 1]) {
+        return false
+    }
+    let position = 0
+    for (const segment of shorter) {
+        position = longer.indexOf(segment, position)
+        if (position === -1) {
+            return false
+        }
+        position += 1
+    }
+    return true
 }
 
 /**
