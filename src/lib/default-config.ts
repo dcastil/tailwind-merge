@@ -915,7 +915,7 @@ export const getDefaultConfig = () => {
              * Max-Height
              * @see https://tailwindcss.com/docs/max-height
              */
-            'max-h': [{ 'max-h': ['screen', 'lh', ...scaleSizing()] }],
+            'max-h': [{ 'max-h': ['screen', 'lh', 'none', ...scaleSizing()] }],
 
             // ------------------
             // --- Typography ---
