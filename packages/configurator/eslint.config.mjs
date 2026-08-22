@@ -16,7 +16,7 @@ export default [
         },
     },
     {
-        files: ['src/cli.ts', 'src/run-cli.ts'],
+        files: ['src/cli.ts', 'src/run-cli.ts', 'scripts/**/*'],
         rules: {
             'no-console': 'off',
         },

@@ -53,6 +53,12 @@ node packages/configurator/src/cli.ts --input path/to/app.css --output path/to/t
 
 The emitted file is self-contained — copy it into any project. Regenerate whenever your theme changes.
 
+To see why a class list merges the way it does — what each class compiles to, which class group the generated and the default config put it in, and what Tailwind's compiled CSS says the right answer is — there is a development inspector:
+
+```bash
+node packages/configurator/scripts/explain.mts path/to/app.css "border-4 border-2" "shadow-brand shadow-lg"
+```
+
 ## JS API
 
 ```ts
@@ -138,7 +144,7 @@ The generated module is a good fit for shipping alongside a design system: gener
 
 Everything is derived from the design system Tailwind itself resolves — there is no hand-maintained mapping to drift out of date. That includes theme overrides and extensions, namespace resets (`--color-*: initial`), Tailwind's undocumented compat sub-namespaces (`--text-color-*`, `--background-color-*`, `--border-width-*`, `--z-index-*`, …), the `--spacing` multiplier semantics, import prefixes, `@config`/`@plugin` contributions, and custom `@utility` definitions (classified empirically: utilities matching a built-in group join it, the rest get their own group plus inferred override relationships where their declarations fully cover another group's).
 
-Correctness is enforced by a conformance sweep that checks every consecutive pair of the design system's class list against Tailwind's own compiled CSS, run over synthetic fixtures, a stress fixture, and seven real-world project configurations (see [tests/fixtures/real-world/](./tests/fixtures/real-world/README.md)).
+Correctness is enforced by a conformance sweep that checks every consecutive pair of the design system's class list against Tailwind's own compiled CSS, run over synthetic fixtures (including deliberately weird but valid themes: numeric color tokens, one value name in two namespaces, color names shadowing static utilities, custom utilities under built-in prefixes), a stress fixture, and seven real-world project configurations (see [tests/fixtures/real-world/](./tests/fixtures/real-world/README.md)). Every generated module is also executed and compared against the in-memory config it was generated from, and the vanilla theme additionally runs absolute checks against Tailwind — every suggested class classified, every consecutive and every cross-group pair adjudicated — with the known divergences committed as a reviewed list.
 
 Known limits:
 

@@ -30,7 +30,7 @@
         // Language and Environment
         "target": "ESNext"
     },
-    "include": ["src/**/*", "tests/**/*"],
+    "include": ["src/**/*", "tests/**/*", "scripts/**/*"],
     // Scratch directories of test runs (emitted modules the fixture round trip imports, CLI outputs) are exercised by running them, not by this tsconfig, and may be mid-write while a check runs.
     "exclude": ["tests/.tmp-*"]
 }
