@@ -51,3 +51,20 @@ test('leading-none keeps merging when the leading theme scale is overridden', ()
     expect(tailwindMerge('leading-none leading-tight')).toBe('leading-tight')
     expect(tailwindMerge('leading-4 leading-none')).toBe('leading-none')
 })
+
+test('z-index theme scale merges like other theme scales', () => {
+    // Tailwind CSS resolves `z-<name>` from the `--z-index-*` theme namespace,
+    // so declared values must conflict with `z-<number>` classes.
+    const tailwindMerge = extendTailwindMerge({
+        extend: {
+            theme: {
+                'z-index': ['button'],
+            },
+        },
+    })
+
+    expect(tailwindMerge('z-button z-0')).toBe('z-0')
+    expect(tailwindMerge('z-0 z-button')).toBe('z-button')
+    // values not declared in the theme must not merge
+    expect(tailwindMerge('z-unknown z-0')).toBe('z-unknown z-0')
+})

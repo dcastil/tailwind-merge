@@ -210,6 +210,7 @@ In the Tailwind config you can modify your theme variable namespace to add class
 | `--aspect-*`           | `aspect`                 |
 | `--ease-*`             | `ease`                   |
 | `--animate-*`          | `animate`                |
+| `--z-index-*`          | `z-index`                |
 
 If you modified one of the theme namespaces in your Tailwind config, you need to add the variable names to the `theme` object in tailwind-merge as well so that tailwind-merge knows about them.
 

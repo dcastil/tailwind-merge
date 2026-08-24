@@ -54,6 +54,7 @@ export const getDefaultConfig = () => {
     const themeAspect = fromTheme('aspect')
     const themeEase = fromTheme('ease')
     const themeAnimate = fromTheme('animate')
+    const themeZIndex = fromTheme('z-index')
 
     /**
      * Helpers to avoid repeating the same scales
@@ -266,6 +267,7 @@ export const getDefaultConfig = () => {
             text: [isTshirtSize],
             'text-shadow': [isTshirtSize],
             tracking: ['tighter', 'tight', 'normal', 'wide', 'wider', 'widest'],
+            'z-index': [],
         },
         classGroups: {
             // --------------
@@ -522,7 +524,7 @@ export const getDefaultConfig = () => {
              * Z-Index
              * @see https://tailwindcss.com/docs/z-index
              */
-            z: [{ z: [isInteger, 'auto', isArbitraryVariable, isArbitraryValue] }],
+            z: [{ z: [isInteger, 'auto', isArbitraryVariable, isArbitraryValue, themeZIndex] }],
 
             // ------------------------
             // --- Flexbox and Grid ---

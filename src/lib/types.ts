@@ -224,6 +224,7 @@ export type DefaultThemeGroupIds =
     | 'text'
     | 'text-shadow'
     | 'tracking'
+    | 'z-index'
 
 /**
  * Class group IDs included in the default configuration of tailwind-merge.
