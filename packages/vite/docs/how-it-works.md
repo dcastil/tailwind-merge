@@ -27,6 +27,8 @@ If a regeneration fails (broken CSS mid-edit), the last good config keeps servin
 
 `vite build` generates once, deterministically — client and SSR passes get byte-identical modules, keeping server and client merging in sync. The default tailwind-merge configuration is never imported by the generated module, so bundlers tree-shake it away entirely; you ship only your own theme's config — and by default only the part of it your code uses, see below.
 
+If configuration generation fails — for example, the explicit `css` path is missing or a configured plugin cannot be loaded — the build fails, including when nothing imports the runtime module. A failed `vite build --watch` regeneration also fails that rebuild instead of emitting the previous configuration; fixing the CSS allows the next rebuild to succeed. Source-scanning failures still use the full generated configuration, as described below.
+
 ## Pruning to the classes you use
 
 In production builds the plugin prunes the generated configuration to the classes found in your sources: class groups no used class belongs to are dropped, and within the remaining groups only the scale values and patterns your classes reach survive. Across real projects this removes 30–55% of the whole bundle (configuration plus tailwind-merge's engine, brotli-compressed).

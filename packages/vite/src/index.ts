@@ -94,7 +94,7 @@ export default function tailwindMerge(
         return discovered
     }
 
-    /** Regenerates the runtime module, keeping the last good module (already logged) when generation fails. `reuseScanner` keeps the previous scan setup when only the sources changed. */
+    /** Regenerates the runtime module. Builds propagate generation errors so they cannot ship a default or stale config; dev keeps the last good module and logs the error. `reuseScanner` keeps the previous scan setup when only the sources changed. */
     async function regenerate(
         cssPath: string,
         { reuseScanner = false }: { reuseScanner?: boolean } = {},
@@ -115,6 +115,9 @@ export default function tailwindMerge(
             reportPruning(generated)
             current = generated
         } catch (error) {
+            if (config.command === 'build') {
+                throw error
+            }
             config.logger.error(
                 `[@tailwind-merge/vite] Generating the tailwind-merge config failed${current ? ' — keeping the previous one' : ''}: ${error instanceof Error ? error.message : String(error)}`,
             )
@@ -270,7 +273,7 @@ export default function tailwindMerge(
 
             cssRoot = locateCssRoot()
             generation = cssRoot.then((cssPath) => (cssPath === null ? null : regenerate(cssPath)))
-            // Ambiguity errors also surface on the first runtime import; log right away so they are visible even before that.
+            // Observe eager discovery/generation failures before buildStart or a runtime import awaits them, so they cannot become unhandled rejections.
             generation.catch((error: unknown) =>
                 config.logger.error(error instanceof Error ? error.message : String(error)),
             )
@@ -287,23 +290,26 @@ export default function tailwindMerge(
 
         async buildStart() {
             // The first build uses the generation started at configResolved. Later buildStarts are `vite build --watch` rebuilds (or further environments of one build): refresh only when the CSS graph or the used classes changed, so unchanged rebuilds keep the module and stay quiet.
-            if (config.command !== 'build' || buildStarts++ === 0 || !current) {
+            if (config.command !== 'build') {
                 return
             }
-            const settled = current
-            generation = (async () => {
-                if (await dependenciesChanged(settled)) {
-                    return regenerate(settled.cssPath)
-                }
-                if (
-                    settled.pruning &&
-                    hashClasses(settled.pruning.scanner.scan().classes) !==
-                        settled.pruning.classesHash
-                ) {
-                    return regenerate(settled.cssPath, { reuseScanner: true })
-                }
-                return settled
-            })()
+            if (buildStarts++ > 0 && current) {
+                const settled = current
+                generation = (async () => {
+                    if (await dependenciesChanged(settled)) {
+                        return regenerate(settled.cssPath)
+                    }
+                    if (
+                        settled.pruning &&
+                        hashClasses(settled.pruning.scanner.scan().classes) !==
+                            settled.pruning.classesHash
+                    ) {
+                        return regenerate(settled.cssPath, { reuseScanner: true })
+                    }
+                    return settled
+                })()
+            }
+            // Await even the initial generation: failures must fail the build regardless of whether any module imports the runtime subpath.
             await generation
         },
 

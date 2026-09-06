@@ -1,17 +1,64 @@
 import { rm, utimes, writeFile } from 'node:fs/promises'
 import path from 'node:path'
 
+import { type Rollup, build } from 'vite'
 import { expect, test } from 'vitest'
 
+import tailwindMerge from '../src/index'
 import { dependenciesChanged, generateRuntimeModule } from '../src/generation'
 
-import { RUNTIME_SPECIFIER, setupPluginTests, updateAfter, waitForWatcher } from './helpers'
+import {
+    RUNTIME_SPECIFIER,
+    buildFixture,
+    libraryAliases,
+    setupPluginTests,
+    updateAfter,
+    waitForWatcher,
+} from './helpers'
 
 const { startServer, copyFixture } = setupPluginTests()
 
 const GOOD_CSS = "@import 'tailwindcss';\n\n@theme {\n    --text-huge: 2.5rem;\n}\n"
 // A plugin Tailwind cannot resolve fails the design-system load — the shape of a broken CSS root the plugin must survive.
 const BROKEN_CSS = "@import 'tailwindcss';\n@plugin './missing-plugin.js';\n"
+
+test.each([true, false])('a build fails on a missing CSS entrypoint (runtime imported: %s)', async (importsRuntime) => {
+    const root = await copyFixture('app')
+    if (!importsRuntime) {
+        await writeFile(path.join(root, 'main.ts'), 'document.body.textContent = "No runtime import"\n')
+    }
+
+    await expect(buildFixture(root, { options: { css: 'missing.css' } }).then(() => undefined)).rejects.toThrow('missing.css')
+})
+
+test('a build fails when its CSS configuration cannot be loaded', async () => {
+    const root = await copyFixture('app')
+    await writeFile(path.join(root, 'app.css'), BROKEN_CSS)
+
+    // No Tailwind Vite plugin: this must fail because merge-config generation rejected the CSS, not because Tailwind's own build failed first.
+    await expect(buildFixture(root).then(() => undefined)).rejects.toThrow('missing-plugin.js')
+})
+
+test('a watch rebuild fails on generation errors and recovers after the CSS is fixed', async () => {
+    const root = await copyFixture('app')
+    const cssPath = path.join(root, 'app.css')
+    const watcher = await build({
+        root,
+        configFile: false,
+        logLevel: 'silent',
+        plugins: [tailwindMerge({ prune: false })],
+        resolve: { alias: libraryAliases },
+        build: { write: false, watch: {} },
+    }) as Rollup.RollupWatcher
+
+    try {
+        await nextWatchBuild(watcher)
+        await expect(nextWatchBuild(watcher, () => writeFile(cssPath, BROKEN_CSS))).rejects.toThrow('missing-plugin.js')
+        await expect(nextWatchBuild(watcher, () => writeFile(cssPath, GOOD_CSS))).resolves.toBeUndefined()
+    } finally {
+        await watcher.close()
+    }
+})
 
 test('a CSS root that fails at startup serves default behavior and logs the error', async () => {
     const root = await copyFixture('app')
@@ -70,3 +117,23 @@ test('dependenciesChanged notices edited and deleted files of the CSS graph', as
     await rm(cssPath)
     await expect(dependenciesChanged(fresh)).resolves.toBe(true)
 })
+
+/** Waits for a real watch build's success or failure, subscribing before an optional edit so no filesystem event is missed. Closing each bundle releases its resources without stopping the watcher. */
+function nextWatchBuild(watcher: Rollup.RollupWatcher, edit?: () => Promise<void>): Promise<void> {
+    return new Promise((resolve, reject) => {
+        const onEvent = (event: Rollup.RollupWatcherEvent) => {
+            if (event.code === 'ERROR') {
+                watcher.off('event', onEvent)
+                reject(event.error)
+            } else if (event.code === 'BUNDLE_END') {
+                watcher.off('event', onEvent)
+                void event.result.close().then(resolve, reject)
+            }
+        }
+        watcher.on('event', onEvent)
+        void edit?.().catch((error: unknown) => {
+            watcher.off('event', onEvent)
+            reject(error)
+        })
+    })
+}
