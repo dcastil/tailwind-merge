@@ -335,6 +335,7 @@ test('class map has correct class groups at first part', () => {
         tabular: ['fvn-spacing'],
         text: [
             'font-size',
+            'font-size-arbitrary',
             'text-alignment',
             'text-color',
             'text-overflow',
