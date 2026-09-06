@@ -15,8 +15,8 @@ export default defineConfig({
             },
         ],
         coverage: {
-            // Coverage options are only picked up from the root config in projects mode. Scope matches the pre-monorepo setup: only the library is measured.
-            include: ['packages/tailwind-merge/src/**/*.ts'],
+            // Coverage options are only picked up from the root config in projects mode. Measure every package's source so build-time integrations have the same visibility as the runtime library.
+            include: ['packages/*/src/**/*.ts'],
         },
     },
 })

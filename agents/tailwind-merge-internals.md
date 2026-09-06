@@ -4,6 +4,8 @@ This file is a practical map for agent-driven changes in this repo.
 
 Since the 2026-08-10 monorepo migration the library lives in `packages/tailwind-merge/`; all `src/`, `tests/`, `docs/`, and `scripts/` paths in this file are relative to that package directory unless a path starts with `packages/` or `.github/`.
 
+Links from the library's `docs/` to repository-wide files must traverse three parents; for example, `../../../.github/CONTRIBUTING.md`. Resolve relative links from the owning document after moving files, not from the repository root.
+
 ## How merge execution works
 
 1. `twMerge` in `src/lib/tw-merge.ts` is created via `createTailwindMerge(getDefaultConfig)`.
@@ -86,6 +88,8 @@ Run a single test file or test by name with Vitest's filter syntax: `pnpm --filt
 Package-specific generation, scanning, and Vite test guidance lives in [configurator development](./configurator.md#debugging-and-validation) and [Vite plugin development](./vite-plugin.md#testing-and-remaining-coverage).
 
 Vitest is set up as one project per package: each package's `vitest.config.mts` carries its aliases and plugins, and the root `vitest.config.mts` aggregates them (plus an inline project for `.github/actions/**/*.test.mjs`, since the local actions aren't workspace packages) so root `pnpm test` runs everything with coverage. Because collection is scoped to those projects, stray test files elsewhere in the repo — notably full repo copies in `.claude/` worktrees, which the pre-monorepo root config silently collected and ran as duplicates — never join the suite.
+
+The root coverage configuration measures `packages/*/src/**/*.ts`, including the configurator and Vite plugin. In projects mode, package-local coverage settings do not control the aggregate report. Coverage is diagnostic, with no percentage threshold; use uncovered branches to guide behavioral tests rather than weakening assertions or padding the percentage. The Vitest report does not capture code executed by spawned CLI/build processes, so interpret unmeasured entrypoints alongside their integration tests.
 
 Recommended local sequence for non-trivial changes:
 1. `pnpm lint`
