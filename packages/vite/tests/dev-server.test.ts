@@ -84,6 +84,29 @@ test('a theme change regenerates, invalidates, and changes merge behavior', asyn
     expect(after.twMerge('text-big text-sm')).toBe('text-sm')
 })
 
+test.each([
+    ['@config', false], ['@config', true], ['@plugin', false], ['@plugin', true],
+] as const)('%s reloads transitive JavaScript theme dependencies without a Tailwind transform (prune: %s)', async (directive, prune) => {
+    const root = await copyFixture('app')
+    const themePath = path.join(root, 'theme.cjs')
+    await writeFile(themePath, "module.exports = { huge: '2.5rem' }\n")
+    const theme = "{ theme: { extend: { fontSize: require('./theme.cjs') } } }"
+    await writeFile(path.join(root, 'tailwind.config.cjs'), `module.exports = ${directive === '@config' ? theme : `{ handler() {}, config: ${theme} }`}\n`)
+    await writeFile(path.join(root, 'app.css'), `@import 'tailwindcss';\n${directive} './tailwind.config.cjs';\n@source inline('text-huge text-big text-sm');\n`)
+    const { server, plugin } = await startServer(root, { options: { prune: { dev: prune } } })
+    await waitForWatcher(server, themePath)
+
+    const before = await server.ssrLoadModule(RUNTIME_SPECIFIER)
+    expect(before.twMerge('text-huge text-sm')).toBe('text-sm')
+    expect(before.twMerge('text-big text-sm')).toBe('text-big text-sm')
+
+    const update = await updateAfter(plugin, () => writeFile(themePath, "module.exports = { big: '2rem' }\n"))
+    expect(update).toEqual({ trigger: 'config', regenerated: true, reloaded: true })
+    const after = await server.ssrLoadModule(RUNTIME_SPECIFIER)
+    expect(after.twMerge('text-big text-sm')).toBe('text-sm')
+    expect(after.twMerge('text-huge text-sm')).toBe('text-huge text-sm')
+})
+
 test('a theme-irrelevant edit regenerates without invalidating (the stability gate)', async () => {
     const root = await copyFixture('app')
     const { server, plugin } = await startServer(root)

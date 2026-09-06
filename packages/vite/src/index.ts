@@ -1,5 +1,6 @@
 import path from 'node:path'
 
+import { clearRequireCache } from '@tailwindcss/node/require-cache'
 import type { Plugin, ResolvedConfig, ViteDevServer } from 'vite'
 
 import { discoverCssRoot } from './discovery'
@@ -101,6 +102,10 @@ export default function tailwindMerge(
         { reuseScanner = false }: { reuseScanner?: boolean } = {},
     ): Promise<GeneratedRuntimeModule | null> {
         try {
+            // Tailwind busts ESM imports itself, but CommonJS configs and their transitive imports remain cached. Clear the whole tracked graph, including parents holding an imported value, before either design-system loading or scanning starts.
+            if (!reuseScanner && current) {
+                clearRequireCache([...current.dependencies])
+            }
             const generated = await generateRuntimeModule({
                 cssPath,
                 root: config.root,
@@ -163,7 +168,7 @@ export default function tailwindMerge(
     /** Swaps the served module in after a regeneration that produced a real change: invalidates it in every environment and asks the browser to reload. Returns whether that happened. */
     function reloadIfChanged(
         generated: GeneratedRuntimeModule | null,
-        previousHash: string,
+        previousHash: string | undefined,
     ): boolean {
         if (!generated || !devServer) {
             return false
@@ -200,11 +205,12 @@ export default function tailwindMerge(
     /** Runs both kinds of dev update through one generation/invalidation path; source-only edits may reuse the scanner, while CSS edits always rebuild it. The scheduler keeps this path serial. */
     async function updateAndReload(trigger: UpdateTrigger) {
         const previous = await generation
-        if (!previous) {
+        const cssPath = await cssRoot
+        if (cssPath === null) {
             return
         }
         if (trigger === 'sources') {
-            const pruning = previous.pruning
+            const pruning = previous?.pruning
             if (!pruning) {
                 return
             }
@@ -224,13 +230,13 @@ export default function tailwindMerge(
             }
         }
 
-        const next = regenerate(previous.cssPath, { reuseScanner: trigger === 'sources' })
+        const next = regenerate(cssPath, { reuseScanner: trigger === 'sources' })
         generation = next
         const generated = await next
         notifyUpdate({
             trigger,
             regenerated: generated !== previous,
-            reloaded: reloadIfChanged(generated, previous.hash),
+            reloaded: reloadIfChanged(generated, previous?.hash),
         })
     }
 
@@ -261,6 +267,9 @@ export default function tailwindMerge(
             await updates?.dispose()
             await generation?.catch(() => {})
             config = resolvedConfig
+            if (current) {
+                clearRequireCache([...current.dependencies])
+            }
             current = null
             buildStarts = 0
             const prune = resolvePruneOptions(options.prune, config)
@@ -280,13 +289,18 @@ export default function tailwindMerge(
             )
         },
 
-        configureServer(server) {
+        async configureServer(server) {
             devServer = server
             updates = createUpdateScheduler(updateAndReload, (error) => {
                 config.logger.error(
                     `[@tailwind-merge/vite] Updating the tailwind-merge config failed: ${error instanceof Error ? error.message : String(error)}`,
                 )
             })
+            // The selected entrypoint must stay watched even before the first successful generation, including explicit paths outside the Vite root or files that do not exist yet.
+            const cssPath = await cssRoot
+            if (cssPath !== null) {
+                server.watcher.add(cssPath)
+            }
             void generation?.then((generated) => {
                 if (generated) {
                     watchOutOfRootPaths(generated)
@@ -360,14 +374,14 @@ export default function tailwindMerge(
             await updates?.dispose()
         },
 
-        hotUpdate({ file }) {
+        async hotUpdate({ file }) {
             // Runs once per environment; the work below spans all environments, so let the client run own it.
-            if (this.environment.name !== 'client' || !current) {
+            if (this.environment.name !== 'client') {
                 return
             }
-            if (current.dependencies.has(file)) {
+            if (file === (await cssRoot) || current?.dependencies.has(file)) {
                 updates?.schedule('config')
-            } else if (current.pruning) {
+            } else if (current?.pruning) {
                 // Any other file may be a source: the re-scan itself decides whether the used classes changed (a new file, a deleted one, an edit).
                 updates?.schedule('sources')
             }

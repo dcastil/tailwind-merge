@@ -1,4 +1,4 @@
-import { rm, utimes, writeFile } from 'node:fs/promises'
+import { readFile, rm, utimes, writeFile } from 'node:fs/promises'
 import path from 'node:path'
 
 import { type Rollup, build } from 'vite'
@@ -10,6 +10,7 @@ import { dependenciesChanged, generateRuntimeModule } from '../src/generation'
 import {
     RUNTIME_SPECIFIER,
     buildFixture,
+    hasLiteral,
     libraryAliases,
     setupPluginTests,
     updateAfter,
@@ -61,20 +62,75 @@ test('a watch rebuild fails on generation errors and recovers after the CSS is f
     }
 })
 
-test('a CSS root that fails at startup serves default behavior and logs the error', async () => {
+test('a watch rebuild loads changed JavaScript theme dependencies', async () => {
     const root = await copyFixture('app')
-    await writeFile(path.join(root, 'app.css'), BROKEN_CSS)
+    const themePath = path.join(root, 'theme.cjs')
+    await writeFile(themePath, "module.exports = { huge: '2.5rem' }\n")
+    await writeFile(path.join(root, 'tailwind.config.cjs'), "module.exports = { theme: { extend: { fontSize: require('./theme.cjs') } } }\n")
+    await writeFile(path.join(root, 'app.css'), "@import 'tailwindcss';\n@config './tailwind.config.cjs';\n")
+    const watcher = await build({
+        root,
+        configFile: false,
+        logLevel: 'silent',
+        plugins: [tailwindMerge({ prune: false })],
+        resolve: { alias: libraryAliases },
+        build: { minify: false, watch: {}, rollupOptions: { output: { entryFileNames: 'app.js' } } },
+    }) as Rollup.RollupWatcher
+
+    try {
+        await nextWatchBuild(watcher)
+        const before = await readFile(path.join(root, 'dist/app.js'), 'utf8')
+        expect(hasLiteral(before, 'huge')).toBe(true)
+        expect(hasLiteral(before, 'big')).toBe(false)
+        await nextWatchBuild(watcher, () => writeFile(themePath, "module.exports = { big: '2rem' }\n"))
+        const after = await readFile(path.join(root, 'dist/app.js'), 'utf8')
+        expect(hasLiteral(after, 'big')).toBe(true)
+        expect(hasLiteral(after, 'huge')).toBe(false)
+    } finally {
+        await watcher.close()
+    }
+})
+
+test.each([false, true])('a CSS root that fails at startup serves default behavior and recovers after repair (outside root: %s)', async (outsideRoot) => {
+    const root = await copyFixture('app')
+    const cssPath = path.join(root, outsideRoot ? '../theme.css' : 'app.css')
+    await writeFile(cssPath, BROKEN_CSS)
     const logs: string[] = []
-    const { server } = await startServer(root, { logs })
+    const { server, plugin } = await startServer(root, { logs, options: outsideRoot ? { css: cssPath } : undefined })
     const runtime = await server.ssrLoadModule(RUNTIME_SPECIFIER)
+    const clientFallback = await server.transformRequest(RUNTIME_SPECIFIER)
 
     // The fallback module: tailwind-merge's default behavior under the same export surface.
     expect(runtime.twMerge('text-huge text-sm')).toBe('text-huge text-sm')
     expect(runtime.twMerge('p-2 p-4')).toBe('p-4')
     expect(Object.keys(runtime.getConfig().classGroups)).toContain('sr')
+    expect(clientFallback?.code).toContain('getDefaultConfig')
     expect(logs).toEqual([
         expect.stringContaining('Generating the tailwind-merge config failed: '),
     ])
+
+    await waitForWatcher(server, cssPath)
+    const update = await updateAfter(plugin, () => writeFile(cssPath, GOOD_CSS))
+    expect(update).toEqual({ trigger: 'config', regenerated: true, reloaded: true })
+    const recovered = await server.ssrLoadModule(RUNTIME_SPECIFIER)
+    expect(recovered).not.toBe(runtime)
+    expect(recovered.twMerge('text-huge text-sm')).toBe('text-sm')
+    const clientRecovered = await server.transformRequest(RUNTIME_SPECIFIER)
+    expect(clientRecovered).not.toBe(clientFallback)
+    expect(clientRecovered?.code).not.toContain('getDefaultConfig')
+})
+
+test('creating an explicitly selected missing CSS entrypoint replaces the startup fallback', async () => {
+    const root = await copyFixture('app')
+    const { server, plugin } = await startServer(root, { options: { css: 'generated.css' } })
+    const fallback = await server.ssrLoadModule(RUNTIME_SPECIFIER)
+    expect(fallback.twMerge('text-huge text-sm')).toBe('text-huge text-sm')
+    await waitForWatcher(server, path.join(root, 'main.ts'))
+
+    const update = await updateAfter(plugin, () => writeFile(path.join(root, 'generated.css'), GOOD_CSS))
+    expect(update).toEqual({ trigger: 'config', regenerated: true, reloaded: true })
+    const recovered = await server.ssrLoadModule(RUNTIME_SPECIFIER)
+    expect(recovered.twMerge('text-huge text-sm')).toBe('text-sm')
 })
 
 test('a breaking edit keeps the last good module in service, and the next good edit recovers', async () => {
