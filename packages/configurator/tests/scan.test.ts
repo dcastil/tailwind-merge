@@ -1,9 +1,12 @@
 import { readFile } from 'node:fs/promises'
 import { fileURLToPath } from 'node:url'
 
+import { compile } from '@tailwindcss/node'
 import { describe, expect, test } from 'vitest'
 
 import { createSourceScanner, expandBraces, segment } from '../src/scan'
+
+import { css, generateFixture } from './fixture-utils'
 
 const scanFixtures = fileURLToPath(new URL('./fixtures/scan/', import.meta.url))
 
@@ -79,6 +82,28 @@ describe('brace expansion (Tailwind semantics)', () => {
 })
 
 describe('createSourceScanner', () => {
+    test.each([false, true])('ignores inline source directives inside comments and strings when pruning (imported: %s)', async (imported) => {
+        const stylesheet = css`
+            @import 'tailwindcss' source(none);
+            ${imported ? "@import './inline-sources.css';" : await readFixture('inline-sources.css')}
+            @theme { --text-huge: 2.5rem; }
+        `
+        const compiler = await compile(stylesheet, { base: scanFixtures, onDependency() {} })
+        expect(compiler.build([])).toContain('.text-huge {')
+        expect(compiler.build([])).toContain('.text-sm {')
+        const scanner = await createSourceScanner({
+            css: stylesheet,
+            base: scanFixtures,
+            autoDetectBases: [],
+        })
+        const { classes } = scanner.scan()
+        expect(classes.sort()).toEqual(['text-huge', 'text-sm'])
+        const { twMerge } = await generateFixture(stylesheet, scanFixtures, {
+            prune: { usedClasses: classes },
+        })
+        expect(twMerge('text-huge text-sm')).toBe('text-sm')
+    })
+
     test("scans Tailwind's sources and safelist exactly as configured in the CSS", async () => {
         const projectDirectory = `${scanFixtures}project/`
         const scanner = await createSourceScanner({

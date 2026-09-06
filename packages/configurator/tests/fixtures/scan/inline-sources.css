@@ -1,0 +1,11 @@
+/* @source not inline('text-huge'); */
+/* @source inline('italic'); */
+.example {
+    content: "}; @source not inline('text-sm'); /* text */";
+}
+.single {
+    content: '@source inline("bold");';
+}
+@source /* safelist */ inline('text-huge text-sm');
+@source inline('underline');
+@source not inline('underline');

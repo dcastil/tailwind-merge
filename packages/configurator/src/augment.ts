@@ -5,6 +5,7 @@ import {
     declaredProperties,
     haveProperSubset,
     havePropertiesEqual,
+    sameDeclarationScope,
 } from './design-system.ts'
 
 export interface CollisionResolution {
@@ -35,6 +36,8 @@ export interface BuildAugmentationsOptions {
     vanillaClassGroupId: (className: string) => string | undefined
     /** Class-name prefixes per group ID, from the group definitions' object keys. Groups listing several prefixes (`start` holds both `inset-s` and the deprecated `start` spelling) drive alias-spelling expansion: Tailwind's class list only suggests one spelling, so the others must be probed. */
     groupPrefixKeys: Map<string, string[]>
+    /** Groups already classified by custom-utility inference. Property signatures alone must not undo its condition-aware decisions. */
+    customGroupIds: ReadonlySet<string>
 }
 
 /**
@@ -48,6 +51,7 @@ export function buildAugmentations({
     projectClassGroupId,
     vanillaClassGroupId,
     groupPrefixKeys,
+    customGroupIds,
 }: BuildAugmentationsOptions): AugmentationResult {
     const vanillaClassNames = vanilla.getClassList().map(([className]) => className)
     const vanillaClassNameSet = new Set(vanillaClassNames)
@@ -68,6 +72,11 @@ export function buildAugmentations({
         // Negative utilities ('-z-header') resolve through the same class-map path as their positive form because the parser skips the leading dash, so only the positive name gets registered and each positive/negative pair is handled once.
         const registrationName = className.startsWith('-') ? className.slice(1) : className
         if (handledNames.has(registrationName)) {
+            continue
+        }
+        const claimingGroupId = projectClassGroupId(registrationName)
+        if (claimingGroupId !== undefined && customGroupIds.has(claimingGroupId)) {
+            // A custom border-grid can share border-color's property names while adding dark-mode effects. Keep its established ownership even when its name resembles a built-in root.
             continue
         }
 
@@ -93,7 +102,6 @@ export function buildAugmentations({
             continue
         }
 
-        const claimingGroupId = projectClassGroupId(registrationName)
         if (claimingGroupId === targetGroupId) {
             continue
         }
@@ -329,8 +337,7 @@ function declarationsEqual(first: DeclarationEntry[], second: DeclarationEntry[]
         first.every((entry, index) => {
             const other = second[index]!
             return (
-                entry.context === other.context &&
-                entry.conditional === other.conditional &&
+                sameDeclarationScope(entry, other) &&
                 entry.property === other.property &&
                 entry.value === other.value
             )

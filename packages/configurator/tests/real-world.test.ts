@@ -19,10 +19,10 @@ const PROJECTS = [
     {
         name: 'shadcn',
         entry: 'shadcn/globals.css',
-        // border-grid is @apply border-border/50 dark:border-border — an alias of the border-color group, so it merges with border colors in both directions.
+        // border-grid is @apply border-border/50 dark:border-border — its dark-mode color must survive a later unconditional border color.
         curated: (twMerge: (classList: string) => string) => {
             expect(twMerge('border-green-950 border-grid')).toBe('border-grid')
-            expect(twMerge('border-grid border-green-950')).toBe('border-green-950')
+            expect(twMerge('border-grid border-green-950')).toBe('border-grid border-green-950')
         },
     },
     {

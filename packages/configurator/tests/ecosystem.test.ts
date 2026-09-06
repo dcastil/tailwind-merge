@@ -128,9 +128,9 @@ describe('theme with pseudo-element, conditional, and state-carrying custom util
         expect(twMerge('overlay-frame border-red-500')).toBe('overlay-frame border-red-500')
     })
 
-    test('a conditional re-declaration of its own property does not stop a utility from aliasing', () => {
-        expect(plan.report.aliasedUtilityClasses).toEqual({ 'frame-line': 'border-color' })
-        expect(twMerge('frame-line border-red-500')).toBe('border-red-500')
+    test('a conditional re-declaration survives a later unconditional built-in', () => {
+        expect(plan.report.aliasedUtilityClasses).toEqual({})
+        expect(twMerge('frame-line border-red-500')).toBe('frame-line border-red-500')
         expect(twMerge('border-red-500 frame-line')).toBe('frame-line')
     })
 

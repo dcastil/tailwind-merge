@@ -62,15 +62,13 @@ export async function generate(options: GenerateOptions): Promise<GenerateResult
     const vanillaClassGroupUtils = createClassGroupUtils(materializeConfig(vanillaPlan))
 
     // Applied before the diff passes run, so classes of custom utilities count as classified and don't show up as unassigned — whether they joined a built-in group as an alias or got their own group.
-    applyCustomUtilityPlan(
-        plan,
-        buildCustomUtilityPlan({
-            project,
-            vanilla,
-            vanillaClassGroupId: vanillaClassGroupUtils.getClassGroupId,
-            encoding,
-        }),
-    )
+    const customUtilities = buildCustomUtilityPlan({
+        project,
+        vanilla,
+        vanillaClassGroupId: vanillaClassGroupUtils.getClassGroupId,
+        encoding,
+    })
+    applyCustomUtilityPlan(plan, customUtilities)
 
     const projectClassGroupUtils = createClassGroupUtils(
         materializeConfig({ ...plan, prefix: null }),
@@ -95,6 +93,7 @@ export async function generate(options: GenerateOptions): Promise<GenerateResult
             projectClassGroupId: projectClassGroupUtils.getClassGroupId,
             vanillaClassGroupId: vanillaClassGroupUtils.getClassGroupId,
             groupPrefixKeys,
+            customGroupIds: new Set(customUtilities.groups.keys()),
         }),
     )
 

@@ -119,7 +119,11 @@ async function collectInlineSources(
     }
 
     for (const text of cssTexts) {
-        for (const match of text.matchAll(INLINE_SOURCE_RE)) {
+        for (const statement of cssStatements(text)) {
+            const match = INLINE_SOURCE_RE.exec(statement)
+            if (!match) {
+                continue
+            }
             const target = match[1] ? exclusions : safelist
             for (const pattern of segment(match[3]!, ' ')) {
                 if (pattern === '') {
@@ -136,7 +140,50 @@ async function collectInlineSources(
 }
 
 /** `@source inline("…")` and `@source not inline('…')`, argument in either quote style. Tailwind requires the quotes, so unquoted forms are not a thing. */
-const INLINE_SOURCE_RE = /@source\s+(not\s+)?inline\(\s*(["'])((?:\\.|(?!\2)[^\\])*)\2\s*\)/g
+const INLINE_SOURCE_RE = /^@source\s+(not\s+)?inline\(\s*(["'])((?:\\.|(?!\2)[^\\])*)\2\s*\)$/
+
+/** Reads active CSS statements without interpreting selectors or declarations. Comments cannot introduce directives, and quoted text and function arguments cannot end a statement or open a block. */
+function* cssStatements(css: string): Generator<string> {
+    let statement = ''
+    let quote = ''
+    let parenDepth = 0
+    for (let index = 0; index < css.length; index++) {
+        const character = css[index]!
+        if (character === '\\') {
+            statement += css.slice(index, index + 2)
+            index += 1
+            continue
+        }
+        if (quote) {
+            statement += character
+            if (character === quote) {
+                quote = ''
+            }
+            continue
+        }
+        if (character === '/' && css[index + 1] === '*') {
+            const end = css.indexOf('*/', index + 2)
+            index = end === -1 ? css.length : end + 1
+            statement += ' '
+            continue
+        }
+        if (character === '"' || character === "'") {
+            quote = character
+        } else if (character === '(') {
+            parenDepth += 1
+        } else if (character === ')') {
+            parenDepth -= 1
+        } else if (parenDepth === 0 && (character === ';' || character === '{' || character === '}')) {
+            if (character === ';') {
+                yield statement.trim()
+            }
+            statement = ''
+            continue
+        }
+        statement += character
+    }
+    yield statement.trim()
+}
 
 const NUMERICAL_RANGE_RE = /^(-?\d+)\.\.(-?\d+)(?:\.\.(-?\d+))?$/
 

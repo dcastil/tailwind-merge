@@ -20,7 +20,7 @@ Exact output is generally larger. Enumeration often compresses well, but the dif
 
 ## Pruning to source usage
 
-The full generated configuration covers the resolved theme. Usage pruning removes groups and members that no supplied candidate reaches. Tailwind's own scanner supplies candidates from automatic detection, `source(…)`, `@source`, and inline safelists, including negative inline exclusions.
+The full generated configuration covers the resolved theme. Usage pruning removes groups and members that no supplied candidate reaches. Tailwind's own scanner supplies candidates from automatic detection, `source(…)`, `@source`, and inline safelists, including negative inline exclusions. Inline directives are read from active CSS in the entrypoint and imported stylesheets; text inside comments or quoted strings does not affect the candidates.
 
 The pruning contract is relative to the full generated config: **lists made from supplied candidates must merge identically before and after pruning.** Pruning does not fix an existing classification gap or validate every scanner token. Retained validators can also match candidates absent from the scan, so a pruned config is not a strict allowlist of class strings.
 
@@ -30,10 +30,10 @@ Do not prune a design-system package's config against only the package's own sou
 
 ## Custom utilities and collisions
 
-A static utility whose compiled declarations match one built-in group's signature can join that group as an alias. Other custom roots receive their own self-conflict group. When a custom utility fully covers another group's unconditional element-level declarations, an override relationship allows the later custom utility to remove the earlier class.
+A static utility whose compiled declarations match one built-in group's signature can join that group as an alias when the two cover each other's effects. Other custom roots receive their own self-conflict group. When a custom utility fully covers another group's declarations, an override relationship allows the later custom utility to remove the earlier class.
 
 Overlapping names such as `demo-*` and `demo-child-*` are classified from their own compiled classes. A bare utility and its functional form share a group only when their effects fully cover each other; a separate static `demo-child` can therefore keep different conflict behavior from `demo-child-*`.
 
-For example, a utility setting padding and border radius can remove an earlier padding utility. An ordinary padding utility cannot remove the combined utility because doing so would lose its radius. Conditional rules and pseudo-element effects require conservative treatment for the same reason.
+For example, a utility setting padding and border radius can remove an earlier padding utility. An ordinary padding utility cannot remove the combined utility because doing so would lose its radius. Likewise, a utility setting both a base color and a hover color survives a later ordinary text color. Conditional rules and pseudo-element effects count as shared scaffolding only when their declarations and surrounding rule paths match. Two identical declarations under different media queries remain independent.
 
 When one class name compiles to several independent effects, the generator may remove it from conflict groups so it passes through intact. The report records these collisions and any theme-created classes it could not assign. These decisions and their constraints are described in the [limitations](./limitations.md).

@@ -54,8 +54,10 @@ function memoizeClassList(designSystem: DesignSystemAccess): DesignSystemAccess 
 export interface DeclarationEntry {
     /** Render target of the declaration: `''` for the element the class sits on, a pseudo-element chain like `'::after'`, or a combinator tail like `'> :not(:last-child)'` when the declaration styles a different element entirely. */
     context: string
-    /** True when the declaration applies only under a condition — an `@media`/`@supports`/`@container` wrapper or a pseudo-class guard like `:hover` or `:is(.dark *)`. */
+    /** True under an `@media`/`@supports`/`@container` wrapper, a pseudo-class guard, or a selector list whose combined effects cannot be treated as one unconditional target. */
     conditional: boolean
+    /** Enclosing block headers relative to the utility's own selector (`&`). Keeping the full path distinguishes both guard expressions and which render target a guard surrounds. */
+    scope: readonly string[]
     property: string
     value: string
 }
@@ -101,6 +103,15 @@ export function qualifiedProperty(entry: { context: string; property: string }):
     return entry.context === '' ? entry.property : `${entry.context} ${entry.property}`
 }
 
+/** Shared scaffolding must apply under the same guards on the same target; equal property/value text alone cannot prove that. Header order is kept conservatively rather than attempting CSS condition equivalence. */
+export function sameDeclarationScope(first: DeclarationEntry, second: DeclarationEntry): boolean {
+    return (
+        first.context === second.context &&
+        first.scope.length === second.scope.length &&
+        first.scope.every((header, index) => header === second.scope[index])
+    )
+}
+
 /**
  * Whether each class name compiles to CSS, checked in one `candidatesToCss` batch — the batched boolean form of the prefix-aware compilation `declaredDeclarations` does per class. Use one of the two over raw `candidatesToCss` so the answer holds for prefixed themes.
  */
@@ -120,6 +131,7 @@ const declarationsCache = new WeakMap<DesignSystemAccess, Map<string, Declaratio
 interface BlockFrame {
     context: string
     conditional: boolean
+    scope: readonly string[]
     /** Set for blocks whose declarations are not element styles (`@property`, `@keyframes` and their descendants). */
     skip: boolean
 }
@@ -147,7 +159,13 @@ function parseDeclarations(css: string): DeclarationEntry[] {
         const value = declaration.slice(colonIndex + 1).trim()
         // Property-name shape guard (covers standard, vendor `-ms-…`, and custom `--…` properties) so selector fragments of malformed input never register as declarations.
         if (/^-{0,2}[a-zA-Z][\w-]*$/.test(property)) {
-            entries.push({ context: frame.context, conditional: frame.conditional, property, value })
+            entries.push({
+                context: frame.context,
+                conditional: frame.conditional,
+                scope: frame.scope,
+                property,
+                value,
+            })
         }
     }
 
@@ -179,6 +197,7 @@ function parseDeclarations(css: string): DeclarationEntry[] {
 function frameForHeader(header: string, parent: BlockFrame | undefined): BlockFrame {
     const parentContext = parent?.context ?? ''
     const parentConditional = parent?.conditional ?? false
+    const parentScope = parent?.scope ?? []
     const parentSkip = parent?.skip ?? false
 
     if (header.startsWith('@')) {
@@ -187,17 +206,19 @@ function frameForHeader(header: string, parent: BlockFrame | undefined): BlockFr
         return {
             context: parentContext,
             conditional: parentConditional || isConditional,
+            scope: [...parentScope, header],
             skip: parentSkip || !isConditional,
         }
     }
 
-    const { contextFragment, conditional } = analyzeSelector(header)
+    const { contextFragment, conditional, relativeSelector } = analyzeSelector(header)
     return {
         context:
             parentContext === '' || contextFragment === ''
                 ? parentContext + contextFragment
                 : `${parentContext} ${contextFragment}`,
         conditional: parentConditional || conditional,
+        scope: [...parentScope, relativeSelector],
         skip: parentSkip,
     }
 }
@@ -208,8 +229,12 @@ const LEGACY_PSEUDO_ELEMENTS = new Set(['before', 'after', 'first-line', 'first-
 /**
  * Determines what a selector does to the render target relative to the class's base element. The subject anchor is `&` (nested rules) or the class selector itself (top-level rules, possibly wrapped in `:where(...)`). Pseudo-elements and combinator tails after the anchor change the target; pseudo-classes and ancestor prefixes only add conditions.
  */
-function analyzeSelector(selector: string): { contextFragment: string; conditional: boolean } {
-    // Comma lists don't occur in single-candidate output; analyzing the first part keeps the scanner total in case they ever do.
+function analyzeSelector(selector: string): {
+    contextFragment: string
+    conditional: boolean
+    relativeSelector: string
+} {
+    // The first selector supplies the property signature. The complete list stays in the scope, and list declarations conservatively avoid unconditional coverage below.
     let subject = selector.split(',')[0]!.trim()
 
     // Unwrap a `:where(...)` / `:is(...)` enclosing the entire selector — it only changes specificity, not the target.
@@ -218,15 +243,19 @@ function analyzeSelector(selector: string): { contextFragment: string; condition
         subject = wrapper[1]!.trim()
     }
 
-    // Anchor: `&` or the first class selector (class names may contain escaped characters like `\%`).
-    const anchorMatch = /&|\.(?:[\w-]|\\.)+/.exec(subject)
+    // Prefer the nesting anchor over an ancestor class (`.dark &`); class names may contain escaped characters like `\%`.
+    const anchorMatch = /&/.exec(subject) ?? /\.(?:[\w-]|\\.)+/.exec(subject)
     if (!anchorMatch) {
         // No recognizable anchor means the block targets something unrelated (not emitted by current Tailwind); give it a distinct context so it can never collide with base declarations.
-        return { contextFragment: subject.replace(/\s+/g, ' '), conditional: false }
+        return {
+            contextFragment: subject.replace(/\s+/g, ' '),
+            conditional: false,
+            relativeSelector: selector,
+        }
     }
 
     // Anything before the anchor is ancestor context (`.dark .foo`), a condition on the same target.
-    let conditional = anchorMatch.index > 0
+    let conditional = anchorMatch.index > 0 || selector.includes(',')
     let contextFragment = ''
     let rest = subject.slice(anchorMatch.index + anchorMatch[0].length)
 
@@ -257,7 +286,12 @@ function analyzeSelector(selector: string): { contextFragment: string; condition
         break
     }
 
-    return { contextFragment, conditional }
+    return {
+        contextFragment,
+        conditional,
+        // Keep the entire selector in the scope even when target classification only analyzes its first comma segment.
+        relativeSelector: selector.replace(anchorMatch[0], '&'),
+    }
 }
 
 /**

@@ -6,6 +6,7 @@ import {
     declaredDeclarations,
     declaredProperties,
     propertyCovers,
+    sameDeclarationScope,
 } from './design-system.ts'
 import { type PlanValue, type ValidatorName } from './plan.ts'
 
@@ -32,7 +33,7 @@ export interface BuildCustomUtilityPlanOptions {
  *
  * Support is empirical, derived entirely from each utility's compiled declarations, in three tiers:
  *
- * 1. A static utility whose declarations match exactly one built-in group's signature is an alias of that group (shadcn's `border-grid` is `border-color: var(--border)` and behaves like `border-red-500`), so it joins the group and merges with its classes in both directions.
+ * 1. A static utility whose declarations match exactly one built-in group's signature and mutually cover its effects is an alias of that group (an unconditional `color` utility behaves like `text-red-500`), so it joins the group and merges with its classes in both directions.
  * 2. Every other utility root becomes its own group so it merges against itself — and when its declarations fully cover what another group sets (`btn` with `padding` + `border-radius` covers everything `p-4` sets; see `fullyCovers` for the exact rule), an override edge is added so the utility coming later removes the covered class. The reverse direction stays out on purpose: `p-4` after `btn` only overrides part of `btn`, and removing `btn` would lose the rest of its effect — the same partial-override rule the default config applies between `px` and `p`.
  * 3. Declarations that are conditional (media queries, dark-mode guards) or target other elements (pseudo-elements, child selectors) only count as covered when they are byte-identical shared scaffolding: they overlap only sometimes or somewhere else, so a utility that merely touches them stays side by side with whatever it partially overlaps.
  *
@@ -307,7 +308,7 @@ function findAliasGroup(
 }
 
 /**
- * The conditionality check on top of signature equality for aliasing: both classes must set the same properties *unconditionally* on the element itself. Signature equality alone is blind to conditions, and a utility whose only padding sits inside a media query is not an alias of `p-4` — while a utility re-declaring its own property again under a dark-mode guard (shadcn's `border-grid`) still is one, because the guard only re-touches a property both sides already set.
+ * Signature equality alone is blind to conditions. Aliases need an unconditional element-level effect and mutual coverage: a later built-in color must never remove a custom utility's independent hover or dark-mode color, even when both touch only `color`.
  */
 function aliasEquivalent(
     first: DeclarationEntry[] | null,
@@ -316,27 +317,15 @@ function aliasEquivalent(
     if (first === null || second === null) {
         return false
     }
-    const firstBase = unconditionalBaseKeys(first)
-    const secondBase = unconditionalBaseKeys(second)
     return (
-        firstBase.size > 0 &&
-        firstBase.size === secondBase.size &&
-        [...firstBase].every((property) => secondBase.has(property))
+        first.some((entry) => entry.context === '' && !entry.conditional) &&
+        fullyCovers(first, second) &&
+        fullyCovers(second, first)
     )
 }
 
-function unconditionalBaseKeys(declarations: DeclarationEntry[]): Set<string> {
-    const keys = new Set<string>()
-    for (const entry of declarations) {
-        if (entry.context === '' && !entry.conditional) {
-            keys.add(entry.property)
-        }
-    }
-    return keys
-}
-
 /**
- * Whether a class fully covers another, meaning: with the coverer coming later, the covered class has no independent effect left, so removing it loses nothing. Each declaration of the target must be accounted for — an unconditional element-level real property by an equal or shorthand property of the coverer, an unconditional element-level custom property (a state carrier like `--hit-area-l`) by the coverer re-declaring the same one, and everything conditional or targeting another element (shared `::before` scaffolding) only by a byte-identical declaration in the coverer. Anything unaccounted for means partial overlap, and partial overlap never justifies removal — the same rule the default config applies between `px` and `p`.
+ * Whether a class fully covers another, meaning: with the coverer coming later, the covered class has no independent effect left, so removing it loses nothing. Each declaration of the target must be accounted for — an unconditional element-level real property by an equal or shorthand property of the coverer, an unconditional element-level custom property (a state carrier like `--hit-area-l`) by the coverer re-declaring the same one, and everything conditional or targeting another element (shared `::before` scaffolding) only by a byte-identical declaration under the same enclosing rules in the coverer. Anything unaccounted for means partial overlap, and partial overlap never justifies removal — the same rule the default config applies between `px` and `p`.
  */
 export function fullyCovers(
     coverer: DeclarationEntry[] | null,
@@ -367,7 +356,7 @@ export function fullyCovers(
 
         return coverer.some(
             (entry) =>
-                entry.context === targetEntry.context &&
+                sameDeclarationScope(entry, targetEntry) &&
                 entry.property === targetEntry.property &&
                 entry.value === targetEntry.value,
         )
