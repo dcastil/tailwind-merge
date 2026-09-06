@@ -48,7 +48,8 @@ test('a watch rebuild fails on generation errors and recovers after the CSS is f
         logLevel: 'silent',
         plugins: [tailwindMerge({ prune: false })],
         resolve: { alias: libraryAliases },
-        build: { write: false, watch: {} },
+        // A failed generation can finish before Chokidar's native-event throttle expires, swallowing an immediate repair on Linux. Polling keeps these deliberately back-to-back edits observable without sleeps or longer test timeouts.
+        build: { write: false, watch: { chokidar: { usePolling: true } } },
     }) as Rollup.RollupWatcher
 
     try {
@@ -118,16 +119,28 @@ test('dependenciesChanged notices edited and deleted files of the CSS graph', as
     await expect(dependenciesChanged(fresh)).resolves.toBe(true)
 })
 
-/** Waits for a real watch build's success or failure, subscribing before an optional edit so no filesystem event is missed. Closing each bundle releases its resources without stopping the watcher. */
+/** Waits for a real watch cycle's END event, subscribing before an optional edit so its outcome cannot be missed. Bundle and error events arrive before the cycle finishes; closing their results releases resources without stopping the watcher. */
 function nextWatchBuild(watcher: Rollup.RollupWatcher, edit?: () => Promise<void>): Promise<void> {
     return new Promise((resolve, reject) => {
-        const onEvent = (event: Rollup.RollupWatcherEvent) => {
-            if (event.code === 'ERROR') {
+        let buildError: unknown
+        const onEvent = async (event: Rollup.RollupWatcherEvent) => {
+            try {
+                if (event.code === 'ERROR') {
+                    buildError = event.error
+                    await event.result?.close()
+                } else if (event.code === 'BUNDLE_END') {
+                    await event.result.close()
+                } else if (event.code === 'END') {
+                    watcher.off('event', onEvent)
+                    if (buildError) {
+                        reject(buildError)
+                    } else {
+                        resolve()
+                    }
+                }
+            } catch (error) {
                 watcher.off('event', onEvent)
-                reject(event.error)
-            } else if (event.code === 'BUNDLE_END') {
-                watcher.off('event', onEvent)
-                void event.result.close().then(resolve, reject)
+                reject(error)
             }
         }
         watcher.on('event', onEvent)
