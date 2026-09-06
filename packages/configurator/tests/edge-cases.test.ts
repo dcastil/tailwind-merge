@@ -463,6 +463,75 @@ describe('custom utilities under built-in prefixes', async () => {
     })
 })
 
+// These names sort with demo-child before demo-z. A plain startsWith lookup must not use the child utility as the exemplar for the parent's padding behavior.
+describe.each(['', 'tw'] as const)('overlapping custom utility roots (prefix: %s)', (prefix) => {
+    test.each(['compact', 'exact'] as const)(
+        "keeps each root's own conflict semantics with %s encoding",
+        async (encoding) => {
+            const { twMerge, config, plan, designSystem } = await generateFixture(
+                css`
+                    @import 'tailwindcss' ${prefix ? `prefix(${prefix})` : ''};
+                    @theme {
+                        --demo-z: 1rem;
+                        --demo-leaf-z: 2rem;
+                    }
+                    @utility demo-* {
+                        padding: --value(--demo-*);
+                    }
+                    @utility demo-child-* {
+                        margin: --value(--demo-*);
+                    }
+                    @utility demo-child {
+                        border-radius: 1rem;
+                    }
+                    @utility demo-leaf {
+                        opacity: 0.5;
+                    }
+                    @utility demo {
+                        padding: 1rem;
+                    }
+                `,
+                undefined,
+                { encoding },
+            )
+
+            const qualify = (classes: string) =>
+                classes.split(' ').map((name) => prefix ? `${prefix}:${name}` : name).join(' ')
+            const cases = {
+                'p-4 demo-z': 'demo-z',
+                'm-4 demo-z': 'm-4 demo-z',
+                'rounded-lg demo-z': 'rounded-lg demo-z',
+                'demo demo-z': 'demo-z',
+                'demo-z demo': 'demo',
+                'm-4 demo-child-z': 'demo-child-z',
+                'p-4 demo-child-z': 'p-4 demo-child-z',
+                'demo-child demo-child-z': 'demo-child demo-child-z',
+                'demo-z demo-child': 'demo-z demo-child',
+                // A longer static name owns only itself; demo-leaf-z remains a functional value of demo-*.
+                'demo-z demo-leaf-z': 'demo-leaf-z',
+                'demo-leaf-z demo-z': 'demo-z',
+                'demo-z demo-leaf': 'demo-z demo-leaf',
+            }
+            expectMerges(
+                twMerge,
+                Object.entries(cases).map(([input, output]): [string, string] => [
+                    qualify(input),
+                    qualify(output),
+                ]),
+            )
+            expect(plan.report.customUtilityGroups).not.toContain('utility.demo.static')
+            expect(
+                declaredDeclarations(designSystem, 'demo-z')?.map((entry) => entry.property),
+            ).toEqual(['padding'])
+
+            const usedClasses = [
+                ...new Set(Object.keys(cases).flatMap((input) => qualify(input).split(' '))),
+            ]
+            assertPruningEquivalence(config, materializeConfig(prunePlan(plan, usedClasses)), usedClasses)
+        },
+    )
+})
+
 // The same collisions under an import prefix: every declaration probe behind the collision corrections compiles prefixed candidates (`tw:border-4`), a path that once silently no-oped for prefixed themes.
 describe('numeric color tokens and two-namespace names under an import prefix', async () => {
     const { twMerge, plan } = await generateFixture(css`

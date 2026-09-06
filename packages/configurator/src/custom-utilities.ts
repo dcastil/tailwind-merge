@@ -49,18 +49,25 @@ export function buildCustomUtilityPlan({
         ...vanilla.utilities.keys('functional'),
     ])
     const functionalRoots = project.utilities.keys('functional').filter((root) => !vanillaRoots.has(root))
-    const functionalRootSet = new Set(functionalRoots)
     const staticRoots = project.utilities.keys('static').filter((root) => !vanillaRoots.has(root))
+    const staticRootSet = new Set(staticRoots)
+    const functionalClasses = collectFunctionalClasses(project, functionalRoots, staticRootSet)
+    const functionalExemplars = new Map(
+        [...functionalClasses].map(([root, classNames]) => [
+            root,
+            classNames.find((className) => declaredDeclarations(project, className)?.length) ?? null,
+        ]),
+    )
 
     const groupSignatures = collectGroupSignatures(vanilla, vanillaClassGroupId)
 
-    const groups = new Map<string, PlanValue[]>()
+    const groups = new Map<string, CustomUtilityGroup>()
     const aliases = new Map<string, string>()
 
     for (const root of staticRoots) {
         // A static root sharing its name with a functional custom root joins the functional group only when the two provably have the same effect (they cover each other, like a `shimmer` default alongside `shimmer-*` values) — splitting those would stop them from merging. When the functional form carries state the bare form doesn't (supabase's `hit-area` scaffold vs `hit-area-*` offsets), they stay separate groups and override inference below adds the correct one-directional relationship instead.
-        if (functionalRootSet.has(root)) {
-            const functionalExemplar = functionalRootExemplar(project, root)
+        if (functionalClasses.has(root)) {
+            const functionalExemplar = functionalExemplars.get(root) ?? null
             if (
                 functionalExemplar !== null &&
                 fullyCovers(
@@ -74,7 +81,10 @@ export function buildCustomUtilityPlan({
             ) {
                 continue
             }
-            groups.set(`${customUtilityGroupId(root)}.static`, [{ kind: 'class', value: root }])
+            groups.set(`${customUtilityGroupId(root)}.static`, {
+                items: [{ kind: 'class', value: root }],
+                exemplar: root,
+            })
             continue
         }
 
@@ -82,42 +92,38 @@ export function buildCustomUtilityPlan({
         if (aliasGroupId !== null) {
             aliases.set(root, aliasGroupId)
         } else {
-            groups.set(customUtilityGroupId(root), [{ kind: 'class', value: root }])
+            groups.set(customUtilityGroupId(root), {
+                items: [{ kind: 'class', value: root }],
+                exemplar: root,
+            })
         }
     }
-
-    const functionalValueTails =
-        encoding === 'exact'
-            ? collectFunctionalValueTails(project, functionalRootSet, [
-                  ...functionalRoots,
-                  ...staticRoots,
-              ])
-            : null
 
     for (const root of functionalRoots) {
         const groupId = customUtilityGroupId(root)
         const items: PlanValue[] = []
-        if (
-            project.utilities.keys('static').includes(root) &&
-            !groups.has(`${groupId}.static`)
-        ) {
+        if (staticRootSet.has(root) && !groups.has(`${groupId}.static`)) {
             items.push({ kind: 'class', value: root })
         }
         // 'compact': `isAny` under the root makes every `root-*` value self-conflict — right in that whatever values the utility accepts all set the same declarations, but it also hands nonexistent values eviction power over real ones (see `EncodingMode`). 'exact' therefore enumerates the compile-verified named values and keeps only the validators whose whole value kind probes as accepted.
         const valueItems =
-            functionalValueTails === null
+            encoding === 'compact'
                 ? [{ kind: 'validator', name: 'isAny' } satisfies PlanValue]
-                : exactFunctionalValueItems(project, root, functionalValueTails.get(root) ?? [])
+                : exactFunctionalValueItems(
+                      project,
+                      root,
+                      functionalClasses.get(root)!.map((className) => className.slice(root.length + 1)),
+                  )
         if (valueItems.length > 0) {
             items.push({ kind: 'object', entries: [[root, valueItems]] })
         }
         if (items.length > 0) {
-            groups.set(groupId, items)
+            groups.set(groupId, { items, exemplar: functionalExemplars.get(root) ?? null })
         }
     }
 
     return {
-        groups,
+        groups: new Map([...groups].map(([groupId, group]) => [groupId, group.items])),
         aliases,
         conflicts: inferOverrideConflicts(project, groups, groupSignatures),
     }
@@ -128,45 +134,39 @@ function customUtilityGroupId(root: string): string {
     return `utility.${root}`
 }
 
+/** Members and their representative class travel together, so override inference never has to reconstruct a utility root from a generated group ID. */
+interface CustomUtilityGroup {
+    items: PlanValue[]
+    exemplar: string | null
+}
+
 /**
- * Named values per functional root, from the class list in suggestion order. A class belongs to the longest custom root prefixing it, so `foo-bar-2` counts as a value of a `foo-bar` root rather than as `bar-2` under `foo`, and a class that *is* a static root stays out of value enumeration (the static branches above handle it). One pass over the class list serves every root.
+ * Indexes suggested classes once for both encoding and conflict inference. A static class belongs to its own root; other classes belong to the longest functional root that prefixes them. Using the same ownership rule prevents a nested root such as `demo-child-*` from becoming the exemplar or a named value of `demo-*`.
  */
-function collectFunctionalValueTails(
+function collectFunctionalClasses(
     project: DesignSystemAccess,
-    functionalRootSet: Set<string>,
-    allCustomRoots: string[],
+    functionalRoots: string[],
+    staticRoots: Set<string>,
 ): Map<string, string[]> {
-    const tailsByRoot = new Map<string, string[]>()
-    const seenClassNames = new Set<string>()
+    const classesByRoot = new Map<string, string[]>(functionalRoots.map((root) => [root, []]))
+    if (functionalRoots.length === 0) {
+        return classesByRoot
+    }
+    const longestRootsFirst = [...functionalRoots].sort((first, second) => second.length - first.length)
+    const seen = new Set<string>()
 
     for (const [className] of project.getClassList()) {
-        if (seenClassNames.has(className)) {
+        if (staticRoots.has(className) || seen.has(className)) {
             continue
         }
-        seenClassNames.add(className)
-
-        let owningRoot: string | null = null
-        for (const root of allCustomRoots) {
-            if (
-                className.startsWith(`${root}-`) &&
-                (owningRoot === null || root.length > owningRoot.length)
-            ) {
-                owningRoot = root
-            }
+        seen.add(className)
+        const root = longestRootsFirst.find((candidate) => className.startsWith(`${candidate}-`))
+        if (root !== undefined) {
+            classesByRoot.get(root)!.push(className)
         }
-        if (owningRoot === null || !functionalRootSet.has(owningRoot)) {
-            continue
-        }
-
-        let tails = tailsByRoot.get(owningRoot)
-        if (!tails) {
-            tails = []
-            tailsByRoot.set(owningRoot, tails)
-        }
-        tails.push(className.slice(owningRoot.length + 1))
     }
 
-    return tailsByRoot
+    return classesByRoot
 }
 
 /**
@@ -379,12 +379,11 @@ export function fullyCovers(
  */
 function inferOverrideConflicts(
     project: DesignSystemAccess,
-    customGroups: Map<string, PlanValue[]>,
+    customGroups: Map<string, CustomUtilityGroup>,
     groupSignatures: GroupSignatures,
 ): Map<string, string[]> {
     const customDeclarations = new Map<string, DeclarationEntry[] | null>()
-    for (const [groupId] of customGroups) {
-        const exemplar = customGroupExemplar(project, groupId)
+    for (const [groupId, { exemplar }] of customGroups) {
         customDeclarations.set(
             groupId,
             exemplar === null ? null : declaredDeclarations(project, exemplar),
@@ -418,26 +417,4 @@ function inferOverrideConflicts(
     }
 
     return conflicts
-}
-
-/** The class name representing a custom group's declaration shape: the group's static root, or any one suggested value of a functional root — all values of a functional utility set the same properties. A functional group whose root also has a separated static form is represented by a functional value, not the bare root. */
-function customGroupExemplar(project: DesignSystemAccess, groupId: string): string | null {
-    const root = groupId.replace(/^utility\./, '').replace(/\.static$/, '')
-    if (groupId.endsWith('.static')) {
-        return root
-    }
-    if (project.utilities.keys('functional').includes(root)) {
-        return functionalRootExemplar(project, root)
-    }
-    return root
-}
-
-/** Any one suggested class of a functional root, taken from the class list. */
-function functionalRootExemplar(project: DesignSystemAccess, root: string): string | null {
-    for (const [className] of project.getClassList()) {
-        if (className.startsWith(`${root}-`)) {
-            return className
-        }
-    }
-    return null
 }

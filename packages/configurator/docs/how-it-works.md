@@ -32,6 +32,8 @@ Do not prune a design-system package's config against only the package's own sou
 
 A static utility whose compiled declarations match one built-in group's signature can join that group as an alias. Other custom roots receive their own self-conflict group. When a custom utility fully covers another group's unconditional element-level declarations, an override relationship allows the later custom utility to remove the earlier class.
 
+Overlapping names such as `demo-*` and `demo-child-*` are classified from their own compiled classes. A bare utility and its functional form share a group only when their effects fully cover each other; a separate static `demo-child` can therefore keep different conflict behavior from `demo-child-*`.
+
 For example, a utility setting padding and border radius can remove an earlier padding utility. An ordinary padding utility cannot remove the combined utility because doing so would lose its radius. Conditional rules and pseudo-element effects require conservative treatment for the same reason.
 
 When one class name compiles to several independent effects, the generator may remove it from conflict groups so it passes through intact. The report records these collisions and any theme-created classes it could not assign. These decisions and their constraints are described in the [limitations](./limitations.md).

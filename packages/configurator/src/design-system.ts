@@ -39,7 +39,7 @@ export async function loadDesignSystems({ css, base }: LoadDesignSystemsOptions)
 }
 
 /**
- * Caches `getClassList()` on a loaded design system. Tailwind rebuilds the list on every call (tens of milliseconds for the ~23k vanilla names), and one generation asks for it several times — the custom-utility pass once per functional root — so on themes with many custom utilities the repeated rebuilds dominated generation time (2.5× on the heaviest real-world fixture). A loaded design system never changes, so caching is safe; consumers replace the object for a new theme.
+ * Caches `getClassList()` on a loaded design system. Tailwind rebuilds the list on every call, and the custom-utility, augmentation, and collision passes share it. Repeated rebuilds previously dominated generation time on themes with many custom utilities. A loaded design system never changes, so caching is safe; consumers replace the object for a new theme.
  */
 function memoizeClassList(designSystem: DesignSystemAccess): DesignSystemAccess {
     const original = designSystem.getClassList.bind(designSystem)
