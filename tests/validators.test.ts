@@ -111,6 +111,8 @@ test('isArbitraryLength', () => {
     expect(isArbitraryLength('[12px')).toBe(false)
     expect(isArbitraryLength('12px]')).toBe(false)
     expect(isArbitraryLength('one')).toBe(false)
+    expect(isArbitraryLength('[color(display-p3_1_0_0/50%)]')).toBe(false)
+    expect(isArbitraryLength('[light-dark(white,rgb(0_0_0/50%))]')).toBe(false)
 })
 
 test('isArbitraryNumber', () => {
