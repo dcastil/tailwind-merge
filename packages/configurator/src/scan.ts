@@ -35,7 +35,7 @@ export interface UsageScan {
 }
 
 /**
- * Finds the class names a project can render, the way Tailwind does: the same candidate extractor (`@tailwindcss/oxide`'s scanner), over the same sources (`source(…)`, automatic detection, every `@source`), plus the `@source inline(…)` safelist. Pruning a generated config to these classes therefore never drops a class that gets styles — the invariant that makes pruning safe (PROPOSAL.md §12).
+ * Finds the class names a project can render, the way Tailwind does: the same candidate extractor (`@tailwindcss/oxide`'s scanner), over the same sources (`source(…)`, automatic detection, every `@source`), plus the `@source inline(…)` safelist. Pruning uses these candidates to preserve the full generated config's merge behavior for the same source usage.
  *
  * The sources come from Tailwind's own `compile()` (its `root` and `sources` results), which is also what reports the CSS graph's dependencies, so one compile serves both. What `compile()` does not expose is the safelist: `@source inline(…)` candidates stay private to its `build()`, so they are parsed from the entrypoint and every CSS dependency here, with Tailwind's brace-expansion rules. Negated inline sources exclude candidates even when they occur in files, exactly like Tailwind, which refuses to generate them.
  *

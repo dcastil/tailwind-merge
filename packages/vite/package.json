@@ -2,7 +2,7 @@
     "name": "@tailwind-merge/vite",
     "version": "0.0.0",
     "private": true,
-    "description": "Vite plugin that generates a project-optimized twMerge from the project's Tailwind CSS. Prototype, see ../configurator/PROPOSAL.md §11.",
+    "description": "Vite plugin that generates a project-optimized twMerge from the project's Tailwind CSS.",
     "license": "MIT",
     "author": "Dany Castillo",
     "repository": {

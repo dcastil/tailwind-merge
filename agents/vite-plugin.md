@@ -1,0 +1,84 @@
+# Vite plugin development
+
+Read this for work on `packages/vite/`. User docs start in the [package README](../packages/vite/README.md); generator internals and source-scanning semantics live in the [configurator guide](./configurator.md). Shared CI security rules remain in [library internals](./tailwind-merge-internals.md#ci-behavior-and-security).
+
+## Goals and strategy
+
+Make a project's `twMerge` follow its Tailwind theme with one plugin installation and an explicit runtime import. Normal apps should not need a CSS path, generated files, ambient module declarations, or manual merge configuration.
+
+The small plugin surface is deliberate: it lets users adopt the integration while the configurator's API and generated representation evolve. Keep the versioned contract focused on plugin options and runtime exports; a standalone configurator release can follow on its own schedule.
+
+- Keep the plugin thin: generation and scanning are reusable configurator operations. Vite code owns root selection, virtual-module resolution, dependency watching, cache invalidation, failure policy, and packaging.
+- Keep development stable. By default, class usage cannot change the served config; CSS-graph edits regenerate, and only a changed module triggers a full reload. Pruning is on for app builds, opt-in for dev, and off by default in library builds because consumer class names are unknowable.
+- Make optimization failures safe. Source scanning can fall back to the full generated config; configuration-generation failures reject builds. Dev can preserve its last good module while CSS is broken mid-edit.
+- Preserve ordinary package resolution and customization. Use a real typed runtime subpath that Vite redirects, with documented default-config behavior outside Vite. `extendTailwindMerge` extends the generated config. A caller explicitly importing plain `tailwind-merge` keeps that package's behavior.
+- Keep client and SSR inputs aligned by using the same CSS and filesystem sources. Do not prune independently to their different module graphs. The architecture targets equal generated code for equal inputs; explicit cross-build parity coverage remains to be added.
+
+Boundaries: one Tailwind root per plugin instance, Vite 6+ (Environment API), and the supported Tailwind peer line. Multiple independent roots require an explicit choice, not a merged theme. Other bundlers should be sibling wrappers on the same core. Intercepting bare `tailwind-merge` imports, runtime dual-copy warnings, and a separate shared runtime package are deferred until adoption demonstrates a need.
+
+## Architecture and invariants
+
+| File in `packages/vite/` | Responsibility |
+| --- | --- |
+| `src/index.ts` | Plugin hooks, eager generation, runtime interception, update subscription API, watching, and reload/failure policy. |
+| `src/discovery.ts` | Bounded CSS marker search, imported-candidate elimination, and ambiguity errors. |
+| `src/generation.ts` | Calls the configurator, gathers dependencies, fingerprints output and source usage, and appends the runtime export surface. |
+| `src/prune-options.ts` | Resolves app/library/build/dev defaults and integration-specific automatic-detection bases. |
+| `src/runtime.ts` | Real fallback module and consumer type surface. |
+| `src/tailwind-merge.ts` | Internal re-export allowing the virtual module to resolve the plugin's own library dependency. |
+| `tsdown.config.ts`, `scripts/test-packed-package.mjs` | Build output and packed-consumer verification. |
+
+Discovery must be eager: `@tailwindcss/vite` discovers CSS lazily as modules flow through the pipeline and offers no root option to read. A runtime import may arrive first. `css` overrides discovery; otherwise choose the import-graph top among files with Tailwind markers. Ambiguity errors, while no root warns and uses the default runtime. The algorithm is a filesystem heuristic, not proof that the selected CSS is the app's only live theme.
+
+The real `@tailwind-merge/vite/runtime` subpath is intercepted with `enforce: 'pre'`; without that, Vite's resolver wins and silently serves the fallback. Exclude the subpath from dependency optimization and make the package `ssr.noExternal`. Do not alias that specifier in tests: Vite aliases consume it before plugin interception and intentionally override the plugin.
+
+Serve plain JavaScript for the virtual module: Vite does not reliably strip TypeScript from a null-prefixed virtual ID. It imports `@tailwind-merge/vite/tailwind-merge`, because a virtual module has no filesystem directory from which to resolve a transitive `tailwind-merge` dependency. This subpath keeps strict pnpm linking ordinary without importer-specific resolver hacks.
+
+The generated runtime and `src/runtime.ts` must export the same names. `getConfig` and `twMerge` are generated, `extendTailwindMerge` layers onto that config, and other exported helpers/types mirror the library. `fromTheme` is intentionally absent because generated configs have an empty `theme` object. Types resolve through the real package subpath, not generated ambient declarations.
+
+## Generation, watching, and failures
+
+`configResolved` starts generation eagerly. `buildStart` awaits it even without a runtime import; later starts compare CSS dependency mtimes and source fingerprints before regenerating. CSS dependencies and scanned files/globs are registered for build watching.
+
+The design-system loader hides dependency callbacks, so the wrapper also invokes `compile()` to collect the CSS/module graph. With pruning, the scanner's compile supplies that information. This extra work avoids coupling correctness to Tailwind's re-transforms, browser requests, or plugin-internal watch lists. Optional upstream improvements are tracked in the [configurator guide](./configurator.md#remaining-development-work-and-revisit-conditions).
+
+Dev explicitly watches out-of-root CSS dependencies and source bases. Only the client environment schedules changes; invalidation spans every environment. A generated-code hash gates full reloads because already-rendered class strings cannot be repaired just by hot-swapping a function. `api.onUpdate` reports processing outcomes for tooling and tests.
+
+Generation failure in dev logs and preserves the last successful module; before the first success it serves a default fallback. Builds propagate generation failure, including watch rebuilds after an earlier success. A failed initial source scan warns and serves the full generated config. Do not confuse these two failures or broaden a fallback that would let a production build ship a stale theme.
+
+Automatic source detection uses the Vite root when the Tailwind Vite plugin is present. Otherwise it scans the root and cwd, removing nested duplicates, to conservatively cover a PostCSS setup. Explicit CSS sources win. `prune: true` forces build pruning even in library mode; object options independently control `build`, `dev`, and `log`. Compact encoding remains the default in both build and dev; pruning does not silently switch encodings.
+
+Pruning logs its result by default, without an opt-out hint on every line; `prune.log` and Vite's log level control visibility. Outside Vite, the real runtime falls back silently to the library defaults, as documented for users. A runtime warning was deliberately avoided because there is no reliable signal distinguishing an intentional non-Vite consumer from a misconfigured integration.
+
+## Testing and remaining coverage
+
+- Plugin tests that exercise pruning add `tailwindcss()` (the `@tailwindcss/vite` plugin) to the plugin list: with it, automatic source detection starts at the Vite root; without it the plugin also scans the working directory (the PostCSS plugin's default), which in the test process is the package itself.
+- The Vite suite is split by concern (`dev-server`, `build`, `pruning`, `options`, `failure-paths`) over a shared `tests/helpers.ts`: `setupPluginTests()` registers fixture links and per-test cleanup and returns `startServer`/`copyFixture`; servers run with `server.ws: false` (no HMR port, so files run in parallel) and a per-file `cacheDir` (Vite's default would be this package's node_modules, which parallel files race over). Dev-loop tests never sleep: `waitForWatcher` polls the watcher for the file about to be edited, and `updateAfter(plugin, edit)` performs the edit and resolves with what the plugin did, reported through the plugin's `api.onUpdate` hook (combined over a quiet window, because a watcher can deliver one save as several events). Assert positive outcomes on module behavior and negative ones (no reload) on the update plus module identity.
+- A filesystem sandbox can allow the Vite watcher to enumerate files while suppressing change events: all five edit-driven tests timed out in a sandboxed readiness run, then all 28 Vite tests passed outside it. Before treating a cluster of `updateAfter` timeouts as a plugin regression, rerun the suite with native filesystem events available; do not increase timeouts to mask missing events.
+- Configuration-generation failures must reject both initial production builds and watch rebuilds; only dev may serve a default or last-good config. `buildStart` awaits the eager generation even when no module imports the runtime, and the failure-path suite drives a real watch build through failure and recovery. Keep pruning-only scan failures separate: they warn and use the full generated config.
+
+The suite also verifies runtime surface parity, consumer types, discovery, both plugins together, out-of-root themes/sources, safelists, and the absence of the default config from successful generated builds. Generation failure/recovery runs through a real watch build. A prior manual browser smoke test exercised cold optimization, compiled Tailwind styles, theme reload, and no reload on a comment-only edit; that was a one-off check, not automated browser coverage.
+
+Remaining work: a Tailwind/Vite version matrix; real framework integrations such as SvelteKit, React Router, Nuxt, and Astro; explicit client/SSR production parity; the consumer's inherited Vitest-config flow; usage-driven pruning in a running build watcher; and repeatable browser coverage. Plain programmatic Vite and SSR module tests do not imply those integrations are verified.
+
+Run `pnpm --filter @tailwind-merge/vite test` and `test:types` for plugin changes, then the repo-wide checks. See [configurator testing notes](./configurator.md#debugging-and-validation) for the oxide/gitignored-directory trap that dictates fixture layout.
+
+## Build and packaging
+
+`packages/vite` builds with tsdown (`tsdown.config.ts`), the rolldown-based library bundler; tsdown is a single-consumer dependency pinned in the package manifest, not the catalog.
+
+- Output is ESM-only (`dist/*.mjs` plus `.d.mts` declarations, fixed extensions via `platform: 'node'`), following `@tailwindcss/vite`'s shipped shape. One bundle and one declaration file per subpath — `.`, `./runtime`, `./tailwind-merge` — because the latter two are load-bearing runtime contracts: `resolveId` intercepts exactly `@tailwind-merge/vite/runtime`, and the generated virtual module imports `@tailwind-merge/vite/tailwind-merge`.
+- The configurator is inlined into `dist/index.mjs` and lives in `devDependencies` (an unpublished package must not appear in the published dependency fields). tsdown bundles it as local source because the workspace link resolves outside `node_modules`. Two guardrails in `tsdown.config.ts` fail the build on drift: `deps.onlyBundle: []` (nothing may be bundled from `node_modules`) and `deps.onlyImport` (the output may import only the declared runtime dependencies and peers).
+- Runtime dependencies are exactly `tailwind-merge`, `@tailwindcss/node` (theme loading, dependency collection) and `@tailwindcss/oxide` (Tailwind's source scanner, used for pruning the generated config to the classes found in the project's sources). oxide is a native module with platform binaries as optional dependencies; the inlined configurator imports it lazily so a platform without a binary fails only when a scan is requested, which the plugin turns into a warning plus the full config. Both Tailwind packages are tilde-pinned to the supported line like the peers; the packed-package gate asserts the exact dependency list and links all three next to the extracted package.
+- Version coupling is declarative: `tailwindcss` is a peer, `@tailwindcss/vite` is an optional peer so PostCSS users need not install it, and the compiler/scanner are regular dependencies. Tilde ranges constrain drift to patches and require validation before widening to a new minor. Install-time peer warnings replace custom runtime version warnings. Resolving the compiler/scanner through the user's Tailwind integration is a possible response to observed drift, but adds resolver heuristics and a fallback path; do not introduce it without evidence.
+- Declaration maps need `dts: { sourcemap: true }` explicitly — with only the top-level `sourcemap` setting, tsdown 0.22 emits a `sourceMappingURL` comment into the `.d.mts` files without the map. Both map kinds resolve into the shipped `src/`.
+- The workspace `exports` keep pointing at `src/*.ts` so every test and fixture stays buildless; `publishConfig.exports` carries the dist mapping, which pnpm swaps in at pack/publish time. This swap is pnpm behavior that `npm publish` does not perform, which is why the npm-publish workflow publishes every package with `pnpm publish` (see [shared CI guidance](./tailwind-merge-internals.md#ci-behavior-and-security) for the exact flags and the trusted-publishing mechanics).
+- `pnpm --filter @tailwind-merge/vite test:exports` (`scripts/test-packed-package.mjs`) is the release gate for the packed shape: it packs with pnpm, asserts the tarball's file list and the swapped dist exports, verifies every export target ships, moves the extracted package into a temp-directory consumer layout (runtime dependencies linked next to it), imports all three subpaths through ordinary resolution, and type-checks the consumer-types fixture's `main.ts` against the bundled declarations plus the library's published types. It requires both the vite package's and the library's `build` first and keeps its scratch directory when a check fails.
+- The packed gate uses the locally built library, not the registry release named in the packed manifest. Before distributing the plugin, verify that the packed `tailwind-merge` dependency version actually ships every unstable API the bundled configurator imports. A workspace library can contain unreleased APIs while still carrying an older version; `workspace:*` then packs to that older version and the local gate still passes. Local field trials before a matching library release must supply both packages.
+- Signal for the library's eventual build migration: tsdown 0.22 handled multi-entry ESM, declaration bundling, and subpath-preserving externals without friction; what it does not cover is the library's CJS/ES5/Babel-assumptions story, which remains the open question for that migration.
+
+## Release boundaries
+
+The initial public package is the Vite wrapper, with configurator implementation inlined and the library as a regular dependency. Plugin options and runtime exports are the intended versioned surface; the internal re-export and generated representation are not. The selected first release is `0.1.0`, with pre-1.0 compatibility expectations documented for users.
+
+Release the matching tailwind-merge update first. Both new packages remain private until explicitly preparing their release. Merging to `main` publishes dev releases only for the library; do not enable automatic Vite dev publication as part of documentation, testing, or routine development. All publishing setup and the current dependency-version gap are owned by the [release guide](./release-workflow.md#publishing).

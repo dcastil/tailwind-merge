@@ -14,11 +14,11 @@ import { snapshotTheme } from './snapshot.ts'
 export interface GenerateOptions {
     /** Content of the project's Tailwind CSS entrypoint (the file containing `@import 'tailwindcss'` and `@theme` customizations). */
     css: string
-    /** Directory used to resolve imports in the CSS, usually the directory containing the entrypoint. Tailwind resolves `@import 'tailwindcss'` from here, so the project's own Tailwind installation is used. */
+    /** Directory used to resolve imports in the CSS, usually the directory containing the entrypoint. Tailwind resolves stylesheet and module imports from here; the compiler itself comes from the configurator's installed `@tailwindcss/node`. */
     base: string
     /** LRU cache size passed through to the generated config. Defaults to the default config's value. */
     cacheSize?: number
-    /** How finite value sets (theme scales, custom-utility values) are encoded. 'compact' (default) picks the smallest matcher even when it accepts names beyond the theme — smallest bundle, but a nonexistent name like `rounded-xs` on a t-shirt scale can evict a real class. 'exact' only matches names that exist, so classes that produce no CSS never merge anything away — larger output, exact merge behavior. See `EncodingMode`. */
+    /** How finite value sets (theme scales, custom-utility values) are encoded. 'compact' (default) picks the smallest matcher even when it accepts names beyond the theme — smallest bundle, but a nonexistent name like `rounded-xs` on a t-shirt scale can evict a real class. 'exact' enumerates finite names to avoid that overmatching, at a size cost; arbitrary-value types remain approximate. See `EncodingMode`. */
     encoding?: EncodingMode
     /** Comment lines placed below the generated-file notice at the top of the emitted module, e.g. provenance info like input path and content hash. */
     banner?: string
@@ -26,7 +26,7 @@ export interface GenerateOptions {
     format?: 'ts' | 'js'
     /** Module specifier the emitted code imports tailwind-merge's API from — see `EmitOptions.importSource`. */
     importSource?: string
-    /** Shrinks the generated config to the classes a project uses: class names as a source scanner finds them (variants, important markers, and postfix modifiers included — see `createSourceScanner`). Class groups and scale members no listed class reaches are dropped; every class list made of listed classes merges exactly as with the full config, while classes outside the list pass through unmerged. The result is reported in `plan.report.pruning`. */
+    /** Shrinks the generated config to the classes a project uses: class names as a source scanner finds them (variants, important markers, and postfix modifiers included — see `createSourceScanner`). Class groups and scale members no listed class reaches are dropped; every class list made of listed classes merges exactly as with the full config, while retained validators may also match unlisted classes. The result is reported in `plan.report.pruning`. */
     prune?: { usedClasses: Iterable<string> }
 }
 
@@ -42,7 +42,7 @@ export interface GenerateResult {
 /**
  * Generates a project-specific tailwind-merge setup from a Tailwind CSS v4 entrypoint.
  *
- * The design system is loaded through Tailwind's own APIs so the resolved theme is exactly what the project's Tailwind version produces (defaults merged, overrides applied, resets executed). The default tailwind-merge config acts as the structural skeleton — class group semantics and conflict relationships — while every theme reference in it is replaced with exact values from the design system.
+ * The design system is loaded through Tailwind's own APIs with defaults merged, overrides applied, and resets executed. Keep the installed compiler aligned with the version that builds the project's CSS. The default tailwind-merge config acts as the structural skeleton — class group semantics and conflict relationships — while every theme reference in it is replaced with exact values from the design system.
  *
  * Classes the theme creates outside the standard namespaces (compat sub-namespaces like `--text-color-*`, or namespaces without a theme key like `--z-index-*`) are found by diffing against a vanilla design system of the same Tailwind installation and classified empirically by their compiled CSS declarations, so no namespace mapping needs to be hand-maintained anywhere.
  */

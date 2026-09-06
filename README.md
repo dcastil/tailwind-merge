@@ -48,4 +48,5 @@ This repository is a monorepo. The docs above belong to the tailwind-merge packa
 | Package | Description |
 | --- | --- |
 | [tailwind-merge](./packages/tailwind-merge) ([npm](https://www.npmjs.com/package/tailwind-merge)) | The library itself — see the docs above. |
-| [@tailwind-merge/vite](./packages/vite) | Vite plugin that generates a twMerge configured for your project's Tailwind CSS. In development, not released yet. |
+| [@tailwind-merge/vite](./packages/vite/README.md) | Automatic theme configuration and source-based pruning for Vite apps. Unreleased. |
+| [@tailwind-merge/configurator](./packages/configurator/README.md) | JavaScript API and CLI for generating a theme-specific merge module. Unreleased; API remains unstable. |

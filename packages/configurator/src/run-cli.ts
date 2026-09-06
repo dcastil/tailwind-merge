@@ -6,7 +6,7 @@ import { generate } from './generate.ts'
 import { createSourceScanner } from './scan.ts'
 
 /**
- * The CLI's behavior as a function returning the process exit code, separated from the executable entry in cli.ts so tests can drive it. Kept deliberately thin: the generation pipeline in generate.ts is the product, and future integrations (bundler plugins) should reuse the library rather than the CLI.
+ * The CLI's behavior as a function returning the process exit code, separated from the executable entry in cli.ts so tests can drive it. Kept deliberately thin: the generation pipeline in generate.ts is the product, and integrations such as bundler plugins should reuse the library rather than the CLI.
  */
 export async function runCli(argv: string[]): Promise<number> {
     const args = parseArguments(argv)
@@ -43,7 +43,7 @@ export async function runCli(argv: string[]): Promise<number> {
     const contentHash = createHash('sha256').update(css).digest('hex').slice(0, 16)
     const banner = `// Source: ${relative(dirname(outputPath), inputPath)} (sha256 ${contentHash})`
 
-    // --prune scans the project the way Tailwind does (its sources and safelist, automatic detection starting at the given directory or the working directory, like Tailwind's CLI) and keeps only the classes found. Opt-in here because a usage-dependent committed file changes with every class a project adds.
+    // --prune scans the project the way Tailwind does (its sources and safelist, automatic detection starting at the given directory or the working directory, like Tailwind's CLI) and retains the configuration reached by the candidates found. Opt-in here because a usage-dependent committed file changes with every class a project adds.
     let scanSummary: string | null = null
     let usedClasses: string[] | undefined
     if (args.prune !== undefined) {

@@ -5,7 +5,7 @@
 ```ts
 import tailwindMerge from '@tailwind-merge/vite'
 
-tailwindMerge(options?: TailwindMergeOptions): Plugin
+tailwindMerge(options?: TailwindMergeOptions): Plugin & { api: TailwindMergePluginApi }
 ```
 
 The default export. Add the returned plugin to your Vite config, next to `@tailwindcss/vite`.
@@ -18,8 +18,10 @@ All options are optional — the zero-argument form is the intended everyday use
 | ----------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `css`       | `string` | Path to your Tailwind CSS entrypoint, relative to the Vite root. Only needed when auto-detection reports several independent Tailwind roots, or when your entrypoint lives outside the Vite root.        |
 | `cacheSize` | `number` | LRU cache size of the generated `twMerge`, passed through to the generated configuration. Defaults to tailwind-merge's default (500).                                                                     |
-| `encoding`  | `'compact' \| 'exact'` | How theme scales are encoded. `'compact'` (default) picks the smallest matcher even when it accepts names beyond your theme; `'exact'` only matches names that exist, so a class that produces no CSS can never evict one that does — at a small size cost (a few percent compressed; more for palette-heavy component libraries). |
+| `encoding`  | `'compact' \| 'exact'` | How theme scales are encoded. `'compact'` (default) picks the smallest matcher even when it accepts names beyond your theme; `'exact'` enumerates finite names to avoid that overmatching, at a size cost. Arbitrary-value typing remains approximate; see [encoding](./how-it-works.md#encoding). |
 | `prune`     | `boolean \| PruneOptions` | Prunes the generated configuration to the classes found in your sources in production builds — see [how it works](./how-it-works.md#pruning-to-the-classes-you-use). `true` (default, except in [library mode](./how-it-works.md#library-mode)): prune in `vite build`, full configuration in dev. `false`: never prune. The object form has `build` (default `true`, `false` in library mode), `dev` (default `false` — also prune in the dev server, for debugging), and `log` (default `true` — one log line per generation saying what pruning did). |
+
+The plugin entry also exports the types `TailwindMergeOptions`, `PruneOptions`, `PluginUpdate`, and `TailwindMergePluginApi`.
 
 ### Plugin API
 
@@ -44,7 +46,7 @@ The stable import surface. While Vite runs, it serves the module generated from 
 
 ### `twMerge`
 
-The star of the show — [tailwind-merge's `twMerge`](https://github.com/dcastil/tailwind-merge/blob/v3.6.0/docs/api-reference.md#twmerge), configured for your theme.
+[tailwind-merge's `twMerge`](https://github.com/dcastil/tailwind-merge/blob/v3.6.0/docs/api-reference.md#twmerge), configured for your theme.
 
 ### `getConfig`
 
@@ -65,6 +67,8 @@ const customTwMerge = extendTailwindMerge<'text-style'>({
     },
 })
 ```
+
+Generated configurations carry resolved scales inline, so changing only `theme` does not change those existing groups. With pruning, an extension referencing an absent group does not recreate it: add the group explicitly or use `prune: false`.
 
 ### `twJoin`, `createTailwindMerge`, `mergeConfigs`, `validators`
 

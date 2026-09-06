@@ -8,7 +8,7 @@ The standalone tailwind-merge package can't know *your* theme, so its default co
 - Whole namespaces the default config doesn't model — `--z-index-*`, `--border-width-*`, utility-specific colors like `--text-color-*` — silently fall through to wrong groups.
 - The manual fix is [configuring tailwind-merge by hand](https://github.com/dcastil/tailwind-merge/blob/v3.6.0/docs/configuration.md) and keeping that configuration in sync with your theme forever.
 
-This plugin removes the whole problem class. At dev-server start and at build time, it loads your CSS through Tailwind's own APIs — the same resolution your real build performs, including theme overrides, resets, `@utility`, `@plugin`, `@config`, and prefixes — and generates a tailwind-merge configuration that matches it exactly. Custom utilities even get conflict inference: a `btn` utility that sets padding will correctly override an earlier `p-4`.
+This plugin automates that configuration work. At dev-server start and at build time, it loads your CSS through Tailwind's APIs, including theme overrides, resets, `@utility`, `@plugin`, `@config`, and prefixes, and generates a configuration for that resolved theme. Custom utilities even get conflict inference: a `btn` utility that sets padding will correctly override an earlier `p-4`.
 
 You import the result from one place:
 
@@ -16,4 +16,4 @@ You import the result from one place:
 import { twMerge } from '@tailwind-merge/vite/runtime'
 ```
 
-Everything your Tailwind setup can produce merges correctly, and when your theme changes, the configuration follows automatically.
+When your theme changes, the configuration follows automatically. The [encoding options and known limits](./limitations.md) explain where matching and custom-utility inference remain conservative.

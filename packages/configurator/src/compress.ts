@@ -6,7 +6,7 @@ import { type PlanValue, type ValidatorName } from './plan.ts'
  * How finite value sets (theme scales, custom-utility value spaces) are encoded into class-group matchers.
  *
  * - 'compact': smallest emitted representation wins, even when a validator matches names beyond the actual set. The classic overmatch premise "merging a class that produces no CSS is harmless" turned out to be wrong for merge semantics — a classified class gains eviction power, so `twMerge('rounded-md', 'rounded-xs')` drops the real `rounded-md` when `rounded-xs` isn't in the theme but matches the scale's validator (first reported from the field, 2026-08-13). Compact stays the default because the damage is limited to class names outside the theme, which linting normally rules out — the config is correct for correct usage of the theme's tokens.
- * - 'exact': a matcher may only accept names that exist. Costs bundle size (enumeration instead of validators); buys eviction-proofness for inputs that produce no CSS.
+ * - 'exact': finite named scales enumerate only names that exist, avoiding eviction by nonexistent named tokens at a size cost. Arbitrary-value types remain approximate; this is not validation of every possible CSS value.
  *
  * Genuinely open-ended value spaces (the bare `--spacing` multiplier, arbitrary values, bare numbers on utilities that accept any) keep their validators in both modes — a validator is only "overmatching" when the real value set is finite.
  */
@@ -21,7 +21,7 @@ export interface ScaleEncoding {
 /**
  * Encodes a theme scale's value names into the smallest class-group representation the mode allows.
  *
- * Policy (see PROPOSAL.md): the encoding must never fail to match a name that exists in the theme; whether it may overmatch names that don't exist is what `EncodingMode` decides. Candidates are compared by estimated emitted size:
+ * Policy: the encoding must never fail to match a name that exists in the theme; whether it may overmatch names that don't exist is what `EncodingMode` decides. Candidates are compared by estimated emitted size:
  * - plain enumeration of all names
  * - 'compact' only: a validator covering all names, plus enumerated outliers (e.g. t-shirt sizes with a `base` outlier)
  * - families with a shared first segment collapsed into a nested entry (e.g. `{ red: [isNumber] }` for `red-50` … `red-950` — in 'exact' mode the tails enumerate instead, staying exact because only listed prefix+tail combinations match)

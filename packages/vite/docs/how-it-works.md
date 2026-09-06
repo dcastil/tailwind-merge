@@ -8,7 +8,7 @@ This scan is deliberately independent of Vite's module graph: the runtime module
 
 ## Generating the configuration
 
-The CSS is loaded through Tailwind's own APIs from your project's Tailwind installation — the exact theme your build resolves, with defaults merged, overrides applied, and resets executed. From that, the generator derives a complete tailwind-merge configuration: exact theme scales (compressed where patterns allow), classes from compat sub-namespaces, custom `@utility` and `@plugin` utilities including inferred conflict relationships, and prefix support. Generation takes roughly 0.1–1.3 s depending on theme size and hides behind the dev server's first page load.
+The plugin loads CSS using its `@tailwindcss/node` compiler, with imports resolved from your stylesheet's directory. Tailwind merges defaults, overrides, and resets; the configurator then derives theme scales, compat sub-namespace classes, custom-utility groups and conflicts, and prefix support. Keep the compiler aligned with the version building your CSS, as described under [version alignment](#version-alignment). Generation starts eagerly so the runtime module can await it on first use.
 
 ## Serving without files
 
@@ -16,24 +16,24 @@ Imports of `@tailwind-merge/vite/runtime` are redirected to an in-memory module 
 
 ## The dev loop
 
-The generated config depends only on your Tailwind **configuration** — never on which classes your app uses — so editing components can't churn it. When a file of the CSS configuration graph changes (the entrypoint, an `@import`ed stylesheet even outside the Vite root, an `@config`/`@plugin` module), the plugin regenerates and compares the result by hash:
+By default, the generated config depends only on your Tailwind **configuration**, so editing components cannot change it. `prune: { dev: true }` also makes it depend on source usage, as described below. When a file of the CSS configuration graph changes (the entrypoint, an `@import`ed stylesheet even outside the Vite root, an `@config`/`@plugin` module), the plugin regenerates and compares the result by hash:
 
 - **Output unchanged** — adding utility classes, comments, formatting: nothing happens. Tailwind's own CSS hot update runs as usual; the merge config stays put.
 - **Output changed** — a real theme change: the plugin invalidates the runtime module and triggers a full page reload. A full reload is deliberate: merged class strings are already baked into the rendered DOM, so hot-swapping `twMerge` alone couldn't fix what's on screen — the same reasoning behind `@tailwindcss/vite`'s full reloads.
 
-If a regeneration fails (broken CSS mid-edit), the last good config keeps serving and the error is logged — the dev server never crashes over the merge config.
+If a regeneration fails during development, the last good config keeps serving and the error is logged. If generation has never succeeded, the runtime serves the default config and logs the error. Fix startup configuration errors and restart the server if no generated module has been established.
 
 ## Builds
 
-`vite build` generates once, deterministically — client and SSR passes get byte-identical modules, keeping server and client merging in sync. The default tailwind-merge configuration is never imported by the generated module, so bundlers tree-shake it away entirely; you ship only your own theme's config — and by default only the part of it your code uses, see below.
+`vite build` generates from the resolved theme and sources. Identical inputs produce identical module code; source collection is independent of the client or SSR module graph. Keep the same root, CSS, dependencies, and options across both builds. The default tailwind-merge configuration is never imported by the generated module, so bundlers tree-shake it away entirely; you ship only your own theme's config — and by default only the part of it your code uses, see below.
 
 If configuration generation fails — for example, the explicit `css` path is missing or a configured plugin cannot be loaded — the build fails, including when nothing imports the runtime module. A failed `vite build --watch` regeneration also fails that rebuild instead of emitting the previous configuration; fixing the CSS allows the next rebuild to succeed. Source-scanning failures still use the full generated configuration, as described below.
 
 ## Pruning to the classes you use
 
-In production builds the plugin prunes the generated configuration to the classes found in your sources: class groups no used class belongs to are dropped, and within the remaining groups only the scale values and patterns your classes reach survive. Across real projects this removes 30–55% of the whole bundle (configuration plus tailwind-merge's engine, brotli-compressed).
+In production builds the plugin prunes the generated configuration to the classes found in your sources: class groups no used class belongs to are dropped, and within the remaining groups only the scale values and patterns your classes reach survive. The historical [project measurements](../../../agents/configurator-performance.md) show substantial compressed-size savings; the result depends on source usage and encoding.
 
-"Found in your sources" means found the way Tailwind finds them. The plugin runs Tailwind's own candidate scanner (`@tailwindcss/oxide`) over the same sources Tailwind uses — automatic detection from the Vite root (gitignored files, `node_modules`, binaries, CSS, and lock files skipped), your CSS's `source(…)` and every `@source` directive — and adds the `@source inline(…)` safelist. That gives a simple rule: **every class Tailwind generates CSS for merges exactly like under the full configuration, and everything else has no styles and passes through untouched.** The only thing pruning changes is what happens to class names Tailwind never saw — and those render nothing.
+"Found in your sources" means found the way Tailwind finds them. The plugin runs Tailwind's own candidate scanner (`@tailwindcss/oxide`) over the same sources Tailwind uses — automatic detection from the Vite root (gitignored files, `node_modules`, binaries, CSS, and lock files skipped), your CSS's `source(…)` and every `@source` directive — and adds the `@source inline(…)` safelist. The contract is that **class lists drawn from the scanned candidates merge identically to the full generated configuration**. This relies on matching Tailwind's source configuration and scanner behavior. Pruning inherits the full config's semantics and limitations. Retained validators may still match unscanned names, so pruning is not a strict class-name allowlist.
 
 What this means in practice:
 
@@ -41,11 +41,15 @@ What this means in practice:
 - **Class names from outside your sources.** If class names reach `twMerge` from outside the scanned sources *and* get their styles from somewhere else than this Tailwind build — markup delivered by a CMS styled by a separately built stylesheet, module federation, micro-frontends — set `prune: false`. Classes that are safelisted with `@source inline(…)` or listed in any file Tailwind scans need nothing: they are covered. Dynamically assembled class names alone are no reason to opt out: if Tailwind can't see them, they don't render.
 - **`vite build --watch`** rebuilds regenerate when the CSS graph or the used classes changed, and the scanned files are registered with the watcher so edits to files outside the module graph (Markdown, HTML partials) count too.
 - **A build logs one line** saying what pruning did (`Pruned the tailwind-merge config to 92 of 379 class groups from the 618 classes found in your sources`), so the behavior is visible in build and CI output. `prune: { log: false }` silences it.
-- **If the sources can't be scanned** — no `@tailwindcss/oxide` binary for the platform, a `source(…)` path that doesn't exist — the build logs a warning and uses the full configuration. Pruning is an optimization; the full configuration is always correct.
+- **If the sources can't be scanned** — no `@tailwindcss/oxide` binary for the platform, a `source(…)` path that doesn't exist — the build logs a warning and uses the full configuration. Pruning is an optimization; falling back preserves the full generated configuration's behavior.
 
 ### Library mode
 
 A Vite build in library mode (`build.lib`) produces a package other apps consume, and a component library's `twMerge` calls receive class strings from the consuming app (`twMerge('rounded px-3', className)`), which no scan from inside the library can see. Pruning such a build would drop exactly the classes consumers pass in, so library builds are **not pruned by default** — the plugin says so with one log line and serves the full configuration. `prune: { build: true }` forces pruning for the rare library that only merges its own class names.
+
+## Encoding
+
+`encoding: 'compact'` is the default in dev and builds. It favors small matchers, which can also recognize nonexistent names in finite theme scales. Those names can evict real classes even though they produce no CSS. `encoding: 'exact'` enumerates finite names and avoids that overmatching, at a bundle-size cost. Arbitrary-value matching still approximates CSS types in both modes. See the configurator's [encoding explanation](../../configurator/docs/how-it-works.md#compact-and-exact-encoding) for an example.
 
 ## Version alignment
 

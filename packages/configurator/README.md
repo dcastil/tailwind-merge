@@ -1,154 +1,37 @@
 # @tailwind-merge/configurator
 
-A build tool that generates a project-specific [tailwind-merge](https://github.com/dcastil/tailwind-merge) setup from your [Tailwind CSS](https://tailwindcss.com) v4 entrypoint. It loads your fully resolved theme through Tailwind's own APIs and emits a standalone module exporting a `twMerge` that knows your design system exactly — custom scales, utility-specific color namespaces like `--text-color-*`, resets, prefixes, `@config`/`@plugin` contributions, and custom `@utility` definitions included, with nothing to maintain by hand.
+Generate a project-specific [tailwind-merge](https://github.com/dcastil/tailwind-merge) module from a Tailwind CSS v4 entrypoint. The configurator reads your resolved theme, including custom scales, namespace resets, prefixes, `@config`, `@plugin`, and `@utility` definitions. The generated module exports `twMerge` and `getConfig` and uses the existing tailwind-merge runtime.
 
 ```ts
 import { readFile, writeFile } from 'node:fs/promises'
+import { resolve } from 'node:path'
 import { generate } from '@tailwind-merge/configurator'
 
-const { code, plan } = await generate({
+const { code } = await generate({
     css: await readFile('src/app.css', 'utf8'),
-    // Directory Tailwind resolves imports from — usually the entrypoint's directory. Your project's own tailwindcss installation is used.
-    base: 'src',
+    base: resolve('src'),
 })
 
-await writeFile('src/lib/tw-merge.generated.ts', code)
+await writeFile('tw-merge.generated.ts', code)
 ```
 
 ```ts
-// Anywhere in your app:
-import { twMerge } from './lib/tw-merge.generated'
+import { twMerge } from './tw-merge.generated'
 
-// With `--text-huge: 2.5rem` in your @theme:
-twMerge('text-huge text-sm')
-// → 'text-sm' — plain tailwind-merge would keep both, misreading text-huge as a color
+// With --text-huge: 2.5rem in your @theme:
+twMerge('text-huge text-sm') // → 'text-sm'
 ```
 
-> **Status: unpublished prototype with an unstable API.** This package works and is thoroughly tested (see below), but it is not on npm yet and its API may change shape while we figure out the right one. The stable way to consume it is the [@tailwind-merge/vite](../vite/README.md) plugin, which wraps this tool with a minimal surface. Use the configurator directly when your pipeline can't use Vite — just expect to follow API changes until it gets a real release. Design and implementation notes live in [PROPOSAL.md](./PROPOSAL.md).
+The default encoding favors bundle size; [exact encoding](./docs/how-it-works.md#compact-and-exact-encoding) avoids overmatching finite theme scales. Optional [pruning](./docs/how-it-works.md#pruning-to-source-usage) removes unused configuration using Tailwind's own sources and scanner.
 
-## What you need
+**Status: unreleased, with an unstable API.** Use it from this repository for now. For Vite applications, prefer [@tailwind-merge/vite](../vite/README.md), which handles generation and watching automatically; that package is also awaiting its first release. Direct configurator use is useful for other build pipelines and generated files.
 
-- Node.js 22.18 or newer (the package runs straight from TypeScript sources; Node's built-in type stripping handles them).
-- Tailwind CSS v4 — `tailwindcss` and `@tailwindcss/node` installed in the project whose CSS you generate from (plus `@tailwindcss/oxide` for pruning). Verified against `^4.3.3`.
-- **At generation time:** the in-repo version of tailwind-merge. Generation uses two APIs that ship with tailwind-merge `3.7.0` (`themeKey` on theme getters and the `tailwind-merge/unstable-do-not-import` entry point). Until 3.7.0 is on npm, run generation from a checkout of this repository, where the workspace wires everything up.
-- **At runtime:** any published tailwind-merge `>=3.6.0`. The generated module imports only the stable public API (`createTailwindMerge` and `validators`), so you can commit it into a project that installs tailwind-merge normally — the configurator's version constraints don't follow it there.
+## Documentation
 
-## Running from this repository
+- [Getting started](./docs/getting-started.md)
+- [JavaScript API](./docs/api-reference.md)
+- [CLI](./docs/cli.md)
+- [How it works: encoding, pruning, and custom utilities](./docs/how-it-works.md)
+- [Limitations and compatibility](./docs/limitations.md)
 
-While unpublished, use a checkout of this branch:
-
-```bash
-git clone --branch feature/add-tailwind-merge-configurator https://github.com/dcastil/tailwind-merge.git
-cd tailwind-merge
-pnpm install --frozen-lockfile
-# Builds the in-repo tailwind-merge the configurator imports at generation time (one-time):
-pnpm --filter tailwind-merge build
-```
-
-Then either script against the JS API (a plain `.mjs`/`.ts` file importing `@tailwind-merge/configurator` works anywhere inside the workspace), or use the CLI directly:
-
-```bash
-node packages/configurator/src/cli.ts --input path/to/app.css --output path/to/tw-merge.generated.ts
-```
-
-The emitted file is self-contained — copy it into any project. Regenerate whenever your theme changes.
-
-To see why a class list merges the way it does — what each class compiles to, which class group the generated and the default config put it in, and what Tailwind's compiled CSS says the right answer is — there is a development inspector:
-
-```bash
-node packages/configurator/scripts/explain.mts path/to/app.css "border-4 border-2" "shadow-brand shadow-lg"
-```
-
-## JS API
-
-```ts
-import { generate } from '@tailwind-merge/configurator'
-
-const { code, config, plan } = await generate(options)
-```
-
-Options:
-
-| Option | Required | What it does |
-| --- | --- | --- |
-| `css` | yes | Content of your Tailwind CSS entrypoint — the file containing `@import 'tailwindcss'` and your `@theme` customizations. |
-| `base` | yes | Directory used to resolve imports in the CSS (local files, `tailwindcss` itself, `@plugin`/`@config` references), usually the entrypoint's directory. |
-| `cacheSize` | no | LRU cache size passed through to the generated config. Defaults to tailwind-merge's default. |
-| `encoding` | no | `'compact'` (default) or `'exact'` — see [Compact vs exact encoding](#compact-vs-exact-encoding). |
-| `banner` | no | Extra comment lines below the generated-file notice, e.g. provenance info. |
-| `format` | no | `'ts'` (default) or `'js'` — the emitted module's language. |
-| `importSource` | no | Module specifier the emitted code imports tailwind-merge from. Defaults to `'tailwind-merge'`; override when you re-export tailwind-merge from somewhere else (the Vite plugin uses this). |
-| `prune` | no | `{ usedClasses }` — prunes the config to the listed class names (raw tokens as found in your sources, variants and modifiers included): class groups and scale members no listed class reaches are dropped, class lists made of listed classes merge exactly as with the full config, classes outside the list pass through unmerged. `plan.report.pruning` tells what happened. |
-
-Results:
-
-- `code` — source text of the generated module. It exports `twMerge` (ready to use) and `getConfig` (the config factory, for composing further via `createTailwindMerge(getConfig, ...extensions)` or `mergeConfigs`).
-- `config` — the same config as a runtime object, so you can build a merge function in-process without writing a file: `createTailwindMerge(() => config)`.
-- `plan` — the intermediate representation including `plan.report`, which tells you what the generator did: chosen scale encodings, pruned groups, classes added beyond the standard namespaces, resolved name collisions, custom-utility handling, and — most importantly — `unassignedClasses`: theme-created classes no group could be determined for. An empty list means every class the theme creates is covered; surface non-empty ones as warnings in your pipeline.
-
-## Compact vs exact encoding
-
-By default the generator encodes each theme scale as the smallest matcher that covers all its values — a t-shirt-sized scale becomes the `isTshirtSize` pattern instead of listing every name. That matcher also accepts names *outside* your theme, which has a real merge-semantics consequence: `twMerge('rounded-md', 'rounded-xs')` drops the real `rounded-md` even when `xs` is not in your radius scale, because `rounded-xs` classifies into the radius group and wins by ordering despite producing no CSS. In short: the compact config is correct for correct usage of your theme's tokens, and class names outside the theme (which linting normally rules out) can evict real classes.
-
-With `encoding: 'exact'`, matchers only accept what actually exists: theme scales enumerate their values, and custom functional utilities enumerate their compile-verified named values, keeping a pattern only where probing proves the utility accepts a whole open-ended value kind (bare numbers, arbitrary values, …). A class that compiles to no CSS then never merges anything away. Genuinely open-ended values — the bare `--spacing` multiplier, arbitrary values like `rounded-[3px]` — keep working in both modes.
-
-The price is bundle size, and it is smaller than it sounds because compression eats enumeration: across the seven real-world fixture projects, exact mode adds 5–8% minified (one outlier with huge numeric color families: +30%) but only 1–2.5% brotli-compressed (worst case +5.3%) — on the order of 100–500 bytes over the wire.
-
-## CLI
-
-```
-node packages/configurator/src/cli.ts --input <tailwind-css-entrypoint> --output <generated-module-path> [--format ts|js] [--encoding compact|exact] [--prune [directory]] [--check]
-```
-
-- Without `--format`, the emitted language follows the output file's extension.
-- `--encoding exact` switches to [exact encoding](#compact-vs-exact-encoding).
-- `--prune [directory]` scans your project the way Tailwind does and keeps only the classes it finds — see [Pruning to the classes you use](#pruning-to-the-classes-you-use). The directory is where Tailwind's automatic source detection starts (the working directory by default, like Tailwind's CLI); your CSS's `source(…)` and `@source` directives are honored either way.
-- `--check` regenerates in memory and compares against the file on disk without writing, exiting non-zero when it's missing or out of date — wire it into CI to catch a theme changing without the generated module being refreshed. Pass the same `--format`/`--encoding` flags as the generating run, since the comparison regenerates with the flags it is given.
-- The report (including `unassignedClasses` warnings) is printed to the console.
-- Output is deterministic per input state, and the header records a content hash of the input, so diffs only appear when behavior actually changes.
-
-## Pruning to the classes you use
-
-By default the generated config covers every class your Tailwind setup can produce. With `prune` (CLI: `--prune`) it covers only the classes your project uses, which makes it a lot smaller — across real projects the whole bundle (config plus tailwind-merge's engine) shrinks by 30–55% brotli-compressed — and makes classes you don't use pass through unmerged.
-
-"Used" means found the way Tailwind finds them: the same candidate scanner (`@tailwindcss/oxide`), over the same sources — `source(…)`, automatic detection (gitignored files, `node_modules`, binaries, CSS files, and lock files are skipped), every `@source` directive — plus the `@source inline(…)` safelist, minus `@source not inline(…)` exclusions. So every class Tailwind generates CSS for stays in the config and merges exactly like under the full config; anything else has no styles and is treated like a non-Tailwind class. If your CSS is built with sources other than the ones in your entrypoint, or class names reach `twMerge` from outside your code base *and* get their styles from somewhere else, don't prune.
-
-Two things to know:
-
-- **Keep the generated module out of Tailwind's sources.** Every class-name literal in it is a candidate, for Tailwind and for pruning alike, so a generated module inside `src/` makes both treat the full config as "used" (and makes Tailwind generate CSS for static classes nobody uses). Write it somewhere Tailwind doesn't scan, or exclude it with `@source not "./lib/tw-merge.generated.ts"`.
-- **The output follows your code.** Adding a class changes the generated module, so `--prune` suits a build step better than a committed file (`--check` still works, with the same flags).
-
-Programmatically, the scan and the pruning are separate steps, so a build tool can re-scan without regenerating:
-
-```ts
-import { createSourceScanner, generate } from '@tailwind-merge/configurator'
-
-const scanner = await createSourceScanner({
-    css,
-    base: 'src',
-    // Where automatic source detection starts: Tailwind's Vite plugin uses the Vite root, its PostCSS plugin and CLI the working directory.
-    autoDetectBases: [process.cwd()],
-})
-const { classes, files } = scanner.scan() // cheap to repeat after edits
-const { code, plan } = await generate({ css, base: 'src', prune: { usedClasses: classes } })
-console.log(plan.report.pruning) // { usedClassCount, classifiedClassCount, classGroupsBefore, classGroupsAfter, … }
-```
-
-`createSourceScanner` needs `@tailwindcss/oxide` (Tailwind's scanner, a native module every Tailwind v4 install already has) next to `tailwindcss` and `@tailwindcss/node`.
-
-## Distributing a config with a design system
-
-The generated module is a good fit for shipping alongside a design system: generate against your system's CSS entrypoint, publish the emitted file (or its built output) in your package, and consumers get a `twMerge` that understands your tokens with zero setup — they only need tailwind-merge `>=3.6.0` installed, or none at all if you bundle it. Exporting `getConfig` keeps them free to layer their own extensions on top.
-
-## What it handles, and known limits
-
-Everything is derived from the design system Tailwind itself resolves — there is no hand-maintained mapping to drift out of date. That includes theme overrides and extensions, namespace resets (`--color-*: initial`), Tailwind's undocumented compat sub-namespaces (`--text-color-*`, `--background-color-*`, `--border-width-*`, `--z-index-*`, …), the `--spacing` multiplier semantics, import prefixes, `@config`/`@plugin` contributions, and custom `@utility` definitions (classified empirically: utilities matching a built-in group join it, the rest get their own group plus inferred override relationships where their declarations fully cover another group's).
-
-Correctness is enforced by a conformance sweep that checks every consecutive pair of the design system's class list against Tailwind's own compiled CSS, run over synthetic fixtures (including deliberately weird but valid themes: numeric color tokens, one value name in two namespaces, color names shadowing static utilities, custom utilities under built-in prefixes), a stress fixture, and seven real-world project configurations (see [tests/fixtures/real-world/](./tests/fixtures/real-world/README.md)). Every generated module is also executed and compared against the in-memory config it was generated from, and the vanilla theme additionally runs absolute checks against Tailwind — every suggested class classified, every consecutive and every cross-group pair adjudicated — with the known divergences committed as a reviewed list.
-
-Known limits:
-
-- Packages referenced via `@import`/`@plugin`/`@config` must be installed where generation runs — Tailwind resolves them for real.
-- Only Tailwind CSS v4 entrypoints; `^4.3.3` is the verified range so far (a wider version matrix is planned).
-- Generation relies on Tailwind's `__unstable__loadDesignSystem` API — the same contract editor tooling like Tailwind's IntelliSense builds on, but not covered by Tailwind's semver.
-- Custom utilities whose declarations only partially overlap a built-in group deliberately stay side by side instead of merging — removing either class could lose part of its effect.
+For work on the package itself, read the [configurator development guide](../../agents/configurator.md).

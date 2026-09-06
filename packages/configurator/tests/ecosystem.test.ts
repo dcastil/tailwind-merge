@@ -4,7 +4,7 @@ import { describe, expect, test } from 'vitest'
 
 import { assertTailwindConformance, css, generateFixture } from './fixture-utils'
 
-// Custom @utility support is empirical, in tiers derived from compiled declarations (see PROPOSAL.md): static utilities matching exactly one built-in group's signature join that group as aliases, every other root becomes a self-conflict group, and a self-conflict utility whose unconditional element-level declarations fully cover another group's gets an override edge so it removes that group's classes when it comes later.
+// Custom @utility support is empirical, in tiers derived from compiled declarations (see agents/configurator.md): static utilities matching exactly one built-in group's signature join that group as aliases, every other root becomes a self-conflict group, and a self-conflict utility whose unconditional element-level declarations fully cover another group's gets an override edge so it removes that group's classes when it comes later.
 describe('theme with custom @utility definitions', async () => {
     const { twMerge, plan, designSystem } = await generateFixture(css`
         @import 'tailwindcss';

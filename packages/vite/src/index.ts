@@ -17,10 +17,10 @@ export interface TailwindMergeOptions {
     css?: string
     /** LRU cache size of the generated `twMerge`, passed through to the generated config. Defaults to tailwind-merge's default. */
     cacheSize?: number
-    /** How theme scales are encoded in the generated config: `'compact'` (default) picks the smallest matcher even when it accepts names beyond the theme, `'exact'` only matches names that exist, so a class that produces no CSS can never evict one that does — at a small size cost. See the configurator's docs for the tradeoff. */
+    /** How theme scales are encoded in the generated config: `'compact'` (default) picks the smallest matcher even when it accepts names beyond the theme, `'exact'` enumerates finite names to avoid that overmatching, at a size cost; arbitrary-value types remain approximate. See the configurator's docs for the tradeoff. */
     encoding?: 'compact' | 'exact'
     /**
-     * Prunes the generated config to the classes found in your sources — the same files Tailwind scans, found the same way — so production bundles ship only the class groups and scale values the project uses. Classes Tailwind generates CSS for merge exactly like with the full config; everything else passes through unmerged.
+     * Prunes the generated config to the classes found in your sources — the same files Tailwind scans, found the same way — so production bundles ship only the class groups and scale values the project uses. Lists composed of scanned candidates merge exactly like with the full generated config; retained validators may also match unscanned names.
      *
      * `true` (the default, except in library mode): prune in `vite build`, serve the full config in dev. `false`: never prune — for projects whose class names reach `twMerge` from outside the scanned sources *and* get their styles from somewhere else than this Tailwind build (server-delivered markup, module federation). The object form configures the details.
      */
@@ -59,7 +59,7 @@ export interface TailwindMergePluginApi {
 /**
  * Vite plugin that configures tailwind-merge for the project's own Tailwind CSS.
  *
- * Add it next to `@tailwindcss/vite` and import from the runtime subpath: `import { twMerge } from '@tailwind-merge/vite/runtime'`. While Vite runs, that import resolves to an in-memory module generated from the project's Tailwind theme by @tailwind-merge/configurator; outside Vite it resolves to the real runtime.ts and serves default tailwind-merge behavior. Design and rationale live in ../configurator/PROPOSAL.md §11 and §12.
+ * Add it next to `@tailwindcss/vite` and import from the runtime subpath: `import { twMerge } from '@tailwind-merge/vite/runtime'`. While Vite runs, that import resolves to an in-memory module generated from the project's Tailwind theme by @tailwind-merge/configurator; outside Vite it resolves to the real runtime.ts and serves default tailwind-merge behavior. Repository integration goals and invariants live in agents/vite-plugin.md.
  *
  * The dev loop is deliberately quiet: generation reads only the CSS configuration (never which classes the app uses, unless `prune.dev` asks for it), regenerates only when a file of the CSS graph changes, and even then triggers a full reload only when the generated module actually changed — editing utility classes in app.css causes no churn. Production builds additionally prune the config to the classes found in the project's sources (`prune` option).
  */
@@ -314,7 +314,7 @@ export default function tailwindMerge(
         },
 
         async resolveId(source) {
-            // Only the bare specifier is intercepted. If the user aliases the subpath elsewhere, that's their path to use — the plugin doesn't chase it. The generated module's own imports need no interception either: they go through this package's real tailwind-merge re-export, resolvable from anywhere because the plugin package is the user's direct dependency (PROPOSAL.md §11.3).
+            // Only the bare specifier is intercepted. If the user aliases the subpath elsewhere, that's their path to use — the plugin doesn't chase it. The generated module's own imports need no interception either: they go through this package's real tailwind-merge re-export, resolvable from anywhere because the plugin package is the user's direct dependency.
             if (source === RUNTIME_SPECIFIER) {
                 return (await cssRoot) === null ? null : VIRTUAL_MODULE_ID
             }

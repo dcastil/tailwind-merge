@@ -10,7 +10,7 @@ import { promisify } from 'node:util'
 /**
  * Release gate for the published package shape, the packed-tarball counterpart of the library's test:exports. The vitest suite proves plugin behavior from source; this script proves the claims only the packed artifact can carry: `pnpm pack` swaps the dist exports in from publishConfig (the workspace exports point at src/ so tests stay buildless), every export target ships in the tarball, the three subpaths resolve and run from a consumer install layout, and a consumer project type-checks against the bundled declarations plus the library's published types.
  *
- * Packing runs through pnpm deliberately: applying `publishConfig.exports` at pack time is pnpm behavior that npm does not share, which also means the npm-publish workflow must publish this package with pnpm rather than `npm publish` once its release wiring lands.
+ * Packing runs through pnpm deliberately: applying `publishConfig.exports` at pack time is pnpm behavior that npm does not share, so the npm-publish workflow also publishes with pnpm rather than `npm publish`.
  *
  * Wired as `pnpm --filter @tailwind-merge/vite test:exports`. Expects this package and the library to be built first; the scratch directory is kept for inspection when a check fails.
  */

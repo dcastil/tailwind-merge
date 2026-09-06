@@ -52,9 +52,9 @@ export interface GenerateRuntimeModuleOptions {
 /**
  * Generates the virtual runtime module from the project's Tailwind CSS entrypoint.
  *
- * Alongside the configurator's generation this collects the entrypoint's dependency graph, because `@tailwindcss/node`'s `__unstable__loadDesignSystem` hides which files it read (it hardcodes a noop `onDependency` into its loaders — see PROPOSAL.md §11.1). With pruning, the scanner's own `compile()` already reports the graph; without it, a second `compile()` pass does (output discarded, only `onDependency` harvested). Either way the extra compile roughly doubles generation time but keeps the plugin self-contained: watching works in `vite build --watch` and doesn't depend on `@tailwindcss/vite`'s internal bookkeeping.
+ * Alongside the configurator's generation this collects the entrypoint's dependency graph, because `@tailwindcss/node`'s `__unstable__loadDesignSystem` hides which files it read (it hardcodes a noop `onDependency` into its loaders). With pruning, the scanner's own `compile()` already reports the graph; without it, a second `compile()` pass does (output discarded, only `onDependency` harvested). Either way the extra compile roughly doubles generation time but keeps the plugin self-contained: watching works in `vite build --watch` and doesn't depend on `@tailwindcss/vite`'s internal bookkeeping.
  *
- * A failing scan (no oxide binary for the platform, sources Tailwind can't resolve) never fails the generation: the module is generated with the full config and `pruningError` carries the reason — pruning is an optimization, and the full config is always correct.
+ * A failing scan (no oxide binary for the platform, sources Tailwind can't resolve) never fails the generation: the module is generated with the full config and `pruningError` carries the reason — pruning is an optimization, and falling back preserves the full generated config's behavior.
  */
 export async function generateRuntimeModule(
     options: GenerateRuntimeModuleOptions,
