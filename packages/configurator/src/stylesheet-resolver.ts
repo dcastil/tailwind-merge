@@ -6,6 +6,7 @@ import enhancedResolve from 'enhanced-resolve'
 
 /**
  * Resolves stylesheet requests with Tailwind's package fields and conditions after an optional bundler resolver declines. Tracking at this boundary records the file's CSS role, including .pcss and extensionless imports, without mistaking JavaScript dependencies for stylesheets.
+ * Each caller gets an uncached filesystem view so regeneration sees imports created or repaired after an earlier resolution attempt.
  */
 export function createStylesheetResolver(
     customResolver?: Resolver,

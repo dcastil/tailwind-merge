@@ -42,6 +42,8 @@ Bundlers can pass `TailwindIntegration` resolution/dependency hooks to generatio
 
 A resolver returning `false`/`undefined` declines the request rather than rejecting it. The shared stylesheet resolver mirrors Tailwind's enhanced-resolve settings (style fields/conditions, CSS extension defaults, and NODE_PATH) for fallback, including explicit `.pcss` and extensionless paths. The node package does not export its stylesheet loader/resolver, so enhanced-resolve is an explicit dependency rather than an import through a transitive dependency's private path. Record stylesheet roles at resolution time; suffix filtering loses inline sources, while parsing every dependency as CSS can interpret JavaScript template strings as directives.
 
+The stylesheet resolver deliberately uses a fresh resolver with uncached `fs` instead of Tailwind's shared cached filesystem. This keeps newly created or repaired imports visible across regeneration attempts without another invalidation mechanism. Revisit only if measurements identify resolution as a bottleneck, and preserve retry correctness if introducing a cache.
+
 The plan references validators by name and holds class groups/conflicts in ordered maps. Only public validators can be serialized. Each group's scale is independently copied so collision corrections cannot remove another group's members; the emitter recovers shared scale runs structurally.
 
 ## Classification constraints and regression lessons

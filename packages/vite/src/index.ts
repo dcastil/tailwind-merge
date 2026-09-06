@@ -16,7 +16,7 @@ import {
 } from './generation'
 
 export interface TailwindMergeOptions {
-    /** Path to the project's Tailwind CSS entrypoint, relative to the Vite root. When omitted, the entrypoint is auto-detected by scanning the root for CSS files with Tailwind markers — only ambiguous projects (several independent roots) need to set this. */
+    /** Path to the project's Tailwind CSS entrypoint, relative to the Vite root. When omitted, the entrypoint is auto-detected within the root. Set this to disambiguate themes or select an entrypoint outside the discovery scan. */
     css?: string
     /** LRU cache size of the generated `twMerge`, passed through to the generated config. Defaults to tailwind-merge's default. */
     cacheSize?: number
@@ -94,7 +94,7 @@ export default function tailwindMerge(
         const discovered = await discoverCssRoot(config.root, integration.resolveCss)
         if (discovered === null) {
             config.logger.warn(
-                '[@tailwind-merge/vite] No Tailwind CSS root found — serving default tailwind-merge behavior. Set the `css` option if your entrypoint lives outside the Vite root.',
+                '[@tailwind-merge/vite] No Tailwind CSS root found — serving default tailwind-merge behavior. Set the `css` option to your Tailwind entrypoint if it uses another extension or is outside the scanned directories.',
             )
         }
         return discovered

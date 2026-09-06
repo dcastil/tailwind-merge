@@ -1,4 +1,4 @@
-import { readFile, readdir } from 'node:fs/promises'
+import { readFile, readdir, stat } from 'node:fs/promises'
 import path from 'node:path'
 
 import { type TailwindIntegration, cssStatements } from '@tailwind-merge/configurator'
@@ -54,7 +54,7 @@ export async function discoverCssRoot(
             const base = path.dirname(file)
             const specifier = match[1] as string
             const target =
-                (await resolveCss?.(specifier, base)) || resolveCssImport(base, specifier)
+                (await resolveCss?.(specifier, base)) || (await resolveCssImport(base, specifier))
             if (target !== null) {
                 importedByCandidate.add(target)
                 pending.push(target)
@@ -90,6 +90,9 @@ async function readStatements(file: string): Promise<string[] | null> {
 /** Directories that never contain the project's own Tailwind entrypoint. Dot-directories (.git, .next, .svelte-kit, …) are skipped wholesale in the walk. */
 const IGNORED_DIRECTORY_NAMES = new Set(['node_modules', 'dist', 'build', 'out', 'coverage', 'public'])
 
+const CSS_EXTENSIONS = new Set(['.css', '.pcss', '.postcss'])
+
+/** Limit the eager scan to plain-CSS filenames supported by Vite. Following explicit imports is separate and does not impose an extension requirement. */
 async function collectCssFiles(directory: string): Promise<string[]> {
     const entries = await readdir(directory, { withFileTypes: true }).catch(() => [])
     const files: string[] = []
@@ -101,7 +104,7 @@ async function collectCssFiles(directory: string): Promise<string[]> {
                     return
                 }
                 files.push(...(await collectCssFiles(path.join(directory, entry.name))))
-            } else if (entry.isFile() && entry.name.endsWith('.css')) {
+            } else if (entry.isFile() && CSS_EXTENSIONS.has(path.extname(entry.name))) {
                 files.push(path.join(directory, entry.name))
             }
         }),
@@ -111,12 +114,13 @@ async function collectCssFiles(directory: string): Promise<string[]> {
 }
 
 /**
- * Resolves a CSS `@import` specifier to an absolute path for the candidate graph. Only path-like specifiers matter here — package imports (like `tailwindcss` itself) can never point at a project candidate — and CSS allows omitting both the leading `./` and the `.css` extension.
+ * Resolves a local CSS `@import` for the candidate graph when the integration resolver declines. Prefer an existing file regardless of extension, then try Tailwind's implicit `.css` suffix; otherwise mixed-extension and extensionless intermediates disconnect imported candidates from their root.
  */
-function resolveCssImport(fromDirectory: string, specifier: string): string | null {
+async function resolveCssImport(fromDirectory: string, specifier: string): Promise<string | null> {
     if (specifier.startsWith('tailwindcss')) {
         return null
     }
     const resolved = path.resolve(fromDirectory, specifier)
-    return path.extname(resolved) === '.css' ? resolved : `${resolved}.css`
+    const exists = await stat(resolved).then((entry) => entry.isFile()).catch(() => false)
+    return exists ? resolved : `${resolved}.css`
 }

@@ -1,5 +1,5 @@
 import path from 'node:path'
-import { writeFile } from 'node:fs/promises'
+import { mkdir, readFile, rename, writeFile } from 'node:fs/promises'
 
 import tailwindcss from '@tailwindcss/vite'
 import { expect, test } from 'vitest'
@@ -17,6 +17,50 @@ import {
 } from './helpers'
 
 const { startServer, copyFixture } = setupPluginTests()
+
+test.each(['.pcss', '.postcss'])('discovers a nested %s entrypoint for dev and build pruning', async (extension) => {
+    const root = await copyFixture('app')
+    const entrypoint = path.join(root, `src/app${extension}`)
+    await mkdir(path.dirname(entrypoint))
+    await rename(path.join(root, 'app.css'), entrypoint)
+    await writeFile(entrypoint, "@import 'tailwindcss' source(none);\n@theme { --text-huge: 2.5rem; }\n@source inline('text-huge text-sm');\n")
+    const main = path.join(root, 'main.ts')
+    await writeFile(main, (await readFile(main, 'utf8')).replace('./app.css', `./src/app${extension}`))
+
+    await expect(discoverCssRoot(root)).resolves.toBe(entrypoint)
+    const logs: string[] = []
+    const { server } = await startServer(root, { options: { prune: { dev: true } }, logs })
+    const runtime = await server.ssrLoadModule(RUNTIME_SPECIFIER)
+    expect(runtime.twMerge('text-huge text-sm')).toBe('text-sm')
+    expect(runtime.getConfig().classGroups).not.toHaveProperty('p')
+    const { code, lines } = await buildFixture(root)
+    expect(hasLiteral(code, 'huge')).toBe(true)
+    expect([...logs, ...lines].some((line) => /No Tailwind|failed|Could not scan/.test(line))).toBe(false)
+
+    await writeFile(path.join(root, 'independent.css'), '@theme { --text-other: 2rem; }\n')
+    await expect(discoverCssRoot(root)).rejects.toThrow('multiple Tailwind CSS roots')
+})
+
+test.each([
+    ['styles.pcss', 'styles.pcss'],
+    ['styles.postcss', 'styles.postcss'],
+    ['styles', 'styles'],
+    ['styles.css', 'styles'],
+])('discovery follows %s imported as %s in a mixed-extension graph', async (filename, specifier) => {
+    const root = await copyFixture('app')
+    await writeFile(path.join(root, 'app.css'), `@import 'tailwindcss' source(none);\n@import './${specifier}';\n@source inline('text-huge text-sm');\n`)
+    await writeFile(path.join(root, filename), "@import './tokens.postcss';\n")
+    await writeFile(path.join(root, 'tokens.postcss'), "@import './colors.pcss';\n@theme { --text-huge: 2.5rem; }\n")
+    await writeFile(path.join(root, 'colors.pcss'), '@theme { --color-brand: #abcdef; }\n')
+
+    await expect(discoverCssRoot(root)).resolves.toBe(path.join(root, 'app.css'))
+    const { server } = await startServer(root)
+    expect((await server.ssrLoadModule(RUNTIME_SPECIFIER)).twMerge('text-huge text-sm')).toBe('text-sm')
+    const { code, output, lines } = await buildFixture(root, { plugins: [tailwindcss()] })
+    expect(hasLiteral(code, 'huge')).toBe(true)
+    expect(output.some((entry) => entry.type === 'asset' && String(entry.source).includes('.text-huge'))).toBe(true)
+    expect(lines.some((line) => /No Tailwind|failed|Could not scan/.test(line))).toBe(false)
+})
 
 test('discovery ignores markers inside comments and strings in ordinary CSS', async () => {
     const root = await copyFixture('app')

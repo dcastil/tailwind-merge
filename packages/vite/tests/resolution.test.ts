@@ -15,6 +15,15 @@ import {
 
 const { startServer, copyFixture } = setupPluginTests()
 
+test.each([false, true])('an unresolved stylesheet fails the build without a runtime import (pruning: %s)', async (prune) => {
+    const root = await copyFixture('app')
+    await writeFile(path.join(root, 'app.css'), "@import 'tailwindcss';\n@import './missing.pcss';\n")
+    await writeFile(path.join(root, 'main.ts'), 'document.body.textContent = "No runtime import"\n')
+
+    // Vite declines non-.css stylesheet requests. Its Tailwind fallback must reject missing files, even when scanning also fails and the module graph never reaches this CSS.
+    await expect(buildFixture(root, { options: { prune } })).rejects.toThrow("Can't resolve './missing.pcss'")
+})
+
 test.each([false, true])('falls back to Tailwind resolution for .pcss imports (pruning: %s)', async (prune) => {
     const root = await copyFixture('app')
     await writeFile(path.join(root, 'app.css'), "@import 'tailwindcss' source(none);\n@import './theme.pcss';\n")
