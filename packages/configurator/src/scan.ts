@@ -3,6 +3,8 @@ import { readFile } from 'node:fs/promises'
 import { Features, compile } from '@tailwindcss/node'
 import { type GlobEntry, type Scanner, type SourceEntry } from '@tailwindcss/oxide'
 
+import { type TailwindIntegration } from './design-system.ts'
+
 export interface SourceScannerOptions {
     /** Content of the Tailwind CSS entrypoint. */
     css: string
@@ -10,6 +12,8 @@ export interface SourceScannerOptions {
     base: string
     /** Directories Tailwind's automatic source detection starts from when the CSS sets no `source(…)`: the Vite root for `@tailwindcss/vite`, the working directory for the PostCSS plugin and the CLI. Several bases scan the union. */
     autoDetectBases: readonly string[]
+    /** Use the same bundler resolution hooks as generation so imports, safelists, and dependencies agree. */
+    integration?: TailwindIntegration
 }
 
 export interface SourceScanner {
@@ -45,8 +49,11 @@ export async function createSourceScanner(options: SourceScannerOptions): Promis
     const dependencies = new Set<string>()
     const compiler = await compile(options.css, {
         base: options.base,
+        customCssResolver: options.integration?.resolveCss,
+        customJsResolver: options.integration?.resolveJs,
         onDependency: (dependencyPath) => {
             dependencies.add(dependencyPath)
+            options.integration?.onDependency?.(dependencyPath)
         },
     })
 

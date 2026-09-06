@@ -14,6 +14,7 @@ const { code, config, plan } = await generate(options)
 | --- | --- | --- |
 | `css` | `string`, required | Contents of the Tailwind CSS entrypoint, before compilation. |
 | `base` | `string`, required | Directory from which Tailwind resolves stylesheet and module imports; normally the absolute directory containing the entrypoint. |
+| `integration` | `TailwindIntegration` | Optional bundler resolution and dependency hooks, shared with source scanning. Omit for ordinary filesystem/package resolution. |
 | `cacheSize` | `number` | Cache size passed through to the generated config. Defaults to the library's default. |
 | `encoding` | `'compact' \| 'exact'` | Finite-scale matching policy. Defaults to `'compact'`; see [encoding](./how-it-works.md#compact-and-exact-encoding). |
 | `format` | `'ts' \| 'js'` | Output language. Defaults to `'ts'`. Both forms are ES modules. |
@@ -79,9 +80,11 @@ const { code, plan } = await generate({ css, base, prune: { usedClasses: classes
 
 All three options are required: `css`, `base`, and `autoDetectBases: readonly string[]`. The bases are where automatic source detection starts when the CSS specifies no `source(…)`; Tailwind's Vite integration uses the Vite root, while its PostCSS integration and CLI normally use the working directory. Several bases scan their union. Explicit `source(…)`, `source(none)`, `@source`, and inline safelists are honored.
 
+An optional `integration` supplies the same `TailwindIntegration` hooks as `generate`: async `resolveCss(id, base)` must return an absolute path to a readable stylesheet; async `resolveJs(id, base)` returns an absolute module path or `false`/`undefined` to defer to Tailwind. The optional `onDependency(file)` callback observes resolved dependencies. Pass the same hooks to scanning and generation so both see the same imports, aliases, and source directives.
+
 The returned object exposes:
 
-- `scan()`: returns `{ classes, files, globs }`. Candidates include source tokens and safelisted classes, minus inline exclusions; they are not all valid utilities. Files and globs can be registered with a watcher.
+- `scan()`: returns `{ classes, files, globs }`. Candidates include source tokens and safelisted classes, minus inline exclusions; they are not all valid utilities. Register files and positive source globs with a watcher. Watchers without glob support must watch the corresponding base directories to observe newly created files.
 - `dependencies: ReadonlySet<string>`: CSS/module dependencies read during compilation. The entrypoint itself is not included because the caller supplied its text.
 - `sources`: scanner source entries, including negations and compat-config content paths.
 - `safelist: readonly string[]`: brace-expanded inline candidates.
@@ -91,4 +94,4 @@ Reuse `scan()` after source edits. Recreate the scanner after changes to the CSS
 
 ## Exported types
 
-`GenerateOptions`, `GenerateResult`, `EncodingMode`, `SourceScanner`, `SourceScannerOptions`, and `UsageScan` describe the main API. The package also exports `ConfigPlan`, `PlanReport`, `PlanValue`, `PruneReport`, `ScalePlan`, `ValidatorName`, `ScaleSnapshot`, and `ThemeSnapshot` for tooling that inspects the generation result.
+`GenerateOptions`, `GenerateResult`, `EncodingMode`, `TailwindIntegration`, `SourceScanner`, `SourceScannerOptions`, and `UsageScan` describe the main API. The package also exports `ConfigPlan`, `PlanReport`, `PlanValue`, `PruneReport`, `ScalePlan`, `ValidatorName`, `ScaleSnapshot`, and `ThemeSnapshot` for tooling that inspects the generation result.

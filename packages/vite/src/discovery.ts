@@ -1,6 +1,8 @@
 import { readFile, readdir } from 'node:fs/promises'
 import path from 'node:path'
 
+import { type TailwindIntegration } from '@tailwind-merge/configurator'
+
 /**
  * Finds the project's Tailwind CSS entrypoint by scanning the Vite root for CSS files with Tailwind root markers.
  *
@@ -8,7 +10,10 @@ import path from 'node:path'
  *
  * When several files carry markers, files transitively `@import`ed by another candidate are dropped — a root is the top of its own import graph (a multi-file theme's token and utility layers all contain `@theme`/`@utility` markers of their own). Follow import-only intermediates, including explicit paths outside the scan root, and visit each file once to bound shared dependencies and cycles. More than one root after that is a hard error asking for the `css` option; none found returns null and the caller falls back to default tailwind-merge behavior.
  */
-export async function discoverCssRoot(root: string): Promise<string | null> {
+export async function discoverCssRoot(
+    root: string,
+    resolveCss?: TailwindIntegration['resolveCss'],
+): Promise<string | null> {
     const candidates = new Set<string>()
     const contents = new Map<string, string | null>()
 
@@ -42,7 +47,10 @@ export async function discoverCssRoot(root: string): Promise<string | null> {
             continue
         }
         for (const match of content.matchAll(CSS_IMPORT_RE)) {
-            const target = resolveCssImport(path.dirname(file), match[1] as string)
+            const base = path.dirname(file)
+            const specifier = match[1] as string
+            const target =
+                (await resolveCss?.(specifier, base)) || resolveCssImport(base, specifier)
             if (target !== null) {
                 importedByCandidate.add(target)
                 pending.push(target)

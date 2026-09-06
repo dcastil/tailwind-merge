@@ -1,4 +1,16 @@
-import { __unstable__loadDesignSystem } from '@tailwindcss/node'
+import { readFile } from 'node:fs/promises'
+import path from 'node:path'
+import { fileURLToPath, pathToFileURL } from 'node:url'
+
+import { type Resolver, __unstable__loadDesignSystem, loadModule } from '@tailwindcss/node'
+import type * as TailwindEngine from 'tailwindcss'
+
+/** Bundler-owned resolution shared by design-system loading and source scanning. CSS resolution must return a readable file; JavaScript can defer to Tailwind's normal resolver. */
+export interface TailwindIntegration {
+    resolveCss: Resolver
+    resolveJs: Resolver
+    onDependency?: (file: string) => void
+}
 
 /**
  * The structural slice of Tailwind's design system the configurator relies on. The real object's types hide most of this behind private fields, so the loader narrows to what is actually used; verified against tailwindcss 4.3.x and guarded by tests.
@@ -12,24 +24,36 @@ export interface DesignSystemAccess {
         keys(kind: 'static' | 'functional'): string[]
     }
     getClassList(): [string, { modifiers: string[] }][]
+    /** Variant suggestions and selector templates, including CSS and JavaScript registrations. */
+    getVariants(): {
+        name: string
+        values: string[]
+        hasDash: boolean
+        selectors(options?: { value?: string }): string[]
+    }[]
     candidatesToCss(classes: string[]): (string | null)[]
 }
 
 export interface LoadDesignSystemsOptions {
     css: string
     base: string
+    integration?: TailwindIntegration
 }
 
 /**
- * Loads the project's design system alongside a vanilla one resolved from the same base directory (and therefore the same Tailwind installation and version). The vanilla system is the reference for diffing which classes the project's theme created and for classifying them — comparisons are only meaningful when both sides come from the identical compiler.
+ * Loads project and vanilla systems through the same installed compiler and CSS-resolution base. The vanilla system is the reference for diffing and classifying theme-created classes; comparisons are only meaningful with an identical compiler.
  */
-export async function loadDesignSystems({ css, base }: LoadDesignSystemsOptions): Promise<{
+export async function loadDesignSystems({
+    css,
+    base,
+    integration,
+}: LoadDesignSystemsOptions): Promise<{
     project: DesignSystemAccess
     vanilla: DesignSystemAccess
 }> {
     const [project, vanilla] = await Promise.all([
-        __unstable__loadDesignSystem(css, { base }),
-        __unstable__loadDesignSystem("@import 'tailwindcss';", { base }),
+        loadDesignSystem(css, base, integration),
+        loadDesignSystem("@import 'tailwindcss';", base, integration),
     ])
 
     return {
@@ -37,6 +61,40 @@ export async function loadDesignSystems({ css, base }: LoadDesignSystemsOptions)
         vanilla: memoizeClassList(vanilla as unknown as DesignSystemAccess),
     }
 }
+
+/** The node wrapper currently drops resolver hooks when loading a design system. Use its own Tailwind engine with explicit loaders for bundler integrations, without changing globals or resolving a different compiler from the project. */
+async function loadDesignSystem(css: string, base: string, integration?: TailwindIntegration) {
+    if (!integration) {
+        return __unstable__loadDesignSystem(css, { base })
+    }
+    const engine = await (tailwindEngine ??= loadModule(
+        'tailwindcss',
+        path.dirname(fileURLToPath(import.meta.resolve('@tailwindcss/node'))),
+        () => {},
+    ).then<typeof TailwindEngine>(({ path: file }) => import(pathToFileURL(file).href)))
+    return engine.__unstable__loadDesignSystem(css, {
+        base,
+        async loadStylesheet(id, from) {
+            const file = await integration.resolveCss(id, from)
+            if (!file) {
+                throw new Error(`Could not resolve stylesheet '${id}' from '${from}'`)
+            }
+            integration.onDependency?.(file)
+            return { path: file, base: path.dirname(file), content: await readFile(file, 'utf8') }
+        },
+        async loadModule(id, from) {
+            const file = await integration.resolveJs(id, from)
+            // Tailwind only collects transitive dependencies and busts ESM caches for relative module requests. Aliases resolving to local configs/plugins must follow that same path.
+            return loadModule(
+                file ? `./${path.relative(from, file)}` : id,
+                from,
+                integration.onDependency ?? (() => {}),
+            )
+        },
+    })
+}
+
+let tailwindEngine: Promise<typeof TailwindEngine> | undefined
 
 /**
  * Caches `getClassList()` on a loaded design system. Tailwind rebuilds the list on every call, and the custom-utility, augmentation, and collision passes share it. Repeated rebuilds previously dominated generation time on themes with many custom utilities. A loaded design system never changes, so caching is safe; consumers replace the object for a new theme.
@@ -248,8 +306,8 @@ function analyzeSelector(selector: string): {
         subject = wrapper[1]!.trim()
     }
 
-    // Prefer the nesting anchor over an ancestor class (`.dark &`); class names may contain escaped characters like `\%`.
-    const anchorMatch = /&/.exec(subject) ?? /\.(?:[\w-]|\\.)+/.exec(subject)
+    // Prefer the nesting anchor over an ancestor class (`.dark &`). A hexadecimal escape consumes its optional trailing space too (`\32 xl`): that space belongs to a numeric variant's class name, not a descendant selector.
+    const anchorMatch = /&/.exec(subject) ?? /\.(?:[\w-]|\\(?:[\da-f]{1,6}\s?|.))+/i.exec(subject)
     if (!anchorMatch) {
         // No recognizable anchor means the block targets something unrelated (not emitted by current Tailwind); give it a distinct context so it can never collide with base declarations.
         return {
@@ -278,7 +336,7 @@ function analyzeSelector(selector: string): {
             continue
         }
 
-        const compound = /^(?:\.(?:[\w-]|\\.)+|\[[^\]]*\])/.exec(rest)
+        const compound = /^(?:\.(?:[\w-]|\\(?:[\da-f]{1,6}\s?|.))+|\[[^\]]*\])/i.exec(rest)
         if (compound) {
             // Additional class or attribute requirements on the same element are conditions.
             conditional = true

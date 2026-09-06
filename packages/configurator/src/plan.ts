@@ -2,6 +2,7 @@ import { getDefaultConfig, validators } from 'tailwind-merge'
 import { type ClassGroup, type ThemeGetter } from 'tailwind-merge/unstable-do-not-import'
 
 import { type EncodingMode, type ScaleEncoding, encodeScale } from './compress.ts'
+import { type CustomUtilityPlan } from './custom-utilities.ts'
 import { type ThemeSnapshot } from './snapshot.ts'
 
 /**
@@ -199,16 +200,14 @@ export function buildPlan({ snapshot, cacheSize, encoding = 'compact' }: BuildPl
  */
 export function applyCustomUtilityPlan(
     plan: ConfigPlan,
-    customUtilityPlan: {
-        groups: Map<string, PlanValue[]>
-        aliases: Map<string, string>
-        conflicts: Map<string, string[]>
-    },
+    customUtilityPlan: CustomUtilityPlan,
 ): void {
     for (const [groupId, items] of customUtilityPlan.groups) {
         plan.classGroups.set(groupId, items)
         plan.report.customUtilityGroups.push(groupId)
     }
+    // A postfix can add independent declarations and select a different effect group (pair-2/3 vs pair-2). Pruning mirrors the runtime's complete-class lookup for these groups.
+    plan.postfixLookupClassGroups.push(...customUtilityPlan.postfixLookupClassGroups)
 
     for (const [className, groupId] of customUtilityPlan.aliases) {
         const items = plan.classGroups.get(groupId)

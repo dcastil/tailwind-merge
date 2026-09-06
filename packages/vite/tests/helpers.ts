@@ -3,8 +3,10 @@ import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 import {
+    type Alias,
     type Logger,
     type PluginOption,
+    type Rollup,
     type ViteDevServer,
     build,
     createLogger,
@@ -53,6 +55,8 @@ export interface ServerOptions {
     plugins?: PluginOption[]
     /** Collects the plugin's own log lines (`[@tailwind-merge/vite] …`) when given; the server stays silent otherwise. */
     logs?: string[]
+    /** Project aliases combined with the test library aliases. */
+    aliases?: Alias[]
 }
 
 export interface BuildOptions extends ServerOptions {
@@ -82,7 +86,10 @@ export function setupPluginTests() {
     afterAll(() => rm(cacheDirectory, { recursive: true, force: true }))
 
     /** Starts a dev server with the plugin under test on `root`. Middleware mode needs no HTTP server, and `ws: false` drops the WebSocket server too, so test files run in parallel without fighting over an HMR port; the plugin tolerates the missing socket (its reload sends are best-effort). */
-    async function startServer(root: string, { options, plugins = [], logs }: ServerOptions = {}) {
+    async function startServer(
+        root: string,
+        { options, plugins = [], logs, aliases = [] }: ServerOptions = {},
+    ) {
         const plugin = tailwindMerge(options)
         activeServer = await createServer({
             root,
@@ -90,7 +97,7 @@ export function setupPluginTests() {
             cacheDir: cacheDirectory,
             ...(logs ? { customLogger: captureLogger(logs) } : { logLevel: 'silent' }),
             plugins: [...plugins, plugin],
-            resolve: { alias: libraryAliases },
+            resolve: { alias: [...aliases, ...libraryAliases] },
             server: { middlewareMode: true, ws: false },
         })
         return { server: activeServer, plugin }
@@ -121,14 +128,14 @@ export function setupPluginTests() {
 /** Builds a fixture with the plugin under test, returning the emitted JavaScript, the raw output entries (for CSS assets), and the plugin's log lines (the build itself stays silent). */
 export async function buildFixture(
     root: string,
-    { options, plugins = [], logs = [], build: buildOptions = {} }: BuildOptions = {},
+    { options, plugins = [], logs = [], aliases = [], build: buildOptions = {} }: BuildOptions = {},
 ) {
     const result = await build({
         root,
         configFile: false,
         customLogger: captureLogger(logs),
         plugins: [...plugins, tailwindMerge(options)],
-        resolve: { alias: libraryAliases },
+        resolve: { alias: [...aliases, ...libraryAliases] },
         build: { write: false, minify: false, ...buildOptions },
     })
     const output = (Array.isArray(result) ? result[0] : result) as {
@@ -196,4 +203,36 @@ export function updateAfter(
 /** Whether the built output contains `value` as a string literal, whichever quote style the bundler printed. */
 export function hasLiteral(code: string, value: string): boolean {
     return new RegExp(`["']${value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}["']`).test(code)
+}
+
+/** Waits for a real watch cycle's END event, subscribing before an optional edit so its outcome cannot be missed. Bundle and error events arrive before the cycle finishes; closing their results releases resources without stopping the watcher. */
+export function nextWatchBuild(watcher: Rollup.RollupWatcher, edit?: () => Promise<void>): Promise<void> {
+    return new Promise((resolve, reject) => {
+        let buildError: unknown
+        const onEvent = async (event: Rollup.RollupWatcherEvent) => {
+            try {
+                if (event.code === 'ERROR') {
+                    buildError = event.error
+                    await event.result?.close()
+                } else if (event.code === 'BUNDLE_END') {
+                    await event.result.close()
+                } else if (event.code === 'END') {
+                    watcher.off('event', onEvent)
+                    if (buildError) {
+                        reject(buildError)
+                    } else {
+                        resolve()
+                    }
+                }
+            } catch (error) {
+                watcher.off('event', onEvent)
+                reject(error)
+            }
+        }
+        watcher.on('event', onEvent)
+        void edit?.().catch((error: unknown) => {
+            watcher.off('event', onEvent)
+            reject(error)
+        })
+    })
 }

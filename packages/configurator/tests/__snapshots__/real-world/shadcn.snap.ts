@@ -1663,7 +1663,7 @@ export const getConfig = () => {
             'font-size': ['leading'],
         },
         postfixLookupClassGroups: ['container-type'],
-        orderSensitiveModifiers: ['*', '**', 'after', 'backdrop', 'before', 'details-content', 'file', 'first-letter', 'first-line', 'marker', 'placeholder', 'selection'],
+        orderSensitiveModifiers: ['*', '**', 'after', 'backdrop', 'before', 'details-content', 'file', 'first-letter', 'first-line', 'marker', 'placeholder', 'selection', 'in-dark', 'in-style-vega', 'in-style-nova', 'in-style-lyra', 'in-style-maia', 'in-style-mira', 'in-style-luma', 'in-style-sera', 'in-style-rhea', 'in-fixed'],
     } satisfies Config<string, never>
 }
 

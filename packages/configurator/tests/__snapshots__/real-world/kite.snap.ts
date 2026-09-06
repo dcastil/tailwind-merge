@@ -1653,7 +1653,7 @@ export const getConfig = () => {
             'font-size': ['leading'],
         },
         postfixLookupClassGroups: ['container-type'],
-        orderSensitiveModifiers: ['*', '**', 'after', 'backdrop', 'before', 'details-content', 'file', 'first-letter', 'first-line', 'marker', 'placeholder', 'selection'],
+        orderSensitiveModifiers: ['*', '**', 'after', 'backdrop', 'before', 'details-content', 'file', 'first-letter', 'first-line', 'marker', 'placeholder', 'selection', 'not-ltr', 'not-rtl', 'not-dark', 'not-blue-light', 'not-blue-dark', 'group-ltr', 'group-rtl', 'group-dark', 'group-blue-light', 'group-blue-dark', 'peer-ltr', 'peer-rtl', 'peer-dark', 'peer-blue-light', 'peer-blue-dark', 'in-ltr', 'in-rtl', 'in-dark', 'in-blue-light', 'in-blue-dark', 'has-ltr', 'has-rtl', 'has-dark', 'has-blue-light', 'has-blue-dark', 'ltr', 'rtl', 'dark', 'blue-light', 'blue-dark'],
     } satisfies Config<string, never>
 }
 

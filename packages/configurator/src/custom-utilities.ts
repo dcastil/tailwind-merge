@@ -17,6 +17,8 @@ export interface CustomUtilityPlan {
     aliases: Map<string, string>
     /** Inferred override relationships: group ID → built-in and custom group IDs whose declarations the utility fully covers, meaning the utility coming later in a class list makes the earlier class irrelevant. */
     conflicts: Map<string, string[]>
+    /** Mixed functional groups need a complete lookup before treating a slash as a modifier of the base group. */
+    postfixLookupClassGroups: string[]
 }
 
 export interface BuildCustomUtilityPlanOptions {
@@ -73,6 +75,7 @@ export function buildCustomUtilityPlan({
 
     const groups = new Map<string, CustomUtilityGroup>()
     const aliases = new Map<string, string>()
+    const postfixLookupClassGroups: string[] = []
 
     for (const root of staticRoots) {
         // A static root sharing its name with a functional custom root joins the functional group only when the two provably have the same effect (they cover each other, like a `shimmer` default alongside `shimmer-*` values) — splitting those would stop them from merging. When the functional form carries state the bare form doesn't (supabase's `hit-area` scaffold vs `hit-area-*` offsets), they stay separate groups and override inference below adds the correct one-directional relationship instead.
@@ -129,10 +132,12 @@ export function buildCustomUtilityPlan({
                         .map((name): PlanValue => ({ kind: 'validator', name })),
                 )
                 if (valueItems.length > 0) {
-                    groups.set(`${groupId}.${index}`, {
+                    const shapeGroupId = `${groupId}.${index}`
+                    groups.set(shapeGroupId, {
                         items: [{ kind: 'object', entries: [[root, valueItems]] }],
                         exemplar: shape.exemplar,
                     })
+                    postfixLookupClassGroups.push(shapeGroupId)
                 }
             }
             continue
@@ -164,6 +169,7 @@ export function buildCustomUtilityPlan({
         groups: new Map([...groups].map(([groupId, group]) => [groupId, group.items])),
         aliases,
         conflicts: inferOverrideConflicts(project, groups, groupSignatures),
+        postfixLookupClassGroups,
     }
 }
 

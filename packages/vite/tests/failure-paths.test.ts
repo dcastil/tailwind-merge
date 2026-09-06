@@ -12,6 +12,7 @@ import {
     buildFixture,
     hasLiteral,
     libraryAliases,
+    nextWatchBuild,
     setupPluginTests,
     updateAfter,
     waitForWatcher,
@@ -174,35 +175,3 @@ test('dependenciesChanged notices edited and deleted files of the CSS graph', as
     await rm(cssPath)
     await expect(dependenciesChanged(fresh)).resolves.toBe(true)
 })
-
-/** Waits for a real watch cycle's END event, subscribing before an optional edit so its outcome cannot be missed. Bundle and error events arrive before the cycle finishes; closing their results releases resources without stopping the watcher. */
-function nextWatchBuild(watcher: Rollup.RollupWatcher, edit?: () => Promise<void>): Promise<void> {
-    return new Promise((resolve, reject) => {
-        let buildError: unknown
-        const onEvent = async (event: Rollup.RollupWatcherEvent) => {
-            try {
-                if (event.code === 'ERROR') {
-                    buildError = event.error
-                    await event.result?.close()
-                } else if (event.code === 'BUNDLE_END') {
-                    await event.result.close()
-                } else if (event.code === 'END') {
-                    watcher.off('event', onEvent)
-                    if (buildError) {
-                        reject(buildError)
-                    } else {
-                        resolve()
-                    }
-                }
-            } catch (error) {
-                watcher.off('event', onEvent)
-                reject(error)
-            }
-        }
-        watcher.on('event', onEvent)
-        void edit?.().catch((error: unknown) => {
-            watcher.off('event', onEvent)
-            reject(error)
-        })
-    })
-}

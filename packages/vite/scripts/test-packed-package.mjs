@@ -32,9 +32,10 @@ try {
     await extractAndAssertManifest(tarballPath, entries)
     const consumerDirectory = await createConsumerInstall()
     await assertRuntimeImports(consumerDirectory)
+    await assertGeneratedRuntime(consumerDirectory)
     await assertConsumerTypes(consumerDirectory)
     console.log(
-        '[@tailwind-merge/vite] Packed-package checks passed: tarball layout, dist exports, runtime imports, consumer types.',
+        '[@tailwind-merge/vite] Packed-package checks passed: tarball layout, dist exports, runtime imports, aliased generation and pruning, consumer types.',
     )
 } catch (error) {
     failed = true
@@ -188,6 +189,12 @@ async function createConsumerInstall() {
             path.join(tailwindScopeDirectory, tailwindPackage),
         )
     }
+    for (const peer of ['vite', 'tailwindcss']) {
+        await symlink(
+            path.join(packageDirectory, 'node_modules', peer),
+            path.join(consumerDirectory, 'node_modules', peer),
+        )
+    }
     return consumerDirectory
 }
 
@@ -229,6 +236,41 @@ assert.equal(typeof internal.getDefaultConfig, 'function')
     )
     await run(process.execPath, [checkFile], { cwd: consumerDirectory }).catch((error) => {
         throw new Error(`Runtime import checks failed:\n${error.stdout ?? ''}${error.stderr ?? ''}`)
+    })
+}
+
+/** Exercises generation from the packed plugin: a successful top-level import does not load the compiler or scanner. Aliased CSS and an inline safelist verify those lazy dependencies resolve and run after bundling, outside the workspace layout. */
+async function assertGeneratedRuntime(consumerDirectory) {
+    const root = path.join(consumerDirectory, 'app')
+    await mkdir(root)
+    await writeFile(path.join(root, 'main.mjs'), "export { twMerge } from '@tailwind-merge/vite/runtime'\n")
+    await writeFile(path.join(root, 'app.css'), "@import 'tailwindcss' source(none);\n@import '@/theme.css';\n")
+    await writeFile(path.join(root, 'theme.css'), '@theme { --text-huge: 2.5rem; }\n@source inline("text-huge text-sm");\n')
+    const checkFile = path.join(consumerDirectory, 'check-generated.mjs')
+    await writeFile(checkFile, `import assert from 'node:assert/strict'
+import { writeFile } from 'node:fs/promises'
+import path from 'node:path'
+import { build } from 'vite'
+import tailwindMerge from '@tailwind-merge/vite'
+
+const root = path.resolve('app')
+const result = await build({
+    root,
+    configFile: false,
+    logLevel: 'silent',
+    plugins: [tailwindMerge()],
+    resolve: { alias: { '@': root } },
+    build: { ssr: path.join(root, 'main.mjs'), write: false, minify: false },
+})
+const chunk = result.output.find((entry) => entry.type === 'chunk' && entry.isEntry)
+assert.ok(chunk, 'build must emit the generated runtime entry')
+await writeFile('generated.mjs', chunk.code)
+const { twMerge } = await import('./generated.mjs')
+assert.equal(twMerge('text-huge text-sm'), 'text-sm', 'the aliased theme must configure merging')
+assert.equal(twMerge('p-2 p-4'), 'p-2 p-4', 'only the inline safelist must survive pruning')
+`)
+    await run(process.execPath, [checkFile], { cwd: consumerDirectory }).catch((error) => {
+        throw new Error(`Generated runtime checks failed:\n${error.stdout ?? ''}${error.stderr ?? ''}`)
     })
 }
 

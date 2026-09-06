@@ -7,6 +7,7 @@ import {
     type EncodingMode,
     type PruneReport,
     type SourceScanner,
+    type TailwindIntegration,
     createSourceScanner,
     generate,
 } from '@tailwind-merge/configurator'
@@ -45,6 +46,7 @@ export interface GenerateRuntimeModuleOptions {
     root: string
     cacheSize?: number
     encoding?: EncodingMode
+    integration?: TailwindIntegration
     /** Prune the config to the classes found in the project's sources. `autoDetectBases` is where Tailwind's automatic source detection starts (the CSS's `source(…)`, when set, wins); `scanner` reuses an existing scanner when only the sources changed, skipping the compile that discovers them. Omit the option for the full config. */
     prune?: { autoDetectBases: string[]; scanner?: SourceScanner }
 }
@@ -52,7 +54,7 @@ export interface GenerateRuntimeModuleOptions {
 /**
  * Generates the virtual runtime module from the project's Tailwind CSS entrypoint.
  *
- * Alongside the configurator's generation this collects the entrypoint's dependency graph, because `@tailwindcss/node`'s `__unstable__loadDesignSystem` hides which files it read (it hardcodes a noop `onDependency` into its loaders). With pruning, the scanner's own `compile()` already reports the graph; without it, a second `compile()` pass does (output discarded, only `onDependency` harvested). Either way the extra compile roughly doubles generation time but keeps the plugin self-contained: watching works in `vite build --watch` and doesn't depend on `@tailwindcss/vite`'s internal bookkeeping.
+ * Collects the dependency graph from integration loader callbacks together with the scanner's `compile()`, or a separate compile when pruning is off. The plain node design-system loader hides its dependencies; the integration loader additionally reports transitive aliased JavaScript dependencies that compilation can omit. This union keeps watching independent of another Tailwind transform or a browser request.
  *
  * A failing scan (no oxide binary for the platform, sources Tailwind can't resolve) never fails the generation: the module is generated with the full config and `pruningError` carries the reason — pruning is an optimization, and falling back preserves the full generated config's behavior.
  */
@@ -61,6 +63,14 @@ export async function generateRuntimeModule(
 ): Promise<GeneratedRuntimeModule> {
     const css = await readFile(options.cssPath, 'utf-8')
     const base = path.dirname(options.cssPath)
+    const dependencies = new Set<string>([options.cssPath])
+    const integration = options.integration && {
+        ...options.integration,
+        onDependency(file: string) {
+            dependencies.add(file)
+            options.integration?.onDependency?.(file)
+        },
+    }
 
     let scanner: SourceScanner | undefined
     let scan: ReturnType<SourceScanner['scan']> | undefined
@@ -73,6 +83,7 @@ export async function generateRuntimeModule(
                     css,
                     base,
                     autoDetectBases: options.prune.autoDetectBases,
+                    integration,
                 }))
             scan = scanner.scan()
         } catch (error) {
@@ -81,10 +92,11 @@ export async function generateRuntimeModule(
         }
     }
 
-    const [result, dependencies] = await Promise.all([
+    const [result, cssDependencies] = await Promise.all([
         generate({
             css,
             base,
+            integration,
             cacheSize: options.cacheSize,
             encoding: options.encoding,
             format: 'js',
@@ -95,9 +107,13 @@ export async function generateRuntimeModule(
             ].join('\n'),
             prune: scan ? { usedClasses: scan.classes } : undefined,
         }),
-        scanner ? Promise.resolve(new Set(scanner.dependencies)) : collectCssDependencies(css, base),
+        scanner
+            ? Promise.resolve(new Set(scanner.dependencies))
+            : collectCssDependencies(css, base, integration),
     ])
-    dependencies.add(options.cssPath)
+    for (const file of cssDependencies) {
+        dependencies.add(file)
+    }
 
     const code = result.code + RUNTIME_APPENDIX
     return {
@@ -179,13 +195,19 @@ export { createTailwindMerge, extendTailwindMerge, getDefaultConfig as getConfig
 `
 
 /**
- * Collects the file dependencies of a Tailwind CSS entrypoint via `compile()`'s `onDependency` callback. Best-effort: `compile` validates a few things `loadDesignSystem` doesn't (e.g. that a `source(…)` path exists), so a failure here must not fail a generation that would otherwise succeed — the result is then just the entrypoint itself.
+ * Collects the file dependencies of a Tailwind CSS entrypoint via `compile()`'s `onDependency` callback. Best-effort: `compile` validates a few things `loadDesignSystem` doesn't (e.g. that a `source(…)` path exists), so a failure here must not fail a generation that would otherwise succeed. Dependencies collected before the failure still help watching.
  */
-async function collectCssDependencies(css: string, base: string): Promise<Set<string>> {
+async function collectCssDependencies(
+    css: string,
+    base: string,
+    integration?: TailwindIntegration,
+): Promise<Set<string>> {
     const dependencies = new Set<string>()
     try {
         await compile(css, {
             base,
+            customCssResolver: integration?.resolveCss,
+            customJsResolver: integration?.resolveJs,
             onDependency: (dependencyPath) => {
                 dependencies.add(dependencyPath)
             },

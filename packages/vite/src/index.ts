@@ -5,6 +5,7 @@ import type { Plugin, ResolvedConfig, ViteDevServer } from 'vite'
 
 import { discoverCssRoot } from './discovery'
 import { autoDetectBases, resolvePruneOptions } from './prune-options'
+import { createTailwindIntegration } from './resolution'
 import { type UpdateTrigger, createUpdateScheduler } from './updates'
 import {
     FALLBACK_MODULE_CODE,
@@ -69,6 +70,7 @@ export default function tailwindMerge(
     options: TailwindMergeOptions = {},
 ): Plugin & { api: TailwindMergePluginApi } {
     let config: ResolvedConfig
+    let integration: ReturnType<typeof createTailwindIntegration>
     let devServer: ViteDevServer | undefined
     /** Resolves to the discovered (or configured) CSS entrypoint, null when the project has none; rejects on ambiguity. Resolved before the runtime subpath resolves, so redirect vs. fallback is decided exactly once. */
     let cssRoot: Promise<string | null>
@@ -87,7 +89,7 @@ export default function tailwindMerge(
         if (options.css !== undefined) {
             return path.resolve(config.root, options.css)
         }
-        const discovered = await discoverCssRoot(config.root)
+        const discovered = await discoverCssRoot(config.root, integration.resolveCss)
         if (discovered === null) {
             config.logger.warn(
                 '[@tailwind-merge/vite] No Tailwind CSS root found — serving default tailwind-merge behavior. Set the `css` option if your entrypoint lives outside the Vite root.',
@@ -111,6 +113,7 @@ export default function tailwindMerge(
                 root: config.root,
                 cacheSize: options.cacheSize,
                 encoding: options.encoding,
+                integration,
                 prune: pruneActive
                     ? {
                           autoDetectBases: autoDetectBases(config),
@@ -267,6 +270,7 @@ export default function tailwindMerge(
             await updates?.dispose()
             await generation?.catch(() => {})
             config = resolvedConfig
+            integration = createTailwindIntegration(config)
             if (current) {
                 clearRequireCache([...current.dependencies])
             }
@@ -349,7 +353,7 @@ export default function tailwindMerge(
                 return FALLBACK_MODULE_CODE
             }
             if (config.command === 'build') {
-                // In `vite build --watch`, Rollup owns the watching — register the CSS graph so config changes rebuild, and with pruning the scanned files and source globs too (as @tailwindcss/vite does), so class-usage changes in files outside the module graph rebuild as well. The dev server intentionally doesn't do this: its watching runs through hotUpdate with the hash gate, and a watch-file link here would full-reload on every edit.
+                // In `vite build --watch`, Rollup owns the watching. Register the CSS graph, scanned files, and source directories so new templates outside the module graph rebuild too. Dev watching runs through hotUpdate with the hash gate; a watch-file link here would full-reload on every edit.
                 for (const dependency of generated.dependencies) {
                     this.addWatchFile(dependency)
                 }
@@ -358,7 +362,11 @@ export default function tailwindMerge(
                         this.addWatchFile(file)
                     }
                     for (const glob of generated.pruning.globs) {
-                        this.addWatchFile(path.join(glob.base, glob.pattern))
+                        if (glob.pattern.startsWith('!')) {
+                            continue
+                        }
+                        // Rollup disables glob expansion in its watcher. A source directory observes newly created files and nested directories; Vite retains its output/cache ignore rules.
+                        this.addWatchFile(glob.base)
                     }
                 }
             }
