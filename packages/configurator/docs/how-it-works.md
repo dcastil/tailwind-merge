@@ -30,7 +30,9 @@ Do not prune a design-system package's config against only the package's own sou
 
 ## Custom utilities and collisions
 
-A static utility whose compiled declarations match one built-in group's signature can join that group as an alias when the two cover each other's effects. Other custom roots receive their own self-conflict group. When a custom utility fully covers another group's declarations, an override relationship allows the later custom utility to remove the earlier class.
+A static utility whose compiled declarations match one built-in group's signature can join that group as an alias when the two cover each other's effects. Other custom utilities receive self-conflict groups. When a custom utility fully covers another group's declarations, an override relationship allows the later custom utility to remove the earlier class. Coverage respects declaration-level `!important`: an important custom color survives a later normal text color and cannot alias the normal color group.
+
+Functional values with different compiled effects receive separate groups. For example, `text-stroke-*` can set stroke width for numbers and stroke color for color names; those classes must coexist. Named values and supported numeric kinds are grouped by their properties, surrounding rules, and importance. When those effects differ, both encodings enumerate the named values and omit broad arbitrary-value matchers. Arbitrary values on such roots may therefore remain unmerged even when they overlap.
 
 Overlapping names such as `demo-*` and `demo-child-*` are classified from their own compiled classes. A bare utility and its functional form share a group only when their effects fully cover each other; a separate static `demo-child` can therefore keep different conflict behavior from `demo-child-*`.
 

@@ -241,6 +241,13 @@ describe('stress: 50 custom utilities and 100-value scales', async () => {
         expect(twMerge('wrap-anywhere panel-20')).toBe('wrap-anywhere panel-20')
     })
 
+    test('a built-in static class is not a value of a custom functional root', () => {
+        expect(twMerge('block flow-root')).toBe('flow-root')
+        expect(twMerge('flow-2 flow-root')).toBe('flow-2 flow-root')
+        expect(twMerge('flow-root flow-2')).toBe('flow-root flow-2')
+        expect(plan.report.customUtilityGroups).not.toContain('utility.flow.1')
+    })
+
     test('pseudo-element, conditional, and custom-property utilities override nothing', () => {
         expect(twMerge('bg-tone-iris veil')).toBe('bg-tone-iris veil')
         expect(twMerge('p-4 touch-grow')).toBe('p-4 touch-grow')

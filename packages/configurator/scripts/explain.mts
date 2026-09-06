@@ -52,7 +52,7 @@ for (const classList of classLists) {
         } else {
             for (const entry of declarations) {
                 console.log(
-                    `    ${entry.context ? `${entry.context} ` : ''}${entry.property}: ${entry.value}${entry.conditional ? '  (conditional)' : ''}`,
+                    `    ${entry.context ? `${entry.context} ` : ''}${entry.property}: ${entry.value}${entry.important ? ' !important' : ''}${entry.conditional ? '  (conditional)' : ''}`,
                 )
             }
         }

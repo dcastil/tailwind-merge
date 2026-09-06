@@ -34,7 +34,7 @@ export interface BuildCustomUtilityPlanOptions {
  * Support is empirical, derived entirely from each utility's compiled declarations, in three tiers:
  *
  * 1. A static utility whose declarations match exactly one built-in group's signature and mutually cover its effects is an alias of that group (an unconditional `color` utility behaves like `text-red-500`), so it joins the group and merges with its classes in both directions.
- * 2. Every other utility root becomes its own group so it merges against itself — and when its declarations fully cover what another group sets (`btn` with `padding` + `border-radius` covers everything `p-4` sets; see `fullyCovers` for the exact rule), an override edge is added so the utility coming later removes the covered class. The reverse direction stays out on purpose: `p-4` after `btn` only overrides part of `btn`, and removing `btn` would lose the rest of its effect — the same partial-override rule the default config applies between `px` and `p`.
+ * 2. Other utilities receive self-conflict groups, splitting functional values when their compiled effects differ. When a group's declarations fully cover what another group sets (`btn` with `padding` + `border-radius` covers everything `p-4` sets; see `fullyCovers` for the exact rule), an override edge is added so the utility coming later removes the covered class. The reverse direction stays out on purpose: `p-4` after `btn` only overrides part of `btn`, and removing `btn` would lose the rest of its effect — the same partial-override rule the default config applies between `px` and `p`.
  * 3. Declarations that are conditional (media queries, dark-mode guards) or target other elements (pseudo-elements, child selectors) only count as covered when they are byte-identical shared scaffolding: they overlap only sometimes or somewhere else, so a utility that merely touches them stays side by side with whatever it partially overlaps.
  *
  * Roots that already exist as built-ins are skipped entirely: shadowing changes built-in behavior in ways a registry diff cannot judge.
@@ -49,14 +49,23 @@ export function buildCustomUtilityPlan({
         ...vanilla.utilities.keys('static'),
         ...vanilla.utilities.keys('functional'),
     ])
-    const functionalRoots = project.utilities.keys('functional').filter((root) => !vanillaRoots.has(root))
+    const functionalRoots = project.utilities
+        .keys('functional')
+        .filter((root) => !vanillaRoots.has(root))
     const staticRoots = project.utilities.keys('static').filter((root) => !vanillaRoots.has(root))
     const staticRootSet = new Set(staticRoots)
-    const functionalClasses = collectFunctionalClasses(project, functionalRoots, staticRootSet)
+    const functionalClasses = collectFunctionalClasses(project, functionalRoots)
+    const functionalShapes = new Map(
+        [...functionalClasses].map(([root, classNames]) => [
+            root,
+            groupFunctionalClasses(project, root, classNames),
+        ]),
+    )
     const functionalExemplars = new Map(
         [...functionalClasses].map(([root, classNames]) => [
             root,
-            classNames.find((className) => declaredDeclarations(project, className)?.length) ?? null,
+            classNames.find((className) => declaredDeclarations(project, className)?.length) ??
+                null,
         ]),
     )
 
@@ -71,6 +80,7 @@ export function buildCustomUtilityPlan({
             const functionalExemplar = functionalExemplars.get(root) ?? null
             if (
                 functionalExemplar !== null &&
+                functionalShapes.get(root)!.length === 1 &&
                 fullyCovers(
                     declaredDeclarations(project, root),
                     declaredDeclarations(project, functionalExemplar),
@@ -102,18 +112,45 @@ export function buildCustomUtilityPlan({
 
     for (const root of functionalRoots) {
         const groupId = customUtilityGroupId(root)
+        const shapes = functionalShapes.get(root)!
+        if (shapes.length > 1) {
+            // Unresolved --value() declarations disappear independently. Keep known names and numeric kinds in their own shapes; broad arbitrary matchers cannot distinguish the remaining branches safely.
+            for (const [index, shape] of shapes.entries()) {
+                const valueItems = encodeScale(
+                    shape.classNames.map((className) => className.slice(root.length + 1)),
+                    'exact',
+                ).items
+                valueItems.push(
+                    ...shape.validators
+                        .filter(
+                            (name) =>
+                                name !== 'isInteger' || !shape.validators.includes('isNumber'),
+                        )
+                        .map((name): PlanValue => ({ kind: 'validator', name })),
+                )
+                if (valueItems.length > 0) {
+                    groups.set(`${groupId}.${index}`, {
+                        items: [{ kind: 'object', entries: [[root, valueItems]] }],
+                        exemplar: shape.exemplar,
+                    })
+                }
+            }
+            continue
+        }
         const items: PlanValue[] = []
         if (staticRootSet.has(root) && !groups.has(`${groupId}.static`)) {
             items.push({ kind: 'class', value: root })
         }
-        // 'compact': `isAny` under the root makes every `root-*` value self-conflict — right in that whatever values the utility accepts all set the same declarations, but it also hands nonexistent values eviction power over real ones (see `EncodingMode`). 'exact' therefore enumerates the compile-verified named values and keeps only the validators whose whole value kind probes as accepted.
+        // Uniform roots keep their open matchers. Compact's `isAny` also accepts nonexistent values; exact mode restricts this to compiled names and accepted value kinds (see `EncodingMode`).
         const valueItems =
             encoding === 'compact'
                 ? [{ kind: 'validator', name: 'isAny' } satisfies PlanValue]
                 : exactFunctionalValueItems(
                       project,
                       root,
-                      functionalClasses.get(root)!.map((className) => className.slice(root.length + 1)),
+                      functionalClasses
+                          .get(root)!
+                          .map((className) => className.slice(root.length + 1)),
                   )
         if (valueItems.length > 0) {
             items.push({ kind: 'object', entries: [[root, valueItems]] })
@@ -142,32 +179,104 @@ interface CustomUtilityGroup {
 }
 
 /**
- * Indexes suggested classes once for both encoding and conflict inference. A static class belongs to its own root; other classes belong to the longest functional root that prefixes them. Using the same ownership rule prevents a nested root such as `demo-child-*` from becoming the exemplar or a named value of `demo-*`.
+ * Indexes suggested classes once for both encoding and conflict inference. Bare utility names belong to their own roots; other classes belong to the longest functional root that prefixes them. Using the same ownership rule prevents a nested root such as `demo-child-*` from becoming the exemplar or a named value of `demo-*`.
  */
 function collectFunctionalClasses(
     project: DesignSystemAccess,
     functionalRoots: string[],
-    staticRoots: Set<string>,
 ): Map<string, string[]> {
     const classesByRoot = new Map<string, string[]>(functionalRoots.map((root) => [root, []]))
     if (functionalRoots.length === 0) {
         return classesByRoot
     }
-    const longestRootsFirst = [...functionalRoots].sort((first, second) => second.length - first.length)
+    // Built-ins retain ownership too: flow-root is not a value of flow-*, nor backdrop-blur-sm or the bare functional default backdrop-grayscale of backdrop-*.
+    const projectFunctionalRoots = project.utilities.keys('functional')
+    const bareRoots = new Set([...project.utilities.keys('static'), ...projectFunctionalRoots])
+    const longestRootsFirst = projectFunctionalRoots.sort(
+        (first, second) => second.length - first.length,
+    )
     const seen = new Set<string>()
 
     for (const [className] of project.getClassList()) {
-        if (staticRoots.has(className) || seen.has(className)) {
+        if (
+            bareRoots.has(className) ||
+            seen.has(className) ||
+            !functionalRoots.some((root) => className.startsWith(`${root}-`))
+        ) {
             continue
         }
         seen.add(className)
         const root = longestRootsFirst.find((candidate) => className.startsWith(`${candidate}-`))
         if (root !== undefined) {
-            classesByRoot.get(root)!.push(className)
+            classesByRoot.get(root)?.push(className)
         }
     }
 
     return classesByRoot
+}
+
+interface FunctionalClassGroup {
+    classNames: string[]
+    exemplar: string
+    validators: ValidatorName[]
+}
+
+/** Groups named values and numeric kinds by their compiled effects, ignoring values but preserving rule scope and importance. Probe arbitrary kinds too: a root's suggestions can contain only widths while arbitrary colors take a different branch. Probe-only shapes prevent unsafe root-wide matchers without registering probe names. */
+function groupFunctionalClasses(
+    project: DesignSystemAccess,
+    root: string,
+    classNames: string[],
+): FunctionalClassGroup[] {
+    const groups = new Map<string, FunctionalClassGroup>()
+    const groupsByClassName = new Map<string, FunctionalClassGroup>()
+    const namedClasses = new Set(classNames)
+    const candidates = new Set([
+        ...classNames,
+        ...FUNCTIONAL_VALUE_PROBES.map((tail) => `${root}-${tail}`),
+    ])
+    for (const className of candidates) {
+        const declarations = declaredDeclarations(project, className)
+        if (!declarations?.length) {
+            continue
+        }
+        const signature = [
+            ...new Set(
+                declarations.map((entry) =>
+                    JSON.stringify([entry.context, entry.scope, entry.property, entry.important]),
+                ),
+            ),
+        ]
+            .sort()
+            .join('\n')
+        const group: FunctionalClassGroup = groups.get(signature) ?? {
+            classNames: [],
+            exemplar: className,
+            validators: [],
+        }
+        if (namedClasses.has(className)) {
+            group.classNames.push(className)
+        }
+        groups.set(signature, group)
+        groupsByClassName.set(className, group)
+    }
+    for (const [validator, sentinels] of BARE_VALUE_PROBES) {
+        const group = groupsByClassName.get(`${root}-${sentinels[0]!}`)
+        if (
+            group &&
+            sentinels.every((tail) => groupsByClassName.get(`${root}-${tail}`) === group)
+        ) {
+            group.validators.push(validator)
+        }
+    }
+
+    const result = [...groups.values()]
+    const integerGroup = result.find((group) => group.validators.includes('isInteger'))
+    // isNumber also accepts integers. A separate integer branch must be registered first so unsuggested integers keep the declarations --value(integer) adds; named literals outrank both validators automatically.
+    if (integerGroup) {
+        result.splice(result.indexOf(integerGroup), 1)
+        result.unshift(integerGroup)
+    }
+    return result
 }
 
 /**
@@ -187,20 +296,21 @@ const ARBITRARY_VALUE_PROBES = ['[3px]', '[7]', '[41%]', '[#650a1b]', '[twm-prob
 
 const ARBITRARY_VARIABLE_PROBE = '(--twm-probe)'
 
+const FUNCTIONAL_VALUE_PROBES = [
+    ...BARE_VALUE_PROBES.flatMap(([, sentinels]) => sentinels),
+    ...ARBITRARY_VALUE_PROBES,
+    ARBITRARY_VARIABLE_PROBE,
+]
+
 /**
- * The exact-mode value matchers of one functional root: the compile-verified named values (scale-encoded, so families still factor), plus validators for every open-ended value kind the probes prove. Remaining approximation: `isArbitraryValue` matches arbitrary values of the wrong *type* (`ll-[red]` on a `--value([length])` utility), because typed arbitrary validators re-implement Tailwind's type inference heuristically and a mismatch there would undermatch real classes — the worse failure. Values a kind probe cannot represent don't exist today (checked against Tailwind 4.3's value handling: named, literal, bare number/integer/percentage/ratio, arbitrary, arbitrary variable), so anything not probed here simply doesn't compile and correctly stays unclassified.
+ * The exact-mode value matchers of a functional root whose compiled effects are uniform across suggestions and probes: compile-verified named values (scale-encoded, so families still factor), plus validators for accepted open-ended value kinds. Arbitrary-value matchers still approximate Tailwind's type inference: `isArbitraryValue` can match a wrong type (`ll-[red]` on a `--value([length])` utility), and the probes do not exhaust every possible arbitrary type or spelling. Mixed-effect roots bypass this helper to avoid assigning different arbitrary branches to one group.
  */
 function exactFunctionalValueItems(
     project: DesignSystemAccess,
     root: string,
     namedTails: string[],
 ): PlanValue[] {
-    const probeTails = [
-        ...BARE_VALUE_PROBES.flatMap(([, sentinels]) => sentinels),
-        ...ARBITRARY_VALUE_PROBES,
-        ARBITRARY_VARIABLE_PROBE,
-    ]
-    const allTails = [...namedTails, ...probeTails]
+    const allTails = [...namedTails, ...FUNCTIONAL_VALUE_PROBES]
     const compileResults = classesCompile(
         project,
         allTails.map((tail) => `${root}-${tail}`),
@@ -278,7 +388,7 @@ function collectGroupSignatures(
 }
 
 /**
- * Finds the single built-in group whose classes set exactly what the static utility sets: the signatures (context-qualified property names) must be equal, and utility and group exemplar must cover each other — the cover check adds conditionality awareness the signature lacks, so a padding inside a media query can never alias into the unconditional `p` group. Zero matches means the utility does its own thing; several matches would make the choice a guess, so both fall back to self-conflict grouping.
+ * Finds the single built-in group whose classes set exactly what the static utility sets: the signatures (context-qualified property names) must be equal, and utility and group exemplar must cover each other. Coverage checks conditions and importance, so media-query padding or inline-important padding cannot alias into the normal unconditional `p` group. Zero matches means the utility does its own thing; several matches would make the choice a guess, so both fall back to self-conflict grouping.
  */
 function findAliasGroup(
     project: DesignSystemAccess,
@@ -308,7 +418,7 @@ function findAliasGroup(
 }
 
 /**
- * Signature equality alone is blind to conditions. Aliases need an unconditional element-level effect and mutual coverage: a later built-in color must never remove a custom utility's independent hover or dark-mode color, even when both touch only `color`.
+ * Signature equality alone is blind to conditions and importance. Aliases need an unconditional element-level effect and mutual coverage: a later built-in color must never remove a custom utility's important, hover, or dark-mode color, even when both touch only `color`.
  */
 function aliasEquivalent(
     first: DeclarationEntry[] | null,
@@ -326,6 +436,7 @@ function aliasEquivalent(
 
 /**
  * Whether a class fully covers another, meaning: with the coverer coming later, the covered class has no independent effect left, so removing it loses nothing. Each declaration of the target must be accounted for — an unconditional element-level real property by an equal or shorthand property of the coverer, an unconditional element-level custom property (a state carrier like `--hit-area-l`) by the coverer re-declaring the same one, and everything conditional or targeting another element (shared `::before` scaffolding) only by a byte-identical declaration under the same enclosing rules in the coverer. Anything unaccounted for means partial overlap, and partial overlap never justifies removal — the same rule the default config applies between `px` and `p`.
+ * Every match also needs at least the target declaration's importance: a normal declaration cannot replace an inline-important property or custom-property state, even when the names and values agree.
  */
 export function fullyCovers(
     coverer: DeclarationEntry[] | null,
@@ -335,36 +446,31 @@ export function fullyCovers(
         return false
     }
 
-    return target.every((targetEntry) => {
-        if (targetEntry.context === '' && !targetEntry.conditional) {
-            if (targetEntry.property.startsWith('--')) {
-                return coverer.some(
-                    (entry) =>
-                        entry.context === '' &&
-                        !entry.conditional &&
-                        entry.property === targetEntry.property,
-                )
+    return target.every((targetEntry) =>
+        coverer.some((entry) => {
+            if (targetEntry.important && !entry.important) {
+                return false
             }
-            return coverer.some(
-                (entry) =>
-                    entry.context === '' &&
-                    !entry.conditional &&
-                    !entry.property.startsWith('--') &&
-                    propertyCovers(entry.property, targetEntry.property),
-            )
-        }
-
-        return coverer.some(
-            (entry) =>
+            if (targetEntry.context === '' && !targetEntry.conditional) {
+                if (entry.context !== '' || entry.conditional) {
+                    return false
+                }
+                return targetEntry.property.startsWith('--')
+                    ? entry.property === targetEntry.property
+                    : !entry.property.startsWith('--') &&
+                          propertyCovers(entry.property, targetEntry.property)
+            }
+            return (
                 sameDeclarationScope(entry, targetEntry) &&
                 entry.property === targetEntry.property &&
-                entry.value === targetEntry.value,
-        )
-    })
+                entry.value === targetEntry.value
+            )
+        }),
+    )
 }
 
 /**
- * For every custom group, finds the groups whose exemplar declarations its utility fully covers — whenever the utility comes later in a class list, the covered class is redundant and gets removed. Inference is exemplar-based like classification: one class stands in for each group, which is exact for custom utilities (all values of a root set the same properties) and an approximation for built-in groups.
+ * For every custom group, finds the groups whose exemplar declarations its utility fully covers — whenever the utility comes later in a class list, the covered class is redundant and gets removed. One class stands in for each group: custom functional values are partitioned by their observed effects first, while built-in groups retain the representative-class approximation used in classification.
  */
 function inferOverrideConflicts(
     project: DesignSystemAccess,

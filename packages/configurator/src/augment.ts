@@ -339,6 +339,7 @@ function declarationsEqual(first: DeclarationEntry[], second: DeclarationEntry[]
             return (
                 sameDeclarationScope(entry, other) &&
                 entry.property === other.property &&
+                entry.important === other.important &&
                 entry.value === other.value
             )
         })

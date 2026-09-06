@@ -59,6 +59,8 @@ export interface DeclarationEntry {
     /** Enclosing block headers relative to the utility's own selector (`&`). Keeping the full path distinguishes both guard expressions and which render target a guard surrounds. */
     scope: readonly string[]
     property: string
+    /** Declaration-level importance, independent of an important modifier on the class name. */
+    important: boolean
     value: string
 }
 
@@ -156,7 +158,9 @@ function parseDeclarations(css: string): DeclarationEntry[] {
             return
         }
         const property = declaration.slice(0, colonIndex).trim()
-        const value = declaration.slice(colonIndex + 1).trim()
+        const rawValue = declaration.slice(colonIndex + 1).trim()
+        const importantMatch = /\s*!\s*important$/i.exec(rawValue)
+        const value = importantMatch ? rawValue.slice(0, importantMatch.index).trimEnd() : rawValue
         // Property-name shape guard (covers standard, vendor `-ms-…`, and custom `--…` properties) so selector fragments of malformed input never register as declarations.
         if (/^-{0,2}[a-zA-Z][\w-]*$/.test(property)) {
             entries.push({
@@ -164,6 +168,7 @@ function parseDeclarations(css: string): DeclarationEntry[] {
                 conditional: frame.conditional,
                 scope: frame.scope,
                 property,
+                important: importantMatch !== null,
                 value,
             })
         }
