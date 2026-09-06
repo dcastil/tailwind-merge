@@ -21,6 +21,8 @@ By default, the generated config depends only on your Tailwind **configuration**
 - **Output unchanged** — adding utility classes, comments, formatting: nothing happens. Tailwind's own CSS hot update runs as usual; the merge config stays put.
 - **Output changed** — a real theme change: the plugin invalidates the runtime module and triggers a full page reload. A full reload is deliberate: merged class strings are already baked into the rendered DOM, so hot-swapping `twMerge` alone couldn't fix what's on screen — the same reasoning behind `@tailwindcss/vite`'s full reloads.
 
+Nearby edits are combined and processed in order. With dev pruning enabled, a source edit cannot cancel a pending CSS update: the plugin still reads the changed theme and safelists. Edits made during generation are processed afterward.
+
 If a regeneration fails during development, the last good config keeps serving and the error is logged. If generation has never succeeded, the runtime serves the default config and logs the error. Fix startup configuration errors and restart the server if no generated module has been established.
 
 ## Builds

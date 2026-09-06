@@ -103,6 +103,25 @@ test('a theme-irrelevant edit regenerates without invalidating (the stability ga
     expect(await server.ssrLoadModule(RUNTIME_SPECIFIER)).toBe(before)
 })
 
+test('theme updates continue after restarting a server with the same plugin instance', async () => {
+    const root = await copyFixture('app')
+    const { server, plugin } = await startServer(root)
+    await server.ssrLoadModule(RUNTIME_SPECIFIER)
+    await server.restart()
+
+    const cssPath = path.join(root, 'app.css')
+    await waitForWatcher(server, cssPath)
+    const before = await server.ssrLoadModule(RUNTIME_SPECIFIER)
+    expect(before.twMerge('text-big text-sm')).toBe('text-big text-sm')
+
+    const update = await updateAfter(plugin, () =>
+        writeFile(cssPath, "@import 'tailwindcss';\n@theme { --text-big: 2rem; }\n"),
+    )
+    expect(update).toEqual({ trigger: 'config', regenerated: true, reloaded: true })
+    const after = await server.ssrLoadModule(RUNTIME_SPECIFIER)
+    expect(after.twMerge('text-big text-sm')).toBe('text-sm')
+})
+
 test('the client pipeline resolves the subpath to the virtual module', async () => {
     const { server } = await startServer(path.join(fixturesDirectory, 'app'))
     const transformed = await server.transformRequest('/main.ts')

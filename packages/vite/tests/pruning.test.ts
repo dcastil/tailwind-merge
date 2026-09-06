@@ -1,4 +1,4 @@
-import { writeFile } from 'node:fs/promises'
+import { readFile, writeFile } from 'node:fs/promises'
 import path from 'node:path'
 
 import tailwindcss from '@tailwindcss/vite'
@@ -138,7 +138,8 @@ test('with prune.dev, a class-usage change regenerates and reloads, an unrelated
             "import './app.css'\nimport { twMerge } from '@tailwind-merge/vite/runtime'\n\ndocument.body.className = twMerge('text-huge text-sm p-4')\n",
         ),
     )
-    expect(usageChange).toEqual({ trigger: 'sources', regenerated: true, reloaded: true })
+    // Native watchers can deliver a late app.css notification from fixture setup around the first edit. Assert the processing outcome and served behavior; scheduler tests cover exact event priority independently of filesystem timing.
+    expect(usageChange).toMatchObject({ regenerated: true, reloaded: true })
     const after = await server.ssrLoadModule(RUNTIME_SPECIFIER)
     expect(after.twMerge('p-2 p-4')).toBe('p-4')
 
@@ -161,4 +162,30 @@ test('with prune.dev, a class-usage change regenerates and reloads, an unrelated
     )
     expect(commentEdit).toEqual({ trigger: 'sources', regenerated: true, reloaded: false })
     expect(await server.ssrLoadModule(RUNTIME_SPECIFIER)).toBe(after)
+})
+
+test('a source edit cannot replace a pending CSS update while pruning in dev', async () => {
+    const root = await copyFixture('app')
+    const { server, plugin } = await startServer(root, {
+        ...withTailwind,
+        options: { prune: { dev: true } },
+    })
+    const cssPath = path.join(root, 'app.css')
+    const mainPath = path.join(root, 'main.ts')
+    await waitForWatcher(server, cssPath)
+    await waitForWatcher(server, mainPath)
+    const before = await server.ssrLoadModule(RUNTIME_SPECIFIER)
+    expect(before.getConfig().classGroups['text-decoration']).toBeUndefined()
+    const css = await readFile(cssPath, 'utf8')
+    const main = await readFile(mainPath, 'utf8')
+
+    const update = await updateAfter(plugin, async () => {
+        await writeFile(cssPath, `${css}\n@source inline('underline');\n`)
+        // Same source candidates, immediately after the CSS edit: reusing the old scanner would miss the new safelist.
+        await writeFile(mainPath, main.replace('text-huge text-sm', 'text-sm text-huge'))
+    })
+
+    expect(update).toMatchObject({ regenerated: true, reloaded: true })
+    const after = await server.ssrLoadModule(RUNTIME_SPECIFIER)
+    expect(after.getConfig().classGroups['text-decoration']).toEqual(['underline'])
 })

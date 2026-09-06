@@ -4,6 +4,7 @@ import type { Plugin, ResolvedConfig, ViteDevServer } from 'vite'
 
 import { discoverCssRoot } from './discovery'
 import { autoDetectBases, resolvePruneOptions } from './prune-options'
+import { type UpdateTrigger, createUpdateScheduler } from './updates'
 import {
     FALLBACK_MODULE_CODE,
     GeneratedRuntimeModule,
@@ -41,7 +42,7 @@ export interface PruneOptions {
  */
 export interface PluginUpdate {
     /** Which kind of file changed: one of the CSS graph (`'config'`), or — with `prune.dev` — any other watched file, which may be a source (`'sources'`). */
-    trigger: 'config' | 'sources'
+    trigger: UpdateTrigger
     /** Whether a new module was generated. False when a sources change left the used classes unchanged, and when generation failed and the previous module stays in service. */
     regenerated: boolean
     /** Whether the served module changed and a full reload was sent. False when regeneration produced identical output — the stability gate. */
@@ -74,12 +75,12 @@ export default function tailwindMerge(
     let generation: Promise<GeneratedRuntimeModule | null> | undefined
     /** Last successfully generated module — kept as the serving state across failed regenerations. */
     let current: GeneratedRuntimeModule | null = null
-    let regenerateTimer: ReturnType<typeof setTimeout> | undefined
     /** Whether this run prunes: the `prune` option resolved against the command (build vs. serve) and library mode. */
     let pruneActive = false
     let pruneLog = true
     let buildStarts = 0
     const updateListeners = new Set<(update: PluginUpdate) => void>()
+    let updates: ReturnType<typeof createUpdateScheduler> | undefined
 
     async function locateCssRoot(): Promise<string | null> {
         if (options.css !== undefined) {
@@ -159,12 +160,11 @@ export default function tailwindMerge(
         }
     }
 
-    /** Swaps the served module in after a regeneration that produced a real change: invalidates it in every environment and asks the browser to reload. Resolves to whether that happened. */
-    async function reloadAfter(
-        next: Promise<GeneratedRuntimeModule | null>,
+    /** Swaps the served module in after a regeneration that produced a real change: invalidates it in every environment and asks the browser to reload. Returns whether that happened. */
+    function reloadIfChanged(
+        generated: GeneratedRuntimeModule | null,
         previousHash: string,
-    ): Promise<boolean> {
-        const generated = await next
+    ): boolean {
         if (!generated || !devServer) {
             return false
         }
@@ -197,46 +197,41 @@ export default function tailwindMerge(
         }
     }
 
-    /** A file of the CSS graph changed: regenerate from scratch (the sources may have changed with it). */
-    async function regenerateAndReload() {
-        if (!current) {
+    /** Runs both kinds of dev update through one generation/invalidation path; source-only edits may reuse the scanner, while CSS edits always rebuild it. The scheduler keeps this path serial. */
+    async function updateAndReload(trigger: UpdateTrigger) {
+        const previous = await generation
+        if (!previous) {
             return
         }
-        const previous = current
-        generation = regenerate(previous.cssPath)
-        const reloaded = await reloadAfter(generation, previous.hash)
-        notifyUpdate({ trigger: 'config', regenerated: (await generation) !== previous, reloaded })
-    }
+        if (trigger === 'sources') {
+            const pruning = previous.pruning
+            if (!pruning) {
+                return
+            }
+            let classesHash: string
+            try {
+                classesHash = hashClasses(pruning.scanner.scan().classes)
+            } catch (error) {
+                config.logger.warn(
+                    `[@tailwind-merge/vite] Re-scanning your sources failed, keeping the current tailwind-merge config: ${error instanceof Error ? error.message : String(error)}`,
+                )
+                notifyUpdate({ trigger, regenerated: false, reloaded: false })
+                return
+            }
+            if (classesHash === pruning.classesHash) {
+                notifyUpdate({ trigger, regenerated: false, reloaded: false })
+                return
+            }
+        }
 
-    /** A source file changed while pruning in dev: re-scan (milliseconds) and regenerate only if the used classes actually changed. */
-    async function rescanAndReload() {
-        if (!current?.pruning) {
-            return
-        }
-        const previous = current
-        let classesHash: string
-        try {
-            classesHash = hashClasses(previous.pruning!.scanner.scan().classes)
-        } catch (error) {
-            config.logger.warn(
-                `[@tailwind-merge/vite] Re-scanning your sources failed, keeping the current tailwind-merge config: ${error instanceof Error ? error.message : String(error)}`,
-            )
-            notifyUpdate({ trigger: 'sources', regenerated: false, reloaded: false })
-            return
-        }
-        if (classesHash === previous.pruning!.classesHash) {
-            notifyUpdate({ trigger: 'sources', regenerated: false, reloaded: false })
-            return
-        }
-        generation = regenerate(previous.cssPath, { reuseScanner: true })
-        const reloaded = await reloadAfter(generation, previous.hash)
-        notifyUpdate({ trigger: 'sources', regenerated: (await generation) !== previous, reloaded })
-    }
-
-    function schedule(task: () => Promise<void>) {
-        // Debounced: editors fire several events per save, and one edit can touch multiple files.
-        clearTimeout(regenerateTimer)
-        regenerateTimer = setTimeout(() => void task(), 100)
+        const next = regenerate(previous.cssPath, { reuseScanner: trigger === 'sources' })
+        generation = next
+        const generated = await next
+        notifyUpdate({
+            trigger,
+            regenerated: generated !== previous,
+            reloaded: reloadIfChanged(generated, previous.hash),
+        })
     }
 
     return {
@@ -260,8 +255,14 @@ export default function tailwindMerge(
             ssr: { noExternal: ['@tailwind-merge/vite'] },
         }),
 
-        configResolved(resolvedConfig) {
+        async configResolved(resolvedConfig) {
+            // Programmatic restarts may reuse this plugin object. Finish the previous run before its mutable generation state is replaced.
+            devServer = undefined
+            await updates?.dispose()
+            await generation?.catch(() => {})
             config = resolvedConfig
+            current = null
+            buildStarts = 0
             const prune = resolvePruneOptions(options.prune, config)
             pruneActive = config.command === 'build' ? prune.build : prune.dev
             pruneLog = prune.log
@@ -281,6 +282,11 @@ export default function tailwindMerge(
 
         configureServer(server) {
             devServer = server
+            updates = createUpdateScheduler(updateAndReload, (error) => {
+                config.logger.error(
+                    `[@tailwind-merge/vite] Updating the tailwind-merge config failed: ${error instanceof Error ? error.message : String(error)}`,
+                )
+            })
             void generation?.then((generated) => {
                 if (generated) {
                     watchOutOfRootPaths(generated)
@@ -345,16 +351,25 @@ export default function tailwindMerge(
             return generated.code
         },
 
+        async closeBundle() {
+            // Vite can configure the replacement server before closing the old one's environments. An old close must not dispose the new server's queue.
+            if (devServer?.environments[this.environment.name] !== this.environment) {
+                return
+            }
+            devServer = undefined
+            await updates?.dispose()
+        },
+
         hotUpdate({ file }) {
             // Runs once per environment; the work below spans all environments, so let the client run own it.
             if (this.environment.name !== 'client' || !current) {
                 return
             }
             if (current.dependencies.has(file)) {
-                schedule(regenerateAndReload)
+                updates?.schedule('config')
             } else if (current.pruning) {
                 // Any other file may be a source: the re-scan itself decides whether the used classes changed (a new file, a deleted one, an edit).
-                schedule(rescanAndReload)
+                updates?.schedule('sources')
             }
         },
     }

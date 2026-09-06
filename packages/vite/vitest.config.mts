@@ -23,7 +23,7 @@ export default defineConfig({
         ],
     },
     test: {
-        // Every test here drives a real Vite server or build including a full configurator generation, which takes seconds on a loaded CI runner; one package-level timeout instead of per-test annotations, like the configurator's.
+        // Integration tests drive a real Vite server or build including a full configurator generation, which takes seconds on a loaded CI runner; one package-level timeout instead of per-test annotations, like the configurator's.
         testTimeout: 30_000,
         // Sweeps the `.tmp-*` fixture copies of interrupted earlier runs before any worker starts.
         globalSetup: ['./tests/global-setup.ts'],
