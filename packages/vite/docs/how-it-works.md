@@ -2,7 +2,7 @@
 
 ## Finding your Tailwind CSS
 
-At startup the plugin scans the Vite root for CSS files with Tailwind markers (`@import 'tailwindcss'`, `@theme`, `@config`, `@plugin`, …). Files that are `@import`ed by another marker file are layers, not roots — what remains is your entrypoint. Exactly one candidate wins; several independent roots produce a hard error asking for the [`css` option](./api-reference.md#options) rather than a guess; none found logs a warning and serves default tailwind-merge behavior so your app keeps working.
+At startup the plugin scans the Vite root for CSS files with Tailwind markers (`@import 'tailwindcss'`, `@theme`, `@config`, `@plugin`, …). Files reached through another marker file's local `@import` chain are treated as layers. Discovery follows intermediate stylesheets containing only imports, including explicit paths outside the Vite root, so `app.css → styles.css → tokens.css` resolves to `app.css` when its nested tokens contain `@theme`. Exactly one remaining candidate wins; several independent roots produce a hard error asking for the [`css` option](./api-reference.md#options) rather than a guess; none found logs a warning and serves default tailwind-merge behavior so your app keeps working.
 
 This scan is deliberately independent of Vite's module graph: the runtime module can be requested before any CSS has been processed, so the plugin must know the entrypoint up front.
 

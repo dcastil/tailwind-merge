@@ -6,15 +6,17 @@ import path from 'node:path'
  *
  * The scan is eager and filesystem-based on purpose: `@tailwindcss/vite` discovers roots lazily from the module graph, but the virtual runtime module can be requested before any CSS has flowed through the pipeline, so this plugin must know the root up front.
  *
- * When several files carry markers, files `@import`ed by another candidate are dropped — a root is the top of its own import graph (a multi-file theme's token and utility layers all contain `@theme`/`@utility` markers of their own). More than one root after that is a hard error asking for the `css` option; none found returns null and the caller falls back to default tailwind-merge behavior.
+ * When several files carry markers, files transitively `@import`ed by another candidate are dropped — a root is the top of its own import graph (a multi-file theme's token and utility layers all contain `@theme`/`@utility` markers of their own). Follow import-only intermediates, including explicit paths outside the scan root, and visit each file once to bound shared dependencies and cycles. More than one root after that is a hard error asking for the `css` option; none found returns null and the caller falls back to default tailwind-merge behavior.
  */
 export async function discoverCssRoot(root: string): Promise<string | null> {
-    const candidates = new Map<string, string>()
+    const candidates = new Set<string>()
+    const contents = new Map<string, string | null>()
 
     for (const file of await collectCssFiles(root)) {
         const content = await readFile(file, 'utf-8').catch(() => null)
+        contents.set(file, content)
         if (content !== null && ROOT_MARKER_RE.test(content)) {
-            candidates.set(file, content)
+            candidates.add(file)
         }
     }
 
@@ -23,21 +25,37 @@ export async function discoverCssRoot(root: string): Promise<string | null> {
     }
 
     const importedByCandidate = new Set<string>()
-    for (const [file, content] of candidates) {
+    const pending = [...candidates]
+    const visited = new Set<string>()
+    while (pending.length > 0) {
+        const file = pending.pop()!
+        if (visited.has(file)) {
+            continue
+        }
+        visited.add(file)
+        // Import-only intermediates are not candidates, but can lead to one. Read explicit imports outside the initial scan too, and cache misses as well as successful reads.
+        if (!contents.has(file)) {
+            contents.set(file, await readFile(file, 'utf-8').catch(() => null))
+        }
+        const content = contents.get(file)
+        if (content === null || content === undefined) {
+            continue
+        }
         for (const match of content.matchAll(CSS_IMPORT_RE)) {
             const target = resolveCssImport(path.dirname(file), match[1] as string)
-            if (target !== null && candidates.has(target)) {
+            if (target !== null) {
                 importedByCandidate.add(target)
+                pending.push(target)
             }
         }
     }
 
-    const roots = Array.from(candidates.keys()).filter((file) => !importedByCandidate.has(file))
+    const roots = [...candidates].filter((file) => !importedByCandidate.has(file))
     if (roots.length === 1) {
         return roots[0] as string
     }
 
-    const listed = (roots.length > 1 ? roots : Array.from(candidates.keys()))
+    const listed = (roots.length > 1 ? roots : [...candidates])
         .map((file) => `  - ${path.relative(root, file)}`)
         .join('\n')
     throw new Error(
