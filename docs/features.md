@@ -61,6 +61,12 @@ twMerge('text-[#ff0000] text-[#00ff00]') // → 'text-[#00ff00]'
 
 // Color detected by color function
 twMerge('bg-[rgb(255,0,0)] bg-[hsl(0,100%,50%)]') // → 'bg-[hsl(0,100%,50%)]'
+
+// Percentages inside color functions don't conflict with font sizes or border widths
+twMerge('text-sm text-[color(srgb_100%_0%_0%)]')
+// → 'text-sm text-[color(srgb_100%_0%_0%)]'
+twMerge('border-2 border-[light-dark(rgb(50%_0%_0%),black)]')
+// → 'border-2 border-[light-dark(rgb(50%_0%_0%),black)]'
 ```
 
 **When labels are necessary**:

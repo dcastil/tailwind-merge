@@ -73,8 +73,9 @@ The hot paths are `src/lib/merge-classlist.ts` and `src/lib/class-group-utils.ts
 ## Testing strategy in this repo
 
 - Unit/behavior tests are granular by feature area in `tests/*.test.ts`.
+- Color-function regression tests should verify preservation of length utilities and replacement of other colors in `tests/colors.test.ts`.
 - `tests/tailwind-css-versions.test.ts` is the compatibility anchor for Tailwind feature coverage by version.
-- `tests/docs-examples.test.ts` enforces that documented `twMerge(...) // -> ...` examples stay correct.
+- `tests/docs-examples.test.ts` enforces that documented `twMerge(...) // -> ...` examples stay correct. Its extraction regex supports a limited set of characters (for example, `/` in arguments is excluded); verify new examples are collected and update the assertion count when adding supported examples.
 - `tests/public-api.test.ts` guards runtime exports and broad type usage.
 - `tests/tw-merge.benchmark.ts` is for performance benchmarking (`pnpm bench`), not correctness gating in CI.
 
