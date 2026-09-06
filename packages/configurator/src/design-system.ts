@@ -114,7 +114,7 @@ function memoizeClassList(designSystem: DesignSystemAccess): DesignSystemAccess 
 export interface DeclarationEntry {
     /** Render target of the declaration: `''` for the element the class sits on, a pseudo-element chain like `'::after'`, or a combinator tail like `'> :not(:last-child)'` when the declaration styles a different element entirely. */
     context: string
-    /** True under an `@media`/`@supports`/`@container` wrapper, a pseudo-class guard, or a selector list whose combined effects cannot be treated as one unconditional target. */
+    /** True under a style-grouping at-rule, a pseudo-class guard, or a selector list whose combined effects cannot be treated as one unconditional target. */
     conditional: boolean
     /** Enclosing block headers relative to the utility's own selector (`&`). Keeping the full path distinguishes both guard expressions and which render target a guard surrounds. */
     scope: readonly string[]
@@ -290,13 +290,13 @@ function frameForHeader(header: string, parent: BlockFrame | undefined): BlockFr
     const parentSkip = parent?.skip ?? false
 
     if (header.startsWith('@')) {
-        // Conditional at-rules keep targeting the same element; everything else at-rule-shaped (@property, @keyframes) holds non-style declarations.
-        const isConditional = /^@(media|supports|container)\b/.test(header)
+        // Registrations and animation frames are not element styles. Other wrappers, including @starting-style and unfamiliar grouping rules, retain their declarations conservatively under their full scope.
+        const isNonStyle = /^@(?:property|(?:-[\w]+-)?keyframes)(?:\s|$)/i.test(header)
         return {
             context: parentContext,
-            conditional: parentConditional || isConditional,
+            conditional: true,
             scope: [...parentScope, header],
-            skip: parentSkip || !isConditional,
+            skip: parentSkip || isNonStyle,
         }
     }
 

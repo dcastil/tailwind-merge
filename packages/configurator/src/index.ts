@@ -3,6 +3,7 @@ export type { GenerateOptions, GenerateResult } from './generate.ts'
 export type { EncodingMode } from './compress.ts'
 export type { TailwindIntegration } from './design-system.ts'
 export { createSourceScanner } from './scan.ts'
+export { cssStatements } from './css-statements.ts'
 export type { SourceScanner, SourceScannerOptions, UsageScan } from './scan.ts'
 export type {
     ConfigPlan,

@@ -6,6 +6,8 @@ At startup the plugin scans the Vite root for CSS files with Tailwind markers (`
 
 This scan is deliberately independent of Vite's module graph: the runtime module can be requested before any CSS has been processed, so the plugin must know the entrypoint up front.
 
+Only active CSS directives participate in discovery. Comments and quoted examples cannot create a Tailwind root or link one stylesheet to another; comments between the tokens of a real directive are treated as whitespace.
+
 ## Generating the configuration
 
 The plugin loads CSS using its `@tailwindcss/node` compiler, with imports resolved from your stylesheet's directory through Vite's resolver. Your `resolve.alias` entries apply to CSS imports and JavaScript `@config`/`@plugin` modules during discovery, generation, and source scanning. The resolved files and their dependencies are watched for changes. Tailwind merges defaults, overrides, and resets; the configurator then derives theme scales, compat sub-namespace classes, custom-utility groups and conflicts, and prefix support. Keep the compiler aligned with the version building your CSS, as described under [version alignment](#version-alignment). Generation starts eagerly so the runtime module can await it on first use.

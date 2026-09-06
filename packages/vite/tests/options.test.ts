@@ -1,6 +1,7 @@
 import path from 'node:path'
 import { writeFile } from 'node:fs/promises'
 
+import tailwindcss from '@tailwindcss/vite'
 import { expect, test } from 'vitest'
 
 import { discoverCssRoot } from '../src/discovery'
@@ -16,6 +17,59 @@ import {
 } from './helpers'
 
 const { startServer, copyFixture } = setupPluginTests()
+
+test('discovery ignores markers inside comments and strings in ordinary CSS', async () => {
+    const root = await copyFixture('app')
+    await writeFile(
+        path.join(root, 'ordinary.css'),
+        `
+        /* Define custom tokens with @theme in app.css.
+           @import 'tailwindcss'; @config './theme.cjs'; @plugin './plugin.cjs';
+           @tailwind utilities; @utility example { color: red; }
+        */
+        .example::before { content: "@theme { --text-fake: 3rem; }"; }
+        .example::after { content: '@import "tailwindcss";'; }
+    `,
+    )
+    await expect(discoverCssRoot(root)).resolves.toBe(path.join(root, 'app.css'))
+    const { server } = await startServer(root)
+    expect((await server.ssrLoadModule(RUNTIME_SPECIFIER)).twMerge('text-huge text-sm')).toBe(
+        'text-sm',
+    )
+    const { code } = await buildFixture(root, {
+        plugins: [tailwindcss()],
+        options: { prune: false },
+    })
+    expect(hasLiteral(code, 'huge')).toBe(true)
+})
+
+test('commented and quoted imports cannot hide independent roots', async () => {
+    const root = await copyFixture('app')
+    await writeFile(path.join(root, 'independent.css'), '@theme { --text-other: 2rem; }\n')
+    for (const comment of [
+        "/* @import './independent.css'; */",
+        `.example::before { content: '@import "./independent.css";'; }`,
+    ]) {
+        await writeFile(path.join(root, 'app.css'), `@import 'tailwindcss';\n${comment}\n`)
+        await expect(discoverCssRoot(root)).rejects.toThrow('multiple Tailwind CSS roots')
+        await writeFile(
+            path.join(root, 'app.css'),
+            "@import 'tailwindcss';\n@import './bridge.css';\n",
+        )
+        await writeFile(path.join(root, 'bridge.css'), comment)
+        await expect(discoverCssRoot(root)).rejects.toThrow('multiple Tailwind CSS roots')
+    }
+})
+
+test('discovery follows active directives separated by comments', async () => {
+    const root = await copyFixture('app')
+    await writeFile(
+        path.join(root, 'app.css'),
+        "@import/* comment */'tailwindcss';\n@import/* comment */url(/* comment */'./tokens.css');\n",
+    )
+    await writeFile(path.join(root, 'tokens.css'), '@theme/* comment */{ --text-huge: 2.5rem; }\n')
+    await expect(discoverCssRoot(root)).resolves.toBe(path.join(root, 'app.css'))
+})
 
 test('discovery picks the import-graph top among marker files', async () => {
     await expect(

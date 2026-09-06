@@ -1,7 +1,7 @@
 import { readFile, readdir } from 'node:fs/promises'
 import path from 'node:path'
 
-import { type TailwindIntegration } from '@tailwind-merge/configurator'
+import { type TailwindIntegration, cssStatements } from '@tailwind-merge/configurator'
 
 /**
  * Finds the project's Tailwind CSS entrypoint by scanning the Vite root for CSS files with Tailwind root markers.
@@ -15,12 +15,12 @@ export async function discoverCssRoot(
     resolveCss?: TailwindIntegration['resolveCss'],
 ): Promise<string | null> {
     const candidates = new Set<string>()
-    const contents = new Map<string, string | null>()
+    const statementsByFile = new Map<string, string[] | null>()
 
     for (const file of await collectCssFiles(root)) {
-        const content = await readFile(file, 'utf-8').catch(() => null)
-        contents.set(file, content)
-        if (content !== null && ROOT_MARKER_RE.test(content)) {
+        const statements = await readStatements(file)
+        statementsByFile.set(file, statements)
+        if (statements?.some((statement) => ROOT_MARKER_RE.test(statement))) {
             candidates.add(file)
         }
     }
@@ -39,14 +39,18 @@ export async function discoverCssRoot(
         }
         visited.add(file)
         // Import-only intermediates are not candidates, but can lead to one. Read explicit imports outside the initial scan too, and cache misses as well as successful reads.
-        if (!contents.has(file)) {
-            contents.set(file, await readFile(file, 'utf-8').catch(() => null))
+        if (!statementsByFile.has(file)) {
+            statementsByFile.set(file, await readStatements(file))
         }
-        const content = contents.get(file)
-        if (content === null || content === undefined) {
+        const statements = statementsByFile.get(file)
+        if (statements === null || statements === undefined) {
             continue
         }
-        for (const match of content.matchAll(CSS_IMPORT_RE)) {
+        for (const statement of statements) {
+            const match = CSS_IMPORT_RE.exec(statement)
+            if (!match) {
+                continue
+            }
             const base = path.dirname(file)
             const specifier = match[1] as string
             const target =
@@ -71,11 +75,17 @@ export async function discoverCssRoot(
     )
 }
 
-/** Matches files that can act as a Tailwind v4 root: the `tailwindcss` import (or one of its sub-imports) or Tailwind's own at-rules. */
+/** Matches active statements that can mark a Tailwind v4 root: the `tailwindcss` import (or one of its sub-imports) or Tailwind's own at-rules. Anchoring excludes directive-like text inside selectors and declaration values. */
 const ROOT_MARKER_RE =
-    /@import\s+(?:url\(\s*)?["']tailwindcss(?:\/[^"']*)?["']|@(?:theme|config|plugin|tailwind|utility)\b/
+    /^@import\s+(?:url\(\s*)?["']tailwindcss(?:\/[^"']*)?["']|^@(?:theme|config|plugin|tailwind|utility)(?:\s|$)/
 
-const CSS_IMPORT_RE = /@import\s+(?:url\(\s*)?["']([^"']+)["']/g
+const CSS_IMPORT_RE = /^@import\s+(?:url\(\s*)?["']([^"']+)["']/
+
+/** Tokenize each stylesheet once so marker detection and import traversal share the same comment/string boundaries. Missing or unreadable files cannot contribute discovery candidates. */
+async function readStatements(file: string): Promise<string[] | null> {
+    const content = await readFile(file, 'utf-8').catch(() => null)
+    return content === null ? null : [...cssStatements(content)]
+}
 
 /** Directories that never contain the project's own Tailwind entrypoint. Dot-directories (.git, .next, .svelte-kit, …) are skipped wholesale in the walk. */
 const IGNORED_DIRECTORY_NAMES = new Set(['node_modules', 'dist', 'build', 'out', 'coverage', 'public'])

@@ -4,6 +4,50 @@ import { css, expectMerges, generateFixture } from './fixture-utils'
 
 describe.each(['compact', 'exact'] as const)('%s functional utility effects', (encoding) => {
     test.each(['', 'tw'])(
+        'preserves independent effects from suggested slash modifiers (prefix: %s)',
+        async (prefix) => {
+            const stylesheet = css`
+                @import 'tailwindcss' ${prefix ? 'prefix(tw)' : ''};
+                @theme {
+                    --color-*: initial;
+                    --color-red-500: red;
+                    --color-blue-500: blue;
+                    --text-*: initial;
+                    --text-xl: 1.25rem;
+                    --text-2xl: 1.5rem;
+                }
+                @utility label-* {
+                    color: --value(--color-*);
+                    font-size: --modifier(--text-*);
+                }
+            `
+            const cases = [
+                ['label-red-500/xl label-blue-500', 'label-red-500/xl label-blue-500'],
+                ['label-blue-500 label-red-500/xl', 'label-red-500/xl'],
+                ['label-red-500/xl label-blue-500/2xl', 'label-blue-500/2xl'],
+                ['label-red-500 label-blue-500', 'label-blue-500'],
+                ['label-red-500/xl text-blue-500', 'label-red-500/xl text-blue-500'],
+                ['text-blue-500 label-red-500/xl', 'label-red-500/xl'],
+            ].map((pair) =>
+                pair.map((list) =>
+                    list
+                        .split(' ')
+                        .map((name) => (prefix ? `${prefix}:${name}` : name))
+                        .join(' '),
+                ),
+            )
+            const usedClasses = [...new Set(cases.flatMap(([input]) => input!.split(' ')))]
+            for (const prune of [undefined, { usedClasses }]) {
+                const { twMerge } = await generateFixture(stylesheet, undefined, {
+                    encoding,
+                    prune,
+                })
+                expectMerges(twMerge, Object.fromEntries(cases))
+            }
+        },
+    )
+
+    test.each(['', 'tw'])(
         'separates width and color values, including a static default (prefix: %s)',
         async (prefix) => {
             const stylesheet = css`

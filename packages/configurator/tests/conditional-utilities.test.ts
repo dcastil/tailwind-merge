@@ -1,5 +1,7 @@
 import { describe, expect, test } from 'vitest'
 
+import { declaredDeclarations } from '../src/design-system'
+
 import { css, generateFixture } from './fixture-utils'
 
 const stylesheet = css`
@@ -121,6 +123,91 @@ const usedClasses = [
 ]
 
 describe.each(['compact', 'exact'] as const)('%s conditional utility coverage', (encoding) => {
+    test.each([false, true])(
+        'preserves declarations in style grouping blocks (pruned: %s)',
+        async (prune) => {
+            const stylesheet = css`
+                @import 'tailwindcss';
+                @utility entrance {
+                    color: red;
+                    @starting-style {
+                        opacity: 0;
+                    }
+                }
+                @utility entrance-copy {
+                    color: blue;
+                    @starting-style {
+                        opacity: 0;
+                    }
+                }
+                @utility scoped {
+                    color: red;
+                    @scope (.card) {
+                        opacity: 0;
+                    }
+                }
+                @utility layered {
+                    color: red;
+                    @layer components {
+                        opacity: 0;
+                    }
+                }
+                @utility registered-red {
+                    color: red;
+                    @property --entrance-opacity {
+                        syntax: '<number>';
+                        inherits: false;
+                        initial-value: 0;
+                    }
+                    @keyframes entrance-fade {
+                        from {
+                            opacity: 0;
+                        }
+                        to {
+                            opacity: 1;
+                        }
+                    }
+                }
+            `
+            const usedClasses = [
+                'entrance',
+                'entrance-copy',
+                'scoped',
+                'layered',
+                'registered-red',
+                'text-blue-500',
+                'opacity-100',
+            ]
+            const { twMerge, designSystem } = await generateFixture(stylesheet, undefined, {
+                encoding,
+                prune: prune ? { usedClasses } : undefined,
+            })
+
+            for (const [name, scope] of [
+                ['entrance', '@starting-style'],
+                ['scoped', '@scope (.card)'],
+                ['layered', '@layer components'],
+            ]) {
+                expect(
+                    declaredDeclarations(designSystem, name!)?.filter(
+                        (entry) => entry.property === 'opacity',
+                    ),
+                ).toEqual([
+                    expect.objectContaining({ conditional: true, scope: ['&', scope], value: '0' }),
+                ])
+                expect(twMerge(`${name} text-blue-500 opacity-100`)).toBe(
+                    `${name} text-blue-500 opacity-100`,
+                )
+                expect(twMerge(`text-blue-500 ${name}`)).toBe(name)
+            }
+            expect(twMerge('entrance entrance-copy')).toBe('entrance-copy')
+            expect(twMerge('entrance scoped layered')).toBe('entrance scoped layered')
+            // Registrations and animation frames describe global resources, not the utility's element styles.
+            expect(declaredDeclarations(designSystem, 'registered-red')).toHaveLength(1)
+            expect(twMerge('registered-red text-blue-500')).toBe('text-blue-500')
+        },
+    )
+
     test.each([false, true])('preserves independent conditions (pruned: %s)', async (prune) => {
         const { twMerge, plan } = await generateFixture(stylesheet, undefined, {
             encoding,

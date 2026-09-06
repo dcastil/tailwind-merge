@@ -185,7 +185,7 @@ interface CustomUtilityGroup {
 }
 
 /**
- * Indexes suggested classes once for both encoding and conflict inference. Bare utility names belong to their own roots; other classes belong to the longest functional root that prefixes them. Using the same ownership rule prevents a nested root such as `demo-child-*` from becoming the exemplar or a named value of `demo-*`.
+ * Indexes suggested classes and their slash modifiers once for both encoding and conflict inference. Modifiers can enable independent declarations through --modifier(), so their complete candidates must participate in effect grouping. Bare utility names belong to their own roots; other classes belong to the longest functional root that prefixes them. Using the same ownership rule prevents a nested root such as `demo-child-*` from becoming the exemplar or a named value of `demo-*`.
  */
 function collectFunctionalClasses(
     project: DesignSystemAccess,
@@ -203,18 +203,25 @@ function collectFunctionalClasses(
     )
     const seen = new Set<string>()
 
-    for (const [className] of project.getClassList()) {
+    for (const [className, { modifiers }] of project.getClassList()) {
         if (
             bareRoots.has(className) ||
-            seen.has(className) ||
             !functionalRoots.some((root) => className.startsWith(`${root}-`))
         ) {
             continue
         }
-        seen.add(className)
         const root = longestRootsFirst.find((candidate) => className.startsWith(`${candidate}-`))
-        if (root !== undefined) {
-            classesByRoot.get(root)?.push(className)
+        const classes = root === undefined ? undefined : classesByRoot.get(root)
+        if (classes) {
+            for (const candidate of [
+                className,
+                ...modifiers.map((modifier) => `${className}/${modifier}`),
+            ]) {
+                if (!seen.has(candidate)) {
+                    seen.add(candidate)
+                    classes.push(candidate)
+                }
+            }
         }
     }
 

@@ -1,6 +1,6 @@
 # JavaScript API
 
-The package exports `generate`, `createSourceScanner`, and their supporting types. The direct configurator API remains unstable until a standalone release. Internal helpers such as `prunePlan` and `emitModule` are not package exports.
+The package exports `generate`, `createSourceScanner`, the `cssStatements` inspection helper, and their supporting types. The direct configurator API remains unstable until a standalone release. Internal helpers such as `prunePlan` and `emitModule` are not package exports.
 
 ## `generate(options)`
 
@@ -91,6 +91,10 @@ The returned object exposes:
 - `scansUtilities`: whether the stylesheet enables Tailwind's utilities layer.
 
 Reuse `scan()` after source edits. Recreate the scanner after changes to the CSS graph, because its sources and safelist were resolved when it was created. Scanner creation and scanning may throw, including when the platform's oxide binary is unavailable; the direct API does not silently fall back.
+
+## `cssStatements(css)`
+
+Returns a generator of nonempty CSS statements and block headers without their terminating semicolon or brace. Comments are replaced by whitespace; quoted strings, escapes, and function arguments remain intact. Source scanning and Vite root discovery share this helper so comments and quoted examples cannot introduce directives. It is a lexical inspection helper, not a CSS validator or an import resolver.
 
 ## Exported types
 
