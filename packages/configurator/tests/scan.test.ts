@@ -82,6 +82,32 @@ describe('brace expansion (Tailwind semantics)', () => {
 })
 
 describe('createSourceScanner', () => {
+    test('reads safelists from imported stylesheets regardless of extension, without reading JavaScript as CSS', async () => {
+        const stylesheet = css`
+            @import 'tailwindcss' source(none);
+            @import './sources.pcss';
+            @plugin './safelist-plugin.cjs';
+        `
+        const compiler = await compile(stylesheet, { base: scanFixtures, onDependency() {} })
+        const compiled = compiler.build([])
+        expect(compiled).toContain('.p-2 {')
+        expect(compiled).toContain('.p-4 {')
+        expect(compiled).not.toContain('.p-8 {')
+        expect(compiled).not.toContain('.gap-8 {')
+        const scanner = await createSourceScanner({
+            css: stylesheet,
+            base: scanFixtures,
+            autoDetectBases: [],
+        })
+        const { classes } = scanner.scan()
+        expect(classes.sort()).toEqual(['m-2', 'm-4', 'p-2', 'p-4'])
+        const { twMerge } = await generateFixture(stylesheet, scanFixtures, {
+            prune: { usedClasses: classes },
+        })
+        expect(twMerge('p-2 p-4')).toBe('p-4')
+        expect(twMerge('m-2 m-4')).toBe('m-4')
+    })
+
     test.each([false, true])('ignores inline source directives inside comments and strings when pruning (imported: %s)', async (imported) => {
         const stylesheet = css`
             @import 'tailwindcss' source(none);

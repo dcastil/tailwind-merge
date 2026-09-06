@@ -80,7 +80,7 @@ const { code, plan } = await generate({ css, base, prune: { usedClasses: classes
 
 All three options are required: `css`, `base`, and `autoDetectBases: readonly string[]`. The bases are where automatic source detection starts when the CSS specifies no `source(…)`; Tailwind's Vite integration uses the Vite root, while its PostCSS integration and CLI normally use the working directory. Several bases scan their union. Explicit `source(…)`, `source(none)`, `@source`, and inline safelists are honored.
 
-An optional `integration` supplies the same `TailwindIntegration` hooks as `generate`: async `resolveCss(id, base)` must return an absolute path to a readable stylesheet; async `resolveJs(id, base)` returns an absolute module path or `false`/`undefined` to defer to Tailwind. The optional `onDependency(file)` callback observes resolved dependencies. Pass the same hooks to scanning and generation so both see the same imports, aliases, and source directives.
+An optional `integration` supplies the same `TailwindIntegration` hooks as `generate`: async `resolveCss(id, base)` and `resolveJs(id, base)` return an absolute path to a readable stylesheet or module, respectively. Either can return `false`/`undefined` to defer to Tailwind's normal resolution, including explicit `.pcss` or extensionless stylesheet imports. The optional `onDependency(file)` callback observes resolved dependencies, including those discovered before generation fails. Pass the same hooks to scanning and generation so both see the same imports, aliases, and source directives.
 
 The returned object exposes:
 

@@ -78,6 +78,8 @@ export default function tailwindMerge(
     let generation: Promise<GeneratedRuntimeModule | null> | undefined
     /** Last successfully generated module — kept as the serving state across failed regenerations. */
     let current: GeneratedRuntimeModule | null = null
+    /** Keep the last good graph plus files discovered by failed attempts, so repairing an imported stylesheet can recover even before a module exists. A success replaces this with its complete graph. */
+    let configDependencies = new Set<string>()
     /** Whether this run prunes: the `prune` option resolved against the command (build vs. serve) and library mode. */
     let pruneActive = false
     let pruneLog = true
@@ -105,15 +107,16 @@ export default function tailwindMerge(
     ): Promise<GeneratedRuntimeModule | null> {
         try {
             // Tailwind busts ESM imports itself, but CommonJS configs and their transitive imports remain cached. Clear the whole tracked graph, including parents holding an imported value, before either design-system loading or scanning starts.
-            if (!reuseScanner && current) {
-                clearRequireCache([...current.dependencies])
+            if (!reuseScanner) {
+                clearRequireCache([...configDependencies])
             }
+            trackDependency(cssPath)
             const generated = await generateRuntimeModule({
                 cssPath,
                 root: config.root,
                 cacheSize: options.cacheSize,
                 encoding: options.encoding,
-                integration,
+                integration: { ...integration, onDependency: trackDependency },
                 prune: pruneActive
                     ? {
                           autoDetectBases: autoDetectBases(config),
@@ -122,6 +125,7 @@ export default function tailwindMerge(
                     : undefined,
             })
             reportPruning(generated)
+            configDependencies = new Set(generated.dependencies)
             current = generated
         } catch (error) {
             if (config.command === 'build') {
@@ -132,6 +136,15 @@ export default function tailwindMerge(
             )
         }
         return current
+    }
+
+    /** Observe dependencies as they are resolved, before reading or compiling them can fail. The dev server may start after eager generation, so configureServer also registers the accumulated set. */
+    function trackDependency(file: string) {
+        if (configDependencies.has(file)) {
+            return
+        }
+        configDependencies.add(file)
+        devServer?.watcher.add(file)
     }
 
     /** One line per generation about pruning, so the behavior and its effect are visible where someone debugging a production-only merge difference would look; a failed scan is always reported, since the module then silently holds the full config. */
@@ -271,9 +284,8 @@ export default function tailwindMerge(
             await generation?.catch(() => {})
             config = resolvedConfig
             integration = createTailwindIntegration(config)
-            if (current) {
-                clearRequireCache([...current.dependencies])
-            }
+            clearRequireCache([...configDependencies])
+            configDependencies = new Set()
             current = null
             buildStarts = 0
             const prune = resolvePruneOptions(options.prune, config)
@@ -303,7 +315,10 @@ export default function tailwindMerge(
             // The selected entrypoint must stay watched even before the first successful generation, including explicit paths outside the Vite root or files that do not exist yet.
             const cssPath = await cssRoot
             if (cssPath !== null) {
-                server.watcher.add(cssPath)
+                trackDependency(cssPath)
+            }
+            for (const dependency of configDependencies) {
+                server.watcher.add(dependency)
             }
             void generation?.then((generated) => {
                 if (generated) {
@@ -387,7 +402,7 @@ export default function tailwindMerge(
             if (this.environment.name !== 'client') {
                 return
             }
-            if (file === (await cssRoot) || current?.dependencies.has(file)) {
+            if (file === (await cssRoot) || configDependencies.has(file)) {
                 updates?.schedule('config')
             } else if (current?.pruning) {
                 // Any other file may be a source: the re-scan itself decides whether the used classes changed (a new file, a deleted one, an edit).

@@ -15,6 +15,19 @@ import {
 
 const { startServer, copyFixture } = setupPluginTests()
 
+test.each([false, true])('falls back to Tailwind resolution for .pcss imports (pruning: %s)', async (prune) => {
+    const root = await copyFixture('app')
+    await writeFile(path.join(root, 'app.css'), "@import 'tailwindcss' source(none);\n@import './theme.pcss';\n")
+    await writeFile(path.join(root, 'theme.pcss'), '@theme { --text-huge: 2.5rem; }\n@source inline("text-huge text-sm");\n')
+    const { code, output, lines } = await buildFixture(root, {
+        plugins: [tailwindcss()],
+        options: { css: 'app.css', prune },
+    })
+    expect(hasLiteral(code, 'huge')).toBe(true)
+    expect(output.some((entry) => entry.type === 'asset' && String(entry.source).includes('.text-huge'))).toBe(true)
+    expect(lines.some((line) => /failed|Could not scan/.test(line))).toBe(false)
+})
+
 test('discovers the entrypoint through a CSS alias', async () => {
     const root = await copyFixture('app')
     await writeFile(path.join(root, 'app.css'), "@import 'tailwindcss';\n@import '@/theme.css';\n")

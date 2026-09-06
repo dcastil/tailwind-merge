@@ -121,6 +121,30 @@ test.each([false, true])('a CSS root that fails at startup serves default behavi
     expect(clientRecovered?.code).not.toContain('getDefaultConfig')
 })
 
+test.each([false, true])('repairing an imported stylesheet recovers startup generation (pruning: %s)', async (prune) => {
+    for (const outsideRoot of [false, true]) {
+        const root = await copyFixture('app')
+        const tokensPath = path.resolve(root, outsideRoot ? '../tokens.css' : 'tokens.css')
+        await writeFile(path.join(root, 'app.css'), "@import 'tailwindcss' source(none);\n@import './bridge.css';\n@source inline('text-huge text-sm');\n")
+        await writeFile(path.join(root, 'bridge.css'), `@import '${outsideRoot ? '../' : './'}tokens.css';\n`)
+        await writeFile(tokensPath, '@theme { --text-huge: 2.5rem;')
+        const { server, plugin } = await startServer(root, { options: { css: 'app.css', prune: { dev: prune } } })
+        const fallback = await server.ssrLoadModule(RUNTIME_SPECIFIER)
+        const clientFallback = await server.transformRequest(RUNTIME_SPECIFIER)
+        expect(fallback.twMerge('text-huge text-sm')).toBe('text-huge text-sm')
+
+        await waitForWatcher(server, tokensPath)
+        const update = await updateAfter(plugin, () => writeFile(tokensPath, '@theme { --text-huge: 2.5rem; }\n'))
+        expect(update).toEqual({ trigger: 'config', regenerated: true, reloaded: true })
+        const recovered = await server.ssrLoadModule(RUNTIME_SPECIFIER)
+        expect(recovered.twMerge('text-huge text-sm')).toBe('text-sm')
+        const clientRecovered = await server.transformRequest(RUNTIME_SPECIFIER)
+        expect(clientRecovered).not.toBe(clientFallback)
+        expect(clientRecovered?.code).not.toContain('getDefaultConfig')
+        await server.close()
+    }
+})
+
 test('creating an explicitly selected missing CSS entrypoint replaces the startup fallback', async () => {
     const root = await copyFixture('app')
     const { server, plugin } = await startServer(root, { options: { css: 'generated.css' } })

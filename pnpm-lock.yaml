@@ -70,6 +70,10 @@ importers:
         version: 4.62.3
 
   packages/configurator:
+    dependencies:
+      enhanced-resolve:
+        specifier: ^5.24.5
+        version: 5.24.5
     devDependencies:
       '@tailwindcss/node':
         specifier: ^4.3.3
@@ -164,6 +168,9 @@ importers:
       '@tailwindcss/oxide':
         specifier: ~4.3.3
         version: 4.3.3
+      enhanced-resolve:
+        specifier: ^5.24.5
+        version: 5.24.5
       tailwind-merge:
         specifier: workspace:*
         version: link:../tailwind-merge

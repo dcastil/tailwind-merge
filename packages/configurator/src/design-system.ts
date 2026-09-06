@@ -5,7 +5,9 @@ import { fileURLToPath, pathToFileURL } from 'node:url'
 import { type Resolver, __unstable__loadDesignSystem, loadModule } from '@tailwindcss/node'
 import type * as TailwindEngine from 'tailwindcss'
 
-/** Bundler-owned resolution shared by design-system loading and source scanning. CSS resolution must return a readable file; JavaScript can defer to Tailwind's normal resolver. */
+import { createStylesheetResolver } from './stylesheet-resolver.ts'
+
+/** Bundler-owned resolution shared by design-system loading and source scanning. Either resolver can defer to Tailwind's normal filesystem/package resolution. */
 export interface TailwindIntegration {
     resolveCss: Resolver
     resolveJs: Resolver
@@ -72,14 +74,14 @@ async function loadDesignSystem(css: string, base: string, integration?: Tailwin
         path.dirname(fileURLToPath(import.meta.resolve('@tailwindcss/node'))),
         () => {},
     ).then<typeof TailwindEngine>(({ path: file }) => import(pathToFileURL(file).href)))
+    const resolveStylesheet = createStylesheetResolver(
+        integration.resolveCss,
+        integration.onDependency,
+    )
     return engine.__unstable__loadDesignSystem(css, {
         base,
         async loadStylesheet(id, from) {
-            const file = await integration.resolveCss(id, from)
-            if (!file) {
-                throw new Error(`Could not resolve stylesheet '${id}' from '${from}'`)
-            }
-            integration.onDependency?.(file)
+            const file = await resolveStylesheet(id, from)
             return { path: file, base: path.dirname(file), content: await readFile(file, 'utf8') }
         },
         async loadModule(id, from) {
@@ -197,7 +199,7 @@ interface BlockFrame {
 }
 
 /**
- * Parses the CSS text Tailwind compiles for one class into annotated declarations. A hand-rolled scanner is enough here: `candidatesToCss` output is machine-generated nested CSS without comments, and only braces, semicolons, and block headers need tracking.
+ * Parses Tailwind's machine-generated nested CSS into annotated declarations. Quoted and escaped punctuation must stay inside its token: treating content: '(' as structure would hide a pseudo-element's declarations and make alias inference discard its styles.
  */
 function parseDeclarations(css: string): DeclarationEntry[] {
     const entries: DeclarationEntry[] = []
@@ -233,7 +235,31 @@ function parseDeclarations(css: string): DeclarationEntry[] {
     }
 
     let parenDepth = 0
+    let quote = ''
+    let escaped = false
     for (const char of css) {
+        if (escaped) {
+            buffer += char
+            escaped = false
+            continue
+        }
+        if (char === '\\') {
+            buffer += char
+            escaped = true
+            continue
+        }
+        if (quote !== '') {
+            buffer += char
+            if (char === quote) {
+                quote = ''
+            }
+            continue
+        }
+        if (char === '"' || char === "'") {
+            buffer += char
+            quote = char
+            continue
+        }
         if (char === '(') {
             parenDepth += 1
         } else if (char === ')') {

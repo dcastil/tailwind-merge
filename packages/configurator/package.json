@@ -21,6 +21,9 @@
         "tailwind-merge": "^3.7.0",
         "tailwindcss": "^4.3.3"
     },
+    "dependencies": {
+        "enhanced-resolve": "^5.24.5"
+    },
     "devDependencies": {
         "@tailwindcss/node": "^4.3.3",
         "@tailwindcss/oxide": "^4.3.3",

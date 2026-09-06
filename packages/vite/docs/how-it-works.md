@@ -10,6 +10,8 @@ This scan is deliberately independent of Vite's module graph: the runtime module
 
 The plugin loads CSS using its `@tailwindcss/node` compiler, with imports resolved from your stylesheet's directory through Vite's resolver. Your `resolve.alias` entries apply to CSS imports and JavaScript `@config`/`@plugin` modules during discovery, generation, and source scanning. The resolved files and their dependencies are watched for changes. Tailwind merges defaults, overrides, and resets; the configurator then derives theme scales, compat sub-namespace classes, custom-utility groups and conflicts, and prefix support. Keep the compiler aligned with the version building your CSS, as described under [version alignment](#version-alignment). Generation starts eagerly so the runtime module can await it on first use.
 
+When Vite declines a stylesheet import, generation uses Tailwind's normal stylesheet resolution. Explicit imports such as `./theme.pcss` and extensionless files remain valid, and their inline safelists and exclusions participate in pruning.
+
 ## Serving without files
 
 Imports of `@tailwind-merge/vite/runtime` are redirected to an in-memory module containing the generated code. Nothing is written into your project — no generated file to commit, ignore, or confuse the TypeScript server. Types always come from the real on-disk module through normal package resolution, and its export surface is identical to the generated one, so editors and `tsc` need zero configuration.
@@ -23,7 +25,7 @@ By default, the generated config depends only on your Tailwind **configuration**
 
 Nearby edits are combined and processed in order. With dev pruning enabled, a source edit cannot cancel a pending CSS update: the plugin still reads the changed theme and safelists. Edits made during generation are processed afterward.
 
-If a regeneration fails during development, the last good config keeps serving and the error is logged. If generation has never succeeded, the runtime serves the default config and logs the error. The selected CSS entrypoint remains watched, including outside the Vite root: fixing and saving it retries generation and replaces the fallback without restarting the server.
+If a regeneration fails during development, the last good config keeps serving and the error is logged. If generation has never succeeded, the runtime serves the default config and logs the error. The selected CSS entrypoint and dependencies discovered before the failure remain watched, including outside the Vite root. Repairing an imported stylesheet retries generation and replaces the fallback without editing the entrypoint or restarting the server.
 
 ## Builds
 

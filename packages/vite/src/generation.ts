@@ -210,6 +210,7 @@ async function collectCssDependencies(
             customJsResolver: integration?.resolveJs,
             onDependency: (dependencyPath) => {
                 dependencies.add(dependencyPath)
+                integration?.onDependency?.(dependencyPath)
             },
         })
     } catch {

@@ -20,7 +20,7 @@ Exact output is generally larger. Enumeration often compresses well, but the dif
 
 ## Pruning to source usage
 
-The full generated configuration covers the resolved theme. Usage pruning removes groups and members that no supplied candidate reaches. Tailwind's own scanner supplies candidates from automatic detection, `source(…)`, `@source`, and inline safelists, including negative inline exclusions. Inline directives are read from active CSS in the entrypoint and imported stylesheets; text inside comments or quoted strings does not affect the candidates.
+The full generated configuration covers the resolved theme. Usage pruning removes groups and members that no supplied candidate reaches. Tailwind's own scanner supplies candidates from automatic detection, `source(…)`, `@source`, and inline safelists, including negative inline exclusions. Inline directives are read from active CSS in the entrypoint and every imported stylesheet, including `.pcss` and extensionless files. JavaScript dependencies are not treated as stylesheets, and text inside comments or quoted strings does not affect the candidates.
 
 The pruning contract is relative to the full generated config: **lists made from supplied candidates must merge identically before and after pruning.** Pruning does not fix an existing classification gap or validate every scanner token. Retained validators can also match candidates absent from the scan, so a pruned config is not a strict allowlist of class strings.
 
@@ -39,6 +39,8 @@ Postfix modifiers can also change a functional utility's effects. If `pair-2` se
 Overlapping names such as `demo-*` and `demo-child-*` are classified from their own compiled classes. A bare utility and its functional form share a group only when their effects fully cover each other; a separate static `demo-child` can therefore keep different conflict behavior from `demo-child-*`.
 
 For example, a utility setting padding and border radius can remove an earlier padding utility. An ordinary padding utility cannot remove the combined utility because doing so would lose its radius. Likewise, a utility setting both a base color and a hover color survives a later ordinary text color. Conditional rules and pseudo-element effects count as shared scaffolding only when their declarations and surrounding rule paths match. Two identical declarations under different media queries remain independent.
+
+Quoted CSS values retain their declarations even when they contain punctuation or escaped quotes. A base color plus `&::before { content: '('; }` therefore survives a later text color, preserving the pseudo-element.
 
 When one class name compiles to several independent effects, the generator may remove it from conflict groups so it passes through intact. The report records these collisions and any theme-created classes it could not assign. These decisions and their constraints are described in the [limitations](./limitations.md).
 

@@ -4,6 +4,7 @@ import { Features, compile } from '@tailwindcss/node'
 import { type GlobEntry, type Scanner, type SourceEntry } from '@tailwindcss/oxide'
 
 import { type TailwindIntegration } from './design-system.ts'
+import { createStylesheetResolver } from './stylesheet-resolver.ts'
 
 export interface SourceScannerOptions {
     /** Content of the Tailwind CSS entrypoint. */
@@ -47,9 +48,12 @@ export interface UsageScan {
  */
 export async function createSourceScanner(options: SourceScannerOptions): Promise<SourceScanner> {
     const dependencies = new Set<string>()
+    const stylesheets = new Set<string>()
     const compiler = await compile(options.css, {
         base: options.base,
-        customCssResolver: options.integration?.resolveCss,
+        customCssResolver: createStylesheetResolver(options.integration?.resolveCss, (file) =>
+            stylesheets.add(file),
+        ),
         customJsResolver: options.integration?.resolveJs,
         onDependency: (dependencyPath) => {
             dependencies.add(dependencyPath)
@@ -59,7 +63,7 @@ export async function createSourceScanner(options: SourceScannerOptions): Promis
 
     const sources = [...autoDetectSources(compiler.root, options.autoDetectBases), ...compiler.sources]
     const scansUtilities = (compiler.features & Features.Utilities) !== 0
-    const { safelist, exclusions } = await collectInlineSources(options.css, dependencies)
+    const { safelist, exclusions } = await collectInlineSources(options.css, stylesheets)
     const scanner = new (await loadScanner())({ sources })
 
     return {
@@ -110,18 +114,16 @@ async function loadScanner(): Promise<typeof Scanner> {
  */
 async function collectInlineSources(
     css: string,
-    dependencies: ReadonlySet<string>,
+    stylesheets: ReadonlySet<string>,
 ): Promise<{ safelist: string[]; exclusions: string[] }> {
     const safelist = new Set<string>()
     const exclusions = new Set<string>()
 
     const cssTexts = [css]
-    for (const dependency of dependencies) {
-        if (dependency.endsWith('.css')) {
-            const content = await readFile(dependency, 'utf8').catch(() => null)
-            if (content !== null) {
-                cssTexts.push(content)
-            }
+    for (const file of stylesheets) {
+        const content = await readFile(file, 'utf8').catch(() => null)
+        if (content !== null) {
+            cssTexts.push(content)
         }
     }
 

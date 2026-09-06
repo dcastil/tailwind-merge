@@ -65,6 +65,7 @@
     "dependencies": {
         "@tailwindcss/node": "~4.3.3",
         "@tailwindcss/oxide": "~4.3.3",
+        "enhanced-resolve": "^5.24.5",
         "tailwind-merge": "workspace:*"
     },
     "devDependencies": {

@@ -154,8 +154,8 @@ async function extractAndAssertManifest(tarballPath, entries) {
 
     assert.deepEqual(
         Object.keys(packed.dependencies).sort(),
-        ['@tailwindcss/node', '@tailwindcss/oxide', 'tailwind-merge'],
-        'runtime dependencies must be exactly the three external packages — the configurator is inlined and must not be depended on',
+        ['@tailwindcss/node', '@tailwindcss/oxide', 'enhanced-resolve', 'tailwind-merge'],
+        'runtime dependencies must be exactly the declared external packages — the configurator is inlined and must not be depended on',
     )
     assert.deepEqual(Object.keys(packed.peerDependencies).sort(), [
         '@tailwindcss/vite',
@@ -189,10 +189,10 @@ async function createConsumerInstall() {
             path.join(tailwindScopeDirectory, tailwindPackage),
         )
     }
-    for (const peer of ['vite', 'tailwindcss']) {
+    for (const dependency of ['enhanced-resolve', 'vite', 'tailwindcss']) {
         await symlink(
-            path.join(packageDirectory, 'node_modules', peer),
-            path.join(consumerDirectory, 'node_modules', peer),
+            path.join(packageDirectory, 'node_modules', dependency),
+            path.join(consumerDirectory, 'node_modules', dependency),
         )
     }
     return consumerDirectory
@@ -245,7 +245,8 @@ async function assertGeneratedRuntime(consumerDirectory) {
     await mkdir(root)
     await writeFile(path.join(root, 'main.mjs'), "export { twMerge } from '@tailwind-merge/vite/runtime'\n")
     await writeFile(path.join(root, 'app.css'), "@import 'tailwindcss' source(none);\n@import '@/theme.css';\n")
-    await writeFile(path.join(root, 'theme.css'), '@theme { --text-huge: 2.5rem; }\n@source inline("text-huge text-sm");\n')
+    await writeFile(path.join(root, 'theme.css'), "@import './tokens.pcss';\n")
+    await writeFile(path.join(root, 'tokens.pcss'), '@theme { --text-huge: 2.5rem; }\n@source inline("text-huge text-sm");\n')
     const checkFile = path.join(consumerDirectory, 'check-generated.mjs')
     await writeFile(checkFile, `import assert from 'node:assert/strict'
 import { writeFile } from 'node:fs/promises'
