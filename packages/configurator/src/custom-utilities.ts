@@ -19,6 +19,8 @@ export interface CustomUtilityPlan {
     conflicts: Map<string, string[]>
     /** Mixed functional groups need a complete lookup before treating a slash as a modifier of the base group. */
     postfixLookupClassGroups: string[]
+    /** Suggested classes deliberately left unclassified because arbitrary modifiers add effects that cannot be enumerated. Augmentation must preserve this decision. */
+    preservedClasses: Set<string>
 }
 
 export interface BuildCustomUtilityPlanOptions {
@@ -38,6 +40,8 @@ export interface BuildCustomUtilityPlanOptions {
  * 1. A static utility whose declarations match exactly one built-in group's signature and mutually cover its effects is an alias of that group (an unconditional `color` utility behaves like `text-red-500`), so it joins the group and merges with its classes in both directions.
  * 2. Other utilities receive self-conflict groups, splitting functional values when their compiled effects differ. When a group's declarations fully cover what another group sets (`btn` with `padding` + `border-radius` covers everything `p-4` sets; see `fullyCovers` for the exact rule), an override edge is added so the utility coming later removes the covered class. The reverse direction stays out on purpose: `p-4` after `btn` only overrides part of `btn`, and removing `btn` would lose the rest of its effect — the same partial-override rule the default config applies between `px` and `p`.
  * 3. Declarations that are conditional (media queries, dark-mode guards) or target other elements (pseudo-elements, child selectors) only count as covered when they are byte-identical shared scaffolding: they overlap only sometimes or somewhere else, so a utility that merely touches them stays side by side with whatever it partially overlaps.
+ *
+ * Functional roots whose arbitrary slash modifiers change effects remain unclassified: the runtime's fallback from an unknown full class to its base group would otherwise discard those effects.
  *
  * Roots that already exist as built-ins are skipped entirely: shadowing changes built-in behavior in ways a registry diff cannot judge.
  */
@@ -76,6 +80,7 @@ export function buildCustomUtilityPlan({
     const groups = new Map<string, CustomUtilityGroup>()
     const aliases = new Map<string, string>()
     const postfixLookupClassGroups: string[] = []
+    const preservedClasses = new Set<string>()
 
     for (const root of staticRoots) {
         // A static root sharing its name with a functional custom root joins the functional group only when the two provably have the same effect (they cover each other, like a `shimmer` default alongside `shimmer-*` values) — splitting those would stop them from merging. When the functional form carries state the bare form doesn't (supabase's `hit-area` scaffold vs `hit-area-*` offsets), they stay separate groups and override inference below adds the correct one-directional relationship instead.
@@ -83,7 +88,7 @@ export function buildCustomUtilityPlan({
             const functionalExemplar = functionalExemplars.get(root) ?? null
             if (
                 functionalExemplar !== null &&
-                functionalShapes.get(root)!.length === 1 &&
+                functionalShapes.get(root)?.length === 1 &&
                 fullyCovers(
                     declaredDeclarations(project, root),
                     declaredDeclarations(project, functionalExemplar),
@@ -115,7 +120,13 @@ export function buildCustomUtilityPlan({
 
     for (const root of functionalRoots) {
         const groupId = customUtilityGroupId(root)
-        const shapes = functionalShapes.get(root)!
+        const shapes = functionalShapes.get(root)
+        if (!shapes) {
+            for (const className of functionalClasses.get(root)!) {
+                preservedClasses.add(className)
+            }
+            continue
+        }
         if (shapes.length > 1) {
             // Unresolved --value() declarations disappear independently. Keep known names and numeric kinds in their own shapes; broad arbitrary matchers cannot distinguish the remaining branches safely.
             for (const [index, shape] of shapes.entries()) {
@@ -170,6 +181,7 @@ export function buildCustomUtilityPlan({
         aliases,
         conflicts: inferOverrideConflicts(project, groups, groupSignatures),
         postfixLookupClassGroups,
+        preservedClasses,
     }
 }
 
@@ -234,12 +246,12 @@ interface FunctionalClassGroup {
     validators: ValidatorName[]
 }
 
-/** Groups named values and numeric kinds by their compiled effects, ignoring values but preserving rule scope and importance. Probe arbitrary kinds too: a root's suggestions can contain only widths while arbitrary colors take a different branch. Probe-only shapes prevent unsafe root-wide matchers without registering probe names. */
+/** Groups named values and numeric kinds by their compiled effects, ignoring values but preserving rule scope and importance. Probe-only shapes prevent unsafe root-wide matchers without registering probe names. Returns null when arbitrary postfixes change effects: the runtime falls back to a recognized base group on a full-lookup miss, so leaving only the postfix unclassified would still discard its independent styles. */
 function groupFunctionalClasses(
     project: DesignSystemAccess,
     root: string,
     classNames: string[],
-): FunctionalClassGroup[] {
+): FunctionalClassGroup[] | null {
     const groups = new Map<string, FunctionalClassGroup>()
     const groupsByClassName = new Map<string, FunctionalClassGroup>()
     const namedClasses = new Set(classNames)
@@ -252,15 +264,7 @@ function groupFunctionalClasses(
         if (!declarations?.length) {
             continue
         }
-        const signature = [
-            ...new Set(
-                declarations.map((entry) =>
-                    JSON.stringify([entry.context, entry.scope, entry.property, entry.important]),
-                ),
-            ),
-        ]
-            .sort()
-            .join('\n')
+        const signature = functionalEffectSignature(declarations)
         const group: FunctionalClassGroup = groups.get(signature) ?? {
             classNames: [],
             exemplar: className,
@@ -271,6 +275,22 @@ function groupFunctionalClasses(
         }
         groups.set(signature, group)
         groupsByClassName.set(className, group)
+    }
+
+    for (const className of candidates) {
+        if (className.includes('/')) {
+            continue
+        }
+        const baseGroup = groupsByClassName.get(className)
+        for (const modifier of ARBITRARY_MODIFIER_PROBES) {
+            const declarations = declaredDeclarations(project, `${className}/${modifier}`)
+            if (
+                declarations?.length &&
+                (!baseGroup || groups.get(functionalEffectSignature(declarations)) !== baseGroup)
+            ) {
+                return null
+            }
+        }
     }
     for (const [validator, sentinels] of BARE_VALUE_PROBES) {
         const group = groupsByClassName.get(`${root}-${sentinels[0]!}`)
@@ -292,8 +312,21 @@ function groupFunctionalClasses(
     return result
 }
 
+/** Values can vary within a functional group; its affected properties, targets, guards, and importance must remain the same. */
+function functionalEffectSignature(declarations: DeclarationEntry[]): string {
+    return [
+        ...new Set(
+            declarations.map((entry) =>
+                JSON.stringify([entry.context, entry.scope, entry.property, entry.important]),
+            ),
+        ),
+    ]
+        .sort()
+        .join('\n')
+}
+
 /**
- * Value kinds a functional utility can accept beyond its named values, each proven open-ended by sentinel candidates: when the sentinels compile, Tailwind's value handling accepts the *kind* (`--value(number)` compiles every number), so the matching validator is exact rather than an approximation. Sentinels containing `.`, `/` or `%` cannot collide with named theme tokens (those characters are invalid in CSS custom property names); the integer sentinels could, which is why every kind requires two sentinels — a theme naming both is beyond unlikely.
+ * Value kinds a functional utility can accept beyond its named values, tested with sentinel candidates: accepting the kind (`--value(number)` compiles every number) permits an open validator. The sentinels use unusual theme-token names, with two per kind to reduce the chance that named tokens impersonate open-ended support.
  */
 const BARE_VALUE_PROBES: [ValidatorName, string[]][] = [
     ['isFraction', ['355/113', '19/97']],
@@ -308,6 +341,19 @@ const BARE_VALUE_PROBES: [ValidatorName, string[]][] = [
 const ARBITRARY_VALUE_PROBES = ['[3px]', '[7]', '[41%]', '[#650a1b]', '[twm-probe]']
 
 const ARBITRARY_VARIABLE_PROBE = '(--twm-probe)'
+
+/** Cover the remaining Tailwind data types for slash modifiers as well: ratios, URLs/images, generic font families, absolute/relative sizes, angles, and vectors. Other types (position, background size, line width, family name) already accept one of the value probes. */
+const ARBITRARY_MODIFIER_PROBES = [
+    ...ARBITRARY_VALUE_PROBES,
+    ARBITRARY_VARIABLE_PROBE,
+    '[13/7]',
+    '[url(twm-probe.svg)]',
+    '[serif]',
+    '[medium]',
+    '[larger]',
+    '[13deg]',
+    '[1_2_3]',
+]
 
 const FUNCTIONAL_VALUE_PROBES = [
     ...BARE_VALUE_PROBES.flatMap(([, sentinels]) => sentinels),

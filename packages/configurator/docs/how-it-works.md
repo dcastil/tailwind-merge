@@ -36,11 +36,15 @@ Functional values with different compiled effects receive separate groups. For e
 
 Postfix modifiers can also change a functional utility's effects. If `pair-2` sets width and `pair-2/3` adds height, a later `pair-4` must preserve `pair-2/3`. Tailwind's suggested named modifiers participate too: a `label-red-500/xl` utility that adds a font size survives a later color-only `label-blue-500`. These groups look up the complete class before stripping a postfix, including in pruned configurations.
 
+Arbitrary postfixes are probed as well. When an arbitrary modifier adds or changes effects, such as `pair-2/[3px]` adding height to a width utility, the functional root is conservatively left unmerged in both encodings. This also preserves redundant base classes: the runtime would otherwise fall back to their group for an unrecognized postfix. Suggested classes from these roots appear in the report's `unassignedClasses`. Modifiers that keep the same effects can still merge normally.
+
 Overlapping names such as `demo-*` and `demo-child-*` are classified from their own compiled classes. A bare utility and its functional form share a group only when their effects fully cover each other; a separate static `demo-child` can therefore keep different conflict behavior from `demo-child-*`.
 
 For example, a utility setting padding and border radius can remove an earlier padding utility. An ordinary padding utility cannot remove the combined utility because doing so would lose its radius. Likewise, a utility setting both a base color and a hover color survives a later ordinary text color. Conditional rules and pseudo-element effects count as shared scaffolding only when their declarations and surrounding rule paths match. Two identical declarations under different media queries remain independent.
 
 Quoted CSS values retain their declarations even when they contain punctuation or escaped quotes. A base color plus `&::before { content: '('; }` therefore survives a later text color, preserving the pseudo-element.
+
+Custom-property declarations also participate in coverage, including names such as `--_size`, `--2xl`, Unicode identifiers, and escaped punctuation. A color utility that sets `--_size` survives a later text color so a separate `w-(--_size)` class can still read the variable.
 
 Style grouping blocks also retain their declarations and scope. An `entrance` utility combining a color with `@starting-style { opacity: 0; }` survives a later text color, preserving its initial opacity. Grouping rules such as `@scope` and `@layer` are handled conservatively; property registrations and keyframe bodies remain separate from element styles.
 

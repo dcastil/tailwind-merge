@@ -1,5 +1,6 @@
 import path from 'node:path'
 import { mkdir, readFile, rename, writeFile } from 'node:fs/promises'
+import { runInNewContext } from 'node:vm'
 
 import tailwindcss from '@tailwindcss/vite'
 import { expect, test } from 'vitest'
@@ -17,6 +18,28 @@ import {
 } from './helpers'
 
 const { startServer, copyFixture } = setupPluginTests()
+
+test.each([false, true])('a custom variant marks the root above its Tailwind import (pruning: %s)', async (prune) => {
+    const root = await copyFixture('app')
+    const classes = 'hover:kids:p-2 kids:hover:p-4'
+    await writeFile(path.join(root, 'app.css'), "@import './base.css';\n@custom-variant kids (& > *);\n")
+    await writeFile(path.join(root, 'base.css'), `@import 'tailwindcss' source(none);\n@source inline('${classes} kids:hover:p-2');\n`)
+    await writeFile(path.join(root, 'main.ts'), `import './app.css'\nimport { twMerge } from '${RUNTIME_SPECIFIER}'\ndocument.body.className = twMerge('${classes}')\n`)
+
+    await expect(discoverCssRoot(root)).resolves.toBe(path.join(root, 'app.css'))
+    const { server } = await startServer(root, { plugins: [tailwindcss()], options: { prune: { dev: prune } } })
+    const runtime = await server.ssrLoadModule(RUNTIME_SPECIFIER)
+    expect(runtime.twMerge(classes)).toBe(classes)
+    expect(runtime.twMerge('kids:hover:p-2 kids:hover:p-4')).toBe('kids:hover:p-4')
+
+    const { code, output } = await buildFixture(root, { plugins: [tailwindcss()], options: { prune }, build: { modulePreload: false } })
+    const document = { body: { className: '' } }
+    runInNewContext(code, { document })
+    expect(document.body.className).toBe(classes)
+    const compiledCss = output.filter((entry) => entry.type === 'asset').map((entry) => String(entry.source)).join('\n')
+    expect(compiledCss).toContain('.hover\\:kids\\:p-2')
+    expect(compiledCss).toContain('.kids\\:hover\\:p-4')
+})
 
 test.each(['.pcss', '.postcss'])('discovers a nested %s entrypoint for dev and build pruning', async (extension) => {
     const root = await copyFixture('app')
@@ -70,6 +93,7 @@ test('discovery ignores markers inside comments and strings in ordinary CSS', as
         /* Define custom tokens with @theme in app.css.
            @import 'tailwindcss'; @config './theme.cjs'; @plugin './plugin.cjs';
            @tailwind utilities; @utility example { color: red; }
+           @custom-variant kids (& > *);
         */
         .example::before { content: "@theme { --text-fake: 3rem; }"; }
         .example::after { content: '@import "tailwindcss";'; }

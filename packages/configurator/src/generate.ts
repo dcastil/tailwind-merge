@@ -78,7 +78,7 @@ export async function generate(options: GenerateOptions): Promise<GenerateResult
     const vanillaPlan = buildPlan({ snapshot: snapshotTheme(vanilla, themeKeys) })
     const vanillaClassGroupUtils = createClassGroupUtils(materializeConfig(vanillaPlan))
 
-    // Applied before the diff passes run, so classes of custom utilities count as classified and don't show up as unassigned — whether they joined a built-in group as an alias or got their own group.
+    // Establish custom ownership before the diff passes run, including classes deliberately left unclassified, so property-only augmentation cannot undo effect-aware decisions.
     const customUtilities = buildCustomUtilityPlan({
         project,
         vanilla,
@@ -111,6 +111,7 @@ export async function generate(options: GenerateOptions): Promise<GenerateResult
             vanillaClassGroupId: vanillaClassGroupUtils.getClassGroupId,
             groupPrefixKeys,
             customGroupIds: new Set(customUtilities.groups.keys()),
+            preservedCustomClasses: customUtilities.preservedClasses,
         }),
     )
 

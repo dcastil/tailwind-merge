@@ -77,7 +77,7 @@ export async function discoverCssRoot(
 
 /** Matches active statements that can mark a Tailwind v4 root: the `tailwindcss` import (or one of its sub-imports) or Tailwind's own at-rules. Anchoring excludes directive-like text inside selectors and declaration values. */
 const ROOT_MARKER_RE =
-    /^@import\s+(?:url\(\s*)?["']tailwindcss(?:\/[^"']*)?["']|^@(?:theme|config|plugin|tailwind|utility)(?:\s|$)/
+    /^@import\s+(?:url\(\s*)?["']tailwindcss(?:\/[^"']*)?["']|^@(?:theme|config|plugin|tailwind|utility|custom-variant)(?:\s|$)/
 
 const CSS_IMPORT_RE = /^@import\s+(?:url\(\s*)?["']([^"']+)["']/
 

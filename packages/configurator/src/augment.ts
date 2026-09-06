@@ -38,6 +38,8 @@ export interface BuildAugmentationsOptions {
     groupPrefixKeys: Map<string, string[]>
     /** Groups already classified by custom-utility inference. Property signatures alone must not undo its condition-aware decisions. */
     customGroupIds: ReadonlySet<string>
+    /** Functional classes whose arbitrary postfix effects cannot safely share their base group's conflicts. */
+    preservedCustomClasses: ReadonlySet<string>
 }
 
 /**
@@ -52,6 +54,7 @@ export function buildAugmentations({
     vanillaClassGroupId,
     groupPrefixKeys,
     customGroupIds,
+    preservedCustomClasses,
 }: BuildAugmentationsOptions): AugmentationResult {
     const vanillaClassNames = vanilla.getClassList().map(([className]) => className)
     const vanillaClassNameSet = new Set(vanillaClassNames)
@@ -72,6 +75,14 @@ export function buildAugmentations({
         // Negative utilities ('-z-header') resolve through the same class-map path as their positive form because the parser skips the leading dash, so only the positive name gets registered and each positive/negative pair is handled once.
         const registrationName = className.startsWith('-') ? className.slice(1) : className
         if (handledNames.has(registrationName)) {
+            continue
+        }
+        if (preservedCustomClasses.has(registrationName)) {
+            handledNames.add(registrationName)
+            unassigned.push({
+                className: registrationName,
+                reason: 'Arbitrary slash modifiers change this custom utility\'s effects',
+            })
             continue
         }
         const claimingGroupId = projectClassGroupId(registrationName)

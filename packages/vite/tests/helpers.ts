@@ -174,10 +174,12 @@ export async function waitForWatcher(server: ViteDevServer, file: string): Promi
 
 /**
  * Performs an edit and resolves with what the plugin did in reaction: the updates it reports through its api, combined into one (`regenerated`/`reloaded` true when any update in the batch had them). Combining matters because file watchers can deliver one save as several events spaced further apart than the plugin's debounce, so one edit may come out as a reload followed by a no-op re-scan; the batch ends after a quiet window longer than the debounce.
+ * Positive checks can require an outcome before settling: under load, an earlier no-op can finish while the requested regeneration is still running, outlasting the quiet window. The caller's test timeout still fails if the required outcome never arrives.
  */
 export function updateAfter(
     plugin: { api: TailwindMergePluginApi },
     edit: () => Promise<void>,
+    isComplete?: (update: PluginUpdate) => boolean,
 ): Promise<PluginUpdate> {
     return new Promise((resolve) => {
         let combined: PluginUpdate | undefined
@@ -191,6 +193,9 @@ export function updateAfter(
                   }
                 : update
             clearTimeout(quietTimer)
+            if (isComplete && !isComplete(combined)) {
+                return
+            }
             quietTimer = setTimeout(() => {
                 unsubscribe()
                 resolve(combined!)

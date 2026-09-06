@@ -1,8 +1,89 @@
 import { describe, expect, test } from 'vitest'
 
+import { declaredDeclarations } from '../src/design-system'
+
 import { css, expectMerges, generateFixture } from './fixture-utils'
 
 describe.each(['compact', 'exact'] as const)('%s functional utility effects', (encoding) => {
+    test('preserves effects across Tailwind arbitrary modifier types', async () => {
+        const modifiers = [
+            ['color', '#123456'],
+            ['length', '4px'],
+            ['percentage', '35%'],
+            ['ratio', '5/4'],
+            ['number', '2.5'],
+            ['integer', '3'],
+            ['url', 'url(icon.svg)'],
+            ['position', 'right_bottom'],
+            ['bg-size', 'contain'],
+            ['line-width', 'thin'],
+            ['image', 'linear-gradient(red,blue)'],
+            ['family-name', 'Example,serif'],
+            ['generic-name', 'monospace'],
+            ['absolute-size', 'x-large'],
+            ['relative-size', 'smaller'],
+            ['angle', '23deg'],
+            ['vector', '4_5_6'],
+        ]
+        const stylesheet = css`
+            @import 'tailwindcss';
+            ${modifiers.map(([type], index) => `@utility typed-modifier-${index}-* {
+                width: calc(--value(number) * 1px);
+                --effect: --modifier([${type}]);
+            }`).join('\n')}
+        `
+        const usedClasses = modifiers.flatMap(([, value], index) => [`typed-modifier-${index}-2/[${value}]`, `typed-modifier-${index}-3`])
+        for (const prune of [undefined, { usedClasses }]) {
+            const { twMerge, designSystem } = await generateFixture(stylesheet, undefined, { encoding, prune })
+            for (const [index, [, value]] of modifiers.entries()) {
+                const modified = `typed-modifier-${index}-2/[${value}]`
+                expect(declaredDeclarations(designSystem, modified)?.map((entry) => entry.property)).toEqual(['width', '--effect'])
+                expect(twMerge(`${modified} typed-modifier-${index}-3`)).toBe(`${modified} typed-modifier-${index}-3`)
+            }
+        }
+    })
+
+    test.each(['', 'tw'])('preserves arbitrary slash modifier effects (prefix: %s)', async (prefix) => {
+        const stylesheet = css`
+            @import 'tailwindcss' ${prefix ? 'prefix(tw)' : ''};
+            @theme {
+                --color-*: initial;
+                --color-red: red;
+                --color-blue: blue;
+            }
+            @utility pair-* {
+                width: calc(--value(number, [number]) * 1px);
+                height: --modifier([length]);
+            }
+            @utility text-label-* {
+                color: --value(--color-*);
+                font-size: --modifier([length]);
+            }
+            @utility same-* {
+                width: calc(--value(number) * 1px);
+                width: --modifier([length]);
+            }
+        `
+        const cases = [
+            ['pair-2/[3px] pair-3', 'pair-2/[3px] pair-3'],
+            ['pair-3 pair-2/[3px]', 'pair-3 pair-2/[3px]'],
+            ['pair-2/[calc(3px/2)] pair-3', 'pair-2/[calc(3px/2)] pair-3'],
+            ['pair-[2]/[3px] pair-3', 'pair-[2]/[3px] pair-3'],
+            ['hover:pair-2/[3px] hover:pair-3', 'hover:pair-2/[3px] hover:pair-3'],
+            ['pair-2 pair-3', 'pair-2 pair-3'],
+            ['text-label-red/[3px] text-label-blue', 'text-label-red/[3px] text-label-blue'],
+            ['text-label-red/[3px] text-blue', 'text-label-red/[3px] text-blue'],
+            ['same-2/[3px] same-3', 'same-3'],
+            ['same-3 same-2/[3px]', 'same-2/[3px]'],
+        ].map((pair) => pair.map((list) => list.split(' ').map((name) => prefix ? `${prefix}:${name}` : name).join(' ')))
+        const usedClasses = [...new Set(cases.flatMap(([input]) => input!.split(' ')))]
+        for (const prune of [undefined, { usedClasses }]) {
+            const { twMerge, designSystem } = await generateFixture(stylesheet, undefined, { encoding, prune })
+            expect(declaredDeclarations(designSystem, 'pair-2/[3px]')?.map((entry) => entry.property)).toEqual(['width', 'height'])
+            expectMerges(twMerge, Object.fromEntries(cases))
+        }
+    })
+
     test.each(['', 'tw'])(
         'preserves independent effects from suggested slash modifiers (prefix: %s)',
         async (prefix) => {

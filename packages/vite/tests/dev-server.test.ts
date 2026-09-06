@@ -100,7 +100,11 @@ test.each([
     expect(before.twMerge('text-huge text-sm')).toBe('text-sm')
     expect(before.twMerge('text-big text-sm')).toBe('text-big text-sm')
 
-    const update = await updateAfter(plugin, () => writeFile(themePath, "module.exports = { big: '2rem' }\n"))
+    const update = await updateAfter(
+        plugin,
+        () => writeFile(themePath, "module.exports = { big: '2rem' }\n"),
+        (result) => result.reloaded,
+    )
     expect(update).toEqual({ trigger: 'config', regenerated: true, reloaded: true })
     const after = await server.ssrLoadModule(RUNTIME_SPECIFIER)
     expect(after.twMerge('text-big text-sm')).toBe('text-sm')

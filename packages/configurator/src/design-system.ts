@@ -213,25 +213,22 @@ function parseDeclarations(css: string): DeclarationEntry[] {
         if (!frame || frame.skip || declaration === '') {
             return
         }
-        const colonIndex = declaration.indexOf(':')
-        if (colonIndex <= 0) {
+        const start = DECLARATION_START_RE.exec(declaration)
+        if (!start) {
             return
         }
-        const property = declaration.slice(0, colonIndex).trim()
-        const rawValue = declaration.slice(colonIndex + 1).trim()
+        const property = start[1]!
+        const rawValue = declaration.slice(start[0].length).trim()
         const importantMatch = /\s*!\s*important$/i.exec(rawValue)
         const value = importantMatch ? rawValue.slice(0, importantMatch.index).trimEnd() : rawValue
-        // Property-name shape guard (covers standard, vendor `-ms-…`, and custom `--…` properties) so selector fragments of malformed input never register as declarations.
-        if (/^-{0,2}[a-zA-Z][\w-]*$/.test(property)) {
-            entries.push({
-                context: frame.context,
-                conditional: frame.conditional,
-                scope: frame.scope,
-                property,
-                important: importantMatch !== null,
-                value,
-            })
-        }
+        entries.push({
+            context: frame.context,
+            conditional: frame.conditional,
+            scope: frame.scope,
+            property,
+            important: importantMatch !== null,
+            value,
+        })
     }
 
     let parenDepth = 0
@@ -282,6 +279,10 @@ function parseDeclarations(css: string): DeclarationEntry[] {
 
     return entries
 }
+
+/** Custom-property identifiers may start with digits or underscores after -- and contain non-ASCII characters or CSS escapes. Match the delimiter too so an escaped colon stays in the name, while malformed selector fragments still cannot become declarations. */
+const DECLARATION_START_RE =
+    /^(--(?:[\w\u0080-\uFFFF-]|\\(?:[\da-f]{1,6}[ \t\n\r\f]?|[^\r\n\f]))+|-?[a-z][\w-]*)\s*:/i
 
 function frameForHeader(header: string, parent: BlockFrame | undefined): BlockFrame {
     const parentContext = parent?.context ?? ''
