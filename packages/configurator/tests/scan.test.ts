@@ -4,7 +4,8 @@ import { fileURLToPath } from 'node:url'
 import { compile } from '@tailwindcss/node'
 import { describe, expect, test } from 'vitest'
 
-import { createSourceScanner, expandBraces, segment } from '../src/scan'
+import { segment } from '../src/css-statements'
+import { createSourceScanner, expandBraces } from '../src/scan'
 
 import { css, generateFixture } from './fixture-utils'
 

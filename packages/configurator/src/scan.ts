@@ -3,7 +3,7 @@ import { readFile } from 'node:fs/promises'
 import { Features, compile } from '@tailwindcss/node'
 import { type GlobEntry, type Scanner, type SourceEntry } from '@tailwindcss/oxide'
 
-import { cssStatements } from './css-statements.ts'
+import { cssStatements, segment } from './css-statements.ts'
 import { type TailwindIntegration } from './design-system.ts'
 import { createStylesheetResolver } from './stylesheet-resolver.ts'
 
@@ -225,59 +225,4 @@ function expandSequence(sequence: string): string[] {
         values.push(String(value))
     }
     return values
-}
-
-/**
- * Splits at a separator that sits outside any parentheses, brackets, braces, and quotes (Tailwind's `segment`), so `a(b,c),d` splits into two parts at the top-level comma and quoted separators stay put.
- */
-export function segment(input: string, separator: string): string[] {
-    const parts: string[] = []
-    const stack: string[] = []
-    let last = 0
-
-    for (let index = 0; index < input.length; index++) {
-        const character = input[index]!
-
-        if (stack.length === 0 && character === separator) {
-            parts.push(input.slice(last, index))
-            last = index + 1
-            continue
-        }
-
-        switch (character) {
-            case '\\':
-                index += 1
-                break
-            case '"':
-            case "'":
-                // Quoted content is opaque until the matching quote.
-                while (++index < input.length) {
-                    if (input[index] === '\\') {
-                        index += 1
-                    } else if (input[index] === character) {
-                        break
-                    }
-                }
-                break
-            case '(':
-                stack.push(')')
-                break
-            case '[':
-                stack.push(']')
-                break
-            case '{':
-                stack.push('}')
-                break
-            case ')':
-            case ']':
-            case '}':
-                if (stack.length > 0 && stack[stack.length - 1] === character) {
-                    stack.pop()
-                }
-                break
-        }
-    }
-
-    parts.push(input.slice(last))
-    return parts
 }

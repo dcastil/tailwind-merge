@@ -32,9 +32,13 @@ Do not prune a design-system package's config against only the package's own sou
 
 ## Custom utilities and collisions
 
+Theme overrides can change what an existing class means. For example, `@theme { --text-color-base: red; }` makes `text-base` a color utility. The generator rechecks affected existing names, so `text-base text-sm` keeps both classes while `text-base text-red-500` keeps only the later color. If an override adds independent effects to one class, the generator preserves them conservatively.
+
 A static utility whose compiled declarations match one built-in group's signature can join that group as an alias when the two cover each other's effects. Other custom utilities receive self-conflict groups. When a custom utility fully covers another group's declarations, an override relationship allows the later custom utility to remove the earlier class. Coverage respects declaration-level `!important`: an important custom color survives a later normal text color and cannot alias the normal color group.
 
 Functional values with different compiled effects receive separate groups. For example, `text-stroke-*` can set stroke width for numbers and stroke color for color names; those classes must coexist. Named values and supported numeric kinds are grouped by their properties, surrounding rules, and importance. When those effects differ, both encodings enumerate the named values and omit broad arbitrary-value matchers. Arbitrary values on such roots may therefore remain unmerged even when they overlap.
+
+Arbitrary-value probes include images and the other supported Tailwind data types. A `paint-*` utility with separate image and color branches therefore preserves both `paint-[url(hero.svg)]` and `paint-[#123456]`. A utility whose arbitrary values all set the same effects can still merge normally.
 
 Postfix modifiers can also change a functional utility's effects. If `pair-2` sets width and `pair-2/3` adds height, a later `pair-4` must preserve `pair-2/3`. Tailwind's suggested named modifiers participate too: a `label-red-500/xl` utility that adds a font size survives a later color-only `label-blue-500`. These groups first resolve the base class and then request a complete-class lookup, including in pruned configurations.
 

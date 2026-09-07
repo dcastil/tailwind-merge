@@ -1,30 +1,86 @@
 import { describe, expect, test } from 'vitest'
 
 import { declaredDeclarations } from '../src/design-system'
+import { emitModule } from '../src/emit'
 
-import { css, expectMerges, generateFixture } from './fixture-utils'
+import { css, expectMerges, generateFixture, importEmittedModule } from './fixture-utils'
 
 describe.each(['compact', 'exact'] as const)('%s functional utility effects', (encoding) => {
+    test.each(['', 'tw'])('separates arbitrary image and color effects (prefix: %s)', async (prefix) => {
+        const stylesheet = css`
+            @import 'tailwindcss' ${prefix ? 'prefix(tw)' : ''};
+            @utility paint-* {
+                background-image: --value([image]);
+                background-color: --value([color]);
+            }
+            @utility image-* {
+                background-image: --value([image]);
+            }
+            @utility ratio-* {
+                aspect-ratio: --value([ratio]);
+                height: --modifier([length]);
+            }
+        `
+        const cases = [
+            ['paint-[url(hero.svg)] paint-[#123456]', 'paint-[url(hero.svg)] paint-[#123456]'],
+            ['paint-[#123456] paint-[url(hero.svg)]', 'paint-[#123456] paint-[url(hero.svg)]'],
+            ['paint-[linear-gradient(red,blue)] paint-[#123456]', 'paint-[linear-gradient(red,blue)] paint-[#123456]'],
+            ['hover:paint-[url(hero.svg)] hover:paint-[#123456]', 'hover:paint-[url(hero.svg)] hover:paint-[#123456]'],
+            ['paint-[url(hero.svg)]! paint-[#123456]!', 'paint-[url(hero.svg)]! paint-[#123456]!'],
+            // Image-only utilities still merge normally, including under exact encoding.
+            ['image-[url(hero.svg)] image-[url(other.svg)]', 'image-[url(other.svg)]'],
+            ['ratio-[5/4]/[3px] ratio-[3/2]', 'ratio-[5/4]/[3px] ratio-[3/2]'],
+        ].map((pair) => pair.map((list) => list.split(' ').map((name) => prefix ? `${prefix}:${name}` : name).join(' ')))
+        const usedClasses = [...new Set(cases.flatMap(([input]) => input!.split(' ')))]
+        for (const prune of [undefined, { usedClasses }]) {
+            const fixture = await generateFixture(stylesheet, undefined, { encoding, prune })
+            expect(declaredDeclarations(fixture.designSystem, 'paint-[url(hero.svg)]')?.map((entry) => entry.property)).toEqual(['background-image'])
+            expect(declaredDeclarations(fixture.designSystem, 'paint-[#123456]')?.map((entry) => entry.property)).toEqual(['background-color'])
+            expectMerges(fixture.twMerge, Object.fromEntries(cases))
+            for (const format of ['ts', 'js'] as const) {
+                const emitted = await importEmittedModule(emitModule(fixture.plan, { format }), format)
+                expectMerges(emitted.twMerge, Object.fromEntries(cases))
+            }
+        }
+    })
+
+    test('separates every arbitrary base-value type from independent named effects', async () => {
+        const stylesheet = css`
+            @import 'tailwindcss';
+            ${ARBITRARY_DATA_TYPE_CASES.map(([type], index) => `
+                @utility typed-value-${index}-* {
+                    --named-effect: --value('named');
+                    --arbitrary-effect: --value([${type}]);
+                }
+                @utility uniform-value-${index}-* {
+                    --uniform-effect: --value([${type}]);
+                }
+            `).join('\n')}
+        `
+        const usedClasses = ARBITRARY_DATA_TYPE_CASES.flatMap(([, value], index) => [
+            `typed-value-${index}-named`,
+            `typed-value-${index}-[${value}]`,
+            `uniform-value-${index}-[${value}]`,
+        ])
+        for (const prune of [undefined, { usedClasses }]) {
+            const { twMerge, designSystem } = await generateFixture(stylesheet, undefined, { encoding, prune })
+            for (const [index, [, value]] of ARBITRARY_DATA_TYPE_CASES.entries()) {
+                const named = `typed-value-${index}-named`
+                const arbitrary = `typed-value-${index}-[${value}]`
+                const uniform = `uniform-value-${index}-[${value}]`
+                expect(declaredDeclarations(designSystem, arbitrary)?.map((entry) => entry.property)).toEqual(['--arbitrary-effect'])
+                expectMerges(twMerge, [
+                    [`${named} ${arbitrary}`, `${named} ${arbitrary}`],
+                    [`${arbitrary} ${named}`, `${arbitrary} ${named}`],
+                    [`${named} ${named}`, named],
+                    [`${uniform} ${uniform}`, uniform],
+                ])
+            }
+        }
+    })
+
     test('preserves effects across Tailwind arbitrary modifier types', async () => {
-        const modifiers = [
-            ['color', '#123456'],
-            ['length', '4px'],
-            ['percentage', '35%'],
-            ['ratio', '5/4'],
-            ['number', '2.5'],
-            ['integer', '3'],
-            ['url', 'url(icon.svg)'],
-            ['position', 'right_bottom'],
-            ['bg-size', 'contain'],
-            ['line-width', 'thin'],
-            ['image', 'linear-gradient(red,blue)'],
-            ['family-name', 'Example,serif'],
-            ['generic-name', 'monospace'],
-            ['absolute-size', 'x-large'],
-            ['relative-size', 'smaller'],
-            ['angle', '23deg'],
-            ['vector', '4_5_6'],
-        ]
+        const modifiers = ARBITRARY_DATA_TYPE_CASES
         const stylesheet = css`
             @import 'tailwindcss';
             ${modifiers.map(([type], index) => `@utility typed-modifier-${index}-* {
@@ -206,3 +262,24 @@ describe.each(['compact', 'exact'] as const)('%s functional utility effects', (e
         },
     )
 })
+
+// Use different samples from the implementation's probes to verify behavior across the supported kinds rather than only the sentinel spellings.
+const ARBITRARY_DATA_TYPE_CASES = [
+    ['color', '#123456'],
+    ['length', '4px'],
+    ['percentage', '35%'],
+    ['ratio', '5/4'],
+    ['number', '2.5'],
+    ['integer', '3'],
+    ['url', 'url(icon.svg)'],
+    ['position', 'right_bottom'],
+    ['bg-size', 'contain'],
+    ['line-width', 'thin'],
+    ['image', 'linear-gradient(red,blue)'],
+    ['family-name', 'Example,serif'],
+    ['generic-name', 'monospace'],
+    ['absolute-size', 'x-large'],
+    ['relative-size', 'smaller'],
+    ['angle', '23deg'],
+    ['vector', '4_5_6'],
+]

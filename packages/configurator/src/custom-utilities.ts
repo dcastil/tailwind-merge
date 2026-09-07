@@ -1,4 +1,5 @@
 import { type EncodingMode, encodeScale } from './compress.ts'
+import { segment } from './css-statements.ts'
 import {
     type DeclarationEntry,
     type DesignSystemAccess,
@@ -278,7 +279,7 @@ function groupFunctionalClasses(
     }
 
     for (const className of candidates) {
-        if (className.includes('/')) {
+        if (segment(className, '/').length > 1) {
             continue
         }
         const baseGroup = groupsByClassName.get(className)
@@ -336,16 +337,14 @@ const BARE_VALUE_PROBES: [ValidatorName, string[]][] = [
 ]
 
 /**
- * One representative arbitrary value per candidate type (length, number, percentage, color, plain ident). Accepting any of them means the utility takes arbitrary values, e.g. `--value([length])` or `--value([*])`.
+ * Representatives covering Tailwind's recognized arbitrary data types for both base values and slash modifiers. Missing a type can make a root with independent branches look uniform, granting an unsafe broad matcher. Some types overlap: lengths also cover position, background size, and line width; URLs cover images; identifiers cover family names.
  */
-const ARBITRARY_VALUE_PROBES = ['[3px]', '[7]', '[41%]', '[#650a1b]', '[twm-probe]']
-
-const ARBITRARY_VARIABLE_PROBE = '(--twm-probe)'
-
-/** Cover the remaining Tailwind data types for slash modifiers as well: ratios, URLs/images, generic font families, absolute/relative sizes, angles, and vectors. Other types (position, background size, line width, family name) already accept one of the value probes. */
-const ARBITRARY_MODIFIER_PROBES = [
-    ...ARBITRARY_VALUE_PROBES,
-    ARBITRARY_VARIABLE_PROBE,
+const ARBITRARY_VALUE_PROBES = [
+    '[3px]',
+    '[7]',
+    '[41%]',
+    '[#650a1b]',
+    '[twm-probe]',
     '[13/7]',
     '[url(twm-probe.svg)]',
     '[serif]',
@@ -355,6 +354,10 @@ const ARBITRARY_MODIFIER_PROBES = [
     '[1_2_3]',
 ]
 
+const ARBITRARY_VARIABLE_PROBE = '(--twm-probe)'
+
+const ARBITRARY_MODIFIER_PROBES = [...ARBITRARY_VALUE_PROBES, ARBITRARY_VARIABLE_PROBE]
+
 const FUNCTIONAL_VALUE_PROBES = [
     ...BARE_VALUE_PROBES.flatMap(([, sentinels]) => sentinels),
     ...ARBITRARY_VALUE_PROBES,
@@ -362,7 +365,7 @@ const FUNCTIONAL_VALUE_PROBES = [
 ]
 
 /**
- * The exact-mode value matchers of a functional root whose compiled effects are uniform across suggestions and probes: compile-verified named values (scale-encoded, so families still factor), plus validators for accepted open-ended value kinds. Arbitrary-value matchers still approximate Tailwind's type inference: `isArbitraryValue` can match a wrong type (`ll-[red]` on a `--value([length])` utility), and the probes do not exhaust every possible arbitrary type or spelling. Mixed-effect roots bypass this helper to avoid assigning different arbitrary branches to one group.
+ * The exact-mode value matchers of a functional root whose compiled effects are uniform across suggestions and probes: compile-verified named values (scale-encoded, so families still factor), plus validators for accepted open-ended value kinds. Arbitrary-value matchers still approximate Tailwind's type inference: `isArbitraryValue` can match a wrong type (`ll-[red]` on a `--value([length])` utility), and representative probes do not validate every possible arbitrary value or explicit type label. Mixed-effect roots bypass this helper to avoid assigning different arbitrary branches to one group.
  */
 function exactFunctionalValueItems(
     project: DesignSystemAccess,

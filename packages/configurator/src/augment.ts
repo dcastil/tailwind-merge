@@ -12,7 +12,7 @@ export interface CollisionResolution {
     className: string
     /** The group whose scale value wrongly claims the class. */
     claimingGroupId: string
-    /** The group that owns the class according to its compiled declarations: for an existing class the group it resolved to before the theme changed it, for a theme-created class the group its declarations match. */
+    /** The group that owns the class according to its compiled declarations. Theme overrides can change that owner even when the original matcher still claims the class. */
     ownerGroupId: string
     /** 'restore': the owner's classification is the correct one, take the claim away from the claiming group. 'neutralize': the class now resolves through multiple utilities at once, so it must not belong to any group — take every claim away and let it pass through unmerged. */
     resolution: 'restore' | 'neutralize'
@@ -23,7 +23,7 @@ export interface AugmentationResult {
     assignments: Map<string, string[]>
     /** Existing classes whose classification the theme accidentally changed (a value name shadowing them), e.g. `bg-bottom` with a `--color-bottom` defined. */
     collisions: CollisionResolution[]
-    /** New classes no group could be determined for, with the reason — reported instead of guessed. */
+    /** Classes no group could be determined for, with the reason — reported instead of guessed. */
     unassigned: { className: string; reason: string }[]
 }
 
@@ -43,9 +43,10 @@ export interface BuildAugmentationsOptions {
 }
 
 /**
- * Finds the classes the project's theme creates beyond what the standard theme namespaces cover, and determines which class group owns each one — empirically, without a maintained namespace table.
+ * Finds new and reinterpreted project classes and determines their owning groups empirically, without a maintained namespace table.
  *
  * Mechanism: diff the project's class list against the vanilla one. Every new class that the generated config doesn't already classify is matched against candidate groups derived from its vanilla siblings (classes sharing the first name segment, e.g. `text-…`), where each candidate group is represented by the declared-property signature of one exemplar class. A unique signature match assigns the group — `text-primary` declares `color` like `text-red-500` does, not `font-size` like `text-xl` — which handles Tailwind's undocumented compat sub-namespaces (`--text-color-*`, `--background-color-*`) and namespaces tailwind-merge has no theme key for (`--z-index-*`, `--border-width-*`) with one rule. Ambiguous or unmatched classes are reported, never guessed.
+ * Existing names are also checked when their group claim or membership in Tailwind's grouped suggestions changes; the deduplicated class list alone cannot reveal an added interpretation.
  */
 export function buildAugmentations({
     project,
@@ -65,6 +66,7 @@ export function buildAugmentations({
         .filter((className) => !vanillaClassNameSet.has(className))
 
     const exemplarsByFirstSegment = collectExemplars(vanillaClassNames, vanillaClassGroupId)
+    const changedSuggestionNames = changedUtilitySuggestions(project, vanilla)
 
     const assignments = new Map<string, string[]>()
     const collisions: CollisionResolution[] = []
@@ -151,19 +153,20 @@ export function buildAugmentations({
         }
     }
 
-    // Collision corrections: a theme value name can shadow a class that already exists (`--color-bottom` vs the `bg-bottom` position, `--color-xl` vs the `drop-shadow-xl` size). Which side Tailwind resolves differs per utility — `text-xl` genuinely becomes a color while `drop-shadow-xl` stays a size — so every class whose classification changed relative to the vanilla config is re-checked against its compiled output. The vanilla compilation of the same class is the most direct evidence: declaring exactly what it declared before means the class still is what it was, and declaring everything it declared before plus what the claiming group's classes declare means Tailwind now emits both interpretations in one rule (`bg-none` with a `--color-none` defined sets background-image and background-color) — such a class belongs to no group at all. Only when neither holds does the signature classification decide.
+    // Existing names need a declaration check when their suggestion branch changes, even if both classifiers return the same group: --text-color-base adds text-base to the color suggestions without changing its old font-size matcher. Checking the grouped suggestions avoids compiling every unchanged vanilla class. Custom-utility inference already checked its own groups and must retain ownership.
     for (const className of vanillaClassNames) {
+        const registrationName = className.startsWith('-') ? className.slice(1) : className
         const projectGroupId = projectClassGroupId(className)
         const vanillaGroupId = vanillaClassGroupId(className)
         if (
-            projectGroupId === vanillaGroupId ||
+            (projectGroupId === vanillaGroupId && !changedSuggestionNames.has(registrationName)) ||
             projectGroupId === undefined ||
-            vanillaGroupId === undefined
+            vanillaGroupId === undefined ||
+            customGroupIds.has(projectGroupId)
         ) {
             continue
         }
 
-        const registrationName = className.startsWith('-') ? className.slice(1) : className
         if (handledNames.has(registrationName)) {
             continue
         }
@@ -176,12 +179,14 @@ export function buildAugmentations({
 
         const vanillaProperties = declaredProperties(vanilla, className)
         if (vanillaProperties !== null && havePropertiesEqual(properties, vanillaProperties)) {
-            collisions.push({
-                className: registrationName,
-                claimingGroupId: projectGroupId,
-                ownerGroupId: vanillaGroupId,
-                resolution: 'restore',
-            })
+            if (projectGroupId !== vanillaGroupId) {
+                collisions.push({
+                    className: registrationName,
+                    claimingGroupId: projectGroupId,
+                    ownerGroupId: vanillaGroupId,
+                    resolution: 'restore',
+                })
+            }
             continue
         }
         const claimingSignature = exemplarsByFirstSegment
@@ -222,25 +227,49 @@ export function buildAugmentations({
                 ownerGroupId: vanillaGroupId,
                 resolution: 'neutralize',
             })
-        } else if (targetGroupId === vanillaGroupId) {
+        } else if (typeof targetGroupId === 'string') {
+            if (targetGroupId !== vanillaGroupId) {
+                // The new owner may have no existing matcher for this name (or may have been reset entirely), so removing the old claim alone is insufficient.
+                const groupClassNames = assignments.get(targetGroupId) ?? []
+                groupClassNames.push(registrationName)
+                assignments.set(targetGroupId, groupClassNames)
+            }
             collisions.push({
                 className: registrationName,
                 claimingGroupId: projectGroupId,
-                ownerGroupId: vanillaGroupId,
+                ownerGroupId: targetGroupId,
                 resolution: 'restore',
             })
         } else {
             unassigned.push({
                 className: registrationName,
-                reason:
-                    typeof targetGroupId === 'string'
-                        ? `classification changed to an unexpected group (${targetGroupId})`
-                        : `classification changed but ${targetGroupId.reason}`,
+                reason: `classification changed but ${targetGroupId.reason}`,
             })
         }
     }
 
     return { assignments, collisions, unassigned }
+}
+
+/**
+ * Finds names added to or removed from each Tailwind suggestion branch, before getClassList merges duplicate names. A name can move between branches or gain a second interpretation while remaining in the final class list. Branches are compared by position within the same compiler's utility definition; a reordered branch only causes extra declaration checks. Negative forms share their positive registration path.
+ */
+function changedUtilitySuggestions(project: DesignSystemAccess, vanilla: DesignSystemAccess): Set<string> {
+    const changed = new Set<string>()
+    for (const root of vanilla.utilities.keys('functional')) {
+        const before = vanilla.utilities.getCompletions(root)
+        const after = project.utilities.getCompletions(root)
+        for (let index = 0; index < Math.max(before.length, after.length); index++) {
+            const previousValues = new Set(before[index]?.values ?? [])
+            const nextValues = new Set(after[index]?.values ?? [])
+            for (const value of new Set([...previousValues, ...nextValues])) {
+                if (previousValues.has(value) !== nextValues.has(value)) {
+                    changed.add(value === null ? root : `${root}-${value}`)
+                }
+            }
+        }
+    }
+    return changed
 }
 
 /**
