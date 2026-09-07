@@ -39,6 +39,14 @@ Compact pruning reduced the whole compressed bundle by roughly 31–54% across t
 
 The source scans took 4–34 ms for small/medium projects, about 305 ms for shadcn's 4,710 files, and 370 ms for supabase's 4,985 files and 55,576 raw tokens. Pruning took 0–12 ms; design-system loading/classification remained the larger generation cost. Treat these as scale estimates, not performance budgets.
 
+## Generation profiling, 2026-09-07
+
+PR #713's Test jobs at `ccf8dd9` timed out on Supabase conformance in both the PR and push runs. A Node CPU profile of that fixture under Vitest coverage attributed about 18 seconds to Tailwind's variant sorting. The generator inspected every variant's selector before compiling utility probes, populating a parsed-variant cache that Tailwind sorts again on each `candidatesToCss()` call.
+
+Moving modifier-order detection after utility classification and augmentation reduced profiled generation from about 23.5 seconds to 2.1 seconds, and the fixture's generation-plus-conformance test from about 24.3 seconds to 2.7 seconds. These local measurements used an Apple M4 Max, Node 22.22.2, Tailwind 4.3.3, and Vitest 4.1.10 with V8 coverage and CPU profiling enabled; they are not hosted-runner timing guarantees. All utility probes and conformance assertions were retained, and modifier-order detection still precedes pruning and emission.
+
+Reproduce the focused coverage test from the repository root with `pnpm exec vitest run --project @tailwind-merge/configurator packages/configurator/tests/real-world.test.ts -t supabase --coverage --reporter=verbose`. For profiling, start and stop Node's inspector CPU profiler around fixture generation and conformance; separate their costs before deciding whether the test or production generation needs changing.
+
 ## Reproducing a comparison
 
 1. Build the matching workspace library and generate from a pinned fixture's CSS with `generate`.

@@ -67,12 +67,6 @@ export async function generate(options: GenerateOptions): Promise<GenerateResult
         cacheSize: options.cacheSize,
         encoding,
     })
-    plan.orderSensitiveModifiers = [
-        ...new Set([
-            ...plan.orderSensitiveModifiers,
-            ...customOrderSensitiveModifiers(project, vanilla),
-        ]),
-    ]
 
     // Both classifiers reuse the configurator's own output: the pre-augmentation project config decides which new classes are already covered, the vanilla config buckets sibling classes into the candidate groups for classification. They run without the prefix because class-list names are unprefixed — the prefix only applies to real candidates like `tw:bg-red-500`. The vanilla classifier always runs compact: real class names classify identically under both encodings, and compact skips the probing work.
     const vanillaPlan = buildPlan({ snapshot: snapshotTheme(vanilla, themeKeys) })
@@ -118,6 +112,14 @@ export async function generate(options: GenerateOptions): Promise<GenerateResult
         ...new Set([
             ...plan.postfixLookupClassGroups,
             ...staticPostfixLookupGroups(project, plan),
+        ]),
+    ]
+
+    // Inspect variants after utility classification: selector inspection populates Tailwind's parsed-variant cache, which it sorts again on every candidate compilation. Doing this earlier makes every utility probe pay for all inspected variants.
+    plan.orderSensitiveModifiers = [
+        ...new Set([
+            ...plan.orderSensitiveModifiers,
+            ...customOrderSensitiveModifiers(project, vanilla),
         ]),
     ]
 
