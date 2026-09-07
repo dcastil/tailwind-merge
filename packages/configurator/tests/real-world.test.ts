@@ -102,34 +102,35 @@ const PROJECTS = [
 
 describe.each(PROJECTS)('$name', ({ name, entry, curated }) => {
     const entryUrl = new URL(`fixtures/real-world/${entry}`, import.meta.url)
-    const fixturePromise = readFile(entryUrl, 'utf8').then((css) =>
+    // Start each project's generation when its tests run, rather than loading every theme during collection and charging that contention to the first test's timeout. generateFixture memoizes the expensive work across assertions.
+    const getFixture = () => readFile(entryUrl, 'utf8').then((css) =>
         generateFixture(css, fileURLToPath(new URL('.', entryUrl))),
     )
 
     test('conforms to Tailwind conflict semantics across the class list', async () => {
-        const { twMerge, plan, designSystem } = await fixturePromise
+        const { twMerge, plan, designSystem } = await getFixture()
         assertTailwindConformance(designSystem, twMerge, plan)
     })
 
     test('leaves nothing unassigned', async () => {
-        const { plan } = await fixturePromise
+        const { plan } = await getFixture()
         expect(plan.report.unassignedClasses).toEqual([])
     })
 
     // eslint-disable-next-line vitest/expect-expect -- the assertions live in each project's `curated` callback above
     test('project-specific merges work', async () => {
-        const { twMerge } = await fixturePromise
+        const { twMerge } = await getFixture()
         curated(twMerge)
     })
 
     test('emitted module matches its file snapshot', async () => {
-        const { code } = await fixturePromise
+        const { code } = await getFixture()
         await expect(code).toMatchFileSnapshot(`./__snapshots__/real-world/${name}.snap.ts`)
     })
 
     // The pruning invariant at real-theme scale: a sampled usage (every 7th class of the class list, decorated with variants/important/postfix) must merge exactly like the full config, and every used class must be attributable to the members the walk keeps.
     test('pruned to a sampled usage, merges those classes exactly like the full config', async () => {
-        const { config, plan, designSystem } = await fixturePromise
+        const { config, plan, designSystem } = await getFixture()
         const usedClasses = sampleUsedClasses(designSystem, 7)
         const pruned = prunePlan(plan, usedClasses)
 
@@ -142,7 +143,7 @@ describe.each(PROJECTS)('$name', ({ name, entry, curated }) => {
 // The exact-encoding option came out of this fixture's design system (field feedback: a nonexistent name matching a compact scale validator evicted a real class). One real-world theme running exact mode end to end keeps the option honest at scale — the sweep for conflict semantics, the parity gate against undermatch — without doubling the whole suite; behavioral specifics live in exact-encoding.test.ts.
 describe('replit with exact encoding', () => {
     const entryUrl = new URL('fixtures/real-world/replit/theme.css', import.meta.url)
-    const fixturesPromise = readFile(entryUrl, 'utf8').then((css) => {
+    const getFixtures = () => readFile(entryUrl, 'utf8').then((css) => {
         const base = fileURLToPath(new URL('.', entryUrl))
         return Promise.all([
             generateFixture(css, base, { encoding: 'exact' }),
@@ -151,17 +152,17 @@ describe('replit with exact encoding', () => {
     })
 
     test('conforms to Tailwind conflict semantics across the class list', async () => {
-        const [exact] = await fixturesPromise
+        const [exact] = await getFixtures()
         assertTailwindConformance(exact.designSystem, exact.twMerge, exact.plan)
     })
 
     test('classifies every compiling class exactly like compact mode', async () => {
-        const [exact, compact] = await fixturesPromise
+        const [exact, compact] = await getFixtures()
         assertExactClassificationParity(exact.designSystem, exact.config, compact.config)
     })
 
     test('no scale falls back to a validator strategy', async () => {
-        const [exact] = await fixturesPromise
+        const [exact] = await getFixtures()
         expect(exact.plan.report.encoding).toBe('exact')
         for (const strategy of Object.values(exact.plan.report.scaleStrategies)) {
             expect(strategy).not.toMatch(/validator:|mixed:/)
