@@ -154,7 +154,7 @@ async function extractAndAssertManifest(tarballPath, entries) {
 
     assert.deepEqual(
         Object.keys(packed.dependencies).sort(),
-        ['@tailwindcss/node', '@tailwindcss/oxide', 'enhanced-resolve', 'tailwind-merge'],
+        ['@tailwindcss/node', '@tailwindcss/oxide', 'enhanced-resolve', 'postcss', 'tailwind-merge'],
         'runtime dependencies must be exactly the declared external packages — the configurator is inlined and must not be depended on',
     )
     assert.deepEqual(Object.keys(packed.peerDependencies).sort(), [
@@ -189,7 +189,7 @@ async function createConsumerInstall() {
             path.join(tailwindScopeDirectory, tailwindPackage),
         )
     }
-    for (const dependency of ['enhanced-resolve', 'vite', 'tailwindcss']) {
+    for (const dependency of ['enhanced-resolve', 'postcss', 'vite', 'tailwindcss']) {
         await symlink(
             path.join(packageDirectory, 'node_modules', dependency),
             path.join(consumerDirectory, 'node_modules', dependency),
