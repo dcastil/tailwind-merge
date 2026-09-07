@@ -10,8 +10,8 @@ import { createModuleResolver, createStylesheetResolver, trackModuleDependencies
 
 /** Bundler-owned resolution shared by design-system loading and source scanning. Either resolver can defer to Tailwind's normal filesystem/package resolution or return an alias-expanded request; the shared resolvers finish extension/package lookup and track missing targets. */
 export interface TailwindIntegration {
-    resolveCss: Resolver
-    resolveJs: Resolver
+    resolveCss?: Resolver
+    resolveJs?: Resolver
     /** Files read by generation, plus missing resolution targets and their existing parent directories on failure so integrations can observe creation and retry. */
     onDependency?: (file: string) => void
 }

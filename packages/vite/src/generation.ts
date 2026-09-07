@@ -2,7 +2,6 @@ import { createHash } from 'node:crypto'
 import { readFile, stat } from 'node:fs/promises'
 import path from 'node:path'
 
-import { compile } from '@tailwindcss/node'
 import {
     type EncodingMode,
     type PruneReport,
@@ -54,7 +53,7 @@ export interface GenerateRuntimeModuleOptions {
 /**
  * Generates the virtual runtime module from the project's Tailwind CSS entrypoint.
  *
- * Collects the dependency graph from integration loader callbacks together with the scanner's `compile()`, or a separate compile when pruning is off. The plain node design-system loader hides its dependencies; the integration loader additionally reports transitive aliased JavaScript dependencies that compilation can omit. This union keeps watching independent of another Tailwind transform or a browser request.
+ * Always supplies dependency hooks to the configurator's loaders, even without custom resolution. The same load that generates the config therefore discovers its dependencies; a separate compile for watching is unnecessary. Reused scanners contribute their previously discovered dependencies too.
  *
  * A failing scan (no oxide binary for the platform, sources Tailwind can't resolve) never fails the generation: the module is generated with the full config and `pruningError` carries the reason — pruning is an optimization, and falling back preserves the full generated config's behavior.
  */
@@ -64,7 +63,7 @@ export async function generateRuntimeModule(
     const css = await readFile(options.cssPath, 'utf-8')
     const base = path.dirname(options.cssPath)
     const dependencies = new Set<string>([options.cssPath])
-    const integration = options.integration && {
+    const integration: TailwindIntegration = {
         ...options.integration,
         onDependency(file: string) {
             dependencies.add(file)
@@ -92,26 +91,21 @@ export async function generateRuntimeModule(
         }
     }
 
-    const [result, cssDependencies] = await Promise.all([
-        generate({
-            css,
-            base,
-            integration,
-            cacheSize: options.cacheSize,
-            encoding: options.encoding,
-            format: 'js',
-            importSource: INTERNAL_TAILWIND_MERGE,
-            banner: [
-                `// Source: ${path.relative(options.root, options.cssPath) || options.cssPath} (served in-memory by @tailwind-merge/vite)`,
-                ...(scan ? ['// Pruned to the classes found in the project\'s sources'] : []),
-            ].join('\n'),
-            prune: scan ? { usedClasses: scan.classes } : undefined,
-        }),
-        scanner
-            ? Promise.resolve(new Set(scanner.dependencies))
-            : collectCssDependencies(css, base, integration),
-    ])
-    for (const file of cssDependencies) {
+    const result = await generate({
+        css,
+        base,
+        integration,
+        cacheSize: options.cacheSize,
+        encoding: options.encoding,
+        format: 'js',
+        importSource: INTERNAL_TAILWIND_MERGE,
+        banner: [
+            `// Source: ${path.relative(options.root, options.cssPath) || options.cssPath} (served in-memory by @tailwind-merge/vite)`,
+            ...(scan ? ['// Pruned to the classes found in the project\'s sources'] : []),
+        ].join('\n'),
+        prune: scan ? { usedClasses: scan.classes } : undefined,
+    })
+    for (const file of scanner?.dependencies ?? []) {
         dependencies.add(file)
     }
 
@@ -193,28 +187,3 @@ export const extendTailwindMerge = (configExtension, ...createConfig) =>
 export const FALLBACK_MODULE_CODE = `
 export { createTailwindMerge, extendTailwindMerge, getDefaultConfig as getConfig, mergeConfigs, twJoin, twMerge, validators } from '${INTERNAL_TAILWIND_MERGE}'
 `
-
-/**
- * Collects the file dependencies of a Tailwind CSS entrypoint via `compile()`'s `onDependency` callback. Best-effort: `compile` validates a few things `loadDesignSystem` doesn't (e.g. that a `source(…)` path exists), so a failure here must not fail a generation that would otherwise succeed. Dependencies collected before the failure still help watching.
- */
-async function collectCssDependencies(
-    css: string,
-    base: string,
-    integration?: TailwindIntegration,
-): Promise<Set<string>> {
-    const dependencies = new Set<string>()
-    try {
-        await compile(css, {
-            base,
-            customCssResolver: integration?.resolveCss,
-            customJsResolver: integration?.resolveJs,
-            onDependency: (dependencyPath) => {
-                dependencies.add(dependencyPath)
-                integration?.onDependency?.(dependencyPath)
-            },
-        })
-    } catch {
-        // Generation reports real problems with the CSS; dependency collection failing only means less precise watching.
-    }
-    return dependencies
-}

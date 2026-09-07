@@ -1,17 +1,15 @@
 import path from 'node:path'
 
-import { clearRequireCache } from '@tailwindcss/node/require-cache'
 import type { Plugin, ResolvedConfig, ViteDevServer } from 'vite'
 
 import { discoverCssRoot } from './discovery'
+import { createGenerationSession } from './generation-session'
 import { autoDetectBases, resolvePruneOptions } from './prune-options'
 import { createTailwindIntegration } from './resolution'
 import { type UpdateTrigger, createUpdateScheduler } from './updates'
 import {
     FALLBACK_MODULE_CODE,
     GeneratedRuntimeModule,
-    dependenciesChanged,
-    generateRuntimeModule,
     hashClasses,
 } from './generation'
 
@@ -74,14 +72,7 @@ export default function tailwindMerge(
     let devServer: ViteDevServer | undefined
     /** Resolves to the discovered (or configured) CSS entrypoint, null when the project has none; rejects on ambiguity. Resolved before the runtime subpath resolves, so redirect vs. fallback is decided exactly once. */
     let cssRoot: Promise<string | null>
-    /** The in-flight or settled generation the virtual module's `load` awaits. */
-    let generation: Promise<GeneratedRuntimeModule | null> | undefined
-    /** Last successfully generated module — kept as the serving state across failed regenerations. */
-    let current: GeneratedRuntimeModule | null = null
-    /** Keep the last good graph plus files discovered by failed attempts, so repairing an imported stylesheet can recover even before a module exists. A success replaces this with its complete graph. */
-    let configDependencies = new Set<string>()
-    /** Whether this run prunes: the `prune` option resolved against the command (build vs. serve) and library mode. */
-    let pruneActive = false
+    let session: ReturnType<typeof createGenerationSession>
     let pruneLog = true
     let buildStarts = 0
     const updateListeners = new Set<(update: PluginUpdate) => void>()
@@ -100,53 +91,6 @@ export default function tailwindMerge(
         return discovered
     }
 
-    /** Regenerates the runtime module. Builds propagate generation errors so they cannot ship a default or stale config; dev keeps the last good module and logs the error. `reuseScanner` keeps the previous scan setup when only the sources changed. */
-    async function regenerate(
-        cssPath: string,
-        { reuseScanner = false }: { reuseScanner?: boolean } = {},
-    ): Promise<GeneratedRuntimeModule | null> {
-        try {
-            // Tailwind busts ESM imports itself, but CommonJS configs and their transitive imports remain cached. Clear the whole tracked graph, including parents holding an imported value, before either design-system loading or scanning starts.
-            if (!reuseScanner) {
-                clearRequireCache([...configDependencies])
-            }
-            trackDependency(cssPath)
-            const generated = await generateRuntimeModule({
-                cssPath,
-                root: config.root,
-                cacheSize: options.cacheSize,
-                encoding: options.encoding,
-                integration: { ...integration, onDependency: trackDependency },
-                prune: pruneActive
-                    ? {
-                          autoDetectBases: autoDetectBases(config),
-                          scanner: reuseScanner ? current?.pruning?.scanner : undefined,
-                      }
-                    : undefined,
-            })
-            reportPruning(generated)
-            configDependencies = new Set(generated.dependencies)
-            current = generated
-        } catch (error) {
-            if (config.command === 'build') {
-                throw error
-            }
-            config.logger.error(
-                `[@tailwind-merge/vite] Generating the tailwind-merge config failed${current ? ' — keeping the previous one' : ''}: ${error instanceof Error ? error.message : String(error)}`,
-            )
-        }
-        return current
-    }
-
-    /** Observe resolved dependencies and missing resolver targets before generation can fail, so both repairs and file creation can recover. The dev server may start after eager generation, so configureServer also registers the accumulated set. */
-    function trackDependency(file: string) {
-        if (configDependencies.has(file)) {
-            return
-        }
-        configDependencies.add(file)
-        devServer?.watcher.add(file)
-    }
-
     /** One line per generation about pruning, so the behavior and its effect are visible where someone debugging a production-only merge difference would look; a failed scan is always reported, since the module then silently holds the full config. */
     function reportPruning(generated: GeneratedRuntimeModule) {
         if (generated.pruningError) {
@@ -163,17 +107,12 @@ export default function tailwindMerge(
         }
     }
 
-    /** Dependencies and source directories outside the Vite root (a monorepo's shared theme or UI package) are invisible to the dev watcher unless added explicitly. */
-    function watchOutOfRootPaths(generated: GeneratedRuntimeModule) {
+    /** Source directories outside the Vite root need explicit watching too; configuration dependencies are registered as the session discovers them. */
+    function watchSourceDirectories(generated: GeneratedRuntimeModule) {
         if (!devServer) {
             return
         }
         const outOfRoot = (filePath: string) => path.relative(config.root, filePath).startsWith('..')
-        for (const dependency of generated.dependencies) {
-            if (outOfRoot(dependency)) {
-                devServer.watcher.add(dependency)
-            }
-        }
         for (const source of generated.pruning?.scanner.sources ?? []) {
             if (!source.negated && outOfRoot(source.base)) {
                 devServer.watcher.add(source.base)
@@ -189,7 +128,7 @@ export default function tailwindMerge(
         if (!generated || !devServer) {
             return false
         }
-        watchOutOfRootPaths(generated)
+        watchSourceDirectories(generated)
         if (generated.hash === previousHash) {
             // The stability gate: something changed on disk but the generated config didn't (utility edits, comments, formatting, class usage that the config already covers) — nothing to invalidate, no reload.
             return false
@@ -220,7 +159,7 @@ export default function tailwindMerge(
 
     /** Runs both kinds of dev update through one generation/invalidation path; source-only edits may reuse the scanner, while CSS edits always rebuild it. The scheduler keeps this path serial. */
     async function updateAndReload(trigger: UpdateTrigger) {
-        const previous = await generation
+        const previous = await session.generation
         const cssPath = await cssRoot
         if (cssPath === null) {
             return
@@ -246,9 +185,7 @@ export default function tailwindMerge(
             }
         }
 
-        const next = regenerate(cssPath, { reuseScanner: trigger === 'sources' })
-        generation = next
-        const generated = await next
+        const generated = await session.regenerate(trigger === 'sources')
         notifyUpdate({
             trigger,
             regenerated: generated !== previous,
@@ -281,15 +218,12 @@ export default function tailwindMerge(
             // Programmatic restarts may reuse this plugin object. Finish the previous run before its mutable generation state is replaced.
             devServer = undefined
             await updates?.dispose()
-            await generation?.catch(() => {})
+            await session?.dispose()
             config = resolvedConfig
             integration = createTailwindIntegration(config)
-            clearRequireCache([...configDependencies])
-            configDependencies = new Set()
-            current = null
             buildStarts = 0
             const prune = resolvePruneOptions(options.prune, config)
-            pruneActive = config.command === 'build' ? prune.build : prune.dev
+            const pruneActive = config.command === 'build' ? prune.build : prune.dev
             pruneLog = prune.log
             if (prune.libraryDefault && pruneLog) {
                 config.logger.info(
@@ -298,9 +232,25 @@ export default function tailwindMerge(
             }
 
             cssRoot = locateCssRoot()
-            generation = cssRoot.then((cssPath) => (cssPath === null ? null : regenerate(cssPath)))
+            session = createGenerationSession({
+                cssRoot,
+                root: config.root,
+                cacheSize: options.cacheSize,
+                encoding: options.encoding,
+                integration: { ...integration, onDependency: (file) => devServer?.watcher.add(file) },
+                prune: pruneActive ? { autoDetectBases: autoDetectBases(config) } : undefined,
+                onGenerated: reportPruning,
+                onError(error, current) {
+                    if (config.command === 'build') {
+                        throw error
+                    }
+                    config.logger.error(
+                        `[@tailwind-merge/vite] Generating the tailwind-merge config failed${current ? ' — keeping the previous one' : ''}: ${error instanceof Error ? error.message : String(error)}`,
+                    )
+                },
+            })
             // Observe eager discovery/generation failures before buildStart or a runtime import awaits them, so they cannot become unhandled rejections.
-            generation.catch((error: unknown) =>
+            session.generation.catch((error: unknown) =>
                 config.logger.error(error instanceof Error ? error.message : String(error)),
             )
         },
@@ -312,17 +262,14 @@ export default function tailwindMerge(
                     `[@tailwind-merge/vite] Updating the tailwind-merge config failed: ${error instanceof Error ? error.message : String(error)}`,
                 )
             })
-            // The selected entrypoint must stay watched even before the first successful generation, including explicit paths outside the Vite root or files that do not exist yet.
-            const cssPath = await cssRoot
-            if (cssPath !== null) {
-                trackDependency(cssPath)
-            }
-            for (const dependency of configDependencies) {
+            // Drain dependencies discovered before the server started, including the entrypoint and missing targets from failed attempts. New discoveries go straight to the watcher.
+            await cssRoot
+            for (const dependency of session.dependencies) {
                 server.watcher.add(dependency)
             }
-            void generation?.then((generated) => {
+            void session.generation.then((generated) => {
                 if (generated) {
-                    watchOutOfRootPaths(generated)
+                    watchSourceDirectories(generated)
                 }
             })
         },
@@ -333,41 +280,23 @@ export default function tailwindMerge(
                 return
             }
             if (buildStarts++ > 0) {
-                const previous = generation
-                generation = (async () => {
-                    // A rejected attempt must be retried even before a first success (or when repairing a new dependency left the last good graph unchanged).
-                    const settled = await previous?.catch(() => null)
-                    if (!settled) {
-                        const cssPath = await cssRoot
-                        return cssPath === null ? null : regenerate(cssPath)
-                    }
-                    if (await dependenciesChanged(settled)) {
-                        return regenerate(settled.cssPath)
-                    }
-                    if (
-                        settled.pruning &&
-                        hashClasses(settled.pruning.scanner.scan().classes) !==
-                            settled.pruning.classesHash
-                    ) {
-                        return regenerate(settled.cssPath, { reuseScanner: true })
-                    }
-                    return settled
-                })()
+                session.refresh()
             }
             try {
                 // Await even the initial generation: failures must fail the build regardless of whether any module imports the runtime subpath.
-                await generation
+                await session.generation
             } finally {
                 // Rollup uses these watches on failed builds too. Register the retained graph before propagating the error, even when no virtual module has ever loaded.
-                for (const dependency of configDependencies) {
+                for (const dependency of session.dependencies) {
                     this.addWatchFile(dependency)
                 }
                 // Rollup disables glob expansion. Watching source directories observes new templates outside the module graph, with Vite's output/cache exclusions still applied.
-                if (current?.pruning) {
-                    for (const file of current.pruning.files) {
+                const pruning = session.current?.pruning
+                if (pruning) {
+                    for (const file of pruning.files) {
                         this.addWatchFile(file)
                     }
-                    for (const glob of current.pruning.globs) {
+                    for (const glob of pruning.globs) {
                         if (!glob.pattern.startsWith('!')) {
                             this.addWatchFile(glob.base)
                         }
@@ -387,7 +316,7 @@ export default function tailwindMerge(
             if (id !== VIRTUAL_MODULE_ID) {
                 return
             }
-            const generated = await generation
+            const generated = await session.generation
             if (!generated) {
                 return FALLBACK_MODULE_CODE
             }
@@ -408,9 +337,9 @@ export default function tailwindMerge(
             if (this.environment.name !== 'client') {
                 return
             }
-            if (file === (await cssRoot) || configDependencies.has(file)) {
+            if (file === (await cssRoot) || session.dependencies.has(file)) {
                 updates?.schedule('config')
-            } else if (current?.pruning) {
+            } else if (session.current?.pruning) {
                 // Any other file may be a source: the re-scan itself decides whether the used classes changed (a new file, a deleted one, an edit).
                 updates?.schedule('sources')
             }
