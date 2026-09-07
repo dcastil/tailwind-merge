@@ -18,7 +18,7 @@ jobs:
               with:
                   persist-credentials: false
             - name: Use Node.js 24
-              uses: actions/setup-node@v6
+              uses: actions/setup-node@v7
               with:
                   node-version: 24.18.1
                   package-manager-cache: false
@@ -44,7 +44,7 @@ jobs:
               with:
                   persist-credentials: false
             - name: Use Node.js 24
-              uses: actions/setup-node@v6
+              uses: actions/setup-node@v7
               with:
                   node-version: 24.18.1
                   # More info: https://docs.github.com/en/actions/publishing-packages/publishing-nodejs-packages#publishing-packages-to-the-npm-registry
@@ -74,7 +74,7 @@ jobs:
               with:
                   persist-credentials: false
             - name: Use Node.js 24
-              uses: actions/setup-node@v6
+              uses: actions/setup-node@v7
               with:
                   node-version: 24.18.1
                   package-manager-cache: false
@@ -103,7 +103,7 @@ jobs:
               with:
                   persist-credentials: false
             - name: Use Node.js 24
-              uses: actions/setup-node@v6
+              uses: actions/setup-node@v7
               with:
                   node-version: 24.18.1
                   # More info: https://docs.github.com/en/actions/publishing-packages/publishing-nodejs-packages#publishing-packages-to-the-npm-registry
