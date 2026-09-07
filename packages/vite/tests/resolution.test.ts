@@ -91,7 +91,11 @@ test.each(['@config', '@plugin'])(
         const before = await server.ssrLoadModule(RUNTIME_SPECIFIER)
         expect(before.twMerge('text-huge text-sm')).toBe('text-sm')
         await waitForWatcher(server, theme)
-        await updateAfter(plugin, () => writeFile(theme, "module.exports = { big: '3rem' }\n"))
+        await updateAfter(
+            plugin,
+            () => writeFile(theme, "module.exports = { big: '3rem' }\n"),
+            (result) => result.reloaded,
+        )
         const after = await server.ssrLoadModule(RUNTIME_SPECIFIER)
         expect(after.twMerge('text-big text-sm')).toBe('text-sm')
         expect(after.twMerge('text-huge text-sm')).toBe('text-huge text-sm')

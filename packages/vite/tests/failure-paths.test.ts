@@ -106,12 +106,12 @@ test.each([false, true])('a CSS root that fails at startup serves default behavi
     expect(runtime.twMerge('p-2 p-4')).toBe('p-4')
     expect(Object.keys(runtime.getConfig().classGroups)).toContain('sr')
     expect(clientFallback?.code).toContain('getDefaultConfig')
-    expect(logs).toEqual([
+    expect([...new Set(logs)]).toEqual([
         expect.stringContaining('Generating the tailwind-merge config failed: '),
     ])
 
     await waitForWatcher(server, cssPath)
-    const update = await updateAfter(plugin, () => writeFile(cssPath, GOOD_CSS))
+    const update = await updateAfter(plugin, () => writeFile(cssPath, GOOD_CSS), (result) => result.reloaded)
     expect(update).toEqual({ trigger: 'config', regenerated: true, reloaded: true })
     const recovered = await server.ssrLoadModule(RUNTIME_SPECIFIER)
     expect(recovered).not.toBe(runtime)

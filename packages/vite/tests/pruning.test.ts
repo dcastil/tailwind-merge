@@ -132,11 +132,14 @@ test('with prune.dev, a class-usage change regenerates and reloads, an unrelated
     // No source uses padding classes yet, so they pass through.
     expect(before.twMerge('p-2 p-4')).toBe('p-2 p-4')
 
-    const usageChange = await updateAfter(plugin, () =>
-        writeFile(
-            mainPath,
-            "import './app.css'\nimport { twMerge } from '@tailwind-merge/vite/runtime'\n\ndocument.body.className = twMerge('text-huge text-sm p-4')\n",
-        ),
+    const usageChange = await updateAfter(
+        plugin,
+        () =>
+            writeFile(
+                mainPath,
+                "import './app.css'\nimport { twMerge } from '@tailwind-merge/vite/runtime'\n\ndocument.body.className = twMerge('text-huge text-sm p-4')\n",
+            ),
+        (result) => result.reloaded,
     )
     // Native watchers can deliver a late app.css notification from fixture setup around the first edit. Assert the processing outcome and served behavior; scheduler tests cover exact event priority independently of filesystem timing.
     expect(usageChange).toMatchObject({ regenerated: true, reloaded: true })
