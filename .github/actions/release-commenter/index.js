@@ -320,7 +320,14 @@ async function main() {
         return
     }
 
-    let targets = await collectLinkedIssuesAndPrs(token, owner, repo, commits, skipLabels)
+    let targets = await collectLinkedIssuesAndPrs(
+        token,
+        owner,
+        repo,
+        commits,
+        skipLabels,
+        currentPackageName,
+    )
     log(`Resolved targets: ${targets.length}`)
 
     if (!targets.length) {
@@ -446,20 +453,33 @@ async function resolveCompareRefs(
 }
 
 /**
- * Resolves linked issue/PR numbers from commits and associated PR metadata.
+ * Resolves linked issue/PR numbers only from commits and PRs that change the released package. A shared comparison range or associated PR alone does not establish that a change ships in this release.
  *
  * @param {string} token
  * @param {string} owner
  * @param {string} repo
  * @param {CommitRecord[]} commits
  * @param {string[]} skipLabels
+ * @param {string} currentPackageName
  * @returns {Promise<number[]>}
  */
-async function collectLinkedIssuesAndPrs(token, owner, repo, commits, skipLabels) {
+async function collectLinkedIssuesAndPrs(token, owner, repo, commits, skipLabels, currentPackageName) {
+    const packagePaths = releasePackagePaths(currentPackageName)
     /** @type {Set<number>} */
     const linkedIssuesPrs = new Set()
+    /** @type {Map<number, boolean>} */
+    const prScope = new Map()
 
     for (const commit of commits) {
+        if (
+            !(await hasPackageChanges(
+                token,
+                `/repos/${owner}/${repo}/commits/${commit.sha}`,
+                packagePaths,
+            ))
+        ) {
+            continue
+        }
         const commitUrl = `https://github.com/${owner}/${repo}/commit/${commit.sha}`
 
         const data = await requestGraphQL(
@@ -534,12 +554,25 @@ async function collectLinkedIssuesAndPrs(token, owner, repo, commits, skipLabels
         const resource = queryData.resource
         if (!resource) continue
 
+        /** @type {GraphQLAssociatedPrNode[]} */
+        const scopedPrs = []
+        for (const { node: pr } of resource.associatedPullRequests?.edges || []) {
+            let inScope = prScope.get(pr.number)
+            if (inScope === undefined) {
+                inScope = await hasPackageChanges(
+                    token,
+                    `/repos/${owner}/${repo}/pulls/${pr.number}/files`,
+                    packagePaths,
+                )
+                prScope.set(pr.number, inScope)
+            }
+            if (inScope) scopedPrs.push(pr)
+        }
+
         const commitHtmlSegments = [
             resource.messageHeadlineHTML || '',
             resource.messageBodyHTML || '',
-            ...(resource.associatedPullRequests?.edges || []).map(
-                (edge) => edge?.node?.bodyHTML || '',
-            ),
+            ...scopedPrs.map((pr) => pr.bodyHTML || ''),
         ].join(' ')
 
         for (const match of commitHtmlSegments.matchAll(closesMatcher)) {
@@ -549,8 +582,7 @@ async function collectLinkedIssuesAndPrs(token, owner, repo, commits, skipLabels
             }
         }
 
-        for (const edge of resource.associatedPullRequests?.edges || []) {
-            const pr = edge.node
+        for (const pr of scopedPrs) {
             const prLabels = (pr.labels?.nodes || []).map((label) => label.name)
             if (shouldSkipPr(skipLabels, prLabels)) {
                 log(`Skipping PR #${pr.number} because skip-label matched`)
@@ -586,6 +618,59 @@ async function collectLinkedIssuesAndPrs(token, owner, repo, commits, skipLabels
     }
 
     return [...linkedIssuesPrs].sort((left, right) => left - right)
+}
+
+/**
+ * Source ownership follows the release-drafter scopes: Vite bundles the configurator but consumes the library as a separate package. Historical library source/docs/tests paths remain eligible when a comparison reaches before the monorepo move; root infrastructure needs a manual changelog entry.
+ *
+ * @param {string} packageName
+ * @returns {string[]}
+ */
+function releasePackagePaths(packageName) {
+    switch (packageName) {
+        case 'tailwind-merge':
+            return ['packages/tailwind-merge/', 'src/', 'docs/', 'tests/']
+        case '@tailwind-merge/vite':
+            return ['packages/vite/', 'packages/configurator/']
+        default:
+            throw new Error(`No release notification paths configured for package ${packageName}`)
+    }
+}
+
+/**
+ * Checks paginated commit or PR file changes, including the old path of a rename out of the package. GitHub limits both endpoints to a fixed number of files; reaching that cap without a match is inconclusive and must fail before posting rather than silently omit a package's targets.
+ *
+ * @param {string} token
+ * @param {string} pathname
+ * @param {string[]} packagePaths
+ * @returns {Promise<boolean>}
+ */
+async function hasPackageChanges(token, pathname, packagePaths) {
+    const pageSize = 100
+    const fileLimit = 3000
+    for (let page = 1; ; page += 1) {
+        /** @type {{ filename: string, previous_filename?: string }[] | { files?: { filename: string, previous_filename?: string }[] } | null} */
+        const payload = await requestJson(token, 'GET', pathname, { per_page: pageSize, page })
+        const files = Array.isArray(payload) ? payload : payload?.files
+        if (!Array.isArray(files)) {
+            throw new Error(`Missing changed-file data for ${pathname}`)
+        }
+        if (
+            files.some((file) =>
+                packagePaths.some(
+                    (prefix) =>
+                        file.filename.startsWith(prefix) ||
+                        file.previous_filename?.startsWith(prefix),
+                ),
+            )
+        ) {
+            return true
+        }
+        if (files.length < pageSize) return false
+        if (page * pageSize >= fileLimit) {
+            throw new Error(`Cannot establish package scope for ${pathname}: changed-file limit reached`)
+        }
+    }
 }
 
 /**
@@ -1741,6 +1826,7 @@ function shouldSkipPr(skipLabels, prLabels) {
 module.exports = {
     __testing: {
         checkGuardViolations,
+        collectLinkedIssuesAndPrs,
         compareCoreVersion,
         filterTargetsWithoutReleaseComments,
         findReleaseComment,

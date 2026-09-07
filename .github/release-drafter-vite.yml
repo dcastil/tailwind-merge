@@ -1,9 +1,10 @@
-# Drafts releases for the @tailwind-merge/vite package. Releases are per package with namespaced tags; tag-prefix scopes previous-release lookup and version resolution to this package's tags, and include-paths keeps pull requests that don't touch the package out of the draft. No autolabeler section here — PR labels are repo-wide and applied once via the tailwind-merge config.
+# Drafts releases for the @tailwind-merge/vite package, including the configurator source bundled into it. Releases are per package with namespaced tags; tag-prefix scopes previous-release lookup and version resolution to this package's tags. No autolabeler section here — PR labels are repo-wide and applied once via the tailwind-merge config.
 name-template: '@tailwind-merge/vite@$RESOLVED_VERSION'
 tag-template: '@tailwind-merge/vite@$RESOLVED_VERSION'
 tag-prefix: '@tailwind-merge/vite@'
 include-paths:
     - packages/vite
+    - packages/configurator
 template: |
     $CHANGES
 
