@@ -6,6 +6,47 @@ import { emitModule } from '../src/emit'
 import { css, expectMerges, generateFixture, importEmittedModule } from './fixture-utils'
 
 describe.each(['compact', 'exact'] as const)('%s functional utility effects', (encoding) => {
+    test.each(['', 'tw'])('preserves named modifier effects without suggested base values (prefix: %s)', async (prefix) => {
+        const stylesheet = css`
+            @import 'tailwindcss' ${prefix ? 'prefix(tw)' : ''};
+            @theme { --mode-tall: 4rem; }
+            @utility demo-* {
+                width: calc(--value(integer) * 1px);
+                height: --modifier(--mode-*);
+            }
+            @utility uniform-demo-* {
+                width: calc(--value(integer) * 1px);
+                width: --modifier(--mode-*);
+            }
+            @utility arbitrary-demo-* {
+                width: --value([length]);
+                height: --modifier(--mode-*);
+            }
+        `
+        const cases = [
+            ['demo-2/tall demo-3', 'demo-2/tall demo-3'],
+            ['demo-3 demo-2/tall', 'demo-3 demo-2/tall'],
+            ['demo-2 demo-3', 'demo-2 demo-3'],
+            ['hover:demo-2/tall hover:demo-3', 'hover:demo-2/tall hover:demo-3'],
+            ['demo-2/tall! demo-3!', 'demo-2/tall! demo-3!'],
+            ['arbitrary-demo-[2px]/tall arbitrary-demo-[3px]', 'arbitrary-demo-[2px]/tall arbitrary-demo-[3px]'],
+            ['uniform-demo-2/tall uniform-demo-3', 'uniform-demo-3'],
+            ['uniform-demo-3 uniform-demo-2/tall', 'uniform-demo-2/tall'],
+        ].map((pair) => pair.map((list) => list.split(' ').map((name) => prefix ? `${prefix}:${name}` : name).join(' ')))
+        const usedClasses = [...new Set(cases.flatMap(([input]) => input!.split(' ')))]
+        for (const prune of [undefined, { usedClasses }]) {
+            const fixture = await generateFixture(stylesheet, undefined, { encoding, prune })
+            expect(fixture.designSystem.getClassList().filter(([name]) => name.startsWith('demo-'))).toEqual([])
+            expect(fixture.designSystem.utilities.getCompletions('demo')).toContainEqual(expect.objectContaining({ values: [], modifiers: ['tall'] }))
+            expect(declaredDeclarations(fixture.designSystem, 'demo-2/tall')?.map((entry) => entry.property)).toEqual(['width', 'height'])
+            expectMerges(fixture.twMerge, Object.fromEntries(cases))
+            for (const format of ['ts', 'js'] as const) {
+                const emitted = await importEmittedModule(emitModule(fixture.plan, { format }), format)
+                expectMerges(emitted.twMerge, Object.fromEntries(cases))
+            }
+        }
+    })
+
     test.each(['', 'tw'])('preserves bare modifier effects on named values (prefix: %s)', async (prefix) => {
         const stylesheet = css`
             @import 'tailwindcss' ${prefix ? 'prefix(tw)' : ''};

@@ -1,5 +1,5 @@
 import { getDefaultConfig } from 'tailwind-merge'
-import { type AnyConfig, createClassGroupUtils } from 'tailwind-merge/unstable-do-not-import'
+import { type AnyConfig, createClassGroupUtils, createParseClassName } from 'tailwind-merge/unstable-do-not-import'
 
 import { buildAugmentations } from './augment.ts'
 import { type EncodingMode } from './compress.ts'
@@ -114,6 +114,12 @@ export async function generate(options: GenerateOptions): Promise<GenerateResult
             preservedCustomClasses: customUtilities.preservedClasses,
         }),
     )
+    plan.postfixLookupClassGroups = [
+        ...new Set([
+            ...plan.postfixLookupClassGroups,
+            ...staticPostfixLookupGroups(project, plan),
+        ]),
+    ]
 
     // Pruning runs last, on the finished plan: only then does classification see every member a used class could reach (custom utilities, augmented classes, collision corrections included).
     const finalPlan = options.prune ? prunePlan(plan, options.prune.usedClasses) : plan
@@ -162,4 +168,29 @@ function customOrderSensitiveModifiers(
                 entry.scope.some((rule) => !rule.startsWith('@') && rule.includes(',')),
         ),
     )
+}
+
+/** Static names can contain slashes too: badge/icon must reach its own group instead of inheriting badge's group. Use the final classifier after aliases and augmentation establish both owners, and the runtime parser for the exact postfix boundary. Pruning then retains both lookups. */
+function staticPostfixLookupGroups(project: DesignSystemAccess, plan: ConfigPlan): string[] {
+    const classNames = project.utilities.keys('static').filter((name) => name.includes('/'))
+    if (classNames.length === 0) {
+        return []
+    }
+    // Registry names are unprefixed, including under a prefixed theme.
+    const config = materializeConfig({ ...plan, prefix: null })
+    const parseClassName = createParseClassName(config)
+    const { getClassGroupId } = createClassGroupUtils(config)
+    const groups = new Set<string>()
+    for (const className of classNames) {
+        const { baseClassName, maybePostfixModifierPosition } = parseClassName(className)
+        if (!maybePostfixModifierPosition) {
+            continue
+        }
+        const baseGroup = getClassGroupId(baseClassName.slice(0, maybePostfixModifierPosition))
+        const fullGroup = getClassGroupId(baseClassName)
+        if (baseGroup && fullGroup && baseGroup !== fullGroup) {
+            groups.add(baseGroup)
+        }
+    }
+    return [...groups]
 }

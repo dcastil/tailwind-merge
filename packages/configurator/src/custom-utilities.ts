@@ -353,12 +353,17 @@ function groupFunctionalClasses(
         result.unshift(integerGroup)
     }
 
+    // Numeric/arbitrary-only roots can suggest named modifiers without contributing any class-list entries. Probe those completions independently of the named base candidates.
+    const modifiers = new Set([
+        ...project.utilities.getCompletions(root).flatMap((suggestion) => suggestion.modifiers),
+        ...MODIFIER_PROBES,
+    ])
     for (const className of candidates) {
         if (segment(className, '/').length > 1) {
             continue
         }
         const baseGroup = groupsByClassName.get(className)
-        for (const modifier of MODIFIER_PROBES) {
+        for (const modifier of modifiers) {
             const modifiedClass = `${className}/${modifier}`
             const declarations = declaredDeclarations(project, modifiedClass)
             if (!declarations?.length) {

@@ -25,8 +25,12 @@ export interface DesignSystemAccess {
     }
     utilities: {
         keys(kind: 'static' | 'functional'): string[]
-        /** Suggestions retain their utility branches here; getClassList deduplicates overlapping names and hides changes such as a font-size name also becoming a color. */
-        getCompletions(root: string): { values: (string | null)[]; supportsNegative?: boolean }[]
+        /** Suggestions retain their utility branches here; getClassList deduplicates overlapping names and omits modifiers for roots without named base values. */
+        getCompletions(root: string): {
+            values: (string | null)[]
+            modifiers: string[]
+            supportsNegative?: boolean
+        }[]
     }
     getClassList(): [string, { modifiers: string[] }][]
     /** Variant suggestions and selector templates, including CSS and JavaScript registrations. */
