@@ -10,6 +10,8 @@ This scan is deliberately independent of Vite's module graph: the runtime module
 
 Only active CSS directives participate in discovery. Comments and quoted examples cannot create a Tailwind root or link one stylesheet to another; comments between the tokens of a real directive are treated as whitespace.
 
+Discovery resolves imports with the same stylesheet resolver used by generation and scanning. Directory aliases are supported, including a directory whose `package.json` points to a stylesheet through its `style` field; that stylesheet is treated as an imported layer rather than an independent root.
+
 Custom variant declarations (`@custom-variant`) also mark an entrypoint. If `app.css` imports a Tailwind base and adds a variant, discovery selects `app.css` so the generated configuration includes that variant's ordering rules.
 
 ## Generating the configuration

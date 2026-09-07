@@ -1,4 +1,4 @@
-import { writeFile } from 'node:fs/promises'
+import { mkdir, writeFile } from 'node:fs/promises'
 import path from 'node:path'
 
 import tailwindcss from '@tailwindcss/vite'
@@ -14,6 +14,29 @@ import {
 } from './helpers'
 
 const { startServer, copyFixture } = setupPluginTests()
+
+test.each([false, true])('discovers directory CSS aliases through their style entry (pruning: %s)', async (prune) => {
+    const root = await copyFixture('app')
+    const theme = path.join(root, 'theme')
+    await mkdir(theme)
+    await writeFile(path.join(theme, 'package.json'), JSON.stringify({ style: './tokens.css' }))
+    await writeFile(path.join(theme, 'tokens.css'), '@theme { --text-huge: 3rem; }\n@source inline("text-huge text-sm");\n')
+    await writeFile(path.join(root, 'app.css'), "@import 'tailwindcss' source(none);\n@import '@theme';\n")
+    const aliases = [{ find: '@theme', replacement: theme }]
+    const logs: string[] = []
+    const options = { prune: { dev: prune, build: prune } }
+    const { server } = await startServer(root, { aliases, logs, options })
+    const runtime = await server.ssrLoadModule(RUNTIME_SPECIFIER)
+    expect(runtime.twMerge('text-huge text-sm')).toBe('text-sm')
+    const { code, output, lines } = await buildFixture(root, {
+        aliases,
+        options,
+        plugins: [tailwindcss()],
+    })
+    expect(hasLiteral(code, 'huge')).toBe(true)
+    expect(output.some((entry) => entry.type === 'asset' && String(entry.source).includes('.text-huge'))).toBe(true)
+    expect([...logs, ...lines].some((line) => /No Tailwind|failed|Could not scan/.test(line))).toBe(false)
+})
 
 test.each([false, true])('recovers when a missing extensionless CSS alias is created (pruning: %s)', async (prune) => {
     const root = await copyFixture('app')

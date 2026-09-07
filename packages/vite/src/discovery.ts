@@ -1,7 +1,11 @@
-import { readFile, readdir, stat } from 'node:fs/promises'
+import { readFile, readdir } from 'node:fs/promises'
 import path from 'node:path'
 
-import { type TailwindIntegration, cssStatements } from '@tailwind-merge/configurator'
+import {
+    type TailwindIntegration,
+    createStylesheetResolver,
+    cssStatements,
+} from '@tailwind-merge/configurator'
 
 /**
  * Finds the project's Tailwind CSS entrypoint by scanning the Vite root for CSS files with Tailwind root markers.
@@ -30,6 +34,7 @@ export async function discoverCssRoot(
     }
 
     const importedByCandidate = new Set<string>()
+    const resolveImport = createStylesheetResolver(resolveCss)
     const pending = [...candidates]
     const visited = new Set<string>()
     while (pending.length > 0) {
@@ -51,9 +56,10 @@ export async function discoverCssRoot(
             if (!match) {
                 continue
             }
-            const base = path.dirname(file)
-            const specifier = match[1] as string
-            const target = await resolveCssImport(base, (await resolveCss?.(specifier, base)) || specifier)
+            // Use generation's resolver even after alias expansion: the result may still name a directory with a package style entry. Missing imports cannot add graph edges; generation owns their errors and recovery dependencies.
+            const target = await resolveImport(match[1] as string, path.dirname(file)).catch(
+                () => null,
+            )
             if (target !== null) {
                 importedByCandidate.add(target)
                 pending.push(target)
@@ -110,16 +116,4 @@ async function collectCssFiles(directory: string): Promise<string[]> {
     )
 
     return files
-}
-
-/**
- * Resolves a local CSS `@import` for the candidate graph when the integration resolver declines. Prefer an existing file regardless of extension, then try Tailwind's implicit `.css` suffix; otherwise mixed-extension and extensionless intermediates disconnect imported candidates from their root.
- */
-async function resolveCssImport(fromDirectory: string, specifier: string): Promise<string | null> {
-    if (specifier.startsWith('tailwindcss')) {
-        return null
-    }
-    const resolved = path.resolve(fromDirectory, specifier)
-    const exists = await stat(resolved).then((entry) => entry.isFile()).catch(() => false)
-    return exists ? resolved : `${resolved}.css`
 }

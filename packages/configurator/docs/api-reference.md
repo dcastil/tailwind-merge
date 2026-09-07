@@ -1,6 +1,6 @@
 # JavaScript API
 
-The package exports `generate`, `createSourceScanner`, the `cssStatements` inspection helper, and their supporting types. The direct configurator API remains unstable until a standalone release. Internal helpers such as `prunePlan` and `emitModule` are not package exports.
+The package exports `generate`, `createSourceScanner`, the `cssStatements` inspection helper, `createStylesheetResolver`, and their supporting types. The direct configurator API remains unstable until a standalone release. Internal helpers such as `prunePlan` and `emitModule` are not package exports.
 
 ## `generate(options)`
 
@@ -97,6 +97,12 @@ Reuse `scan()` after source edits. Recreate the scanner after changes to the CSS
 ## `cssStatements(css)`
 
 Returns a generator of nonempty CSS statements and block headers without their terminating semicolon or brace. Comments are replaced by whitespace; quoted strings, escapes, and function arguments remain intact. Source scanning and Vite root discovery share this helper so comments and quoted examples cannot introduce directives. It is a lexical inspection helper, not a CSS validator or an import resolver.
+
+## `createStylesheetResolver(resolveCss?, onStylesheet?, onMissingDependency?)`
+
+Returns an `(id: string, base: string) => Promise<string>` resolver using the same stylesheet rules as generation and scanning. An optional `resolveCss` hook follows the `TailwindIntegration` contract above; alias-expanded paths still receive extension and package resolution, including a directory's `package.json` `style` entry. Bundler adapters can use this helper to keep entrypoint discovery consistent with generation.
+
+`onStylesheet(file)` observes successful stylesheet resolution. `onMissingDependency(file)` observes attempted paths only when resolution fails, before the returned promise rejects; these paths may not exist. Each resolver uses fresh filesystem reads so retries can see newly created files.
 
 ## Exported types
 

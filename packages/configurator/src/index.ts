@@ -4,6 +4,7 @@ export type { EncodingMode } from './compress.ts'
 export type { TailwindIntegration } from './design-system.ts'
 export { createSourceScanner } from './scan.ts'
 export { cssStatements } from './css-statements.ts'
+export { createStylesheetResolver } from './resolvers.ts'
 export type { SourceScanner, SourceScannerOptions, UsageScan } from './scan.ts'
 export type {
     ConfigPlan,
