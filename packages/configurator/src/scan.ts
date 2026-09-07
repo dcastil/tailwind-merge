@@ -52,8 +52,10 @@ export async function createSourceScanner(options: SourceScannerOptions): Promis
     const stylesheets = new Set<string>()
     const compiler = await compile(options.css, {
         base: options.base,
-        customCssResolver: createStylesheetResolver(options.integration?.resolveCss, (file) =>
-            stylesheets.add(file),
+        customCssResolver: createStylesheetResolver(
+            options.integration?.resolveCss,
+            (file) => stylesheets.add(file),
+            options.integration?.onDependency,
         ),
         customJsResolver: options.integration?.resolveJs,
         onDependency: (dependencyPath) => {

@@ -7,10 +7,12 @@ import enhancedResolve from 'enhanced-resolve'
 /**
  * Resolves stylesheet requests with Tailwind's package fields and conditions after an optional bundler resolver declines. Tracking at this boundary records the file's CSS role, including .pcss and extensionless imports, without mistaking JavaScript dependencies for stylesheets.
  * Each caller gets an uncached filesystem view so regeneration sees imports created or repaired after an earlier resolution attempt.
+ * Failed resolution reports attempted missing paths separately from stylesheet roles, so integrations can watch for their creation without treating resolver metadata such as package.json as CSS.
  */
 export function createStylesheetResolver(
     customResolver?: Resolver,
     onStylesheet?: (file: string) => void,
+    onMissingDependency?: (file: string) => void,
 ): (id: string, base: string) => Promise<string> {
     const resolver = enhancedResolve.ResolverFactory.createResolver({
         fileSystem: fs,
@@ -24,11 +26,13 @@ export function createStylesheetResolver(
         const file =
             (await customResolver?.(id, base)) ||
             (await new Promise<string>((resolve, reject) => {
-                resolver.resolve({}, base, id, {}, (error, result) => {
-                    if (error) {
-                        reject(error)
-                    } else if (!result) {
-                        reject(new Error(`Could not resolve stylesheet '${id}' from '${base}'`))
+                const missingDependencies = onMissingDependency ? new Set<string>() : undefined
+                resolver.resolve({}, base, id, { missingDependencies }, (error, result) => {
+                    if (error || !result) {
+                        for (const file of missingDependencies ?? []) {
+                            onMissingDependency?.(file)
+                        }
+                        reject(error ?? new Error(`Could not resolve stylesheet '${id}' from '${base}'`))
                     } else {
                         resolve(result)
                     }

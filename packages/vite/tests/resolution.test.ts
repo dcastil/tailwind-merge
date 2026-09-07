@@ -100,12 +100,14 @@ test.each([false, true])(
         expect(before.twMerge('text-huge text-sm')).toBe('text-sm')
         expect(logs.some((line) => /failed|Could not scan/.test(line))).toBe(false)
         await waitForWatcher(server, themePath)
-        await updateAfter(plugin, () =>
+        const update = await updateAfter(plugin, () =>
             writeFile(
                 themePath,
                 '@theme { --text-huge: 2.5rem; --text-big: 3rem; }\n@source inline("text-huge text-big text-sm");\n',
             ),
+            (result) => result.reloaded,
         )
+        expect(update).toMatchObject({ regenerated: true, reloaded: true })
         const after = await server.ssrLoadModule(RUNTIME_SPECIFIER)
         expect(after.twMerge('text-big text-sm')).toBe('text-sm')
 

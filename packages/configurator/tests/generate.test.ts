@@ -6,14 +6,47 @@ import { createTailwindMerge, twMerge as defaultTwMerge } from 'tailwind-merge'
 import { generate } from '../src'
 import { loadDesignSystems } from '../src/design-system'
 import { emitModule } from '../src/emit'
+import { materializeConfig } from '../src/materialize'
+import { prunePlan } from '../src/prune'
 
-import { assertTailwindConformance } from './fixture-utils'
+import { assertTailwindConformance, css, importEmittedModule } from './fixture-utils'
 
 const base = fileURLToPath(new URL('.', import.meta.url))
 const vanillaCss = "@import 'tailwindcss';"
 
 const { code, config, plan } = await generate({ css: vanillaCss, base })
 const generatedTwMerge = createTailwindMerge(() => config)
+
+test.each(['compact', 'exact'] as const)('emits own __proto__ theme entries with %s encoding', async (encoding) => {
+    const generated = await generate({
+        css: css`
+            @import 'tailwindcss';
+            @theme {
+                --color-__proto__-100: #111;
+                --color-__proto__-200: #222;
+                --color-__proto__-300: #333;
+            }
+        `,
+        base,
+        encoding,
+    })
+    const candidates = ['bg-__proto__-100', 'bg-__proto__-200', 'text-__proto__-300', 'text-__proto__-100']
+    for (const plan of [generated.plan, prunePlan(generated.plan, candidates)]) {
+        const expectedConfig = materializeConfig(plan)
+        const inMemory = createTailwindMerge(() => expectedConfig)
+        for (const format of ['ts', 'js'] as const) {
+            for (const sharing of ['scales', 'aggressive', 'none'] as const) {
+                const emitted = await importEmittedModule(emitModule(plan, { format, sharing }), format)
+                for (const [first, second] of [[candidates[0], candidates[1]], [candidates[2], candidates[3]]]) {
+                    const input = `${first} ${second}`
+                    expect(inMemory(input)).toBe(second)
+                    expect(emitted.twMerge(input)).toBe(second)
+                }
+                expect(emitted.getConfig()).toEqual(expectedConfig)
+            }
+        }
+    }
+})
 
 describe('generate from vanilla Tailwind CSS', () => {
     test('merges existing classes like the default twMerge', () => {

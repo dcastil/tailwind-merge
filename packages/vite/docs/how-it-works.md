@@ -31,7 +31,7 @@ By default, the generated config depends only on your Tailwind **configuration**
 
 Nearby edits are combined and processed in order. With dev pruning enabled, a source edit cannot cancel a pending CSS update: the plugin still reads the changed theme and safelists. Edits made during generation are processed afterward.
 
-If a regeneration fails during development, the last good config keeps serving and the error is logged. If generation has never succeeded, the runtime serves the default config and logs the error. The selected CSS entrypoint and dependencies discovered before the failure remain watched, including outside the Vite root. Repairing an imported stylesheet retries generation and replaces the fallback without editing the entrypoint or restarting the server.
+If a regeneration fails during development, the last good config keeps serving and the error is logged. If generation has never succeeded, the runtime serves the default config and logs the error. The selected CSS entrypoint and dependencies discovered before the failure remain watched, including outside the Vite root. Missing stylesheet import targets are watched too. Repairing an imported stylesheet or creating a missing one retries generation and replaces the fallback without editing the entrypoint or restarting the server.
 
 ## Builds
 

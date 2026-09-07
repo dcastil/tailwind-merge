@@ -10,11 +10,45 @@ import { prunePlan } from '../src/prune'
 import {
     assertPruningEquivalence,
     css,
+    expectMerges,
     generateFixture,
     sampleUsedClasses,
 } from './fixture-utils'
 
 const base = fileURLToPath(new URL('.', import.meta.url))
+
+describe.each(['compact', 'exact'] as const)('%s postfix lookup pruning', (encoding) => {
+    test.each(['', 'tw'])('keeps the base lookup before a different postfix group (prefix: %s)', async (prefix) => {
+        const stylesheet = css`
+            @import 'tailwindcss' ${prefix ? 'prefix(tw)' : ''};
+            @utility thing-* {
+                opacity: --value(number);
+            }
+            @utility thing-width-* {
+                width: calc(--value(integer) * 1px);
+                height: calc(--modifier(integer) * 1px);
+            }
+        `
+        // No unmodified thing-width class is scanned: its matcher is needed solely to request the full postfix lookup before the broader thing-* validator can win.
+        const names = ['thing-width-2/3', 'thing-width-4/5', 'thing-0.5']
+        const usedClasses = names.flatMap((name) => [name, `hover:${name}`, `${name}!`])
+            .map((name) => prefix ? `${prefix}:${name}` : name)
+        const full = await generateFixture(stylesheet, base, { encoding })
+        const pruned = await generateFixture(stylesheet, base, { encoding, prune: { usedClasses } })
+
+        for (const fixture of [full, pruned]) {
+            const [first, second, opacity] = names.map((name) => prefix ? `${prefix}:${name}` : name)
+            expectMerges(fixture.twMerge, [
+                [`${first} ${opacity}`, `${first} ${opacity}`],
+                [`${opacity} ${first}`, `${opacity} ${first}`],
+                [`${first} ${second}`, second!],
+            ])
+        }
+        assertPruningEquivalence(full.config, pruned.config, usedClasses)
+        expect(pruned.plan.report.pruning?.classifiedClassCount).toBe(usedClasses.length)
+        expect(pruned.plan.report.pruning?.unprunedClassGroups).toEqual([])
+    })
+})
 
 describe('pruning a vanilla config', () => {
     const fullPromise = generate({ css: "@import 'tailwindcss';", base })

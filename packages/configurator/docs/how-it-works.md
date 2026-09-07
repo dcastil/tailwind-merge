@@ -8,6 +8,8 @@ The library's default configuration supplies class-group semantics and direction
 
 The result exports `getConfig` and `twMerge`. Configuration construction stays inside `getConfig`, so the normal lazy initialization of `createTailwindMerge` is preserved. The emitted module uses the library's public runtime API without importing its default configuration, allowing a bundler to remove that default configuration.
 
+TypeScript and JavaScript output preserve the in-memory config's theme entries, including families named `__proto__`, which require special object-key syntax in generated code.
+
 ## Compact and exact encoding
 
 `encoding: 'compact'` is the default. It selects small matchers that cover a finite theme scale, which may also recognize nonexistent names. If a radius scale lacks `xs` but is represented by `isTshirtSize`, `twMerge('rounded-md rounded-xs')` can drop `rounded-md` even though `rounded-xs` has no CSS. Compact encoding assumes callers use valid theme tokens.
@@ -22,7 +24,7 @@ Exact output is generally larger. Enumeration often compresses well, but the dif
 
 The full generated configuration covers the resolved theme. Usage pruning removes groups and members that no supplied candidate reaches. Tailwind's own scanner supplies candidates from automatic detection, `source(…)`, `@source`, and inline safelists, including negative inline exclusions. Inline directives are read from active CSS in the entrypoint and every imported stylesheet, including `.pcss` and extensionless files. JavaScript dependencies are not treated as stylesheets, and text inside comments or quoted strings does not affect the candidates.
 
-The pruning contract is relative to the full generated config: **lists made from supplied candidates must merge identically before and after pruning.** Pruning does not fix an existing classification gap or validate every scanner token. Retained validators can also match candidates absent from the scan, so a pruned config is not a strict allowlist of class strings.
+The pruning contract is relative to the full generated config: **lists made from supplied candidates must merge identically before and after pruning.** This can require keeping a base matcher even when only its slash-modified classes appear in the sources, because the base lookup selects how the full class is classified. Pruning does not fix an existing classification gap or validate every scanner token. Retained validators can also match candidates absent from the scan, so a pruned config is not a strict allowlist of class strings.
 
 The [CLI](./cli.md) can scan and generate in one command. The [JavaScript API](./api-reference.md#createsourcescanneroptions) keeps those steps separate so a build integration can reuse its scanner. Neither enables pruning by default.
 
@@ -34,7 +36,7 @@ A static utility whose compiled declarations match one built-in group's signatur
 
 Functional values with different compiled effects receive separate groups. For example, `text-stroke-*` can set stroke width for numbers and stroke color for color names; those classes must coexist. Named values and supported numeric kinds are grouped by their properties, surrounding rules, and importance. When those effects differ, both encodings enumerate the named values and omit broad arbitrary-value matchers. Arbitrary values on such roots may therefore remain unmerged even when they overlap.
 
-Postfix modifiers can also change a functional utility's effects. If `pair-2` sets width and `pair-2/3` adds height, a later `pair-4` must preserve `pair-2/3`. Tailwind's suggested named modifiers participate too: a `label-red-500/xl` utility that adds a font size survives a later color-only `label-blue-500`. These groups look up the complete class before stripping a postfix, including in pruned configurations.
+Postfix modifiers can also change a functional utility's effects. If `pair-2` sets width and `pair-2/3` adds height, a later `pair-4` must preserve `pair-2/3`. Tailwind's suggested named modifiers participate too: a `label-red-500/xl` utility that adds a font size survives a later color-only `label-blue-500`. These groups first resolve the base class and then request a complete-class lookup, including in pruned configurations.
 
 Arbitrary postfixes are probed as well. When an arbitrary modifier adds or changes effects, such as `pair-2/[3px]` adding height to a width utility, the functional root is conservatively left unmerged in both encodings. This also preserves redundant base classes: the runtime would otherwise fall back to their group for an unrecognized postfix. Suggested classes from these roots appear in the report's `unassignedClasses`. Modifiers that keep the same effects can still merge normally.
 

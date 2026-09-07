@@ -95,7 +95,7 @@ async function buildFixture(
 /**
  * Writes emitted module code to a worker-private temp directory inside tests/ and imports it through Vitest, so the code runs exactly as a consumer's build would run it: the TypeScript is transformed, `tailwind-merge` resolves through the package's vitest alias, and `getConfig()` yields a real config object. The directory lives inside tests/ because the alias only applies to files Vite serves from the project; it is removed when the worker exits, and `tests/global-setup.ts` sweeps anything a crashed run left behind.
  */
-async function importEmittedModule(
+export async function importEmittedModule(
     code: string,
     format: 'ts' | 'js',
 ): Promise<{ getConfig: () => AnyConfig; twMerge: (classList: string) => string }> {

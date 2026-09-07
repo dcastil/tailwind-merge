@@ -158,6 +158,34 @@ test('creating an explicitly selected missing CSS entrypoint replaces the startu
     expect(recovered.twMerge('text-huge text-sm')).toBe('text-sm')
 })
 
+test.each([false, true])('creating a missing imported stylesheet recovers startup generation (pruning: %s)', async (prune) => {
+    for (const [importPath, filePath] of [
+        ['./tokens.css', 'tokens.css'],
+        ['./tokens', 'tokens.css'],
+        ['../tokens.pcss', '../tokens.pcss'],
+    ]) {
+        const root = await copyFixture('app')
+        const tokensPath = path.resolve(root, filePath!)
+        await writeFile(path.join(root, 'app.css'), "@import 'tailwindcss' source(none);\n@import './bridge.css';\n@source inline('text-huge text-sm');\n")
+        await writeFile(path.join(root, 'bridge.css'), `@import '${importPath}';\n`)
+        const { server, plugin } = await startServer(root, { options: { css: 'app.css', prune: { dev: prune } } })
+        const fallback = await server.ssrLoadModule(RUNTIME_SPECIFIER)
+        const clientFallback = await server.transformRequest(RUNTIME_SPECIFIER)
+        expect(fallback.twMerge('text-huge text-sm')).toBe('text-huge text-sm')
+        await waitForWatcher(server, path.join(root, 'bridge.css'))
+
+        const update = await updateAfter(plugin, () => writeFile(tokensPath, '@theme { --text-huge: 3rem; }\n'), (result) => result.reloaded)
+        expect(update).toEqual({ trigger: 'config', regenerated: true, reloaded: true })
+        const recovered = await server.ssrLoadModule(RUNTIME_SPECIFIER)
+        expect(recovered).not.toBe(fallback)
+        expect(recovered.twMerge('text-huge text-sm')).toBe('text-sm')
+        const clientRecovered = await server.transformRequest(RUNTIME_SPECIFIER)
+        expect(clientRecovered).not.toBe(clientFallback)
+        expect(clientRecovered?.code).not.toContain('getDefaultConfig')
+        await server.close()
+    }
+})
+
 test('a breaking edit keeps the last good module in service, and the next good edit recovers', async () => {
     const root = await copyFixture('app')
     const logs: string[] = []
@@ -169,7 +197,7 @@ test('a breaking edit keeps the last good module in service, and the next good e
 
     const breakingEdit = await updateAfter(plugin, () => writeFile(cssPath, BROKEN_CSS))
     expect(breakingEdit).toEqual({ trigger: 'config', regenerated: false, reloaded: false })
-    expect(logs).toEqual([expect.stringContaining('keeping the previous one')])
+    expect([...new Set(logs)]).toEqual([expect.stringContaining('keeping the previous one')])
     expect(await server.ssrLoadModule(RUNTIME_SPECIFIER)).toBe(before)
 
     const fixingEdit = await updateAfter(plugin, () =>

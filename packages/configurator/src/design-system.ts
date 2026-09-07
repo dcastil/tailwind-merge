@@ -11,6 +11,7 @@ import { createStylesheetResolver } from './stylesheet-resolver.ts'
 export interface TailwindIntegration {
     resolveCss: Resolver
     resolveJs: Resolver
+    /** Files read by generation, plus missing resolution targets on failure so integrations can retry when they are created. */
     onDependency?: (file: string) => void
 }
 
@@ -76,6 +77,7 @@ async function loadDesignSystem(css: string, base: string, integration?: Tailwin
     ).then<typeof TailwindEngine>(({ path: file }) => import(pathToFileURL(file).href)))
     const resolveStylesheet = createStylesheetResolver(
         integration.resolveCss,
+        integration.onDependency,
         integration.onDependency,
     )
     return engine.__unstable__loadDesignSystem(css, {

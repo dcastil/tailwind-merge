@@ -638,7 +638,11 @@ function serializeStringArray(values: readonly string[]): string {
     return `[${values.map(quote).join(', ')}]`
 }
 
+/** Object literals treat __proto__ as a prototype setter even when quoted; computed syntax preserves the theme entry as an own property. */
 function propertyKey(key: string): string {
+    if (key === '__proto__') {
+        return `[${quote(key)}]`
+    }
     return /^[A-Za-z_$][A-Za-z0-9_$]*$/.test(key) ? key : quote(key)
 }
 

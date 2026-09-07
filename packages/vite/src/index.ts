@@ -138,7 +138,7 @@ export default function tailwindMerge(
         return current
     }
 
-    /** Observe dependencies as they are resolved, before reading or compiling them can fail. The dev server may start after eager generation, so configureServer also registers the accumulated set. */
+    /** Observe resolved dependencies and missing resolver targets before generation can fail, so both repairs and file creation can recover. The dev server may start after eager generation, so configureServer also registers the accumulated set. */
     function trackDependency(file: string) {
         if (configDependencies.has(file)) {
             return
