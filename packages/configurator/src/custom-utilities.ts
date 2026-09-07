@@ -1,3 +1,5 @@
+import { validators } from 'tailwind-merge'
+
 import { type EncodingMode, encodeScale } from './compress.ts'
 import { segment } from './css-statements.ts'
 import {
@@ -6,10 +8,10 @@ import {
     classesCompile,
     declaredDeclarations,
     declaredProperties,
-    propertyCovers,
     sameDeclarationScope,
 } from './design-system.ts'
 import { type PlanValue, type ValidatorName } from './plan.ts'
+import { propertyCovers } from './property-coverage.ts'
 
 export interface CustomUtilityPlan {
     /** Self-conflict groups to register (group ID → items), for utilities that are not aliases of a built-in group. */
@@ -42,7 +44,7 @@ export interface BuildCustomUtilityPlanOptions {
  * 2. Other utilities receive self-conflict groups, splitting functional values when their compiled effects differ. When a group's declarations fully cover what another group sets (`btn` with `padding` + `border-radius` covers everything `p-4` sets; see `fullyCovers` for the exact rule), an override edge is added so the utility coming later removes the covered class. The reverse direction stays out on purpose: `p-4` after `btn` only overrides part of `btn`, and removing `btn` would lose the rest of its effect — the same partial-override rule the default config applies between `px` and `p`.
  * 3. Declarations that are conditional (media queries, dark-mode guards) or target other elements (pseudo-elements, child selectors) only count as covered when they are byte-identical shared scaffolding: they overlap only sometimes or somewhere else, so a utility that merely touches them stays side by side with whatever it partially overlaps.
  *
- * Functional roots whose arbitrary slash modifiers change effects remain unclassified: the runtime's fallback from an unknown full class to its base group would otherwise discard those effects.
+ * Functional roots whose slash modifiers change effects without a matching full-class group remain unclassified: the runtime's fallback from an unknown full class to its base group would otherwise discard those effects.
  *
  * Roots that already exist as built-ins are skipped entirely: shadowing changes built-in behavior in ways a registry diff cannot judge.
  */
@@ -272,7 +274,7 @@ interface FunctionalClassGroup {
     validators: ValidatorName[]
 }
 
-/** Groups named values and numeric kinds by their compiled effects, ignoring values but preserving rule scope and importance. Probe-only shapes prevent unsafe root-wide matchers without registering probe names. Returns null when arbitrary postfixes change effects: the runtime falls back to a recognized base group on a full-lookup miss, so leaving only the postfix unclassified would still discard its independent styles. */
+/** Groups named values and numeric kinds by their compiled effects, ignoring values but preserving rule scope and importance. Probe-only shapes prevent unsafe root-wide matchers without registering probe names. Returns null when postfix effects lack a matching full-class group: the runtime falls back to a recognized base group on a full-lookup miss, so leaving only the postfix unclassified would still discard its independent styles. */
 function groupFunctionalClasses(
     project: DesignSystemAccess,
     root: string,
@@ -303,21 +305,6 @@ function groupFunctionalClasses(
         groupsByClassName.set(className, group)
     }
 
-    for (const className of candidates) {
-        if (segment(className, '/').length > 1) {
-            continue
-        }
-        const baseGroup = groupsByClassName.get(className)
-        for (const modifier of ARBITRARY_MODIFIER_PROBES) {
-            const declarations = declaredDeclarations(project, `${className}/${modifier}`)
-            if (
-                declarations?.length &&
-                (!baseGroup || groups.get(functionalEffectSignature(declarations)) !== baseGroup)
-            ) {
-                return null
-            }
-        }
-    }
     for (const [validator, sentinels] of BARE_VALUE_PROBES) {
         const group = groupsByClassName.get(`${root}-${sentinels[0]!}`)
         if (
@@ -334,6 +321,32 @@ function groupFunctionalClasses(
     if (integerGroup) {
         result.splice(result.indexOf(integerGroup), 1)
         result.unshift(integerGroup)
+    }
+
+    for (const className of candidates) {
+        if (segment(className, '/').length > 1) {
+            continue
+        }
+        const baseGroup = groupsByClassName.get(className)
+        for (const modifier of MODIFIER_PROBES) {
+            const modifiedClass = `${className}/${modifier}`
+            const declarations = declaredDeclarations(project, modifiedClass)
+            if (!declarations?.length) {
+                continue
+            }
+            const modifiedGroup = groups.get(functionalEffectSignature(declarations))
+            if (baseGroup && modifiedGroup === baseGroup) {
+                continue
+            }
+            // Named literals outrank validators, whose registration order matches `result`. Fractions can represent numeric base/modifier pairs, but cannot represent named bases such as `type-sm/2`.
+            const tail = modifiedClass.slice(root.length + 1)
+            const lookupGroup = namedClasses.has(modifiedClass)
+                ? groupsByClassName.get(modifiedClass)
+                : result.find((group) => group.validators.some((name) => validators[name](tail)))
+            if (!modifiedGroup || lookupGroup !== modifiedGroup) {
+                return null
+            }
+        }
     }
     return result
 }
@@ -358,7 +371,8 @@ const BARE_VALUE_PROBES: [ValidatorName, string[]][] = [
     ['isFraction', ['355/113', '19/97']],
     ['isNumber', ['971.5', '823.25']],
     ['isInteger', ['9713', '8231']],
-    ['isPercent', ['77.9%', '61.3%']],
+    // Tailwind accepts bare percentages with integer amounts; decimal percentages would silently miss this branch.
+    ['isPercent', ['79%', '61%']],
 ]
 
 /**
@@ -381,7 +395,14 @@ const ARBITRARY_VALUE_PROBES = [
 
 const ARBITRARY_VARIABLE_PROBE = '(--twm-probe)'
 
-const ARBITRARY_MODIFIER_PROBES = [...ARBITRARY_VALUE_PROBES, ARBITRARY_VARIABLE_PROBE]
+// Tailwind suggests named modifiers, but bare numeric modifiers may have no suggestions at all. Probe them on valid named bases as well as the arbitrary base samples.
+const MODIFIER_PROBES = [
+    ...BARE_VALUE_PROBES.filter(([name]) => name !== 'isFraction').flatMap(
+        ([, sentinels]) => sentinels,
+    ),
+    ...ARBITRARY_VALUE_PROBES,
+    ARBITRARY_VARIABLE_PROBE,
+]
 
 const FUNCTIONAL_VALUE_PROBES = [
     ...BARE_VALUE_PROBES.flatMap(([, sentinels]) => sentinels),

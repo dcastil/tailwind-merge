@@ -2,10 +2,10 @@
 import { fullyCovers } from '../src/custom-utilities.ts'
 import {
     type DeclarationEntry,
-    propertyCovers,
     qualifiedProperty,
     sameDeclarationScope,
 } from '../src/design-system.ts'
+import { propertyCovers } from '../src/property-coverage.ts'
 
 /**
  * What Tailwind's compiled CSS says a merge of two classes should do: 'merge' when the later class makes the earlier one irrelevant, 'keep' when both still have an effect, and 'either' when removing the earlier class is lossless without being required (the later class re-declares everything the earlier one sets — identical scaffolding plus overridden state, like supabase's `hit-area` vs `hit-area-0`).

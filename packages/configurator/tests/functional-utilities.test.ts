@@ -6,6 +6,56 @@ import { emitModule } from '../src/emit'
 import { css, expectMerges, generateFixture, importEmittedModule } from './fixture-utils'
 
 describe.each(['compact', 'exact'] as const)('%s functional utility effects', (encoding) => {
+    test.each(['', 'tw'])('preserves bare modifier effects on named values (prefix: %s)', async (prefix) => {
+        const stylesheet = css`
+            @import 'tailwindcss' ${prefix ? 'prefix(tw)' : ''};
+            @utility type-* {
+                font-size: --value(--text-*);
+                line-height: --modifier(number);
+            }
+            @utility type-count-* {
+                font-size: --value(--text-*);
+                --count: --modifier(integer);
+            }
+            @utility type-percent-* {
+                font-size: --value(--text-*);
+                --percent: --modifier(percentage);
+            }
+            @utility same-type-* {
+                font-size: --value(--text-*);
+                font-size: calc(--modifier(number) * 1rem);
+            }
+        `
+        const cases = [
+            ['type-sm/2 type-lg', 'type-sm/2 type-lg'],
+            ['type-sm/1.5 type-lg', 'type-sm/1.5 type-lg'],
+            ['type-lg type-sm/1.5', 'type-lg type-sm/1.5'],
+            ['type-count-sm/2 type-count-lg', 'type-count-sm/2 type-count-lg'],
+            ['type-percent-sm/35% type-percent-lg', 'type-percent-sm/35% type-percent-lg'],
+            ['type-sm type-lg', 'type-sm type-lg'],
+            ['hover:type-sm/2 hover:type-lg', 'hover:type-sm/2 hover:type-lg'],
+            ['type-sm/2! type-lg!', 'type-sm/2! type-lg!'],
+            ['same-type-sm/2 same-type-lg', 'same-type-lg'],
+            ['same-type-lg same-type-sm/2', 'same-type-sm/2'],
+        ].map((pair) => pair.map((list) => list.split(' ').map((name) => prefix ? `${prefix}:${name}` : name).join(' ')))
+        const usedClasses = [...new Set(cases.flatMap(([input]) => input!.split(' ')))]
+        for (const prune of [undefined, { usedClasses }]) {
+            const fixture = await generateFixture(stylesheet, undefined, { encoding, prune })
+            for (const [name, properties] of [
+                ['type-sm/2', ['font-size', 'line-height']],
+                ['type-count-sm/2', ['font-size', '--count']],
+                ['type-percent-sm/35%', ['font-size', '--percent']],
+            ] as const) {
+                expect(declaredDeclarations(fixture.designSystem, name)?.map((entry) => entry.property)).toEqual(properties)
+            }
+            expectMerges(fixture.twMerge, Object.fromEntries(cases))
+            for (const format of ['js', 'ts'] as const) {
+                const emitted = await importEmittedModule(emitModule(fixture.plan, { format }), format)
+                expectMerges(emitted.twMerge, Object.fromEntries(cases))
+            }
+        }
+    })
+
     test.each(['', 'tw'])('separates arbitrary image and color effects (prefix: %s)', async (prefix) => {
         const stylesheet = css`
             @import 'tailwindcss' ${prefix ? 'prefix(tw)' : ''};
