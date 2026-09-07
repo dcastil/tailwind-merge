@@ -33,7 +33,7 @@ All source paths in this table are relative to `packages/configurator/src/`.
 | `materialize.ts`, `emit.ts` | Produce the in-memory config and generated TS/JS from the same plan. |
 | `scan.ts` | Compiles source configuration, collects dependency files and safelists, and wraps oxide scanning. |
 | `css-statements.ts` | Shared lexical inspection of active CSS statements and block headers, plus bracket/quote-aware segmentation for scanning and utility probes. |
-| `stylesheet-resolver.ts` | Shares Tailwind-compatible stylesheet fallback resolution and records stylesheet roles independently of extensions. |
+| `resolvers.ts` | Shares Tailwind-compatible stylesheet/module resolution, records stylesheet roles independently of extensions, and reports missing targets for creation recovery. |
 | `run-cli.ts`, `cli.ts` | Argument parsing, file I/O, source scanning, report output, and full-content `--check`. |
 
 Project and vanilla loads use the same `@tailwindcss/node` compiler and CSS-resolution base. Do not substitute a globally installed vanilla baseline. The compiler itself comes from the package's dependency resolution; resolving CSS imports from the project does not guarantee compiler-version equality with another integration.
@@ -45,6 +45,8 @@ A resolver returning `false`/`undefined` declines the request rather than reject
 The stylesheet resolver deliberately uses a fresh resolver with uncached `fs` instead of Tailwind's shared cached filesystem. This keeps newly created or repaired imports visible across regeneration attempts without another invalidation mechanism. Revisit only if measurements identify resolution as a bottleneck, and preserve retry correctness if introducing a cache. Bundler CSS results can be alias-expanded requests rather than complete filenames; always finish their filesystem/package resolution here. Otherwise an extensionless alias either bypasses `.css` lookup or reports missing paths under the original package-like name instead of the aliased directory.
 
 On failed stylesheet resolution, forward enhanced-resolve's `missingDependencies` to the integration dependency callback. These attempted paths let a watcher recover when a missing import is created, including outside the project root and with implicit `.css` resolution. Report them separately from resolved stylesheet roles: resolver metadata such as a missing `package.json` must never enter safelist parsing. Successful resolution does not report failed alternatives.
+
+JavaScript resolution uses the same fresh-filesystem and missing-dependency mechanism, with Tailwind's module extensions and import-then-require conditions. Apply it in both design-system loading and scanning. Record resolved configs/plugins before execution can fail, and pass the resolved file back to node's `loadModule` through its resolver callback; otherwise its cached filesystem can reject a just-created module even though our fresh lookup succeeded. Keep relative loader requests for dependency collection and ESM invalidation. Regressions exercise creation-only recovery for `@config` and `@plugin`, aliases, out-of-root files, and both pruning modes, plus package condition precedence and fallback.
 
 The plan references validators by name and holds class groups/conflicts in ordered maps. Only public validators can be serialized. Each group's scale is independently copied so collision corrections cannot remove another group's members; the emitter recovers shared scale runs structurally.
 

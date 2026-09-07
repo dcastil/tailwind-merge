@@ -186,6 +186,38 @@ test.each([false, true])('creating a missing imported stylesheet recovers startu
     }
 })
 
+test.each([false, true])('creating missing JavaScript configs and plugins recovers startup generation (pruning: %s)', async (prune) => {
+    for (const [directive, specifier, file] of [
+        ['@config', './missing.config.cjs', 'missing.config.cjs'],
+        ['@plugin', './missing.plugin.cjs', 'missing.plugin.cjs'],
+        ['@config', '@/theme', 'theme.js'],
+        ['@plugin', '../plugin.cjs', '../plugin.cjs'],
+    ]) {
+        const root = await copyFixture('app')
+        const entrypoint = path.join(root, 'app.css')
+        await writeFile(entrypoint, `@import 'tailwindcss' source(none);\n${directive} '${specifier}';\n@source inline('text-huge text-sm');\n`)
+        const { server, plugin } = await startServer(root, {
+            aliases: [{ find: '@', replacement: root }],
+            options: { css: 'app.css', prune: { dev: prune } },
+        })
+        const fallback = await server.ssrLoadModule(RUNTIME_SPECIFIER)
+        const clientFallback = await server.transformRequest(RUNTIME_SPECIFIER)
+        expect(fallback.twMerge('text-huge text-sm')).toBe('text-huge text-sm')
+        await waitForWatcher(server, entrypoint)
+
+        const config = "{ theme: { extend: { fontSize: { huge: '3rem' } } } }"
+        const module = directive === '@config' ? config : `{ handler() {}, config: ${config} }`
+        const update = await updateAfter(plugin, () => writeFile(path.resolve(root, file!), `module.exports = ${module}\n`), (result) => result.reloaded)
+        expect(update).toEqual({ trigger: 'config', regenerated: true, reloaded: true })
+        const recovered = await server.ssrLoadModule(RUNTIME_SPECIFIER)
+        expect(recovered.twMerge('text-huge text-sm')).toBe('text-sm')
+        const clientRecovered = await server.transformRequest(RUNTIME_SPECIFIER)
+        expect(clientRecovered).not.toBe(clientFallback)
+        expect(clientRecovered?.code).not.toContain('getDefaultConfig')
+        await server.close()
+    }
+})
+
 test('a breaking edit keeps the last good module in service, and the next good edit recovers', async () => {
     const root = await copyFixture('app')
     const logs: string[] = []

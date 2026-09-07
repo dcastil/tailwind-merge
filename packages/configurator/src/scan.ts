@@ -5,7 +5,7 @@ import { type GlobEntry, type Scanner, type SourceEntry } from '@tailwindcss/oxi
 
 import { cssStatements, segment } from './css-statements.ts'
 import { type TailwindIntegration } from './design-system.ts'
-import { createStylesheetResolver } from './stylesheet-resolver.ts'
+import { createModuleResolver, createStylesheetResolver } from './resolvers.ts'
 
 export interface SourceScannerOptions {
     /** Content of the Tailwind CSS entrypoint. */
@@ -57,7 +57,10 @@ export async function createSourceScanner(options: SourceScannerOptions): Promis
             (file) => stylesheets.add(file),
             options.integration?.onDependency,
         ),
-        customJsResolver: options.integration?.resolveJs,
+        customJsResolver: createModuleResolver(
+            options.integration?.resolveJs,
+            options.integration?.onDependency,
+        ),
         onDependency: (dependencyPath) => {
             dependencies.add(dependencyPath)
             options.integration?.onDependency?.(dependencyPath)
