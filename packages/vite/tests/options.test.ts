@@ -1,5 +1,5 @@
 import path from 'node:path'
-import { mkdir, readFile, rename, writeFile } from 'node:fs/promises'
+import { mkdir, readFile, rename, symlink, writeFile } from 'node:fs/promises'
 import { runInNewContext } from 'node:vm'
 
 import tailwindcss from '@tailwindcss/vite'
@@ -18,6 +18,53 @@ import {
 } from './helpers'
 
 const { startServer, copyFixture } = setupPluginTests()
+
+test.each([false, true])('discovers a theme through a symlinked project root (pruning: %s)', async (prune) => {
+    const root = await copyFixture('app')
+    const linkedRoot = path.join(path.dirname(root), 'linked-app')
+    await symlink(root, linkedRoot, 'dir')
+    await writeFile(path.join(root, 'app.css'), "@import 'tailwindcss' source(none);\n@import './tokens.css';\n@source inline('text-huge text-sm');\n")
+    await writeFile(path.join(root, 'tokens.css'), '@theme { --text-huge: 3rem; }\n')
+    await writeFile(path.join(root, 'main.ts'), `import './app.css'\nimport { twMerge } from '${RUNTIME_SPECIFIER}'\ndocument.body.className = twMerge('text-huge text-sm')\n`)
+
+    await expect(discoverCssRoot(linkedRoot)).resolves.toBe(path.join(linkedRoot, 'app.css'))
+    const options = { prune: { dev: prune, build: prune } }
+    const logs: string[] = []
+    const { server } = await startServer(linkedRoot, { plugins: [tailwindcss()], options, logs })
+    const runtime = await server.ssrLoadModule(RUNTIME_SPECIFIER)
+    expect(runtime.twMerge('text-huge text-sm')).toBe('text-sm')
+    expect('p' in runtime.getConfig().classGroups).toBe(!prune)
+    // A JavaScript entry avoids Vite's separate HTML-output naming issue when its symlinked root resolves outside that path. CSS discovery still has no explicit entrypoint.
+    const { code, output, lines } = await buildFixture(linkedRoot, {
+        plugins: [tailwindcss()],
+        options,
+        build: { rollupOptions: { input: path.join(linkedRoot, 'main.ts') } },
+    })
+    const document = { body: { className: '' } }
+    runInNewContext(code, { document })
+    expect(document.body.className).toBe('text-sm')
+    expect(output.some((entry) => entry.type === 'asset' && String(entry.source).includes('.text-huge'))).toBe(true)
+    expect([...logs, ...lines].some((line) => /No Tailwind|failed|Could not scan/.test(line))).toBe(false)
+})
+
+test('symlinked discovery follows shared import cycles and still reports independent roots', async () => {
+    const root = await copyFixture('app')
+    const linkedRoot = path.join(path.dirname(root), 'linked-app')
+    await symlink(root, linkedRoot, 'dir')
+    await writeFile(path.join(root, 'app.css'), "@import 'tailwindcss';\n@import './bridge.css';\n@import './tokens.css';\n")
+    await writeFile(path.join(root, 'bridge.css'), "@import './shared.css';\n")
+    await writeFile(path.join(root, 'shared.css'), "@import './bridge.css';\n@import './tokens.css';\n")
+    await writeFile(path.join(root, 'tokens.css'), '@theme { --text-huge: 3rem; }\n')
+
+    await expect(discoverCssRoot(linkedRoot)).resolves.toBe(path.join(linkedRoot, 'app.css'))
+    await writeFile(path.join(root, 'independent.css'), '@theme { --text-other: 4rem; }\n')
+    const error = await discoverCssRoot(linkedRoot).catch((error: unknown) => error)
+    expect(error).toBeInstanceOf(Error)
+    expect((error as Error).message).toContain('  - app.css')
+    expect((error as Error).message).toContain('  - independent.css')
+    expect((error as Error).message).not.toContain('tokens.css')
+    expect((error as Error).message).not.toContain(root)
+})
 
 test.each([false, true])('a custom variant marks the root above its Tailwind import (pruning: %s)', async (prune) => {
     const root = await copyFixture('app')

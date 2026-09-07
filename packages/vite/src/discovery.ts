@@ -1,4 +1,4 @@
-import { readFile, readdir } from 'node:fs/promises'
+import { readFile, readdir, realpath } from 'node:fs/promises'
 import path from 'node:path'
 
 import {
@@ -18,14 +18,16 @@ export async function discoverCssRoot(
     root: string,
     resolveCss?: TailwindIntegration['resolveCss'],
 ): Promise<string | null> {
-    const candidates = new Set<string>()
+    // Graph identities use real paths: a symlinked Vite root and resolved imports can spell the same file differently. Keep scanned paths for import resolution, the selected entrypoint, and root-relative diagnostics.
+    const candidates = new Map<string, string>()
     const statementsByFile = new Map<string, string[] | null>()
 
     for (const file of await collectCssFiles(root)) {
+        const identity = await realpath(file).catch(() => file)
         const statements = await readStatements(file)
-        statementsByFile.set(file, statements)
+        statementsByFile.set(identity, statements)
         if (statements?.some((statement) => ROOT_MARKER_RE.test(statement))) {
-            candidates.add(file)
+            candidates.set(identity, file)
         }
     }
 
@@ -38,16 +40,16 @@ export async function discoverCssRoot(
     const pending = [...candidates]
     const visited = new Set<string>()
     while (pending.length > 0) {
-        const file = pending.pop()!
-        if (visited.has(file)) {
+        const [identity, file] = pending.pop()!
+        if (visited.has(identity)) {
             continue
         }
-        visited.add(file)
+        visited.add(identity)
         // Import-only intermediates are not candidates, but can lead to one. Read explicit imports outside the initial scan too, and cache misses as well as successful reads.
-        if (!statementsByFile.has(file)) {
-            statementsByFile.set(file, await readStatements(file))
+        if (!statementsByFile.has(identity)) {
+            statementsByFile.set(identity, await readStatements(file))
         }
-        const statements = statementsByFile.get(file)
+        const statements = statementsByFile.get(identity)
         if (statements === null || statements === undefined) {
             continue
         }
@@ -61,18 +63,21 @@ export async function discoverCssRoot(
                 () => null,
             )
             if (target !== null) {
-                importedByCandidate.add(target)
-                pending.push(target)
+                const targetIdentity = await realpath(target).catch(() => target)
+                importedByCandidate.add(targetIdentity)
+                pending.push([targetIdentity, target])
             }
         }
     }
 
-    const roots = [...candidates].filter((file) => !importedByCandidate.has(file))
+    const roots = [...candidates]
+        .filter(([identity]) => !importedByCandidate.has(identity))
+        .map(([, file]) => file)
     if (roots.length === 1) {
         return roots[0] as string
     }
 
-    const listed = (roots.length > 1 ? roots : [...candidates])
+    const listed = (roots.length > 1 ? roots : [...candidates.values()])
         .map((file) => `  - ${path.relative(root, file)}`)
         .join('\n')
     throw new Error(

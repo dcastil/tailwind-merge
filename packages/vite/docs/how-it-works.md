@@ -12,6 +12,8 @@ Only active CSS directives participate in discovery. Comments and quoted example
 
 Discovery resolves imports with the same stylesheet resolver used by generation and scanning. Directory aliases are supported, including a directory whose `package.json` points to a stylesheet through its `style` field; that stylesheet is treated as an imported layer rather than an independent root.
 
+Discovery supports symlinked project roots. It compares files by their real filesystem paths so imported theme layers are recognized even when resolution returns a different path spelling.
+
 Custom variant declarations (`@custom-variant`) also mark an entrypoint. If `app.css` imports a Tailwind base and adds a variant, discovery selects `app.css` so the generated configuration includes that variant's ordering rules.
 
 ## Generating the configuration
