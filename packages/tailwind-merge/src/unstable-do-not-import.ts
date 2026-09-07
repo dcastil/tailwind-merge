@@ -4,5 +4,6 @@
  * This entry point exposes tailwind-merge internals for sibling tooling — e.g. the tailwind-merge configurator, which needs to classify class names exactly the way the runtime does. If you find yourself needing something from here in your own project, please open an issue at https://github.com/dcastil/tailwind-merge/issues so a supported API can be considered instead.
  */
 export { createClassGroupUtils } from './lib/class-group-utils'
+export { createClassGroupLookup } from './lib/class-group-lookup'
 export { createParseClassName } from './lib/parse-class-name'
 export { type AnyConfig, type ClassGroup, type ThemeGetter } from './lib/types'

@@ -1,5 +1,5 @@
 import { validators } from 'tailwind-merge'
-import { createClassGroupUtils, createParseClassName } from 'tailwind-merge/unstable-do-not-import'
+import { createClassGroupLookup } from 'tailwind-merge/unstable-do-not-import'
 
 import { materializeConfig } from './materialize.ts'
 import { type ConfigPlan, type PlanValue, filterConflictMap } from './plan.ts'
@@ -7,15 +7,13 @@ import { type ConfigPlan, type PlanValue, filterConflictMap } from './plan.ts'
 /**
  * Shrinks a plan to the class names a project actually uses: groups and members survive only when needed by a used class's lookup, including intermediate base matchers for slash-modified classes — literals a used class names, nested prefix objects a used class descends into, and validators a used class's remaining tail satisfies.
  *
- * The pruned plan merges exactly like the full plan for every class list made of used classes, by construction: it is a subset of the full plan with tailwind-merge's lookup precedence intact. Classification of a used class runs through tailwind-merge's own parser and class map (prefix, variants, important marker, postfix modifiers — mirroring `mergeClassList`'s lookup order), so a class matched via a literal keeps that literal and a class matched via a validator keeps that validator, in the same group and at the same trie position; removing other members can never promote a previously losing candidate, because lookup tries deeper literal paths first and validators in definition order, and that order is preserved among the survivors. Members are only ever removed, never re-encoded, and validators are kept whenever any used tail satisfies them — over-keeping is always safe, under-keeping never is. Retained validators can also classify names outside the used set, so the result is not a strict allowlist. Only supplied candidates carry the equivalence guarantee; consumers with externally supplied, separately styled class names should keep the full config.
+ * The pruned plan merges exactly like the full plan for every class list made of used classes, by construction: it is a subset of the full plan with tailwind-merge's lookup precedence intact. Classification of a used class records the lookups of tailwind-merge's own merge engine (prefix, variants, important marker, and postfix modifiers), so a class matched via a literal keeps that literal and a class matched via a validator keeps that validator, in the same group and at the same trie position; removing other members can never promote a previously losing candidate, because lookup tries deeper literal paths first and validators in definition order, and that order is preserved among the survivors. Members are only ever removed, never re-encoded, and validators are kept whenever any used tail satisfies them — over-keeping is always safe, under-keeping never is. Retained validators can also classify names outside the used set, so the result is not a strict allowlist. Only supplied candidates carry the equivalence guarantee; consumers with externally supplied, separately styled class names should keep the full config.
  *
  * Used classes are raw tokens as a scanner finds them (`hover:bg-red-500/50`, `tw:p-4!`, `-mt-2`), deduplicated here; anything that does not classify is ignored. Conflict maps are filtered to the kept groups, `scales` stay untouched (the emitter drops shared consts nothing references anymore), and the result records what happened in `report.pruning`. The input plan is not mutated.
  */
 export function prunePlan(plan: ConfigPlan, usedClasses: Iterable<string>): ConfigPlan {
     const config = materializeConfig(plan)
-    const parseClassName = createParseClassName(config)
-    const { getClassGroupId } = createClassGroupUtils(config)
-    const postfixLookupClassGroupIds = new Set(config.postfixLookupClassGroups ?? [])
+    const lookupClass = createClassGroupLookup(config)
 
     /** Every successful lookup needed by a used class, including a base group that enables a subsequent postfix lookup. Names contain only the part the class map matched, with a leading minus removed. */
     const matchedNamesByGroup = new Map<string, Set<string>>()
@@ -29,45 +27,19 @@ export function prunePlan(plan: ConfigPlan, usedClasses: Iterable<string>): Conf
         }
         seen.add(className)
 
-        if (classify(className)) {
+        const matches = lookupClass(className)
+        if (matches.length > 0) {
             classifiedClassCount += 1
         }
-    }
-
-    /**
-     * Mirrors the lookup in tailwind-merge's `mergeClassList`, retaining every successful step. A slash-modified class can finish in a different group, but its base matcher must still survive: removing it could promote a broader validator that never requests the full lookup. Counts each supplied class once regardless of how many lookups it needs.
-     */
-    function classify(className: string): boolean {
-        const { isExternal, baseClassName, maybePostfixModifierPosition } =
-            parseClassName(className)
-        if (isExternal) {
-            return false
-        }
-
-        if (maybePostfixModifierPosition) {
-            const withoutPostfix = baseClassName.substring(0, maybePostfixModifierPosition)
-            const classGroupId = trackLookup(withoutPostfix)
-            if (classGroupId && !postfixLookupClassGroupIds.has(classGroupId)) {
-                return true
-            }
-            return Boolean(trackLookup(baseClassName) || classGroupId)
-        }
-
-        return Boolean(trackLookup(baseClassName))
-    }
-
-    /** Records the exact name at each successful classifier step so member pruning preserves its trie precedence. */
-    function trackLookup(className: string): string | undefined {
-        const classGroupId = getClassGroupId(className)
-        if (classGroupId) {
+        for (const match of matches) {
+            const { classGroupId } = match
             let names = matchedNamesByGroup.get(classGroupId)
             if (!names) {
                 names = new Set()
                 matchedNamesByGroup.set(classGroupId, names)
             }
-            names.add(lookupName(className))
+            names.add(lookupName(match.className))
         }
-        return classGroupId
     }
 
     const classGroups = new Map<string, PlanValue[]>()

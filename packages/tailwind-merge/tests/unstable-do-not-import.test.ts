@@ -1,15 +1,45 @@
 import { expect, test } from 'vitest'
 
-import { fromTheme, getDefaultConfig } from '../src'
+import { fromTheme, getDefaultConfig, validators } from '../src'
 import {
     AnyConfig,
     ClassGroup,
     ThemeGetter,
+    createClassGroupLookup,
     createClassGroupUtils,
     createParseClassName,
 } from '../src/unstable-do-not-import'
 
 // Everything tested here is unstable by contract (see docs/versioning.md): it exists for tooling built on tailwind-merge internals and can change in any release. These tests only guard that the entry point exposes what the tooling currently relies on.
+
+test('createClassGroupLookup records base and complete matches using runtime precedence', () => {
+    const lookup = createClassGroupLookup({
+        ...getDefaultConfig(),
+        prefix: 'tw',
+        classGroups: {
+            base: [{ thing: [validators.isNumber] }],
+            narrow: [{ 'thing-width': [validators.isNumber] }],
+            full: [{ 'thing-width': [validators.isFraction] }],
+            fixed: ['badge'],
+            slash: ['badge/icon'],
+            standalone: ['only/icon'],
+        },
+        postfixLookupClassGroups: ['narrow', 'fixed'],
+    })
+    const cases = [
+        ['tw:hover:-thing-width-2/3!', [['-thing-width-2', 'narrow'], ['-thing-width-2/3', 'full']]],
+        ['tw:thing-width-2', [['thing-width-2', 'narrow']]],
+        ['tw:thing-2/3', [['thing-2', 'base']]],
+        ['tw:badge/icon', [['badge', 'fixed'], ['badge/icon', 'slash']]],
+        ['tw:badge/unknown', [['badge', 'fixed']]],
+        ['tw:only/icon', [['only/icon', 'standalone']]],
+        ['tw:thing-unknown', []],
+        ['badge', []],
+    ] as const
+    for (const [input, matches] of cases) {
+        expect(lookup(input)).toEqual(matches.map(([className, classGroupId]) => ({ className, classGroupId })))
+    }
+})
 
 test('createClassGroupUtils has correct inputs and outputs', () => {
     const classGroupUtils = createClassGroupUtils(getDefaultConfig())

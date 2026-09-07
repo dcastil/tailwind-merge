@@ -32,6 +32,8 @@ Links from the library's `docs/` to repository-wide files must traverse three pa
    - alphabetically sorts non-sensitive modifiers,
    - preserves placement around arbitrary/order-sensitive modifiers.
 
+The unstable tooling entry point also exports `createClassGroupLookup` from `src/lib/class-group-lookup.ts`. It runs one candidate through `mergeClassList` with an observing class-map function and returns every successful lookup, including a slash class's intermediate base. The configurator uses this to preserve lookup dependencies during pruning. Keep this instrumentation outside the normal merge path; it is an adapter for build-time inspection, not a second implementation of modifier or lookup semantics. Both built ESM/CJS export checks exercise it.
+
 ## Performance constraints in hot-path code
 
 The hot paths are `src/lib/merge-classlist.ts` and `src/lib/class-group-utils.ts`; `src/lib/parse-class-name.ts` runs per class on cache misses. When editing these files, preserve the existing V8-oriented patterns:
