@@ -63,6 +63,10 @@ export function buildCustomUtilityPlan({
         .filter((root) => !vanillaRoots.has(root))
     const staticRoots = project.utilities.keys('static').filter((root) => !vanillaRoots.has(root))
     const staticRootSet = new Set(staticRoots)
+    const lookupRoots = [
+        ...project.utilities.keys('static'),
+        ...project.utilities.keys('functional'),
+    ].map((root) => (root.startsWith('-') ? root.slice(1) : root))
     const functionalClasses = collectFunctionalClasses(project, functionalRoots)
     const functionalShapes = new Map(
         [...functionalClasses].map(([root, classNames]) => [
@@ -164,9 +168,12 @@ export function buildCustomUtilityPlan({
         ) {
             items.push({ kind: 'class', value: root })
         }
-        // Uniform roots keep their open matchers. Compact's `isAny` also accepts nonexistent values; exact mode restricts this to compiled names and accepted value kinds (see `EncodingMode`).
+        // A failed descendant lookup retries ancestor validators. Even a uniform parent must use exact matchers when nested roots exist, or isAny would reclaim child utilities deliberately preserved for incompatible or unrepresentable effects. Normalize both signs just as runtime lookup does.
+        const hasDescendantRoot = lookupRoots.some((candidate) =>
+            candidate.startsWith(`${lookupRoot}-`),
+        )
         const valueItems =
-            encoding === 'compact'
+            encoding === 'compact' && !hasDescendantRoot
                 ? [{ kind: 'validator', name: 'isAny' } satisfies PlanValue]
                 : exactFunctionalValueItems(
                       project,

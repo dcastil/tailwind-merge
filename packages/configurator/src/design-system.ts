@@ -217,7 +217,7 @@ interface BlockFrame {
 }
 
 /**
- * Parses Tailwind's machine-generated nested CSS into annotated declarations. Quoted and escaped punctuation must stay inside its token: treating content: '(' as structure would hide a pseudo-element's declarations and make alias inference discard its styles.
+ * Parses Tailwind's machine-generated nested CSS into annotated declarations. Quoted punctuation and balanced blocks inside values must stay inside their tokens: losing content: '(' or --state: {ready} would let alias inference discard independent styles or state.
  */
 function parseDeclarations(css: string): DeclarationEntry[] {
     const entries: DeclarationEntry[] = []
@@ -249,7 +249,7 @@ function parseDeclarations(css: string): DeclarationEntry[] {
         })
     }
 
-    let parenDepth = 0
+    const valueClosers: string[] = []
     let quote = ''
     let escaped = false
     for (const char of css) {
@@ -275,20 +275,34 @@ function parseDeclarations(css: string): DeclarationEntry[] {
             quote = char
             continue
         }
-        if (char === '(') {
-            parenDepth += 1
-        } else if (char === ')') {
-            parenDepth = Math.max(0, parenDepth - 1)
+        if (
+            char === '(' ||
+            char === '[' ||
+            (char === '{' &&
+                (valueClosers.length > 0 ||
+                    DECLARATION_START_RE.exec(buffer.trimStart())?.[1]?.startsWith('--')))
+        ) {
+            // Custom properties accept balanced block tokens, including nested semicolons and braces. They do not open style scopes or terminate declarations.
+            valueClosers.push(char === '(' ? ')' : char === '[' ? ']' : '}')
+            buffer += char
+            continue
+        }
+        if (valueClosers.length > 0) {
+            if (char === valueClosers[valueClosers.length - 1]) {
+                valueClosers.pop()
+            }
+            buffer += char
+            continue
         }
 
-        if (parenDepth === 0 && char === '{') {
+        if (char === '{') {
             const header = buffer.trim()
             buffer = ''
             stack.push(frameForHeader(header, stack[stack.length - 1]))
-        } else if (parenDepth === 0 && char === '}') {
+        } else if (char === '}') {
             flushDeclaration()
             stack.pop()
-        } else if (parenDepth === 0 && char === ';') {
+        } else if (char === ';') {
             flushDeclaration()
         } else {
             buffer += char

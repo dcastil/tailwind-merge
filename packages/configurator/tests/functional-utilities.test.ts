@@ -6,6 +6,47 @@ import { emitModule } from '../src/emit'
 import { css, expectMerges, generateFixture, importEmittedModule } from './fixture-utils'
 
 describe.each(['compact', 'exact'] as const)('%s functional utility effects', (encoding) => {
+    test.each(['', 'tw'])('keeps ancestor matchers out of preserved descendant namespaces (prefix: %s)', async (prefix) => {
+        const stylesheet = css`
+            @import 'tailwindcss' ${prefix ? 'prefix(tw)' : ''};
+            @theme { --thing-faint: 0.2; }
+            @utility thing-* { opacity: --value(number, --thing-*); }
+            @utility thing-width-* {
+                width: calc(--value(integer) * 1px);
+                height: --modifier([length]);
+            }
+            @utility thing-paint-* {
+                background-image: --value([image]);
+                background-color: --value([color]);
+            }
+            @utility -thing-shift-* {
+                margin-right: calc(--value(integer) * -1px);
+                height: --modifier([length]);
+            }
+        `
+        const cases = Object.fromEntries([
+            ['thing-width-2/[3px] thing-0.5', 'thing-width-2/[3px] thing-0.5'],
+            ['thing-0.5 thing-width-2/[3px]', 'thing-0.5 thing-width-2/[3px]'],
+            ['thing-width-2 thing-0.5', 'thing-width-2 thing-0.5'],
+            ['thing-width-2/[3px] thing-faint', 'thing-width-2/[3px] thing-faint'],
+            ['thing-paint-[url(hero.svg)] thing-0.5', 'thing-paint-[url(hero.svg)] thing-0.5'],
+            ['-thing-shift-2/[3px] thing-0.5', '-thing-shift-2/[3px] thing-0.5'],
+            ['hover:thing-width-2/[3px] hover:thing-0.5', 'hover:thing-width-2/[3px] hover:thing-0.5'],
+            ['thing-width-2/[3px]! thing-0.5!', 'thing-width-2/[3px]! thing-0.5!'],
+            ['thing-faint thing-0.5', 'thing-0.5'],
+            ['thing-0.5 thing-faint', 'thing-faint'],
+        ].map((pair) => pair.map((list) => list!.split(' ').map((name) => prefix ? `${prefix}:${name}` : name).join(' '))))
+        const usedClasses = [...new Set(Object.keys(cases).flatMap((input) => input.split(' ')))]
+        for (const prune of [undefined, { usedClasses }]) {
+            const fixture = await generateFixture(stylesheet, undefined, { encoding, prune })
+            expectMerges(fixture.twMerge, cases)
+            for (const format of ['ts', 'js'] as const) {
+                const emitted = await importEmittedModule(emitModule(fixture.plan, { format }), format)
+                expectMerges(emitted.twMerge, cases)
+            }
+        }
+    })
+
     test.each(['', 'tw'])('preserves named modifier effects without suggested base values (prefix: %s)', async (prefix) => {
         const stylesheet = css`
             @import 'tailwindcss' ${prefix ? 'prefix(tw)' : ''};
