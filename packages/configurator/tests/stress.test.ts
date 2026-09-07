@@ -128,12 +128,12 @@ function buildStressCss(): string {
         )
     }
 
-    // A bare static + functional pair with identical effect shape — mutual cover joins them into one group. Requires the functional root to surface value suggestions (here via --spacing), because mutual cover is proven against a suggested exemplar.
+    // A bare static + functional pair with identical effect shape — mutual cover joins them into one group, using a suggested value or a compiled probe as the exemplar.
     lines.push(
         '@utility nudge { translate: 0px; }',
         '@utility nudge-* { translate: --spacing(--value(number)); }',
     )
-    // The same pair shape without suggestions: --value(number) alone surfaces no class-list values, so no exemplar exists to prove mutual cover and the bare form conservatively stays its own group.
+    // The same pair shape without suggestions: --value(number) alone surfaces no class-list values, so the compiled numeric probes must supply the exemplar.
     lines.push(
         '@utility pulse { animation-delay: 0s; }',
         '@utility pulse-* { animation-delay: calc(--value(number) * 1s); }',
@@ -227,9 +227,12 @@ describe('stress: 50 custom utilities and 100-value scales', async () => {
         expect(twMerge('nudge-4 nudge')).toBe('nudge')
     })
 
-    test('without value suggestions, mutual cover cannot be proven and the pair conservatively stays apart', () => {
-        expect(plan.report.customUtilityGroups).toContain('utility.pulse.static')
-        expect(twMerge('pulse pulse-3')).toBe('pulse pulse-3')
+    test('compiled probes establish coverage without value suggestions', () => {
+        expect(plan.report.customUtilityGroups).not.toContain('utility.pulse.static')
+        expect(twMerge('pulse pulse-3')).toBe('pulse-3')
+        expect(twMerge('pulse-3 pulse')).toBe('pulse')
+        expect(twMerge('opacity-50 fade-75')).toBe('fade-75')
+        expect(twMerge('z-10 elev-20')).toBe('elev-20')
     })
 
     test('dash-prefix naming exceptions produce no false overrides', () => {

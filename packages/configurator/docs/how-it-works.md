@@ -36,7 +36,11 @@ Theme overrides can change what an existing class means. For example, `@theme { 
 
 A static utility whose compiled declarations match one built-in group's signature can join that group as an alias when the two cover each other's effects. Other custom utilities receive self-conflict groups. When a custom utility fully covers another group's declarations, an override relationship allows the later custom utility to remove the earlier class. Coverage respects declaration-level `!important`: an important custom color survives a later normal text color and cannot alias the normal color group.
 
+Shorthand coverage respects independent CSS properties. For example, a custom utility setting `border` can replace earlier border widths and colors, but preserves rounded corners because only `border-radius` controls those radii.
+
 Functional values with different compiled effects receive separate groups. For example, `text-stroke-*` can set stroke width for numbers and stroke color for color names; those classes must coexist. Named values and supported numeric kinds are grouped by their properties, surrounding rules, and importance. When those effects differ, both encodings enumerate the named values and omit broad arbitrary-value matchers. Arbitrary values on such roots may therefore remain unmerged even when they overlap.
+
+Negative custom roots such as `@utility -shift-*` use the runtime's shared positive/negative lookup path. A negative-only root merges normally. When both signs are registered, uniform roots with mutually covering effects share a group; otherwise both roots remain unmerged so a left-margin utility cannot remove an independent right-margin utility.
 
 Arbitrary-value probes include images and the other supported Tailwind data types. A `paint-*` utility with separate image and color branches therefore preserves both `paint-[url(hero.svg)]` and `paint-[#123456]`. A utility whose arbitrary values all set the same effects can still merge normally.
 

@@ -83,7 +83,7 @@ export function buildAugmentations({
             handledNames.add(registrationName)
             unassigned.push({
                 className: registrationName,
-                reason: 'Arbitrary slash modifiers change this custom utility\'s effects',
+                reason: 'Custom utility effects cannot be distinguished safely by runtime lookup',
             })
             continue
         }

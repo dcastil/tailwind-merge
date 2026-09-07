@@ -53,8 +53,7 @@ export async function discoverCssRoot(
             }
             const base = path.dirname(file)
             const specifier = match[1] as string
-            const target =
-                (await resolveCss?.(specifier, base)) || (await resolveCssImport(base, specifier))
+            const target = await resolveCssImport(base, (await resolveCss?.(specifier, base)) || specifier)
             if (target !== null) {
                 importedByCandidate.add(target)
                 pending.push(target)

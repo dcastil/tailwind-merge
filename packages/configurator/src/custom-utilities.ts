@@ -20,7 +20,7 @@ export interface CustomUtilityPlan {
     conflicts: Map<string, string[]>
     /** Mixed functional groups need a complete lookup before treating a slash as a modifier of the base group. */
     postfixLookupClassGroups: string[]
-    /** Suggested classes deliberately left unclassified because arbitrary modifiers add effects that cannot be enumerated. Augmentation must preserve this decision. */
+    /** Suggested classes at normalized lookup keys deliberately left unclassified because runtime lookup cannot safely distinguish their effects. Augmentation must preserve this decision. */
     preservedClasses: Set<string>
 }
 
@@ -68,12 +68,9 @@ export function buildCustomUtilityPlan({
             groupFunctionalClasses(project, root, classNames),
         ]),
     )
+    reconcileNegativeRoots(project, functionalShapes)
     const functionalExemplars = new Map(
-        [...functionalClasses].map(([root, classNames]) => [
-            root,
-            classNames.find((className) => declaredDeclarations(project, className)?.length) ??
-                null,
-        ]),
+        [...functionalShapes].map(([root, shapes]) => [root, shapes?.[0]?.exemplar ?? null]),
     )
 
     const groupSignatures = collectGroupSignatures(vanilla, vanillaClassGroupId)
@@ -120,11 +117,12 @@ export function buildCustomUtilityPlan({
     }
 
     for (const root of functionalRoots) {
-        const groupId = customUtilityGroupId(root)
+        const lookupRoot = root.startsWith('-') ? root.slice(1) : root
+        const groupId = customUtilityGroupId(lookupRoot)
         const shapes = functionalShapes.get(root)
         if (!shapes) {
             for (const className of functionalClasses.get(root)!) {
-                preservedClasses.add(className)
+                preservedClasses.add(className.startsWith('-') ? className.slice(1) : className)
             }
             continue
         }
@@ -146,7 +144,7 @@ export function buildCustomUtilityPlan({
                 if (valueItems.length > 0) {
                     const shapeGroupId = `${groupId}.${index}`
                     groups.set(shapeGroupId, {
-                        items: [{ kind: 'object', entries: [[root, valueItems]] }],
+                        items: [{ kind: 'object', entries: [[lookupRoot, valueItems]] }],
                         exemplar: shape.exemplar,
                     })
                     postfixLookupClassGroups.push(shapeGroupId)
@@ -170,10 +168,14 @@ export function buildCustomUtilityPlan({
                           .map((className) => className.slice(root.length + 1)),
                   )
         if (valueItems.length > 0) {
-            items.push({ kind: 'object', entries: [[root, valueItems]] })
+            items.push({ kind: 'object', entries: [[lookupRoot, valueItems]] })
         }
         if (items.length > 0) {
-            groups.set(groupId, { items, exemplar: functionalExemplars.get(root) ?? null })
+            const existing = groups.get(groupId)
+            groups.set(groupId, {
+                items: [...(existing?.items ?? []), ...items],
+                exemplar: existing?.exemplar ?? functionalExemplars.get(root) ?? null,
+            })
         }
     }
 
@@ -183,6 +185,29 @@ export function buildCustomUtilityPlan({
         conflicts: inferOverrideConflicts(project, groups, groupSignatures),
         postfixLookupClassGroups,
         preservedClasses,
+    }
+}
+
+/** Runtime lookup removes a leading minus, so opposite roots share one trie path. Only uniform roots that mutually cover each other's effects can share a group; otherwise leave both unclassified instead of letting either sign discard independent styles. */
+function reconcileNegativeRoots(
+    project: DesignSystemAccess,
+    shapesByRoot: Map<string, FunctionalClassGroup[] | null>,
+): void {
+    for (const [root, shapes] of shapesByRoot) {
+        if (!root.startsWith('-') || !shapesByRoot.has(root.slice(1))) {
+            continue
+        }
+        const positiveRoot = root.slice(1)
+        const positiveShapes = shapesByRoot.get(positiveRoot)
+        if (shapes?.length === 1 && positiveShapes?.length === 1) {
+            const negative = declaredDeclarations(project, shapes[0]!.exemplar)
+            const positive = declaredDeclarations(project, positiveShapes[0]!.exemplar)
+            if (fullyCovers(negative, positive) && fullyCovers(positive, negative)) {
+                continue
+            }
+        }
+        shapesByRoot.set(root, null)
+        shapesByRoot.set(positiveRoot, null)
     }
 }
 

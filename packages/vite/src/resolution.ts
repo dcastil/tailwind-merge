@@ -21,7 +21,7 @@ export function createTailwindIntegration(config: ResolvedConfig): TailwindInteg
     }
 }
 
-/** Only real filesystem paths can be read by Tailwind's loaders. Alias-only resolution can return a relative replacement, which remains relative to the importing stylesheet. */
+/** Only filesystem paths can be read by Tailwind's loaders. Keep CSS alias replacements even before their extension is resolved: the configurator finishes resolution and watches the expanded missing targets on failure. Relative replacements remain relative to the importing stylesheet. */
 async function resolve(resolver: ResolveFn, id: string, base: string, ssr: boolean, css: boolean) {
     const importer = path.join(base, '__placeholder__.ts')
     for (const aliasOnly of [true, false]) {
@@ -32,7 +32,7 @@ async function resolve(resolver: ResolveFn, id: string, base: string, ssr: boole
         if (file.startsWith('.')) {
             file = path.resolve(base, file)
         }
-        if (path.isAbsolute(file) && file.endsWith('.css') === css) {
+        if (path.isAbsolute(file) && (file.endsWith('.css') === css || (css && aliasOnly))) {
             return file
         }
     }

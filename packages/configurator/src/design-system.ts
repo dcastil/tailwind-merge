@@ -7,7 +7,7 @@ import type * as TailwindEngine from 'tailwindcss'
 
 import { createStylesheetResolver } from './stylesheet-resolver.ts'
 
-/** Bundler-owned resolution shared by design-system loading and source scanning. Either resolver can defer to Tailwind's normal filesystem/package resolution. */
+/** Bundler-owned resolution shared by design-system loading and source scanning. Either resolver can defer to Tailwind's normal filesystem/package resolution. CSS results may also be alias-expanded requests; stylesheet resolution finishes their extension/package lookup and tracks missing targets. */
 export interface TailwindIntegration {
     resolveCss: Resolver
     resolveJs: Resolver
@@ -446,13 +446,17 @@ const IRREGULAR_SHORTHAND_LONGHANDS: Record<string, string[]> = {
 }
 
 /**
- * Whether setting `property` fully controls `target`, exploiting CSS's systematic shorthand naming: identity, dash-prefix (`padding` → `padding-inline`, `inset` → `inset-block-end`), or the target spelling the property with side or corner segments inserted (`border-radius` → `border-top-left-radius`, `border-color` → `border-top-color`, see `isSegmentSubsequence`) — corrected by the two enumerated exception lists where CSS naming lies about the relationship, in either direction.
+ * Whether setting `property` fully controls `target`, exploiting CSS's systematic shorthand naming: identity, dash-prefix (`padding` → `padding-inline`, `inset` → `inset-block-end`), or the target spelling the property with side or corner segments inserted (`border-radius` → `border-top-left-radius`, `border-color` → `border-top-color`, see `isSegmentSubsequence`) — corrected for the independent border-radius family and by exception tables where CSS naming lies about the relationship, in either direction.
  *
  * On top of the pure naming facts, one policy tailwind-merge's default config has always taken is applied here too: an axis property in the logical `-inline`/`-block` form (`padding-inline`, as `px-*` compiles in v4) controls both physical sides of its axis (`padding-left`, `padding-right`) — the horizontal-tb assumption behind the default config's `px` → `pl`/`pr` edges. Single logical sides stay unrelated to single physical sides (`padding-inline-start` vs `padding-left` depends on the text direction as well), which is also where the default config draws the line.
  */
 export function propertyCovers(property: string, target: string): boolean {
     if (property === target) {
         return true
+    }
+    // Border and side shorthands set width/style/color, but corner radii belong exclusively to border-radius.
+    if (target.startsWith('border-') && target.endsWith('-radius')) {
+        return property === 'border-radius'
     }
     if (IRREGULAR_SHORTHAND_LONGHANDS[property]?.includes(target)) {
         return true

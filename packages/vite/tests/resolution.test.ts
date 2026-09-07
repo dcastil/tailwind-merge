@@ -15,6 +15,24 @@ import {
 
 const { startServer, copyFixture } = setupPluginTests()
 
+test.each([false, true])('recovers when a missing extensionless CSS alias is created (pruning: %s)', async (prune) => {
+    const root = await copyFixture('app')
+    const entrypoint = path.join(root, 'app.css')
+    await writeFile(entrypoint, "@import 'tailwindcss' source(none);\n@import '@/tokens';\n@source inline('text-huge text-sm');\n")
+    const { server, plugin } = await startServer(root, {
+        aliases: [{ find: '@', replacement: root }],
+        options: { css: 'app.css', prune: { dev: prune } },
+    })
+    const before = await server.ssrLoadModule(RUNTIME_SPECIFIER)
+    expect(before.twMerge('text-huge text-sm')).toBe('text-huge text-sm')
+    await waitForWatcher(server, entrypoint)
+
+    const update = await updateAfter(plugin, () => writeFile(path.join(root, 'tokens.css'), '@theme { --text-huge: 3rem; }\n'), (result) => result.reloaded)
+    expect(update).toMatchObject({ regenerated: true, reloaded: true })
+    const after = await server.ssrLoadModule(RUNTIME_SPECIFIER)
+    expect(after.twMerge('text-huge text-sm')).toBe('text-sm')
+})
+
 test.each([false, true])('an unresolved stylesheet fails the build without a runtime import (pruning: %s)', async (prune) => {
     const root = await copyFixture('app')
     await writeFile(path.join(root, 'app.css'), "@import 'tailwindcss';\n@import './missing.pcss';\n")
@@ -37,10 +55,15 @@ test.each([false, true])('falls back to Tailwind resolution for .pcss imports (p
     expect(lines.some((line) => /failed|Could not scan/.test(line))).toBe(false)
 })
 
-test('discovers the entrypoint through a CSS alias', async () => {
+test.each([
+    ['theme.css', 'theme.css'],
+    ['theme', 'theme.css'],
+    ['theme.pcss', 'theme.pcss'],
+    ['theme', 'theme'],
+])('discovers the entrypoint through a CSS alias (%s → %s)', async (specifier, file) => {
     const root = await copyFixture('app')
-    await writeFile(path.join(root, 'app.css'), "@import 'tailwindcss';\n@import '@/theme.css';\n")
-    await writeFile(path.join(root, 'theme.css'), '@theme { --text-huge: 2.5rem; }\n')
+    await writeFile(path.join(root, 'app.css'), `@import 'tailwindcss';\n@import '@/${specifier}';\n`)
+    await writeFile(path.join(root, file), '@theme { --text-huge: 2.5rem; }\n')
     const { server } = await startServer(root, { aliases: [{ find: '@', replacement: root }] })
     const runtime = await server.ssrLoadModule(RUNTIME_SPECIFIER)
     expect(runtime.twMerge('text-huge text-sm')).toBe('text-sm')

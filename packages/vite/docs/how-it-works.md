@@ -18,6 +18,8 @@ The plugin loads CSS using its `@tailwindcss/node` compiler, with imports resolv
 
 When Vite declines a stylesheet import, generation uses Tailwind's normal stylesheet resolution. Explicit imports such as `./theme.pcss` and extensionless files remain valid, and their inline safelists and exclusions participate in pruning.
 
+Aliases also support implicit `.css` extensions. If `@/tokens` points to a missing `tokens.css`, creating that file retries generation and replaces the development fallback without editing the entrypoint.
+
 ## Serving without files
 
 Imports of `@tailwind-merge/vite/runtime` are redirected to an in-memory module containing the generated code. Nothing is written into your project — no generated file to commit, ignore, or confuse the TypeScript server. Types always come from the real on-disk module through normal package resolution, and its export surface is identical to the generated one, so editors and `tsc` need zero configuration.
