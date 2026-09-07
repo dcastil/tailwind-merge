@@ -1,3 +1,4 @@
+import { existsSync } from 'node:fs'
 import path from 'node:path'
 
 import type { Plugin, ResolvedConfig, ViteDevServer } from 'vite'
@@ -105,6 +106,24 @@ export default function tailwindMerge(
                 { timestamp: config.command === 'serve' },
             )
         }
+    }
+
+    /**
+     * Watch existing dependencies and recovery directories, retaining missing filenames only in the session's graph. Chokidar on Linux watches missing filenames through competing, target-filtered directory scans: a missing package.json watch can suppress an imported file's creation even when its parent is also watched.
+     * Resolvers report recovery directories for missing imports. A missing entrypoint has no resolver, so it requests its nearest existing parent here instead.
+     */
+    function watchDependency(file: string, recoverMissingEntrypoint = false) {
+        if (!devServer) {
+            return
+        }
+        while (!existsSync(file)) {
+            const parent = path.dirname(file)
+            if (!recoverMissingEntrypoint || parent === file) {
+                return
+            }
+            file = parent
+        }
+        devServer.watcher.add(file)
     }
 
     /** Source directories outside the Vite root need explicit watching too; configuration dependencies are registered as the session discovers them. */
@@ -237,7 +256,7 @@ export default function tailwindMerge(
                 root: config.root,
                 cacheSize: options.cacheSize,
                 encoding: options.encoding,
-                integration: { ...integration, onDependency: (file) => devServer?.watcher.add(file) },
+                integration: { ...integration, onDependency: watchDependency },
                 prune: pruneActive ? { autoDetectBases: autoDetectBases(config) } : undefined,
                 onGenerated: reportPruning,
                 onError(error, current) {
@@ -262,10 +281,13 @@ export default function tailwindMerge(
                     `[@tailwind-merge/vite] Updating the tailwind-merge config failed: ${error instanceof Error ? error.message : String(error)}`,
                 )
             })
-            // Drain dependencies discovered before the server started, including the entrypoint and missing targets from failed attempts. New discoveries go straight to the watcher.
-            await cssRoot
+            // Drain dependencies discovered before the server started. Missing imports have recovery directories in that graph; the entrypoint needs its own parent watch when it does not exist yet.
+            const cssPath = await cssRoot
+            if (cssPath !== null) {
+                watchDependency(cssPath, true)
+            }
             for (const dependency of session.dependencies) {
-                server.watcher.add(dependency)
+                watchDependency(dependency)
             }
             void session.generation.then((generated) => {
                 if (generated) {
