@@ -38,7 +38,7 @@ export interface BuildAugmentationsOptions {
     groupPrefixKeys: Map<string, string[]>
     /** Groups already classified by custom-utility inference. Property signatures alone must not undo its condition-aware decisions. */
     customGroupIds: ReadonlySet<string>
-    /** Functional classes whose arbitrary postfix effects cannot safely share their base group's conflicts. */
+    /** Custom names whose opposite-sign or postfix effects cannot safely share runtime lookup. */
     preservedCustomClasses: ReadonlySet<string>
 }
 

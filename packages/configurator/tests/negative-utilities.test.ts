@@ -5,6 +5,41 @@ import { emitModule } from '../src/emit'
 import { css, expectMerges, generateFixture, importEmittedModule } from './fixture-utils'
 
 describe.each(['compact', 'exact'] as const)('%s negative custom utilities', (encoding) => {
+    test.each(['', 'tw'])('preserves positive static claims with different effects (prefix: %s)', async (prefix) => {
+        expect.hasAssertions()
+        const utilities = css`
+            @utility shift-small { padding: 1rem; }
+            @utility shift-large { padding: 2rem; border-radius: 1rem; }
+            @utility shift-7 { color: red; }
+        `
+        const cases = {
+            'shift-small -shift-small': 'shift-small -shift-small',
+            '-shift-small shift-small': '-shift-small shift-small',
+            'shift-large -shift-large': 'shift-large -shift-large',
+            '-shift-large shift-large': '-shift-large shift-large',
+            'shift-small -shift-large': 'shift-small -shift-large',
+            'shift-7 -shift-7': 'shift-7 -shift-7',
+            '-shift-7 shift-7': '-shift-7 shift-7',
+            'hover:shift-small hover:-shift-small': 'hover:shift-small hover:-shift-small',
+            'shift-small! -shift-small!': 'shift-small! -shift-small!',
+            'p-2 -shift-small': 'p-2 -shift-small',
+            'text-blue-500 -shift-7': 'text-blue-500 -shift-7',
+        }
+        for (const functional of ['', '@utility shift-* { margin-right: calc(--value(integer) * 1px); }']) {
+            await checkUtilities(prefix, `${utilities}\n${functional}`, cases)
+        }
+    })
+
+    test.each(['', 'tw'])('retains compatible positive static claims (prefix: %s)', async (prefix) => {
+        expect.hasAssertions()
+        await checkUtilities(prefix, '@utility shift-small { margin-right: 1px; }', {
+            'shift-small -shift-small': '-shift-small',
+            '-shift-small shift-small': 'shift-small',
+            '-shift-small -shift-large': '-shift-large',
+            'mr-2 -shift-small': '-shift-small',
+        })
+    })
+
     test.each(['', 'tw'])('normalizes negative-only roots (prefix: %s)', async (prefix) => {
         expect.hasAssertions()
         await checkUtilities(prefix, '', {

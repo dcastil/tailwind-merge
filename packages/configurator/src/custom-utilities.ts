@@ -70,7 +70,7 @@ export function buildCustomUtilityPlan({
             groupFunctionalClasses(project, root, classNames),
         ]),
     )
-    reconcileNegativeRoots(project, functionalShapes)
+    const preservedClasses = reconcileNegativeRoots(project, functionalShapes, staticRoots)
     const functionalExemplars = new Map(
         [...functionalShapes].map(([root, shapes]) => [root, shapes?.[0]?.exemplar ?? null]),
     )
@@ -80,9 +80,11 @@ export function buildCustomUtilityPlan({
     const groups = new Map<string, CustomUtilityGroup>()
     const aliases = new Map<string, string>()
     const postfixLookupClassGroups: string[] = []
-    const preservedClasses = new Set<string>()
 
     for (const root of staticRoots) {
+        if (preservedClasses.has(root)) {
+            continue
+        }
         // A static root sharing its name with a functional custom root joins the functional group only when the two provably have the same effect (they cover each other, like a `shimmer` default alongside `shimmer-*` values) — splitting those would stop them from merging. When the functional form carries state the bare form doesn't (supabase's `hit-area` scaffold vs `hit-area-*` offsets), they stay separate groups and override inference below adds the correct one-directional relationship instead.
         if (functionalClasses.has(root)) {
             const functionalExemplar = functionalExemplars.get(root) ?? null
@@ -190,27 +192,55 @@ export function buildCustomUtilityPlan({
     }
 }
 
-/** Runtime lookup removes a leading minus, so opposite roots share one trie path. Only uniform roots that mutually cover each other's effects can share a group; otherwise leave both unclassified instead of letting either sign discard independent styles. */
+/** Runtime lookup removes a leading minus, so opposite functional roots and positive static names share trie paths. Only compatible effects can share those paths. Preserve conflicting roots and their static claims together, including would-be aliases: either remaining claim could otherwise classify both signs and discard independent styles. */
 function reconcileNegativeRoots(
     project: DesignSystemAccess,
     shapesByRoot: Map<string, FunctionalClassGroup[] | null>,
-): void {
+    staticRoots: string[],
+): Set<string> {
+    const preservedStaticClasses = new Set<string>()
     for (const [root, shapes] of shapesByRoot) {
-        if (!root.startsWith('-') || !shapesByRoot.has(root.slice(1))) {
+        if (!root.startsWith('-')) {
             continue
         }
         const positiveRoot = root.slice(1)
         const positiveShapes = shapesByRoot.get(positiveRoot)
-        if (shapes?.length === 1 && positiveShapes?.length === 1) {
-            const negative = declaredDeclarations(project, shapes[0]!.exemplar)
-            const positive = declaredDeclarations(project, positiveShapes[0]!.exemplar)
-            if (fullyCovers(negative, positive) && fullyCovers(positive, negative)) {
-                continue
+        let compatible = shapes !== null
+        if (positiveShapes !== undefined) {
+            if (shapes?.length === 1 && positiveShapes?.length === 1) {
+                const negative = declaredDeclarations(project, shapes[0]!.exemplar)
+                const positive = declaredDeclarations(project, positiveShapes[0]!.exemplar)
+                compatible &&= fullyCovers(negative, positive) && fullyCovers(positive, negative)
+            } else {
+                compatible = false
             }
         }
+
+        const staticClaims: string[] = []
+        for (const className of staticRoots) {
+            if (className !== positiveRoot && !className.startsWith(`${positiveRoot}-`)) {
+                continue
+            }
+            const negative = declaredDeclarations(project, `-${className}`)
+            if (!negative?.length) {
+                continue
+            }
+            staticClaims.push(className)
+            const positive = declaredDeclarations(project, className)
+            compatible &&= fullyCovers(negative, positive) && fullyCovers(positive, negative)
+        }
+        if (compatible) {
+            continue
+        }
         shapesByRoot.set(root, null)
-        shapesByRoot.set(positiveRoot, null)
+        if (shapesByRoot.has(positiveRoot)) {
+            shapesByRoot.set(positiveRoot, null)
+        }
+        for (const className of staticClaims) {
+            preservedStaticClasses.add(className)
+        }
     }
+    return preservedStaticClasses
 }
 
 /** Group IDs get a `utility.` prefix so they cannot collide with the skeleton's group IDs and are recognizable in reports and the emitted config. */
