@@ -1,6 +1,7 @@
 import { describe, expect, test } from 'vitest'
 
 import { declaredDeclarations } from '../src/design-system'
+import { emitModule } from '../src/emit'
 import { materializeConfig } from '../src/materialize'
 import { prunePlan } from '../src/prune'
 
@@ -11,9 +12,64 @@ import {
     css,
     expectMerges,
     generateFixture,
+    importEmittedModule,
     mergeTable,
     sampleUsedClasses,
 } from './fixture-utils'
+
+describe.each(['compact', 'exact'] as const)('%s new combined-effect names', (encoding) => {
+    test.each(['', 'tw'])('neutralizes names absent from vanilla suggestions (prefix: %s)', async (prefix) => {
+        const stylesheet = css`
+            @import 'tailwindcss' ${prefix ? 'prefix(tw)' : ''};
+            @theme {
+                --color-x-13: red;
+                --color-x-17: blue;
+                --color-y-13: green;
+                --color-x-hairline: black;
+                --border-width-hairline: 1px;
+            }
+        `
+        const cases = {
+            'border-x-13 border-blue-500': 'border-x-13 border-blue-500',
+            'border-blue-500 border-x-13': 'border-blue-500 border-x-13',
+            'border-x-13 border-x-2': 'border-x-13 border-x-2',
+            'border-x-2 border-x-13': 'border-x-2 border-x-13',
+            'border-x-13 border-x-17': 'border-x-13 border-x-17',
+            'border-y-13 border-blue-500': 'border-y-13 border-blue-500',
+            'divide-x-13 divide-blue-500': 'divide-x-13 divide-blue-500',
+            'divide-blue-500 divide-x-13': 'divide-blue-500 divide-x-13',
+            'divide-x-13 divide-x-2': 'divide-x-13 divide-x-2',
+            'divide-x-2 divide-x-13': 'divide-x-2 divide-x-13',
+            'divide-x-13 divide-x-17': 'divide-x-13 divide-x-17',
+            'divide-y-13 divide-blue-500': 'divide-y-13 divide-blue-500',
+            'border-x-hairline border-blue-500': 'border-x-hairline border-blue-500',
+            'border-x-hairline border-x-2': 'border-x-hairline border-x-2',
+            'divide-x-hairline divide-blue-500': 'divide-x-hairline divide-blue-500',
+            'divide-x-hairline divide-x-2': 'divide-x-hairline divide-x-2',
+            'hover:border-x-13 hover:border-blue-500': 'hover:border-x-13 hover:border-blue-500',
+            'divide-x-13! divide-blue-500!': 'divide-x-13! divide-blue-500!',
+            'bg-x-13 bg-blue-500': 'bg-blue-500',
+            'text-x-13 text-x-17': 'text-x-17',
+            'border-hairline border-2': 'border-2',
+        }
+        const prefixedCases = Object.fromEntries(Object.entries(cases).map((pair) => pair.map((list) => list.split(' ').map((name) => prefix ? `${prefix}:${name}` : name).join(' '))))
+        const usedClasses = [...new Set(Object.keys(prefixedCases).flatMap((input) => input.split(' ')))]
+        for (const prune of [undefined, { usedClasses }]) {
+            const fixture = await generateFixture(stylesheet, undefined, { encoding, prune })
+            expect(declaredDeclarations(fixture.designSystem, 'border-x-13')?.map((entry) => entry.property)).toEqual(['border-inline-style', 'border-inline-width', 'border-color'])
+            expectMerges(fixture.twMerge, prefixedCases)
+            expect(fixture.plan.report.resolvedCollisions).toEqual(expect.arrayContaining([
+                expect.objectContaining({ className: 'border-x-13', keptGroupId: null }),
+                expect.objectContaining({ className: 'divide-x-13', keptGroupId: null }),
+                expect.objectContaining({ className: 'border-x-hairline', keptGroupId: null }),
+            ]))
+            for (const format of ['js', 'ts'] as const) {
+                const emitted = await importEmittedModule(emitModule(fixture.plan, { format }), format)
+                expectMerges(emitted.twMerge, prefixedCases)
+            }
+        }
+    })
+})
 
 // Themes that are unusual but entirely possible to write in Tailwind CSS, chosen to stress the one thing a hand-written config gets wrong first: class names that look alike but mean different things. Every fixture runs the conformance sweep (Tailwind's compiled CSS is the authority) and pins the specific merges that matter with `expectMerges`; the `mergeTable` snapshots document behavior where seeing it is the point.
 

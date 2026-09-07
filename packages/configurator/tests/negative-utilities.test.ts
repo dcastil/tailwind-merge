@@ -5,6 +5,58 @@ import { emitModule } from '../src/emit'
 import { css, expectMerges, generateFixture, importEmittedModule } from './fixture-utils'
 
 describe.each(['compact', 'exact'] as const)('%s negative custom utilities', (encoding) => {
+    test.each(['', 'tw'])('preserves opposite static utilities with independent effects (prefix: %s)', async (prefix) => {
+        expect.hasAssertions()
+        const utilities = css`
+            @utility pull { margin-left: 1rem; }
+            @utility -pull { margin-right: -1rem; }
+            @utility badge { padding: 1rem; border-radius: 1rem; }
+            @utility -badge { color: red; }
+            @utility tone { color: blue; }
+            @utility -tone { color: red !important; }
+        `
+        const cases = {
+            'pull -pull': 'pull -pull',
+            '-pull pull': '-pull pull',
+            'pull mr-2': 'pull mr-2',
+            'mr-2 pull': 'mr-2 pull',
+            '-pull ml-2': '-pull ml-2',
+            'ml-2 -pull': 'ml-2 -pull',
+            'hover:pull hover:-pull': 'hover:pull hover:-pull',
+            'pull! -pull!': 'pull! -pull!',
+            'badge -badge': 'badge -badge',
+            '-badge badge': '-badge badge',
+            'badge text-blue-500': 'badge text-blue-500',
+            'tone -tone': 'tone -tone',
+            '-tone tone': '-tone tone',
+            '-tone text-blue-500': '-tone text-blue-500',
+        }
+        // A compatible functional default must not re-register the bare name after its static signed pair was preserved.
+        for (const functional of ['', '@utility pull-* { margin-left: calc(--value(integer) * 1px); }']) {
+            await checkStylesheet(prefix, `${utilities}\n${functional}`, cases)
+        }
+    })
+
+    test.each(['', 'tw'])('keeps compatible opposite static utilities mergeable (prefix: %s)', async (prefix) => {
+        expect.hasAssertions()
+        await checkStylesheet(prefix, css`
+            @utility pull { margin-left: 1rem; }
+            @utility -pull { margin-left: -1rem; }
+            @utility badge { padding: 1rem; border-radius: 1rem; }
+            @utility -badge { padding: 2rem; border-radius: 2rem; }
+        `, {
+            'pull -pull': '-pull',
+            '-pull pull': 'pull',
+            'pull ml-2': 'ml-2',
+            '-pull ml-2': 'ml-2',
+            'mr-2 pull': 'mr-2 pull',
+            'badge -badge': '-badge',
+            '-badge badge': 'badge',
+            'p-2 -badge': '-badge',
+            '-badge p-2': '-badge p-2',
+        })
+    })
+
     test.each(['', 'tw'])('preserves positive static claims with different effects (prefix: %s)', async (prefix) => {
         expect.hasAssertions()
         const utilities = css`
@@ -76,10 +128,9 @@ describe.each(['compact', 'exact'] as const)('%s negative custom utilities', (en
         })
     })
 
-    /** Exercise the public runtime in every output form, including the lookup paths retained by pruning. */
+    /** Supply the negative functional root shared by the positive-claim regressions. */
     async function checkUtilities(prefix: string, positiveUtility: string, cases: Record<string, string>) {
-        const stylesheet = css`
-            @import 'tailwindcss' ${prefix ? 'prefix(tw)' : ''};
+        await checkStylesheet(prefix, css`
             @theme {
                 --shift-small: 1;
                 --shift-large: 2;
@@ -88,6 +139,14 @@ describe.each(['compact', 'exact'] as const)('%s negative custom utilities', (en
                 margin-right: calc(--value(integer, --shift-*) * -1px);
             }
             ${positiveUtility}
+        `, cases)
+    }
+
+    /** Exercise the public runtime in every output form, including the lookup paths retained by pruning. */
+    async function checkStylesheet(prefix: string, utilities: string, cases: Record<string, string>) {
+        const stylesheet = css`
+            @import 'tailwindcss' ${prefix ? 'prefix(tw)' : ''};
+            ${utilities}
         `
         const prefixedCases = Object.fromEntries(Object.entries(cases).map((pair) => pair.map((list) => list.split(' ').map((name) => prefix ? `${prefix}:${name}` : name).join(' '))))
         const usedClasses = [...new Set(Object.keys(prefixedCases).flatMap((input) => input.split(' ')))]

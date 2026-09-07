@@ -44,6 +44,8 @@ Functional values with different compiled effects receive separate groups. For e
 
 Negative custom roots such as `@utility -shift-*` use the runtime's shared positive/negative lookup path. A negative-only root merges normally. When both signs are registered, uniform roots with mutually covering effects share a group; otherwise both roots remain unmerged so a left-margin utility cannot remove an independent right-margin utility. Collision checks also include positive custom static names, even ones that would otherwise alias a built-in group. If `shift-small` sets padding while `-shift-small` sets margin, the conflicting functional roots and their overlapping static names remain unmerged to preserve both styles.
 
+The same check applies to opposite static utilities: if `pull` sets left margin and `-pull` sets right margin, both remain unmerged. Compatible static pairs can still share merge behavior. A functional utility with the same name does not restore an incompatible static pair's bare default.
+
 Arbitrary-value probes include images and the other supported Tailwind data types. A `paint-*` utility with separate image and color branches therefore preserves both `paint-[url(hero.svg)]` and `paint-[#123456]`. A utility whose arbitrary values all set the same effects can still merge normally.
 
 Postfix modifiers can also change a functional utility's effects. If `pair-2` sets width and `pair-2/3` adds height, a later `pair-4` must preserve `pair-2/3`. Tailwind's suggested named modifiers participate too: a `label-red-500/xl` utility that adds a font size survives a later color-only `label-blue-500`. Named modifiers are also probed for numeric-only and arbitrary-only roots that have no suggested base classes. These groups first resolve the base class and then request a complete-class lookup, including in pruned configurations.
@@ -61,6 +63,8 @@ Custom-property declarations also participate in coverage, including names such 
 Style grouping blocks also retain their declarations and scope. An `entrance` utility combining a color with `@starting-style { opacity: 0; }` survives a later text color, preserving its initial opacity. Grouping rules such as `@scope` and `@layer` are handled conservatively; property registrations and keyframe bodies remain separate from element styles.
 
 When one class name compiles to several independent effects, the generator may remove it from conflict groups so it passes through intact. The report records these collisions and any theme-created classes it could not assign. These decisions and their constraints are described in the [limitations](./limitations.md).
+
+This also applies to new names absent from Tailwind's default suggestions. For example, `--color-x-13` makes `border-x-13` set both inline border width and color. A later `border-blue-500` preserves that class's width; the corresponding `divide-x-13` likewise keeps its divider widths.
 
 ## Custom variant ordering
 

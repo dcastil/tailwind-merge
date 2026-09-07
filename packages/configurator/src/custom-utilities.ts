@@ -82,7 +82,7 @@ export function buildCustomUtilityPlan({
     const postfixLookupClassGroups: string[] = []
 
     for (const root of staticRoots) {
-        if (preservedClasses.has(root)) {
+        if (preservedClasses.has(root.startsWith('-') ? root.slice(1) : root)) {
             continue
         }
         // A static root sharing its name with a functional custom root joins the functional group only when the two provably have the same effect (they cover each other, like a `shimmer` default alongside `shimmer-*` values) — splitting those would stop them from merging. When the functional form carries state the bare form doesn't (supabase's `hit-area` scaffold vs `hit-area-*` offsets), they stay separate groups and override inference below adds the correct one-directional relationship instead.
@@ -157,7 +157,11 @@ export function buildCustomUtilityPlan({
             continue
         }
         const items: PlanValue[] = []
-        if (staticRootSet.has(root) && !groups.has(`${groupId}.static`)) {
+        if (
+            staticRootSet.has(root) &&
+            !preservedClasses.has(lookupRoot) &&
+            !groups.has(`${groupId}.static`)
+        ) {
             items.push({ kind: 'class', value: root })
         }
         // Uniform roots keep their open matchers. Compact's `isAny` also accepts nonexistent values; exact mode restricts this to compiled names and accepted value kinds (see `EncodingMode`).
@@ -192,13 +196,24 @@ export function buildCustomUtilityPlan({
     }
 }
 
-/** Runtime lookup removes a leading minus, so opposite functional roots and positive static names share trie paths. Only compatible effects can share those paths. Preserve conflicting roots and their static claims together, including would-be aliases: either remaining claim could otherwise classify both signs and discard independent styles. */
+/** Runtime lookup removes a leading minus, so opposite static names, functional roots, and overlapping static/functional names share trie paths. Only compatible effects can share those paths. Preserve conflicting roots and their static claims together, including would-be aliases: either remaining claim could otherwise classify both signs and discard independent styles. */
 function reconcileNegativeRoots(
     project: DesignSystemAccess,
     shapesByRoot: Map<string, FunctionalClassGroup[] | null>,
     staticRoots: string[],
 ): Set<string> {
     const preservedStaticClasses = new Set<string>()
+    const staticRootSet = new Set(staticRoots)
+    for (const root of staticRoots) {
+        if (!root.startsWith('-') || !staticRootSet.has(root.slice(1))) {
+            continue
+        }
+        const negative = declaredDeclarations(project, root)
+        const positive = declaredDeclarations(project, root.slice(1))
+        if (!fullyCovers(negative, positive) || !fullyCovers(positive, negative)) {
+            preservedStaticClasses.add(root.slice(1))
+        }
+    }
     for (const [root, shapes] of shapesByRoot) {
         if (!root.startsWith('-')) {
             continue

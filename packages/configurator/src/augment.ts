@@ -12,7 +12,7 @@ export interface CollisionResolution {
     className: string
     /** The group whose scale value wrongly claims the class. */
     claimingGroupId: string
-    /** The group that owns the class according to its compiled declarations. Theme overrides can change that owner even when the original matcher still claims the class. */
+    /** The corrected owner for restoration, or the pre-theme matcher also removed during neutralization. If the name had no pre-theme matcher, neutralization repeats the claiming group here. */
     ownerGroupId: string
     /** 'restore': the owner's classification is the correct one, take the claim away from the claiming group. 'neutralize': the class now resolves through multiple utilities at once, so it must not belong to any group — take every claim away and let it pass through unmerged. */
     resolution: 'restore' | 'neutralize'
@@ -21,7 +21,7 @@ export interface CollisionResolution {
 export interface AugmentationResult {
     /** Full class names to append per class group ID, in class-list order. */
     assignments: Map<string, string[]>
-    /** Existing classes whose classification the theme accidentally changed (a value name shadowing them), e.g. `bg-bottom` with a `--color-bottom` defined. */
+    /** Classes with incompatible claims from theme-derived or default matchers, including newly suggested names already covered by a vanilla validator. */
     collisions: CollisionResolution[]
     /** Classes no group could be determined for, with the reason — reported instead of guessed. */
     unassigned: { className: string; reason: string }[]
@@ -45,7 +45,7 @@ export interface BuildAugmentationsOptions {
 /**
  * Finds new and reinterpreted project classes and determines their owning groups empirically, without a maintained namespace table.
  *
- * Mechanism: diff the project's class list against the vanilla one. Every new class that the generated config doesn't already classify is matched against candidate groups derived from its vanilla siblings (classes sharing the first name segment, e.g. `text-…`), where each candidate group is represented by the declared-property signature of one exemplar class. A unique signature match assigns the group — `text-primary` declares `color` like `text-red-500` does, not `font-size` like `text-xl` — which handles Tailwind's undocumented compat sub-namespaces (`--text-color-*`, `--background-color-*`) and namespaces tailwind-merge has no theme key for (`--z-index-*`, `--border-width-*`) with one rule. Ambiguous or unmatched classes are reported, never guessed.
+ * Mechanism: diff the project's class list against the vanilla one. Every new class is matched against candidate groups derived from its vanilla siblings (classes sharing the first name segment, e.g. `text-…`), where each candidate group is represented by the declared-property signature of one exemplar class. A unique signature match assigns the group — `text-primary` declares `color` like `text-red-500` does, not `font-size` like `text-xl` — which handles Tailwind's undocumented compat sub-namespaces (`--text-color-*`, `--background-color-*`) and namespaces tailwind-merge has no theme key for (`--z-index-*`, `--border-width-*`) with one rule. Ambiguous or unmatched classes are reported, never guessed.
  * Existing names are also checked when their group claim or membership in Tailwind's grouped suggestions changes; the deduplicated class list alone cannot reveal an added interpretation.
  */
 export function buildAugmentations({
@@ -108,8 +108,18 @@ export function buildAugmentations({
         )
 
         if (typeof targetGroupId !== 'string') {
+            if (targetGroupId.isJanus && claimingGroupId !== undefined) {
+                // New suggestions can already match a vanilla validator: border-x-13 gains color while retaining its width. Remove both claims just as for an existing suggested name, or removing only the color would expose the width matcher again.
+                collisions.push({
+                    className: registrationName,
+                    claimingGroupId,
+                    ownerGroupId: vanillaClassGroupId(registrationName) ?? claimingGroupId,
+                    resolution: 'neutralize',
+                })
+                continue
+            }
             // The generated config may already classify the class correctly through the standard namespaces (e.g. a custom `--text-*` size); only real gaps are worth reporting.
-            if (projectClassGroupId(registrationName) === undefined) {
+            if (claimingGroupId === undefined) {
                 unassigned.push({ className: registrationName, reason: targetGroupId.reason })
             }
             continue
