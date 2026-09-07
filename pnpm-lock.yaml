@@ -74,6 +74,9 @@ importers:
       enhanced-resolve:
         specifier: ^5.24.5
         version: 5.24.5
+      postcss:
+        specifier: ^8.5.15
+        version: 8.5.15
     devDependencies:
       '@tailwindcss/node':
         specifier: ^4.3.3
@@ -171,6 +174,9 @@ importers:
       enhanced-resolve:
         specifier: ^5.24.5
         version: 5.24.5
+      postcss:
+        specifier: ^8.5.15
+        version: 8.5.15
       tailwind-merge:
         specifier: workspace:*
         version: link:../tailwind-merge

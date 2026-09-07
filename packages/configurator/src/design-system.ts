@@ -3,6 +3,7 @@ import path from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 
 import { type Resolver, __unstable__loadDesignSystem, loadModule } from '@tailwindcss/node'
+import { type ChildNode, parse } from 'postcss'
 import type * as TailwindEngine from 'tailwindcss'
 
 import { createModuleResolver, createStylesheetResolver, trackModuleDependencies } from './resolvers.ts'
@@ -216,105 +217,34 @@ interface BlockFrame {
     skip: boolean
 }
 
-/**
- * Parses Tailwind's machine-generated nested CSS into annotated declarations. Quoted punctuation and balanced blocks inside values must stay inside their tokens: losing content: '(' or --state: {ready} would let alias inference discard independent styles or state.
- */
+/** Annotates compiled CSS with the target and conditions needed for coverage checks. PostCSS owns CSS syntax (including escaped identifiers, importance, and nested value blocks); this walker only interprets style scopes. */
 function parseDeclarations(css: string): DeclarationEntry[] {
     const entries: DeclarationEntry[] = []
-    const stack: BlockFrame[] = []
-    let buffer = ''
-
-    const flushDeclaration = () => {
-        const frame = stack[stack.length - 1]
-        const declaration = buffer.trim()
-        buffer = ''
-        if (!frame || frame.skip || declaration === '') {
-            return
-        }
-        const start = DECLARATION_START_RE.exec(declaration)
-        if (!start) {
-            return
-        }
-        const property = start[1]!
-        const rawValue = declaration.slice(start[0].length).trim()
-        const importantMatch = /\s*!\s*important$/i.exec(rawValue)
-        const value = importantMatch ? rawValue.slice(0, importantMatch.index).trimEnd() : rawValue
-        entries.push({
-            context: frame.context,
-            conditional: frame.conditional,
-            scope: frame.scope,
-            property,
-            important: importantMatch !== null,
-            value,
-        })
-    }
-
-    const valueClosers: string[] = []
-    let quote = ''
-    let escaped = false
-    for (const char of css) {
-        if (escaped) {
-            buffer += char
-            escaped = false
-            continue
-        }
-        if (char === '\\') {
-            buffer += char
-            escaped = true
-            continue
-        }
-        if (quote !== '') {
-            buffer += char
-            if (char === quote) {
-                quote = ''
-            }
-            continue
-        }
-        if (char === '"' || char === "'") {
-            buffer += char
-            quote = char
-            continue
-        }
-        if (
-            char === '(' ||
-            char === '[' ||
-            (char === '{' &&
-                (valueClosers.length > 0 ||
-                    DECLARATION_START_RE.exec(buffer.trimStart())?.[1]?.startsWith('--')))
-        ) {
-            // Custom properties accept balanced block tokens, including nested semicolons and braces. They do not open style scopes or terminate declarations.
-            valueClosers.push(char === '(' ? ')' : char === '[' ? ']' : '}')
-            buffer += char
-            continue
-        }
-        if (valueClosers.length > 0) {
-            if (char === valueClosers[valueClosers.length - 1]) {
-                valueClosers.pop()
-            }
-            buffer += char
-            continue
-        }
-
-        if (char === '{') {
-            const header = buffer.trim()
-            buffer = ''
-            stack.push(frameForHeader(header, stack[stack.length - 1]))
-        } else if (char === '}') {
-            flushDeclaration()
-            stack.pop()
-        } else if (char === ';') {
-            flushDeclaration()
-        } else {
-            buffer += char
-        }
-    }
-
+    visit(parse(css).nodes)
     return entries
-}
 
-/** Custom-property identifiers may start with digits or underscores after -- and contain non-ASCII characters or CSS escapes. Match the delimiter too so an escaped colon stays in the name, while malformed selector fragments still cannot become declarations. */
-const DECLARATION_START_RE =
-    /^(--(?:[\w\u0080-\uFFFF-]|\\(?:[\da-f]{1,6}[ \t\n\r\f]?|[^\r\n\f]))+|-?[a-z][\w-]*)\s*:/i
+    function visit(nodes: ChildNode[], frame?: BlockFrame) {
+        for (const node of nodes) {
+            if (node.type === 'decl') {
+                if (frame && !frame.skip) {
+                    entries.push({
+                        context: frame.context,
+                        conditional: frame.conditional,
+                        scope: frame.scope,
+                        property: node.prop,
+                        important: node.important ?? false,
+                        value: node.value,
+                    })
+                }
+            } else if (node.type === 'rule' || node.type === 'atrule') {
+                const header = node.type === 'rule'
+                    ? node.selector
+                    : `@${node.name}${node.params ? ` ${node.params}` : ''}`
+                visit(node.nodes ?? [], frameForHeader(header, frame))
+            }
+        }
+    }
+}
 
 function frameForHeader(header: string, parent: BlockFrame | undefined): BlockFrame {
     const parentContext = parent?.context ?? ''

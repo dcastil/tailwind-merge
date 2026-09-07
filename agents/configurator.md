@@ -23,7 +23,7 @@ All source paths in this table are relative to `packages/configurator/src/`.
 | File | Responsibility |
 | --- | --- |
 | `generate.ts` | Loads project and vanilla systems, builds plans, applies custom utilities, augments/corrects class claims, optionally prunes, then materializes and emits. |
-| `design-system.ts` | Thin Tailwind API adapter, memoized class lists, prefix-aware compilation, and declaration parsing. |
+| `design-system.ts` | Thin Tailwind API adapter, memoized class lists, prefix-aware compilation, and style-scope annotation of PostCSS declarations. |
 | `property-coverage.ts` | Known CSS shorthand relationships and the default config's logical-axis coverage policy; shared by inference and the test oracle. |
 | `snapshot.ts` | Normalizes theme entries and prefix; compound theme keys do not become standalone scale values. |
 | `plan.ts` | Walks `getDefaultConfig()`, resolves theme getters via `themeKey`, copies scales per group, removes disabled members, and carries group/conflict/modifier ordering. |
@@ -38,6 +38,8 @@ All source paths in this table are relative to `packages/configurator/src/`.
 | `run-cli.ts`, `cli.ts` | Argument parsing, file I/O, source scanning, report output, and full-content `--check`. |
 
 Project and vanilla loads use the same `@tailwindcss/node` compiler and CSS-resolution base. Do not substitute a globally installed vanilla baseline. The compiler itself comes from the package's dependency resolution; resolving CSS imports from the project does not guarantee compiler-version equality with another integration.
+
+PostCSS parses compiled declarations; keep only target/condition interpretation in `design-system.ts`, rather than maintaining another CSS lexer. It handles escaped property names, importance, comments, quoted punctuation, and balanced custom-property values. This is a build-time dependency, declared by both the configurator and the Vite package that bundles its source. The lightweight `cssStatements` reader intentionally remains separate: root discovery must still recognize an entrypoint during an unfinished edit, before its CSS can be parsed successfully. Tailwind owns validation and the normal generation failure/recovery path. Candidate/value `segment` also stays separate because it splits Tailwind class syntax, not stylesheets.
 
 Bundlers can pass `TailwindIntegration` resolution/dependency hooks to generation and scanning. The node wrapper's design-system loader currently drops resolver hooks, so `design-system.ts` uses its underlying Tailwind engine with explicit stylesheet/module loaders when an integration is supplied. Resolve that engine from the installed node package, never from the project or a mutable global resolver hook. Aliased JavaScript paths must be passed back to node's `loadModule` as relative requests: only that path captures transitive dependencies and refreshes ESM imports. Scanning also passes the hooks to `compile()`; otherwise imports, source directives, and generation can describe different projects.
 

@@ -1,5 +1,6 @@
 /**
  * Reads active CSS statements and block headers for build-time inspection without interpreting their contents. Comments cannot introduce directives, and quoted text and function arguments cannot end a statement or open a block. Sharing this between source scanning and root discovery keeps both integrations' view of active directives consistent.
+ * Unlike declaration analysis of compiled CSS, discovery must tolerate unfinished edits so generation can select the entrypoint and report its error through the normal recovery path.
  */
 export function* cssStatements(css: string): Generator<string> {
     let statement = ''

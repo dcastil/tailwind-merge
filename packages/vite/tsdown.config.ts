@@ -20,12 +20,13 @@ export default defineConfig({
     deps: {
         // Nothing may be bundled from node_modules — an entry appearing here means a dependency moved out of the manifest by accident, and the build fails. The inlined configurator (unpublished for the initial Vite release) does not count against this: its workspace link resolves outside node_modules, so tsdown bundles it as local source.
         onlyBundle: [],
-        // The complete import surface of the emitted bundles and declarations — all declared dependencies or peers. tailwind-merge covers its unstable subpath; oxide is the lazy scanner, and enhanced-resolve supplies the stylesheet fallback. vite appears only in declarations (the Plugin type); node builtins are always allowed on platform 'node'.
+        // The complete import surface of the emitted bundles and declarations — all declared dependencies or peers. tailwind-merge covers its unstable subpath; oxide is the lazy scanner, enhanced-resolve supplies the stylesheet fallback, and PostCSS parses compiled declarations. vite appears only in declarations (the Plugin type); node builtins are always allowed on platform 'node'.
         onlyImport: [
             'tailwind-merge',
             '@tailwindcss/node',
             '@tailwindcss/oxide',
             'enhanced-resolve',
+            'postcss',
             'vite',
         ],
     },
