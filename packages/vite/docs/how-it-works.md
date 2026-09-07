@@ -35,13 +35,13 @@ By default, the generated config depends only on your Tailwind **configuration**
 
 Nearby edits are combined and processed in order. With dev pruning enabled, a source edit cannot cancel a pending CSS update: the plugin still reads the changed theme and safelists. Edits made during generation are processed afterward.
 
-If a regeneration fails during development, the last good config keeps serving and the error is logged. If generation has never succeeded, the runtime serves the default config and logs the error. The selected CSS entrypoint and dependencies discovered before the failure remain watched, including outside the Vite root. Missing stylesheet imports and JavaScript `@config`/`@plugin` targets are watched too. Repairing a dependency or creating a missing target retries generation and replaces the fallback without editing the entrypoint or restarting the server.
+If a regeneration fails during development, the last good config keeps serving and the error is logged. If generation has never succeeded, the runtime serves the default config and logs the error. The selected CSS entrypoint and dependencies discovered before the failure remain watched, including outside the Vite root. Missing stylesheet imports and JavaScript `@config`/`@plugin` targets are watched too, including local files those modules import. Repairing a dependency or creating a missing target retries generation and replaces the fallback without editing the entrypoint or restarting the server.
 
 ## Builds
 
 `vite build` generates from the resolved theme and sources. Identical inputs produce identical module code; source collection is independent of the client or SSR module graph. Keep the same root, CSS, dependencies, and options across both builds. The default tailwind-merge configuration is never imported by the generated module, so bundlers tree-shake it away entirely; you ship only your own theme's config — and by default only the part of it your code uses, see below.
 
-If configuration generation fails — for example, the explicit `css` path is missing or a configured plugin cannot be loaded — the build fails, including when nothing imports the runtime module. A failed `vite build --watch` regeneration also fails that rebuild instead of emitting the previous configuration; fixing the CSS allows the next rebuild to succeed. Source-scanning failures still use the full generated configuration, as described below.
+If configuration generation fails — for example, the explicit `css` path is missing or a configured plugin cannot be loaded — the build fails, including when nothing imports the runtime module. A failed `vite build --watch` generation also fails that build instead of emitting a previous configuration. Dependencies discovered by the failed attempt stay watched, even before the first successful build; repairing or creating the affected file retries generation without requiring an entrypoint edit. Source-scanning failures still use the full generated configuration, as described below.
 
 ## Pruning to the classes you use
 

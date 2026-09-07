@@ -5,13 +5,13 @@ import { fileURLToPath, pathToFileURL } from 'node:url'
 import { type Resolver, __unstable__loadDesignSystem, loadModule } from '@tailwindcss/node'
 import type * as TailwindEngine from 'tailwindcss'
 
-import { createModuleResolver, createStylesheetResolver } from './resolvers.ts'
+import { createModuleResolver, createStylesheetResolver, trackModuleDependencies } from './resolvers.ts'
 
 /** Bundler-owned resolution shared by design-system loading and source scanning. Either resolver can defer to Tailwind's normal filesystem/package resolution or return an alias-expanded request; the shared resolvers finish extension/package lookup and track missing targets. */
 export interface TailwindIntegration {
     resolveCss: Resolver
     resolveJs: Resolver
-    /** Files read by generation, plus missing resolution targets on failure so integrations can retry when they are created. */
+    /** Files read by generation, plus missing resolution targets and their existing parent directories on failure so integrations can observe creation and retry. */
     onDependency?: (file: string) => void
 }
 
@@ -91,14 +91,21 @@ async function loadDesignSystem(css: string, base: string, integration?: Tailwin
         },
         async loadModule(id, from) {
             const file = await resolveModule(id, from)
-            // Tailwind only collects transitive dependencies and busts ESM caches for relative module requests. Aliases resolving to local configs/plugins must follow that same path.
-            return loadModule(
-                `./${path.relative(from, file)}`,
-                from,
-                integration.onDependency ?? (() => {}),
-                // Reuse the fresh resolution instead of re-entering Tailwind's cached resolver, which can still consider a newly created module missing.
-                async () => file,
-            )
+            try {
+                // Tailwind only collects transitive dependencies and busts ESM caches for relative module requests. Aliases resolving to local configs/plugins must follow that same path.
+                return await loadModule(
+                    `./${path.relative(from, file)}`,
+                    from,
+                    integration.onDependency ?? (() => {}),
+                    // Reuse the fresh resolution instead of re-entering Tailwind's cached resolver, which can still consider a newly created module missing.
+                    async () => file,
+                )
+            } catch (error) {
+                if (integration.onDependency) {
+                    await trackModuleDependencies(file, integration.onDependency)
+                }
+                throw error
+            }
         },
     })
 }

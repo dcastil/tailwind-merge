@@ -332,9 +332,15 @@ export default function tailwindMerge(
             if (config.command !== 'build') {
                 return
             }
-            if (buildStarts++ > 0 && current) {
-                const settled = current
+            if (buildStarts++ > 0) {
+                const previous = generation
                 generation = (async () => {
+                    // A rejected attempt must be retried even before a first success (or when repairing a new dependency left the last good graph unchanged).
+                    const settled = await previous?.catch(() => null)
+                    if (!settled) {
+                        const cssPath = await cssRoot
+                        return cssPath === null ? null : regenerate(cssPath)
+                    }
                     if (await dependenciesChanged(settled)) {
                         return regenerate(settled.cssPath)
                     }
@@ -348,8 +354,26 @@ export default function tailwindMerge(
                     return settled
                 })()
             }
-            // Await even the initial generation: failures must fail the build regardless of whether any module imports the runtime subpath.
-            await generation
+            try {
+                // Await even the initial generation: failures must fail the build regardless of whether any module imports the runtime subpath.
+                await generation
+            } finally {
+                // Rollup uses these watches on failed builds too. Register the retained graph before propagating the error, even when no virtual module has ever loaded.
+                for (const dependency of configDependencies) {
+                    this.addWatchFile(dependency)
+                }
+                // Rollup disables glob expansion. Watching source directories observes new templates outside the module graph, with Vite's output/cache exclusions still applied.
+                if (current?.pruning) {
+                    for (const file of current.pruning.files) {
+                        this.addWatchFile(file)
+                    }
+                    for (const glob of current.pruning.globs) {
+                        if (!glob.pattern.startsWith('!')) {
+                            this.addWatchFile(glob.base)
+                        }
+                    }
+                }
+            }
         },
 
         async resolveId(source) {
@@ -366,24 +390,6 @@ export default function tailwindMerge(
             const generated = await generation
             if (!generated) {
                 return FALLBACK_MODULE_CODE
-            }
-            if (config.command === 'build') {
-                // In `vite build --watch`, Rollup owns the watching. Register the CSS graph, scanned files, and source directories so new templates outside the module graph rebuild too. Dev watching runs through hotUpdate with the hash gate; a watch-file link here would full-reload on every edit.
-                for (const dependency of generated.dependencies) {
-                    this.addWatchFile(dependency)
-                }
-                if (generated.pruning) {
-                    for (const file of generated.pruning.files) {
-                        this.addWatchFile(file)
-                    }
-                    for (const glob of generated.pruning.globs) {
-                        if (glob.pattern.startsWith('!')) {
-                            continue
-                        }
-                        // Rollup disables glob expansion in its watcher. A source directory observes newly created files and nested directories; Vite retains its output/cache ignore rules.
-                        this.addWatchFile(glob.base)
-                    }
-                }
             }
             return generated.code
         },
