@@ -68,3 +68,23 @@ test.each(['compact', 'exact'] as const)(
         }
     },
 )
+
+test.each(['compact', 'exact'] as const)(
+    "%s aliasing survives the entrypoint's `important` import option",
+    async (encoding) => {
+        // With `@import 'tailwindcss' important` every declaration is important, the project's and the built-in exemplars' alike; the baseline must carry the option too, or the importance comparison rejects every alias.
+        const stylesheet = css`
+            @import 'tailwindcss' important;
+            @utility text-special {
+                color: red;
+            }
+        `
+        const { twMerge, plan, designSystem } = await generateFixture(stylesheet, undefined, { encoding })
+        expect(designSystem.important).toBe(true)
+        expect(plan.report.aliasedUtilityClasses).toMatchObject({ 'text-special': 'text-color' })
+        expectMerges(twMerge, {
+            'text-special text-red-500': 'text-red-500',
+            'text-red-500 text-special': 'text-special',
+        })
+    },
+)

@@ -35,6 +35,8 @@ export interface DesignSystemAccess {
             supportsNegative?: boolean
         }[]
     }
+    /** Whether `@import 'tailwindcss' important` marks every utility declaration important. */
+    important: boolean
     getClassList(): [string, { modifiers: string[] }][]
     /** Variant suggestions and selector templates, including CSS and JavaScript registrations. */
     getVariants(): {
@@ -63,13 +65,16 @@ export async function loadDesignSystems({
     project: DesignSystemAccess
     vanilla: DesignSystemAccess
 }> {
-    const [project, vanilla] = await Promise.all([
-        loadDesignSystem(css, base, integration),
-        loadDesignSystem("@import 'tailwindcss';", base, integration),
-    ])
+    const project = (await loadDesignSystem(css, base, integration)) as unknown as DesignSystemAccess
+    // The baseline mirrors the entrypoint's `important` import option: under it every project declaration is important, and the coverage checks that recognize custom utilities as aliases of built-in ones compare importance, so the vanilla exemplars must carry it too. The prefix option needs no mirroring — candidates are prefixed at the compile boundary.
+    const vanilla = await loadDesignSystem(
+        `@import 'tailwindcss'${project.important ? ' important' : ''};`,
+        base,
+        integration,
+    )
 
     return {
-        project: memoizeClassList(project as unknown as DesignSystemAccess),
+        project: memoizeClassList(project),
         vanilla: memoizeClassList(vanilla as unknown as DesignSystemAccess),
     }
 }
