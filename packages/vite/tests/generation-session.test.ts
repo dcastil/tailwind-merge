@@ -1,4 +1,4 @@
-import { writeFile } from 'node:fs/promises'
+import { mkdir, writeFile } from 'node:fs/promises'
 import path from 'node:path'
 
 import { describe, expect, test } from 'vitest'
@@ -64,4 +64,34 @@ describe.each(['dev', 'build'] as const)('%s generation session', (mode) => {
             await session.dispose()
         }
     })
+})
+
+test('a watch rebuild retries a failed source scan once its cause is gone', async () => {
+    // The first scan fails on a missing `source(…)` directory and the module holds the full config; the next rebuild must try pruning again even though the CSS graph is unchanged.
+    const root = await copyFixture('app')
+    const cssPath = path.join(root, 'app.css')
+    await writeFile(cssPath, "@import 'tailwindcss' source('./does-not-exist');\n")
+    const session = createGenerationSession({
+        cssRoot: Promise.resolve(cssPath),
+        root,
+        prune: { autoDetectBases: [root] },
+        onGenerated: () => {},
+        onError(error) { throw error },
+    })
+    try {
+        const first = await session.generation
+        expect(first!.pruningError).toBeInstanceOf(Error)
+        expect(first!.pruning).toBeUndefined()
+        expect(hasLiteral(first!.code, 'sr-only')).toBe(true)
+
+        await mkdir(path.join(root, 'does-not-exist'))
+        await writeFile(path.join(root, 'does-not-exist', 'index.html'), '<p class="text-sm">')
+        const retried = await session.refresh()
+        expect(retried!.pruningError).toBeUndefined()
+        expect(retried!.pruning).toBeDefined()
+        expect(hasLiteral(retried!.code, 'sr-only')).toBe(false)
+        await expect(session.refresh()).resolves.toBe(retried)
+    } finally {
+        await session.dispose()
+    }
 })

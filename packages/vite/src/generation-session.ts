@@ -53,10 +53,10 @@ export function createGenerationSession(options: GenerationSessionOptions) {
             return generation
         },
 
-        /** Watch builds reuse unchanged successes but always retry failures, even before the first successful generation. */
+        /** Watch builds reuse unchanged successes but always retry failures, even before the first successful generation. A module holding the full config because its source scan failed is retried too, so pruning returns (and the warning repeats) once the cause is gone rather than after the next CSS edit. */
         refresh() {
             generation = generation.catch(() => null).then(async (previous) => {
-                if (!previous || (await dependenciesChanged(previous))) {
+                if (!previous || previous.pruningError || (await dependenciesChanged(previous))) {
                     return run()
                 }
                 if (previous.pruning) {
