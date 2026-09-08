@@ -52,6 +52,12 @@ describe('design-system theme with compat sub-namespaces and resets', async () =
         expect(twMerge('text-primary text-secondary')).toBe('text-secondary')
     })
 
+    test('sub-namespace variables do not become font-size names', () => {
+        // `--text-color-primary` shares the `--text` prefix but Tailwind never turns `text-color-primary` into a class; enumerating it would let a non-class evict a real font size.
+        expect(plan.scales.get('text')?.items).not.toContainEqual({ kind: 'class', value: 'color-primary' })
+        expect(twMerge('text-lg text-color-primary')).toBe('text-lg text-color-primary')
+    })
+
     test('z-index values without a theme key merge (#657)', () => {
         expect(twMerge('z-header z-modal')).toBe('z-modal')
         expect(twMerge('z-header z-10')).toBe('z-10')

@@ -37,14 +37,7 @@ export const getConfig = () => {
     /** The bare `--spacing` multiplier is set, which makes every number a valid spacing value (e.g. p-13). */
     const scaleSpacing = ['px', isNumber]
     /** The `--text-*` theme values: enumerated outliers plus the `isTshirtSize` pattern covering the rest. */
-    const scaleText = [
-        'base',
-        'color-text',
-        'color-secondary-text',
-        'color-tertiary-text',
-        'color-placeholder-text',
-        isTshirtSize,
-    ]
+    const scaleText = ['base', isTshirtSize]
     /** The `--font-weight-*` theme values. */
     const scaleFontWeight = ['thin', 'extralight', 'light', 'normal', 'medium', 'semibold', 'bold', 'extrabold', 'black']
     /** The `--font-*` theme values. */

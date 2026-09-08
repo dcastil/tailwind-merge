@@ -38,15 +38,7 @@ export const getConfig = () => {
     /** Named `--spacing-*` theme values. The bare `--spacing` multiplier is set, which makes every number a valid spacing value (e.g. p-13). */
     const scaleSpacing = ['px', isNumber, 'content', 'card']
     /** The `--text-*` theme values: enumerated outliers plus the `isTshirtSize` pattern covering the rest. */
-    const scaleText = [
-        'base',
-        'color-default',
-        'color-light',
-        'color-lighter',
-        'color-muted',
-        'color-contrast',
-        isTshirtSize,
-    ]
+    const scaleText = ['base', isTshirtSize]
     /** The `--font-weight-*` theme values. */
     const scaleFontWeight = ['thin', 'extralight', 'light', 'normal', 'medium', 'semibold', 'bold', 'extrabold', 'black']
     /** The `--font-*` theme values. */
@@ -2372,7 +2364,7 @@ export const getConfig = () => {
             'font-size': ['leading'],
         },
         postfixLookupClassGroups: ['container-type'],
-        orderSensitiveModifiers: ['*', '**', 'after', 'backdrop', 'before', 'details-content', 'file', 'first-letter', 'first-line', 'marker', 'placeholder', 'selection', 'not-dark', 'group-dark', 'peer-dark', 'in-dark', 'has-dark', 'dark'],
+        orderSensitiveModifiers: ['*', '**', 'after', 'backdrop', 'before', 'details-content', 'file', 'first-letter', 'first-line', 'marker', 'placeholder', 'selection'],
     } satisfies Config<string, never>
 }
 
