@@ -178,7 +178,7 @@ importers:
         specifier: ^8.5.15
         version: 8.5.15
       tailwind-merge:
-        specifier: workspace:*
+        specifier: workspace:^
         version: link:../tailwind-merge
     devDependencies:
       '@tailwind-merge/configurator':
@@ -1202,6 +1202,7 @@ packages:
 
   '@octokit/webhooks-types@7.6.1':
     resolution: {integrity: sha512-S8u2cJzklBC0FgTwWVLaM8tMrDuDMVE4xiTK4EYXM9GntyvrdbSoxqDQa+Fh57CCNApyIpyeqPhhFEmHPfrXgw==}
+    deprecated: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
 
   '@oxc-project/types@0.143.0':
     resolution: {integrity: sha512-u6JZdLBTLotrNC9Vd6vPssINdzcCzleKAH6EJKImQb7GtYvX5keN2dxkoK44stCc4tffE6QQRtZTXVSzsLUlWA==}
