@@ -359,7 +359,9 @@ export default function tailwindMerge(
             if (this.environment.name !== 'client') {
                 return
             }
-            if (file === (await cssRoot) || session.dependencies.has(file)) {
+            // Vite hands over the watcher's path with forward slashes; the entrypoint and the reported dependencies keep the platform's separators (on Windows, `require.cache` keys and resolver results do), so the comparison happens in that form.
+            const changed = path.normalize(file)
+            if (changed === (await cssRoot) || session.dependencies.has(changed)) {
                 updates?.schedule('config')
             } else if (session.current?.pruning) {
                 // Any other file may be a source: the re-scan itself decides whether the used classes changed (a new file, a deleted one, an edit).
