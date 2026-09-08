@@ -186,6 +186,22 @@ test('discovery follows active directives separated by comments', async () => {
     await expect(discoverCssRoot(root)).resolves.toBe(path.join(root, 'app.css'))
 })
 
+test.each([false, true])('an entrypoint that only adds @source above a shared theme is the root (pruning: %s)', async (prune) => {
+    // A shared theme package owns the Tailwind import; the app file adds source directives. Picking the theme file instead would compile it without `@source`, and pruning would drop every group used only under those sources.
+    const root = await copyFixture('app')
+    await mkdir(path.join(root, 'ui'))
+    await writeFile(path.join(root, 'app.css'), "@import './theme.css';\n@source './ui';\n")
+    await writeFile(path.join(root, 'theme.css'), "@import 'tailwindcss' source(none);\n@theme { --text-huge: 2.5rem; }\n")
+    await writeFile(path.join(root, 'ui', 'button.ts'), "export const button = 'text-huge text-sm'\n")
+
+    await expect(discoverCssRoot(root)).resolves.toBe(path.join(root, 'app.css'))
+    const { server } = await startServer(root, { options: { prune: { dev: prune, build: prune } } })
+    const runtime = await server.ssrLoadModule(RUNTIME_SPECIFIER)
+    // Merging proves the font-size group survived: pruning saw `ui/button.ts`, which only the `@source` in app.css reaches.
+    expect(runtime.twMerge('text-huge text-sm')).toBe('text-sm')
+    expect('p' in runtime.getConfig().classGroups).toBe(!prune)
+})
+
 test('discovery picks the import-graph top among marker files', async () => {
     await expect(
         discoverCssRoot(path.join(fixturesDirectory, 'multi-root-resolved')),
