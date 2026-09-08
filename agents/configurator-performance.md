@@ -8,7 +8,7 @@ Measure the whole generated module together with the merge engine, minified and 
 
 The chosen design emits ordinary `createTailwindMerge` configs with lazy construction. In the 2026-08-08 vanilla experiment, the engine was 4,494 B minified / 1,815 B brotli. A prebuilt class-map trie took 9,964 B brotli versus 4,894 B for the `classGroups` representation: repeated scales made the expanded trie twice as large. It would save roughly 0.69 ms of a 0.73 ms one-time initialization. This did not justify a separate runtime or format.
 
-Emitter sharing has a similar tradeoff. The historical default (`scales`) measured 31,989 / 8,822 / 7,706 B (minified / gzip / brotli); aggressive deduplication reduced minified bytes to 28,492 but increased gzip/brotli to 9,364 / 8,197. Fully inline measured 47,289 / 9,055 / 7,767. Keep validator bindings local for minifier renaming and compare compressed output before hoisting additional repeated structures.
+Emitter sharing has a similar tradeoff. Sharing only theme scales measured 31,989 / 8,822 / 7,706 B (minified / gzip / brotli); an aggressive-deduplication variant reduced minified bytes to 28,492 but increased gzip/brotli to 9,364 / 8,197, and fully inline output measured 47,289 / 9,055 / 7,767. The emitter therefore shares scales only, and the other variants were removed rather than kept as modes. Keep validator bindings local for minifier renaming and compare compressed output before hoisting additional repeated structures.
 
 ## Source-pruning baseline, 2026-08-22
 

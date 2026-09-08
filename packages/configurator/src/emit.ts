@@ -11,13 +11,6 @@ export interface EmitOptions {
      * Module specifier the emitted code imports tailwind-merge's API from. Defaults to 'tailwind-merge'. A bundler plugin serving the module virtually has no filesystem location to resolve a bare 'tailwind-merge' from, so it substitutes a specifier of its own package that re-exports tailwind-merge — resolvable from anywhere because the plugin package is the user's direct dependency.
      */
     importSource?: string
-    /**
-     * How much repeated content is deduplicated into shared consts, measured on the vanilla theme (minified / gzip / brotli in bytes):
-     * - 'scales' (default): only resolved theme scales become shared consts, everything else stays inline (31,989 / 8,822 / 7,706). Best compressed size, which is what network transfer pays — compressors handle inline repetition nearly for free, while extra references add entropy.
-     * - 'aggressive': additionally hoists every repeated array/object that pays for itself and spreads mined runs (28,492 / 9,364 / 8,197). Best minified-uncompressed size, at the cost of compressed size.
-     * - 'none': fully inline (47,289 / 9,055 / 7,767). Only useful as a measurement baseline.
-     */
-    sharing?: 'scales' | 'aggressive' | 'none'
 }
 
 /**
@@ -25,18 +18,17 @@ export interface EmitOptions {
  *
  * The whole config is built inside `getConfig` so that nothing is allocated at module evaluation — `createTailwindMerge` invokes the callback on the first `twMerge` call, preserving the library's lazy-init behavior. The module imports only `createTailwindMerge` and `validators` from tailwind-merge, so bundlers tree-shake the default config away.
  *
- * Two measured insights shape the output. Validators are destructured once and referenced as bare identifiers because property accesses like `v.isArbitraryVariable` survive minification while local bindings get mangled. And sharing is applied selectively (see EmitOptions.sharing): deduplicating repetition into consts shrinks the minified size but *grows* the compressed size, since references add entropy where gzip/brotli handled the repetition nearly for free — so the default shares only theme scales, emitted as references or spreads (e.g. `['none', ...scale7]`). Sharing array identity across class groups is safe because tailwind-merge never mutates config arrays. Output is deterministic for identical input so the CLI's `--check` mode can diff against the file on disk.
+ * Two measured insights shape the output. Validators are destructured once and referenced as bare identifiers because property accesses like `v.isArbitraryVariable` survive minification while local bindings get mangled. And only the resolved theme scales are shared as consts, emitted as references or spreads (e.g. `['none', ...scaleBlur]`): deduplicating other repetition into consts shrinks the minified size but *grows* the compressed size, since references add entropy where gzip/brotli handled the repetition nearly for free (measured on the vanilla theme: 31,989 / 8,822 / 7,706 bytes minified / gzip / brotli with scale sharing, against 28,492 / 9,364 / 8,197 with every paying repetition hoisted). Sharing array identity across class groups is safe because tailwind-merge never mutates config arrays. Output is deterministic for identical input so the CLI's `--check` mode can diff against the file on disk.
  */
 export function emitModule(plan: ConfigPlan, options: EmitOptions = {}): string {
     const format = options.format ?? 'ts'
-    const candidates = collectConstantCandidates(plan, options.sharing ?? 'scales')
+    const candidates = collectConstantCandidates(plan)
 
-    // First pass with every candidate available determines which consts are actually referenced (directly from the config or transitively from other used consts). The second pass re-serializes with final sequential names for just the used ones, so decisions are identical and numbering has no gaps.
-    const firstPass = serializeAll(plan, candidates, provisionalNames(candidates), format)
-    const usedCanonicals = resolveTransitiveUsage(candidates, firstPass)
-    const finalNames = assignNames(candidates, usedCanonicals)
-    const secondPass = serializeAll(plan, candidates, finalNames, format)
-    const { configBody } = secondPass
+    // Serialize with every scale const available, then emit only the consts actually referenced — directly from the config or transitively from another emitted const; a pruned plan can leave every scale unreferenced.
+    const names = new Map([...candidates].map(([canonical, candidate]) => [canonical, candidate.name]))
+    const output = serializeAll(plan, candidates, names, format)
+    const usedCanonicals = resolveTransitiveUsage(output)
+    const { configBody } = output
 
     const lines: string[] = []
 
@@ -80,13 +72,13 @@ export function emitModule(plan: ConfigPlan, options: EmitOptions = {}): string 
         lines.push('')
     }
 
-    const emittedConstants = sortByDependencies(secondPass, finalNames)
+    const emittedConstants = sortByDependencies(output, usedCanonicals)
     for (const [canonical, body] of emittedConstants) {
-        const comment = candidates.get(canonical)?.comment
+        const { name, comment } = candidates.get(canonical)!
         if (comment) {
             lines.push(`${INDENT}/** ${comment} */`)
         }
-        lines.push(`${INDENT}const ${finalNames.get(canonical)} = ${body}`)
+        lines.push(`${INDENT}const ${name} = ${body}`)
     }
     // Only the consts actually emitted earn the separating blank line — a pruned plan can leave every shared-scale candidate unreferenced.
     if (emittedConstants.length > 0) {
@@ -104,8 +96,6 @@ export function emitModule(plan: ConfigPlan, options: EmitOptions = {}): string 
 
 const MAX_LINE_LENGTH = 100
 const INDENT = '    '
-/** Assumed length of a const reference when estimating whether hoisting or spreading saves bytes. */
-const NAME_LENGTH = 7
 
 /** Validator names in first-use order, for the destructuring statement at the top of `getConfig`. */
 function collectUsedValidatorNames(plan: ConfigPlan): string[] {
@@ -130,13 +120,13 @@ function collectUsedValidatorNames(plan: ConfigPlan): string[] {
     return [...names]
 }
 
+/** A resolved theme scale emitted as a shared const, referenced or spread wherever a group array contains it. */
 interface ConstantCandidate {
-    kind: 'array' | 'object'
-    node: PlanValue[] | Extract<PlanValue, { kind: 'object' }>
-    /** Item-wise canonical forms for arrays, used for run matching. */
-    itemCanonicals: string[] | null
-    /** Semantic const name, set for theme scales (e.g. `scaleColor`). Falls back to positional naming when absent or already taken. */
-    preferredName: string | null
+    items: PlanValue[]
+    /** Item-wise canonical forms, used for run matching. */
+    itemCanonicals: string[]
+    /** Const name derived from the theme key (e.g. `scaleColor`). */
+    name: string
     /** JSDoc text emitted above the const declaration. Stripped by minifiers, so it costs nothing in production bundles. */
     comment: string | null
 }
@@ -152,178 +142,38 @@ interface SerializedOutput {
     usageByConstant: Map<string, Set<string>>
 }
 
-/**
- * Gathers what becomes a shared const under the chosen sharing strategy: the resolved theme scales (group arrays contain them as contiguous runs), and under 'aggressive' additionally every repeated array/object whose size outweighs a reference plus frequent runs mined from the group arrays (e.g. the spacing tail repeated across margin/padding/sizing scales).
- */
-function collectConstantCandidates(
-    plan: ConfigPlan,
-    sharing: NonNullable<EmitOptions['sharing']>,
-): CandidateMap {
+/** Gathers the resolved theme scales as shared-const candidates; group arrays contain them verbatim wherever a theme getter was substituted. Theme keys are unique, so the derived names are too. */
+function collectConstantCandidates(plan: ConfigPlan): CandidateMap {
     const candidates: CandidateMap = new Map()
 
-    if (sharing === 'none') {
-        return candidates
-    }
-
-    function addArrayCandidate(
-        canonical: string,
-        items: PlanValue[],
-        preferredName: string | null = null,
-        comment: string | null = null,
-    ) {
+    for (const [themeKey, scale] of plan.scales) {
+        if (scale.items.length < 2) {
+            continue
+        }
+        const canonical = canonicalArray(scale.items)
         const existing = candidates.get(canonical)
         if (!existing) {
             candidates.set(canonical, {
-                kind: 'array',
-                node: items,
-                itemCanonicals: items.map(canonicalValue),
-                preferredName,
-                comment,
+                items: scale.items,
+                itemCanonicals: scale.items.map(canonicalValue),
+                name: scaleConstName(themeKey),
+                comment: scale.comment,
             })
-        } else if (existing.preferredName === null) {
-            existing.preferredName = preferredName
-            existing.comment = comment
-        } else if (comment !== null) {
+        } else if (scale.comment !== null) {
             // Two theme scales resolved to identical content and share one const; the comment must mention both origins.
-            existing.comment = `${existing.comment ?? ''} ${comment}`.trim()
-        }
-    }
-
-    if (sharing === 'aggressive') {
-        const arrayStats = new Map<string, { count: number; items: PlanValue[] }>()
-        const objectStats = new Map<
-            string,
-            { count: number; node: Extract<PlanValue, { kind: 'object' }> }
-        >()
-        const runStats = new Map<string, { count: number; items: PlanValue[] }>()
-        const collectionOrder: string[] = []
-
-        function visitArray(items: PlanValue[]) {
-            for (const item of items) {
-                if (item.kind === 'object') {
-                    for (const [, entryItems] of item.entries) {
-                        visitArray(entryItems)
-                    }
-                    const canonical = canonicalValue(item)
-                    const stats = objectStats.get(canonical)
-                    if (stats) {
-                        stats.count += 1
-                    } else {
-                        objectStats.set(canonical, { count: 1, node: item })
-                        collectionOrder.push(canonical)
-                    }
-                }
-            }
-
-            const canonical = canonicalArray(items)
-            const stats = arrayStats.get(canonical)
-            if (stats) {
-                stats.count += 1
-            } else {
-                arrayStats.set(canonical, { count: 1, items })
-                collectionOrder.push(canonical)
-            }
-
-            // Mine contiguous runs so recurring scale fragments compress into spreads even when no full array repeats. Window sizes are capped: longer runs than this don't occur repeatedly in practice.
-            for (let size = 3; size <= Math.min(8, items.length - 1); size++) {
-                for (let start = 0; start + size <= items.length; start++) {
-                    const run = items.slice(start, start + size)
-                    const runCanonical = canonicalArray(run)
-                    const runEntry = runStats.get(runCanonical)
-                    if (runEntry) {
-                        runEntry.count += 1
-                    } else {
-                        runStats.set(runCanonical, { count: 1, items: run })
-                    }
-                }
-            }
-        }
-
-        for (const [, items] of plan.classGroups) {
-            visitArray(items)
-        }
-
-        for (const canonical of collectionOrder) {
-            const array = arrayStats.get(canonical)
-            if (array && hoistingPaysOff(canonical.length, array.count)) {
-                addArrayCandidate(canonical, array.items)
-                continue
-            }
-            const object = objectStats.get(canonical)
-            if (object && hoistingPaysOff(canonical.length, object.count)) {
-                candidates.set(canonical, {
-                    kind: 'object',
-                    node: object.node,
-                    itemCanonicals: null,
-                    preferredName: null,
-                    comment: null,
-                })
-            }
-        }
-
-        for (const [canonical, run] of runStats) {
-            if (!candidates.has(canonical) && spreadingPaysOff(canonical.length, run.count)) {
-                addArrayCandidate(canonical, run.items)
-            }
-        }
-    }
-
-    // Theme scales are prime spread targets — group arrays contain them verbatim wherever a theme getter was substituted.
-    for (const [themeKey, scale] of plan.scales) {
-        if (scale.items.length >= 2) {
-            addArrayCandidate(
-                canonicalArray(scale.items),
-                scale.items,
-                scaleConstName(themeKey),
-                scale.comment,
-            )
+            existing.comment = `${existing.comment ?? ''} ${scale.comment}`.trim()
         }
     }
 
     return candidates
 }
 
-/** `color` → `scaleColor`, `font-weight` → `scaleFontWeight`. Theme keys are unique, so the derived names are too; the `scale` prefix avoids collisions with destructured validator names. */
+/** `color` → `scaleColor`, `font-weight` → `scaleFontWeight`. The `scale` prefix avoids collisions with destructured validator names. */
 function scaleConstName(themeKey: string): string {
     return `scale${themeKey
         .split('-')
         .map((segment) => `${segment[0]?.toUpperCase() ?? ''}${segment.slice(1)}`)
         .join('')}`
-}
-
-/** Hoisting replaces `count` inline copies with references plus one declaration. */
-function hoistingPaysOff(canonicalLength: number, count: number): boolean {
-    return count >= 2 && count * (canonicalLength - NAME_LENGTH) - (canonicalLength + 20) > 0
-}
-
-/** Spreads pay a `...` on top of the reference at every use site. */
-function spreadingPaysOff(canonicalLength: number, count: number): boolean {
-    return count >= 3 && count * (canonicalLength - NAME_LENGTH - 4) - (canonicalLength + 20) > 0
-}
-
-function provisionalNames(candidates: CandidateMap): Map<string, string> {
-    return new Map([...candidates.keys()].map((canonical, index) => [canonical, `scale${index}`]))
-}
-
-/** Names the used consts: theme scales get their semantic name (`scaleColor`), everything else positional numbering. Numeric names cannot collide with semantic ones, so uniqueness only needs the taken-set check. */
-function assignNames(candidates: CandidateMap, usedCanonicals: Set<string>): Map<string, string> {
-    const names = new Map<string, string>()
-    const takenNames = new Set<string>()
-    let positionalIndex = 0
-
-    for (const [canonical, candidate] of candidates) {
-        if (!usedCanonicals.has(canonical)) {
-            continue
-        }
-        const name =
-            candidate.preferredName !== null && !takenNames.has(candidate.preferredName)
-                ? candidate.preferredName
-                : `scale${positionalIndex++}`
-        takenNames.add(name)
-        names.set(canonical, name)
-    }
-
-    return names
 }
 
 /**
@@ -343,19 +193,12 @@ function serializeAll(
         const usage = new Set<string>()
         constantBodies.set(
             canonical,
-            candidate.kind === 'array'
-                ? serializeArrayBody(candidate.node as PlanValue[], 4, {
-                      candidates,
-                      names,
-                      usage,
-                      selfCanonical: canonical,
-                  })
-                : serializeObjectBody(candidate.node as Extract<PlanValue, { kind: 'object' }>, 4, {
-                      candidates,
-                      names,
-                      usage,
-                      selfCanonical: canonical,
-                  }),
+            serializeArrayBody(candidate.items, 4, {
+                candidates,
+                names,
+                usage,
+                selfCanonical: canonical,
+            }),
         )
         usageByConstant.set(canonical, usage)
     }
@@ -402,7 +245,7 @@ function serializeAll(
 }
 
 /** Usage is transitive: a const referenced only from another used const's body still has to be emitted. */
-function resolveTransitiveUsage(candidates: CandidateMap, output: SerializedOutput): Set<string> {
+function resolveTransitiveUsage(output: SerializedOutput): Set<string> {
     const used = new Set<string>(output.directUsage)
     let changed = true
 
@@ -421,13 +264,10 @@ function resolveTransitiveUsage(candidates: CandidateMap, output: SerializedOutp
     return used
 }
 
-/** Orders consts so that every reference points to an already-declared name, using the exact usage sets recorded during serialization. Containment makes cycles impossible. */
-function sortByDependencies(
-    output: SerializedOutput,
-    names: Map<string, string>,
-): [string, string][] {
+/** Orders the used consts so that every reference points to an already-declared name, using the exact usage sets recorded during serialization. Containment makes cycles impossible. */
+function sortByDependencies(output: SerializedOutput, used: Set<string>): [string, string][] {
     const remaining = new Map(
-        [...output.constantBodies].filter(([canonical]) => names.has(canonical)),
+        [...output.constantBodies].filter(([canonical]) => used.has(canonical)),
     )
     const declared = new Set<string>()
     const sorted: [string, string][] = []
@@ -437,7 +277,7 @@ function sortByDependencies(
 
         for (const [canonical, body] of remaining) {
             const dependencies = [...(output.usageByConstant.get(canonical) ?? [])].filter(
-                (dependency) => names.has(dependency) && dependency !== canonical,
+                (dependency) => used.has(dependency) && dependency !== canonical,
             )
             if (dependencies.every((dependency) => declared.has(dependency))) {
                 declared.add(canonical)
@@ -516,11 +356,7 @@ function findLongestRun(
     let best: { name: string; canonical: string; length: number } | null = null
 
     for (const [canonical, candidate] of context.candidates) {
-        if (
-            candidate.kind !== 'array' ||
-            canonical === context.selfCanonical ||
-            candidate.itemCanonicals === null
-        ) {
+        if (canonical === context.selfCanonical) {
             continue
         }
         const length = candidate.itemCanonicals.length
@@ -559,15 +395,6 @@ function serializeValue(value: PlanValue, indent: number, context: SerializeCont
     if (value.kind === 'validator') {
         return value.name
     }
-
-    const canonical = canonicalValue(value)
-    if (canonical !== context.selfCanonical) {
-        const name = context.names.get(canonical)
-        if (name) {
-            context.usage.add(canonical)
-            return name
-        }
-    }
     return serializeObjectBody(value, indent, context)
 }
 
@@ -591,7 +418,7 @@ function serializeObjectBody(
 }
 
 /**
- * Canonical string form used as identity for sharing decisions: fully inlined, ignoring shared consts and line breaks, so identical content always produces identical keys. Cached by node identity since plans reuse instances for repeated scales.
+ * Canonical string form used as identity for scale references and run matching: fully inlined, ignoring shared consts and line breaks, so identical content always produces identical keys. Cached by node identity since plans reuse instances for repeated scales.
  */
 function canonicalArray(items: PlanValue[]): string {
     let canonical = canonicalArrayCache.get(items)

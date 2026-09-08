@@ -35,15 +35,13 @@ test.each(['compact', 'exact'] as const)('emits own __proto__ theme entries with
         const expectedConfig = materializeConfig(plan)
         const inMemory = createTailwindMerge(() => expectedConfig)
         for (const format of ['ts', 'js'] as const) {
-            for (const sharing of ['scales', 'aggressive', 'none'] as const) {
-                const emitted = await importEmittedModule(emitModule(plan, { format, sharing }), format)
-                for (const [first, second] of [[candidates[0], candidates[1]], [candidates[2], candidates[3]]]) {
-                    const input = `${first} ${second}`
-                    expect(inMemory(input)).toBe(second)
-                    expect(emitted.twMerge(input)).toBe(second)
-                }
-                expect(emitted.getConfig()).toEqual(expectedConfig)
+            const emitted = await importEmittedModule(emitModule(plan, { format }), format)
+            for (const [first, second] of [[candidates[0], candidates[1]], [candidates[2], candidates[3]]]) {
+                const input = `${first} ${second}`
+                expect(inMemory(input)).toBe(second)
+                expect(emitted.twMerge(input)).toBe(second)
             }
+            expect(emitted.getConfig()).toEqual(expectedConfig)
         }
     }
 })
