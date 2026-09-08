@@ -102,7 +102,8 @@ function createResolver(
         ...options,
         fileSystem: fs,
         useSyncFileSystemCalls: true,
-        modules: ['node_modules', ...(process.env.NODE_PATH?.split(path.delimiter) ?? [])],
+        // An empty or trailing-delimiter NODE_PATH must not add '' as a module directory: enhanced-resolve turns that into the working directory itself, and a missing bare import would then resolve to the project's own entry file instead of failing.
+        modules: ['node_modules', ...(process.env.NODE_PATH?.split(path.delimiter).filter(Boolean) ?? [])],
     }))
     return async (id, base) => {
         const request = (await customResolver?.(id, base)) || id
