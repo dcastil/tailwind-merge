@@ -2461,7 +2461,7 @@ export const getConfig = () => {
             'font-size': ['leading'],
         },
         postfixLookupClassGroups: ['container-type'],
-        orderSensitiveModifiers: ['*', '**', 'after', 'backdrop', 'before', 'details-content', 'file', 'first-letter', 'first-line', 'marker', 'placeholder', 'selection', 'not-dark', 'group-dark', 'peer-dark', 'in-dark', 'has-dark', 'dark'],
+        orderSensitiveModifiers: ['*', '**', 'after', 'backdrop', 'before', 'details-content', 'file', 'first-letter', 'first-line', 'marker', 'placeholder', 'selection', 'in-dark'],
     } satisfies Config<string, never>
 }
 

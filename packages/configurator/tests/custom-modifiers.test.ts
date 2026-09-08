@@ -117,3 +117,20 @@ describe.each(['', 'tw'])('custom modifiers (prefix: %s)', (prefix) => {
         },
     )
 })
+
+test.each(['compact', 'exact'] as const)(
+    '%s keeps a variant with a :where() selector list order-insensitive',
+    async (encoding) => {
+        // The dark-mode setup of many real-world themes. Its selector list sits inside `:where()`, so it still targets the element itself and commutes with state variants like the default config's `dark` does.
+        const stylesheet = css`
+            @import 'tailwindcss';
+            @custom-variant dark (&:where(.dark, .dark *));
+        `
+        const { twMerge, plan } = await generateFixture(stylesheet, undefined, { encoding })
+        expect(plan.orderSensitiveModifiers).not.toContain('dark')
+        expectMerges(twMerge, {
+            'dark:hover:p-2 hover:dark:p-4': 'hover:dark:p-4',
+            'hover:dark:p-2 dark:hover:p-4': 'dark:hover:p-4',
+        })
+    },
+)

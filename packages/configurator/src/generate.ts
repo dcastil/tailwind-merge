@@ -3,6 +3,7 @@ import { type AnyConfig, createClassGroupUtils, createParseClassName } from 'tai
 
 import { buildAugmentations } from './augment.ts'
 import { type EncodingMode } from './compress.ts'
+import { segment } from './css-statements.ts'
 import { buildCustomUtilityPlan } from './custom-utilities.ts'
 import {
     type DesignSystemAccess,
@@ -167,7 +168,7 @@ function customOrderSensitiveModifiers(
         declaredDeclarations(project, `${modifier}:block`)?.some(
             (entry) =>
                 entry.context !== '' ||
-                entry.scope.some((rule) => !rule.startsWith('@') && rule.includes(',')),
+                entry.scope.some((rule) => !rule.startsWith('@') && segment(rule, ',').length > 1),
         ),
     )
 }
