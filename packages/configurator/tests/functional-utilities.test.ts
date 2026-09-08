@@ -1,3 +1,5 @@
+import { fileURLToPath } from 'node:url'
+
 import { describe, expect, test } from 'vitest'
 
 import { declaredDeclarations } from '../src/design-system'
@@ -430,4 +432,24 @@ test('a custom utility extending a built-in root is reported instead of silently
         reason: expect.stringContaining('extends a built-in root'),
     })
     expect(twMerge('text-4 text-8')).toBe('text-4 text-8')
+})
+
+test.each(['compact', 'exact'] as const)("%s joins a plugin utility's DEFAULT value to its root", async (encoding) => {
+    // `matchUtilities` with a DEFAULT value registers only the functional root; the bare `tint` is suggested and compiles but had no static root to join through, so `tint tint-2` never merged.
+    const { twMerge, plan } = await generateFixture(
+        css`
+            @import 'tailwindcss';
+            @plugin './default-value.mjs';
+        `,
+        fileURLToPath(new URL('fixtures/plugin/', import.meta.url)),
+        { encoding },
+    )
+
+    expect(plan.report.unassignedClasses).toEqual([])
+    expectMerges(twMerge, {
+        'tint tint-2': 'tint-2',
+        'tint-2 tint': 'tint',
+        'tint tint': 'tint',
+        'tint grayscale': 'tint grayscale',
+    })
 })

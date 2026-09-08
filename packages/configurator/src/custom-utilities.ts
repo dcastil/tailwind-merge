@@ -180,6 +180,9 @@ export function buildCustomUtilityPlan({
             !groups.has(`${groupId}.static`)
         ) {
             items.push({ kind: 'class', value: lookupRoot })
+        } else if (!staticRootSet.has(root) && bareValueJoinsRoot(project, root, shapes[0]!)) {
+            // A plugin's `DEFAULT` value: Tailwind suggests and compiles the bare `tint` but registers no static root for it, so it has no other way into the group. It joins only when it provably has the same effect as the root's values.
+            items.push({ kind: 'class', value: lookupRoot })
         }
         // A failed descendant lookup retries ancestor validators. Even a uniform parent must use exact matchers when nested roots exist, or isAny would reclaim child utilities deliberately preserved for incompatible or unrepresentable effects. Normalize both signs just as runtime lookup does.
         const hasDescendantRoot = lookupRoots.some((candidate) =>
@@ -277,6 +280,20 @@ function reconcileNegativeRoots(
         }
     }
     return preservedStaticClasses
+}
+
+/** Whether a functional root's bare class (a plugin `DEFAULT` value) compiles and covers its shape's exemplar both ways, like a static root that joins its functional group. */
+function bareValueJoinsRoot(
+    project: DesignSystemAccess,
+    root: string,
+    shape: FunctionalClassGroup,
+): boolean {
+    const bare = declaredDeclarations(project, root)
+    if (!bare?.length) {
+        return false
+    }
+    const exemplar = declaredDeclarations(project, shape.exemplar)
+    return fullyCovers(bare, exemplar) && fullyCovers(exemplar, bare)
 }
 
 /** Group IDs get a `utility.` prefix so they cannot collide with the skeleton's group IDs and are recognizable in reports and the emitted config. */
