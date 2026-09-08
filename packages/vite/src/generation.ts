@@ -19,7 +19,7 @@ export interface GeneratedRuntimeModule {
     hash: string
     /** Absolute paths of every file the generation read: the entrypoint, `@import`ed stylesheets, and `@config`/`@plugin` modules. Watching these is what triggers regeneration. */
     dependencies: Set<string>
-    /** Modification times of the dependencies at generation time, so a `vite build --watch` rebuild can tell whether the CSS graph changed without re-reading it. */
+    /** Modification times of the dependencies as generation read them, so a `vite build --watch` rebuild can tell whether the CSS graph changed without re-reading it. */
     dependencyMtimes: Map<string, number | null>
     /** The entrypoint the module was generated from, kept for regeneration. */
     cssPath: string
@@ -53,20 +53,28 @@ export interface GenerateRuntimeModuleOptions {
 /**
  * Generates the virtual runtime module from the project's Tailwind CSS entrypoint.
  *
- * Always supplies dependency hooks to the configurator's loaders, even without custom resolution. The same load that generates the config therefore discovers its dependencies; a separate compile for watching is unnecessary. Reused scanners contribute their previously discovered dependencies too.
+ * Always supplies dependency hooks to the configurator's loaders, even without custom resolution. The same load that generates the config therefore discovers its dependencies; a separate compile for watching is unnecessary. Reused scanners contribute their previously discovered dependencies too. Each dependency's modification time is taken when it is reported, as it is read: taken after generation, an edit landing mid-generation would be recorded as the baseline and a watch rebuild would keep the stale module.
  *
  * A failing scan (no oxide binary for the platform, sources Tailwind can't resolve) never fails the generation: the module is generated with the full config and `pruningError` carries the reason — pruning is an optimization, and falling back preserves the full generated config's behavior.
  */
 export async function generateRuntimeModule(
     options: GenerateRuntimeModuleOptions,
 ): Promise<GeneratedRuntimeModule> {
+    const dependencies = new Set<string>()
+    const dependencyMtimes = new Map<string, Promise<number | null>>()
+    const recordDependency = (file: string) => {
+        dependencies.add(file)
+        if (!dependencyMtimes.has(file)) {
+            dependencyMtimes.set(file, readMtime(file))
+        }
+    }
+    recordDependency(options.cssPath)
     const css = await readFile(options.cssPath, 'utf-8')
     const base = path.dirname(options.cssPath)
-    const dependencies = new Set<string>([options.cssPath])
     const integration: TailwindIntegration = {
         ...options.integration,
         onDependency(file: string) {
-            dependencies.add(file)
+            recordDependency(file)
             options.integration?.onDependency?.(file)
         },
     }
@@ -106,7 +114,7 @@ export async function generateRuntimeModule(
         prune: scan ? { usedClasses: scan.classes } : undefined,
     })
     for (const file of scanner?.dependencies ?? []) {
-        dependencies.add(file)
+        recordDependency(file)
     }
 
     const code = result.code + RUNTIME_APPENDIX
@@ -114,7 +122,11 @@ export async function generateRuntimeModule(
         code,
         hash: createHash('sha256').update(code).digest('hex'),
         dependencies,
-        dependencyMtimes: await readMtimes(dependencies),
+        dependencyMtimes: new Map(
+            await Promise.all(
+                [...dependencyMtimes].map(async ([file, mtime]) => [file, await mtime] as const),
+            ),
+        ),
         cssPath: options.cssPath,
         pruning:
             scanner && scan && result.plan.report.pruning
@@ -150,16 +162,18 @@ async function readMtimes(files: Iterable<string>): Promise<Map<string, number |
     const mtimes = new Map<string, number | null>()
     await Promise.all(
         [...files].map(async (file) => {
-            mtimes.set(
-                file,
-                await stat(file).then(
-                    (stats) => stats.mtimeMs,
-                    () => null,
-                ),
-            )
+            mtimes.set(file, await readMtime(file))
         }),
     )
     return mtimes
+}
+
+/** A missing file reads as null, which differs from any real modification time. */
+function readMtime(file: string): Promise<number | null> {
+    return stat(file).then(
+        (stats) => stats.mtimeMs,
+        () => null,
+    )
 }
 
 /**

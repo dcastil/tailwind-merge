@@ -245,6 +245,32 @@ test('a breaking edit keeps the last good module in service, and the next good e
     expect(after.twMerge('text-big text-sm')).toBe('text-sm')
 })
 
+test('an edit landing during generation counts as a change for the next watch rebuild', async () => {
+    // Modification times are taken as files are reported, so a save that races the (slow) generation is not recorded as the baseline the rebuild compares against.
+    const root = await copyFixture('app')
+    const cssPath = path.join(root, 'app.css')
+    const tokensPath = path.join(root, 'tokens.css')
+    await writeFile(cssPath, "@import 'tailwindcss' source(none);\n@import './tokens.css';\n")
+    await writeFile(tokensPath, '@theme { --text-huge: 2.5rem; }\n')
+    let edited = false
+    const generated = await generateRuntimeModule({
+        cssPath,
+        root,
+        integration: {
+            async onDependency(file) {
+                if (file === tokensPath && !edited) {
+                    edited = true
+                    const later = new Date(Date.now() + 5_000)
+                    await writeFile(tokensPath, '@theme { --text-big: 2rem; }\n')
+                    await utimes(tokensPath, later, later)
+                }
+            },
+        },
+    })
+    expect(edited).toBe(true)
+    await expect(dependenciesChanged(generated)).resolves.toBe(true)
+})
+
 test('dependenciesChanged notices edited and deleted files of the CSS graph', async () => {
     const root = await copyFixture('app')
     const cssPath = path.join(root, 'app.css')
