@@ -30,8 +30,8 @@ interface BlockFrame {
     skip: boolean
 }
 
-/** Annotates compiled CSS with the target and conditions needed for coverage checks. PostCSS owns CSS syntax (including escaped identifiers, importance, and nested value blocks); this walker only interprets style scopes. */
-export function parseDeclarations(css: string): DeclarationEntry[] {
+/** Annotates compiled CSS with the target and conditions needed for coverage checks. PostCSS owns CSS syntax (including escaped identifiers, importance, and nested value blocks); this walker only interprets style scopes. `candidate` is the class the CSS was compiled for, so its own selector can be told apart from ancestor classes a variant adds (`.in-dark\:block` inside `:where(.dark *) .in-dark\:block`); without it the first class selector is taken. */
+export function parseDeclarations(css: string, candidate?: string): DeclarationEntry[] {
     const entries: DeclarationEntry[] = []
     visit(parse(css).nodes)
     return entries
@@ -53,13 +53,17 @@ export function parseDeclarations(css: string): DeclarationEntry[] {
                 const header = node.type === 'rule'
                     ? node.selector
                     : `@${node.name}${node.params ? ` ${node.params}` : ''}`
-                visit(node.nodes ?? [], frameForHeader(header, frame))
+                visit(node.nodes ?? [], frameForHeader(header, frame, candidate))
             }
         }
     }
 }
 
-function frameForHeader(header: string, parent: BlockFrame | undefined): BlockFrame {
+function frameForHeader(
+    header: string,
+    parent: BlockFrame | undefined,
+    candidate: string | undefined,
+): BlockFrame {
     const parentContext = parent?.context ?? ''
     const parentConditional = parent?.conditional ?? false
     const parentScope = parent?.scope ?? []
@@ -76,7 +80,7 @@ function frameForHeader(header: string, parent: BlockFrame | undefined): BlockFr
         }
     }
 
-    const { contextFragment, conditional, relativeSelector } = analyzeSelector(header)
+    const { contextFragment, conditional, relativeSelector } = analyzeSelector(header, candidate)
     return {
         context:
             parentContext === '' || contextFragment === ''
@@ -88,13 +92,35 @@ function frameForHeader(header: string, parent: BlockFrame | undefined): BlockFr
     }
 }
 
+/** The class selector to anchor on: the one spelling the candidate, or the first one when the candidate is unknown or absent (a selector Tailwind built without the class itself). */
+function findClassAnchor(subject: string, candidate: string | undefined): RegExpExecArray | null {
+    const classSelectors = [...subject.matchAll(/\.(?:[\w-]|\\(?:[\da-f]{1,6}\s?|.))+/gi)]
+    if (candidate !== undefined) {
+        const own = classSelectors.find((match) => unescapeIdentifier(match[0].slice(1)) === candidate)
+        if (own) {
+            return own
+        }
+    }
+    return classSelectors[0] ?? null
+}
+
+/** Reverses CSS identifier escaping: `\:` → `:`, `\32 xl` → `2xl`. */
+function unescapeIdentifier(identifier: string): string {
+    return identifier.replace(/\\(?:([\da-f]{1,6})\s?|(.))/gi, (_, hex: string | undefined, char: string | undefined) =>
+        hex !== undefined ? String.fromCodePoint(Number.parseInt(hex, 16)) : (char as string),
+    )
+}
+
 /** Single-colon selectors that are pseudo-elements by CSS's legacy compatibility rule; everything else single-colon is a pseudo-class. */
 const LEGACY_PSEUDO_ELEMENTS = new Set(['before', 'after', 'first-line', 'first-letter'])
 
 /**
  * Determines what a selector does to the render target relative to the class's base element. The subject anchor is `&` (nested rules) or the class selector itself (top-level rules, possibly wrapped in `:where(...)`). Pseudo-elements and combinator tails after the anchor change the target; pseudo-classes and ancestor prefixes only add conditions.
  */
-function analyzeSelector(selector: string): {
+function analyzeSelector(
+    selector: string,
+    candidate: string | undefined,
+): {
     contextFragment: string
     conditional: boolean
     relativeSelector: string
@@ -108,8 +134,8 @@ function analyzeSelector(selector: string): {
         subject = wrapper[1]!.trim()
     }
 
-    // Prefer the nesting anchor over an ancestor class (`.dark &`). A hexadecimal escape consumes its optional trailing space too (`\32 xl`): that space belongs to a numeric variant's class name, not a descendant selector.
-    const anchorMatch = /&/.exec(subject) ?? /\.(?:[\w-]|\\(?:[\da-f]{1,6}\s?|.))+/i.exec(subject)
+    // Prefer the nesting anchor over an ancestor class (`.dark &`), then the candidate's own class over any other: ancestor variants like `in-*` and `group-*` put their ancestor's class first (`:where(.dark *) .in-dark\:block`), and anchoring there would turn the utility's own element into a combinator target. A hexadecimal escape consumes its optional trailing space too (`\32 xl`): that space belongs to a numeric variant's class name, not a descendant selector.
+    const anchorMatch = /&/.exec(subject) ?? findClassAnchor(subject, candidate)
     if (!anchorMatch) {
         // No recognizable anchor means the block targets something unrelated (not emitted by current Tailwind); give it a distinct context so it can never collide with base declarations.
         return {

@@ -12,6 +12,17 @@ test('a selector list inside :where() is one selector, not a list', () => {
     expect(entry!.scope).toEqual(['&:where(.dark, .dark *)'])
 })
 
+test('an ancestor variant anchors on the candidate, not on the ancestor class', () => {
+    // `in-dark:block` compiles to `:where(:where(.dark, .dark *)) .in-dark\:block`; anchoring on the first class (`.dark`) would make the utility's own element a combinator target.
+    const [entry] = parseDeclarations(
+        ':where(:where(.dark, .dark *)) .in-dark\\:block { display: block }',
+        'in-dark:block',
+    )
+
+    expect(entry).toMatchObject({ context: '', conditional: true })
+    expect(entry!.scope).toEqual([':where(:where(.dark, .dark *)) &'])
+})
+
 test('a top-level selector list stays conditional with the first selector as subject', () => {
     const [entry] = parseDeclarations('.x::after, .x::before { color: red }')
 

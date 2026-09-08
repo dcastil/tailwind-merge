@@ -155,8 +155,9 @@ export function declaredDeclarations(
 
     let declarations = cache.get(className)
     if (declarations === undefined) {
-        const css = designSystem.candidatesToCss([toCandidate(designSystem, className)])[0] ?? null
-        declarations = css === null ? null : parseDeclarations(css)
+        const candidate = toCandidate(designSystem, className)
+        const css = designSystem.candidatesToCss([candidate])[0] ?? null
+        declarations = css === null ? null : parseDeclarations(css, candidate)
         cache.set(className, declarations)
     }
 
