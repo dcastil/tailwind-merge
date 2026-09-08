@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest'
 
-import { assertTailwindConformance, css, generateFixture } from './fixture-utils'
+import { assertTailwindConformance, css, expectMerges, generateFixture } from './fixture-utils'
 
 // Modeled on a typical design-system setup: the color palette reset and replaced with a custom one, utility-specific compat sub-namespaces (--background-color-*, --text-color-*), a custom font size with a compound line-height key, and namespaces tailwind-merge has no theme key for (--z-index-*, --border-width-*). Reproduces the scenarios from issues #684 (custom --text-* misread as color), #657 (--z-index), and #631 (--border-width).
 const designSystemCss = css`
@@ -152,6 +152,32 @@ describe('minimal theme with heavy resets', async () => {
         expect(plan.report.scaleStrategies['shadow']).toBe('empty')
         expect(plan.report.scaleStrategies['animate']).toBe('empty')
         expect(plan.report.scaleStrategies['blur']).toBe('empty')
+    })
+})
+
+describe('vanilla names re-added through compat sub-namespaces after a reset', async () => {
+    // `--color-*: initial` takes `bg-white` and `text-red-500` out of the color scale; the sub-namespace variables bring the same names back for one utility each. Neither is a new class nor a changed claim, so both passes of augmentation used to skip them and they merged with nothing.
+    const { twMerge, plan } = await generateFixture(css`
+        @import 'tailwindcss';
+        @theme {
+            --color-*: initial;
+            --background-color-white: #fff;
+            --background-color-surface: #eee;
+            --text-color-red-500: #f00;
+            --text-color-red-600: #e00;
+        }
+    `)
+
+    test('the re-added names join their utility groups', () => {
+        expect(plan.report.augmentedClassGroups).toMatchObject({
+            'bg-color': expect.arrayContaining(['white', 'surface'].map((name) => `bg-${name}`)),
+            'text-color': expect.arrayContaining(['text-red-500', 'text-red-600']),
+        })
+        expectMerges(twMerge, {
+            'bg-white bg-surface': 'bg-surface',
+            'text-red-500 text-red-600': 'text-red-600',
+            'text-red-500 text-[red]': 'text-[red]',
+        })
     })
 })
 

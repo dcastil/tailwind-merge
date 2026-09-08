@@ -60,10 +60,9 @@ export function buildAugmentations({
     const vanillaClassNames = vanilla.getClassList().map(([className]) => className)
     const vanillaClassNameSet = new Set(vanillaClassNames)
 
-    const newClassNames = project
-        .getClassList()
-        .map(([className]) => className)
-        .filter((className) => !vanillaClassNameSet.has(className))
+    const projectClassNames = project.getClassList().map(([className]) => className)
+    const newClassNames = projectClassNames.filter((className) => !vanillaClassNameSet.has(className))
+    const projectClassNameSet = new Set(projectClassNames)
 
     const exemplarsByFirstSegment = collectExemplars(vanillaClassNames, vanillaClassGroupId)
     const changedSuggestionNames = changedUtilitySuggestions(project, vanilla)
@@ -171,9 +170,9 @@ export function buildAugmentations({
         const vanillaGroupId = vanillaClassGroupId(className)
         if (
             (projectGroupId === vanillaGroupId && !changedSuggestionNames.has(registrationName)) ||
-            projectGroupId === undefined ||
+            (projectGroupId === undefined && !projectClassNameSet.has(className)) ||
             vanillaGroupId === undefined ||
-            customGroupIds.has(projectGroupId)
+            (projectGroupId !== undefined && customGroupIds.has(projectGroupId))
         ) {
             continue
         }
@@ -187,6 +186,24 @@ export function buildAugmentations({
             continue
         }
         handledNames.add(registrationName)
+
+        if (projectGroupId === undefined) {
+            // The project config lost its claim on a vanilla name that Tailwind still suggests and compiles: a reset namespace re-added through a compat sub-namespace (`--color-*: initial` plus `--background-color-white`). Neither loop would otherwise register it — it is not new, and there is no claim to correct — so classify it like a new class. A plain reset drops the name from the project's class list, which keeps this off the thousands of classes a reset removes.
+            const targetGroupId = classifyByProperties(
+                registrationName,
+                properties,
+                exemplarsByFirstSegment,
+                vanilla,
+            )
+            if (typeof targetGroupId === 'string') {
+                const groupClassNames = assignments.get(targetGroupId) ?? []
+                groupClassNames.push(registrationName)
+                assignments.set(targetGroupId, groupClassNames)
+            } else if (!targetGroupId.isJanus) {
+                unassigned.push({ className: registrationName, reason: targetGroupId.reason })
+            }
+            continue
+        }
 
         const vanillaProperties = declaredProperties(vanilla, className)
         if (vanillaProperties !== null && havePropertiesEqual(properties, vanillaProperties)) {
