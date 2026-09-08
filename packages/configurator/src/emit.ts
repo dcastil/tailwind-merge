@@ -47,11 +47,14 @@ export function emitModule(plan: ConfigPlan, options: EmitOptions = {}): string 
     }
     lines.push('')
 
+    // Validators are referenced as bare identifiers instead of `v.name` property accesses: property names survive minification while local bindings get mangled to single characters, and validator references are among the most repeated tokens in the config. A pruned plan can need no validator at all; the import then goes too, or `noUnusedLocals` would reject the emitted TypeScript.
+    const usedValidators = collectUsedValidatorNames(plan)
     const importSource = options.importSource ?? 'tailwind-merge'
+    const validatorsImport = usedValidators.length > 0 ? ', validators as v' : ''
     lines.push(
         format === 'ts'
-            ? `import { createTailwindMerge, validators as v, type Config } from '${importSource}'`
-            : `import { createTailwindMerge, validators as v } from '${importSource}'`,
+            ? `import { createTailwindMerge${validatorsImport}, type Config } from '${importSource}'`
+            : `import { createTailwindMerge${validatorsImport} } from '${importSource}'`,
     )
     lines.push('')
     lines.push('/**')
@@ -65,8 +68,6 @@ export function emitModule(plan: ConfigPlan, options: EmitOptions = {}): string 
     lines.push(' */')
     lines.push('export const getConfig = () => {')
 
-    // Validators are referenced as bare identifiers instead of `v.name` property accesses: property names survive minification while local bindings get mangled to single characters, and validator references are among the most repeated tokens in the config.
-    const usedValidators = collectUsedValidatorNames(plan)
     if (usedValidators.length > 0) {
         const inline = `${INDENT}const { ${usedValidators.join(', ')} } = v`
         if (inline.length <= MAX_LINE_LENGTH) {

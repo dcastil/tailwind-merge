@@ -145,6 +145,17 @@ describe('generate from vanilla Tailwind CSS', () => {
         )
     })
 
+    test.each(['ts', 'js'] as const)('a pruned plan without validators imports none (%s)', async (format) => {
+        // Literal-only usage leaves no validator behind; the import must go with the destructuring, or `noUnusedLocals` rejects the emitted TypeScript.
+        const pruned = prunePlan(plan, ['flex', 'hidden'])
+        const emitted = emitModule(pruned, { format })
+
+        expect(emitted).not.toContain('validators as v')
+        const module = await importEmittedModule(emitted, format)
+        expect(module.twMerge('flex hidden')).toBe('hidden')
+        expect(module.getConfig()).toEqual(materializeConfig(pruned))
+    })
+
     test('importSource substitutes the module the emitted code imports from', () => {
         const emitted = emitModule(plan, { importSource: '@tailwind-merge/vite/tailwind-merge' })
 
