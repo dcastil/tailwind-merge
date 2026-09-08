@@ -11,7 +11,12 @@ import { createSourceScanner } from './scan.ts'
 export async function runCli(argv: string[]): Promise<number> {
     const args = parseArguments(argv)
 
+    if (args.unknown !== undefined) {
+        // A typo like `--chekc` must not silently turn a CI check into a regeneration that overwrites the file and exits 0.
+        console.error(`Unknown argument: ${args.unknown}`)
+    }
     if (
+        args.unknown !== undefined ||
         !args.input ||
         !args.output ||
         (args.format && args.format !== 'ts' && args.format !== 'js') ||
@@ -155,6 +160,8 @@ function parseArguments(argv: string[]) {
         /** Directory automatic source detection starts from; set when --prune is given, defaulting to the working directory. */
         prune?: string
         check: boolean
+        /** The first argument no flag claims — a mistyped flag, an `=` form, or a stray positional. */
+        unknown?: string
     } = {
         check: false,
     }
@@ -174,6 +181,9 @@ function parseArguments(argv: string[]) {
             args.prune = resolve(next !== undefined && !next.startsWith('-') ? argv[++index]! : '.')
         } else if (flag === '--check') {
             args.check = true
+        } else {
+            args.unknown = flag
+            break
         }
     }
 

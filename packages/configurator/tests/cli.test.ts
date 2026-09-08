@@ -43,6 +43,16 @@ describe('CLI with --check mode', () => {
         expect(await runCli(['--input', inputPath, '--output', outputPath, '--check'])).toBe(0)
     })
 
+    test('rejects unknown arguments instead of ignoring them', async () => {
+        await writeFile(inputPath, "@import 'tailwindcss';\n")
+        const untouchedPath = join(directory, 'untouched.generated.ts')
+
+        expect(await runCli(['--input', inputPath, '--output', untouchedPath, '--chekc'])).toBe(1)
+        expect(await runCli(['--input', inputPath, '--output', untouchedPath, '--encoding=exact'])).toBe(1)
+        expect(await runCli(['--input', inputPath, '--output', untouchedPath, 'stray'])).toBe(1)
+        await expect(readFile(untouchedPath, 'utf8')).rejects.toThrow()
+    })
+
     test('fails the check when the output file is missing', async () => {
         const missingPath = join(directory, 'missing.generated.ts')
         expect(await runCli(['--input', inputPath, '--output', missingPath, '--check'])).toBe(1)
