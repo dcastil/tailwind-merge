@@ -97,7 +97,9 @@ export function buildCustomUtilityPlan({
     const postfixLookupClassGroups: string[] = []
 
     for (const root of staticRoots) {
-        if (preservedClasses.has(root.startsWith('-') ? root.slice(1) : root)) {
+        // Runtime lookup strips a leading minus before walking the class map, so a static utility registers under its unsigned name: a literal `-solo` would sit on a trie path no lookup visits. Opposite signs with incompatible effects were preserved above and skip this loop.
+        const lookupRoot = root.startsWith('-') ? root.slice(1) : root
+        if (preservedClasses.has(lookupRoot)) {
             continue
         }
         // A static root sharing its name with a functional custom root joins the functional group only when the two provably have the same effect (they cover each other, like a `shimmer` default alongside `shimmer-*` values) — splitting those would stop them from merging. When the functional form carries state the bare form doesn't (supabase's `hit-area` scaffold vs `hit-area-*` offsets), they stay separate groups and override inference below adds the correct one-directional relationship instead.
@@ -117,8 +119,8 @@ export function buildCustomUtilityPlan({
             ) {
                 continue
             }
-            groups.set(`${customUtilityGroupId(root)}.static`, {
-                items: [{ kind: 'class', value: root }],
+            groups.set(`${customUtilityGroupId(lookupRoot)}.static`, {
+                items: [{ kind: 'class', value: lookupRoot }],
                 exemplar: root,
             })
             continue
@@ -126,10 +128,10 @@ export function buildCustomUtilityPlan({
 
         const aliasGroupId = findAliasGroup(project, root, groupSignatures)
         if (aliasGroupId !== null) {
-            aliases.set(root, aliasGroupId)
+            aliases.set(lookupRoot, aliasGroupId)
         } else {
-            groups.set(customUtilityGroupId(root), {
-                items: [{ kind: 'class', value: root }],
+            groups.set(customUtilityGroupId(lookupRoot), {
+                items: [{ kind: 'class', value: lookupRoot }],
                 exemplar: root,
             })
         }
@@ -177,7 +179,7 @@ export function buildCustomUtilityPlan({
             !preservedClasses.has(lookupRoot) &&
             !groups.has(`${groupId}.static`)
         ) {
-            items.push({ kind: 'class', value: root })
+            items.push({ kind: 'class', value: lookupRoot })
         }
         // A failed descendant lookup retries ancestor validators. Even a uniform parent must use exact matchers when nested roots exist, or isAny would reclaim child utilities deliberately preserved for incompatible or unrepresentable effects. Normalize both signs just as runtime lookup does.
         const hasDescendantRoot = lookupRoots.some((candidate) =>

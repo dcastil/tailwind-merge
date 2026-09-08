@@ -160,3 +160,30 @@ describe.each(['compact', 'exact'] as const)('%s negative custom utilities', (en
         }
     }
 })
+
+test.each(['compact', 'exact'] as const)('%s registers negative-only static utilities where lookup finds them', async (encoding) => {
+    // Runtime lookup drops the leading minus, so `-solo` is found as `solo`; registering the signed spelling put it on a path no lookup visits, and even `-solo -solo` stayed unmerged.
+    const { twMerge, plan } = await generateFixture(
+        css`
+            @import 'tailwindcss';
+            @utility -solo {
+                color: red;
+            }
+            @utility -glow {
+                paint-order: stroke;
+            }
+        `,
+        undefined,
+        { encoding },
+    )
+
+    expect(plan.report.aliasedUtilityClasses).toMatchObject({ solo: 'text-color' })
+    expect(plan.report.customUtilityGroups).toContain('utility.glow')
+    expectMerges(twMerge, {
+        '-solo text-red-500': 'text-red-500',
+        'text-red-500 -solo': '-solo',
+        '-solo -solo': '-solo',
+        '-glow -glow': '-glow',
+        '-glow -solo': '-glow -solo',
+    })
+})
