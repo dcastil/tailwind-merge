@@ -8,6 +8,7 @@ import { createTailwindMerge, twMerge as defaultTwMerge } from 'tailwind-merge'
 import { type AnyConfig, createClassGroupUtils } from 'tailwind-merge/unstable-do-not-import'
 
 import { type ConfigPlan, type GenerateOptions, generate } from '../src'
+import { materializeConfig } from '../src/materialize'
 import {
     type DesignSystemAccess,
     declaredDeclarations,
@@ -83,6 +84,10 @@ async function buildFixture(
     // The emitted module and the materialized config come from the same plan, so they must describe the same config — validators are compared by reference, which holds because both import the same tailwind-merge module instance.
     expect(emitted.getConfig()).toEqual(config)
 
+    if (options.prune === undefined) {
+        await assertEveryCompilingClassIsAccountedFor(project, plan)
+    }
+
     return {
         code,
         config,
@@ -90,6 +95,63 @@ async function buildFixture(
         twMerge: createTailwindMerge(() => config),
         designSystem: project,
     }
+}
+
+/**
+ * The classification invariant every unpruned fixture must hold: a class Tailwind suggests and compiles is either classified by the generated config or listed in the report — never silently dropped. Three bugs of exactly that shape (compat sub-namespace phantoms, reset names re-added through a sub-namespace, negative-first classification) escaped the merge-behavior tests because no fixture happened to exercise them; this check runs over every fixture, real-world themes included. The vanilla config's own gaps (tracked by vanilla-coverage.test.ts) are inherited by every theme and excluded here.
+ */
+async function assertEveryCompilingClassIsAccountedFor(
+    project: DesignSystemAccess,
+    plan: ConfigPlan,
+): Promise<void> {
+    const knownGaps = await vanillaGaps()
+    const accountedFor = new Set(plan.report.resolvedCollisions
+        .filter((collision) => collision.keptGroupId === null)
+        .map((collision) => collision.className))
+    const reportedRoots: string[] = []
+    for (const { className } of plan.report.unassignedClasses) {
+        if (className.endsWith('-*')) {
+            reportedRoots.push(className.slice(0, -1))
+        } else {
+            accountedFor.add(className)
+        }
+    }
+
+    const dropped = unclassifiedCompilingClasses(project, plan).filter((className) => {
+        const registrationName = className.startsWith('-') ? className.slice(1) : className
+        return (
+            !knownGaps.has(className) &&
+            !accountedFor.has(registrationName) &&
+            !reportedRoots.some((root) => registrationName.startsWith(root))
+        )
+    })
+    expect(dropped, 'compiling classes neither classified nor reported').toEqual([])
+}
+
+/** Names of the design system's class list that compile but the generated config (prefix removed, since class-list names are unprefixed) does not classify. */
+function unclassifiedCompilingClasses(designSystem: DesignSystemAccess, plan: ConfigPlan): string[] {
+    const { getClassGroupId } = createClassGroupUtils(materializeConfig({ ...plan, prefix: null }))
+    return designSystem
+        .getClassList()
+        .map(([className]) => className)
+        .filter(
+            (className) =>
+                getClassGroupId(className) === undefined &&
+                declaredDeclarations(designSystem, className) !== null,
+        )
+}
+
+let vanillaGapsPromise: Promise<Set<string>> | undefined
+
+function vanillaGaps(): Promise<Set<string>> {
+    return (vanillaGapsPromise ??= (async () => {
+        const css = "@import 'tailwindcss';"
+        const [{ plan }, { project }] = await Promise.all([
+            generate({ css, base: fixtureBase }),
+            loadDesignSystems({ css, base: fixtureBase }),
+        ])
+        return new Set(unclassifiedCompilingClasses(project, plan))
+    })())
 }
 
 /**
