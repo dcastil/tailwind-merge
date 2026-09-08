@@ -24,6 +24,8 @@ export interface CustomUtilityPlan {
     postfixLookupClassGroups: string[]
     /** Suggested classes at normalized lookup keys deliberately left unclassified because runtime lookup cannot safely distinguish their effects. Augmentation must preserve this decision. */
     preservedClasses: Set<string>
+    /** Built-in functional roots the project registers an additional `@utility` for (`@utility text-*`). The extension is not planned, since a registry diff cannot judge how it changes the built-in's behavior: its values are classified only as far as the built-in matchers accept them, and the root is reported. */
+    extendedBuiltInRoots: string[]
 }
 
 export interface BuildCustomUtilityPlanOptions {
@@ -46,7 +48,7 @@ export interface BuildCustomUtilityPlanOptions {
  *
  * Functional roots whose slash modifiers change effects without a matching full-class group remain unclassified: the runtime's fallback from an unknown full class to its base group would otherwise discard those effects.
  *
- * Roots that already exist as built-ins are skipped entirely: shadowing changes built-in behavior in ways a registry diff cannot judge.
+ * Roots that already exist as built-ins are skipped entirely: shadowing changes built-in behavior in ways a registry diff cannot judge. Such roots are reported so the gap is visible instead of silent.
  */
 export function buildCustomUtilityPlan({
     project,
@@ -61,6 +63,15 @@ export function buildCustomUtilityPlan({
     const functionalRoots = project.utilities
         .keys('functional')
         .filter((root) => !vanillaRoots.has(root))
+    // Each `@utility` registration adds a suggestion branch, so a built-in root with more branches than vanilla was extended by the project.
+    const extendedBuiltInRoots = project.utilities
+        .keys('functional')
+        .filter(
+            (root) =>
+                vanillaRoots.has(root) &&
+                project.utilities.getCompletions(root).length >
+                    vanilla.utilities.getCompletions(root).length,
+        )
     const staticRoots = project.utilities.keys('static').filter((root) => !vanillaRoots.has(root))
     const staticRootSet = new Set(staticRoots)
     const lookupRoots = [
@@ -200,6 +211,7 @@ export function buildCustomUtilityPlan({
         conflicts: inferOverrideConflicts(project, groups, groupSignatures),
         postfixLookupClassGroups,
         preservedClasses,
+        extendedBuiltInRoots,
     }
 }
 

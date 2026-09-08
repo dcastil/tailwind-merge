@@ -40,7 +40,7 @@ Generation rejects on errors; it does not log warnings or write files. Callers d
 | `augmentedClassGroups` | Named classes added beyond the standard theme-namespace mapping. |
 | `customUtilityGroups`, `aliasedUtilityClasses`, `customUtilityConflicts` | Custom roots registered for self-conflict, aliases joining built-in groups, and inferred directional overrides. |
 | `resolvedCollisions` | Classes with competing claims and the group retained; `keptGroupId: null` means the class was removed from all groups to preserve its combined CSS effects. |
-| `unassignedClasses` | Theme-created classes for which classification could not be established, with reasons. An empty list is not a proof of all merge behavior; see [limitations](./limitations.md). |
+| `unassignedClasses` | Theme-created classes for which classification could not be established, with reasons; a custom utility extending a built-in root appears as `root-*`. An empty list is not a proof of all merge behavior; see [limitations](./limitations.md). |
 | `pruning` | Present only with `prune`. Contains counts before/after, `removedClassGroups`, and `unprunedClassGroups`. The latter records groups conservatively retained in full because member attribution could not reproduce the classifier's path. |
 
 `pruning.usedClassCount` includes raw scanner tokens. `classifiedClassCount` counts candidates recognized by the full generated config; it is not a count of CSS rules or a compile-validation result.

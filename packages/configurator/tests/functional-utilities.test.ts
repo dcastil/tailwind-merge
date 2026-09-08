@@ -415,3 +415,19 @@ const ARBITRARY_DATA_TYPE_CASES = [
     ['angle', '23deg'],
     ['vector', '4_5_6'],
 ]
+
+test('a custom utility extending a built-in root is reported instead of silently skipped', async () => {
+    // `text-*` already exists; the extension's values cannot be judged against the built-in's behavior, so they stay unclassified — visibly.
+    const { twMerge, plan } = await generateFixture(css`
+        @import 'tailwindcss';
+        @utility text-* {
+            text-indent: calc(--value(integer) * 1px);
+        }
+    `)
+
+    expect(plan.report.unassignedClasses).toContainEqual({
+        className: 'text-*',
+        reason: expect.stringContaining('extends a built-in root'),
+    })
+    expect(twMerge('text-4 text-8')).toBe('text-4 text-8')
+})

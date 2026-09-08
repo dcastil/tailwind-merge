@@ -208,6 +208,12 @@ export function applyCustomUtilityPlan(
     }
     // A postfix can add independent declarations and select a different effect group (pair-2/3 vs pair-2). Pruning mirrors the runtime's complete-class lookup for these groups.
     plan.postfixLookupClassGroups.push(...customUtilityPlan.postfixLookupClassGroups)
+    for (const root of customUtilityPlan.extendedBuiltInRoots) {
+        plan.report.unassignedClasses.push({
+            className: `${root}-*`,
+            reason: 'custom utility extends a built-in root; only values the built-in matchers accept are classified',
+        })
+    }
 
     for (const [className, groupId] of customUtilityPlan.aliases) {
         const items = plan.classGroups.get(groupId)
@@ -266,7 +272,7 @@ export function applyAugmentations(
         plan.report.augmentedClassGroups[classGroupId] = classNames
     }
 
-    plan.report.unassignedClasses = [...augmentations.unassigned]
+    plan.report.unassignedClasses.push(...augmentations.unassigned)
 
     // Collisions are resolved by removing claims, which works on each group's own copy of the scale items (with `--color-xl`, removing `xl` under `drop-shadow` leaves `text-xl` a color). 'restore' removes the wrong group's claim so the owner's own machinery classifies the class again; 'neutralize' removes the claims of both groups, because a class compiling into multiple rules at once must not be merged away in either direction. A claim that is not a removable literal (a validator like `isNumber`, or a factored family's `{ x: [isNumber] }`) can still be outranked: tailwind-merge's class map always prefers an exact literal path over a validator, so 'restore' then appends the class to the owner group as a literal, and 'neutralize' gives it a conflict-free group of its own — either way the class ends up exactly where Tailwind's compiled output says it belongs.
     for (const { className, claimingGroupId, ownerGroupId, resolution } of augmentations.collisions) {

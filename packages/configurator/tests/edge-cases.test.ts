@@ -515,7 +515,10 @@ describe('custom utilities under built-in prefixes', async () => {
             'calc(2 * 10)',
         ])
         expectMerges(twMerge, { 'z-2 z-3': 'z-3', 'z-2 z-auto': 'z-auto' })
-        expect(plan.report.unassignedClasses).toEqual([])
+        // The extension itself is not planned; the report says so even where, as here, the built-in matcher accepts its values.
+        expect(plan.report.unassignedClasses).toEqual([
+            { className: 'z-*', reason: expect.stringContaining('extends a built-in root') },
+        ])
     })
 })
 
