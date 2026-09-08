@@ -202,6 +202,19 @@ test.each([false, true])('an entrypoint that only adds @source above a shared th
     expect('p' in runtime.getConfig().classGroups).toBe(!prune)
 })
 
+test('discovery follows symlinked directories and files inside the root', async () => {
+    const root = await copyFixture('app')
+    const shared = path.join(path.dirname(root), 'shared')
+    await mkdir(path.join(shared, 'styles'), { recursive: true })
+    await rename(path.join(root, 'app.css'), path.join(shared, 'styles', 'app.css'))
+    await symlink(path.join(shared, 'styles'), path.join(root, 'styles'), 'dir')
+    await expect(discoverCssRoot(root)).resolves.toBe(path.join(root, 'styles', 'app.css'))
+
+    await writeFile(path.join(shared, 'tokens.css'), '@theme { --text-huge: 2.5rem; }\n')
+    await symlink(path.join(shared, 'tokens.css'), path.join(root, 'tokens.css'), 'file')
+    await expect(discoverCssRoot(root)).rejects.toThrow('multiple Tailwind CSS roots')
+})
+
 test('discovery picks the import-graph top among marker files', async () => {
     await expect(
         discoverCssRoot(path.join(fixturesDirectory, 'multi-root-resolved')),

@@ -1,4 +1,4 @@
-import { readFile, readdir, realpath } from 'node:fs/promises'
+import { readFile, readdir, realpath, stat } from 'node:fs/promises'
 import path from 'node:path'
 
 import {
@@ -102,20 +102,32 @@ const IGNORED_DIRECTORY_NAMES = new Set(['node_modules', 'dist', 'build', 'out',
 
 const CSS_EXTENSIONS = new Set(['.css', '.pcss', '.postcss'])
 
-/** Limit the eager scan to plain-CSS filenames supported by Vite. Following explicit imports is separate and does not impose an extension requirement. */
-async function collectCssFiles(directory: string): Promise<string[]> {
+/** Limit the eager scan to plain-CSS filenames supported by Vite. Following explicit imports is separate and does not impose an extension requirement. Symlinks are followed (a shared theme package linked into the app is a common layout), with directories visited once by real path so linked cycles terminate. */
+async function collectCssFiles(
+    directory: string,
+    visited: Set<string> = new Set(),
+): Promise<string[]> {
+    const identity = await realpath(directory).catch(() => directory)
+    if (visited.has(identity)) {
+        return []
+    }
+    visited.add(identity)
+
     const entries = await readdir(directory, { withFileTypes: true }).catch(() => [])
     const files: string[] = []
 
     await Promise.all(
         entries.map(async (entry) => {
-            if (entry.isDirectory()) {
+            const entryPath = path.join(directory, entry.name)
+            // A Dirent describes the link itself, so a symlink is neither a file nor a directory until its target is checked; broken links are skipped.
+            const target = entry.isSymbolicLink() ? await stat(entryPath).catch(() => null) : entry
+            if (target?.isDirectory()) {
                 if (entry.name.startsWith('.') || IGNORED_DIRECTORY_NAMES.has(entry.name)) {
                     return
                 }
-                files.push(...(await collectCssFiles(path.join(directory, entry.name))))
-            } else if (entry.isFile() && CSS_EXTENSIONS.has(path.extname(entry.name))) {
-                files.push(path.join(directory, entry.name))
+                files.push(...(await collectCssFiles(entryPath, visited)))
+            } else if (target?.isFile() && CSS_EXTENSIONS.has(path.extname(entry.name))) {
+                files.push(entryPath)
             }
         }),
     )
