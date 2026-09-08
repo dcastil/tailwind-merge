@@ -99,21 +99,18 @@ async function loadDesignSystem(css: string, base: string, integration?: Tailwin
         },
         async loadModule(id, from) {
             const file = await resolveModule(id, from)
-            try {
-                // Tailwind only collects transitive dependencies and busts ESM caches for relative module requests. Aliases resolving to local configs/plugins must follow that same path.
-                return await loadModule(
-                    `./${path.relative(from, file)}`,
-                    from,
-                    integration.onDependency ?? (() => {}),
-                    // Reuse the fresh resolution instead of re-entering Tailwind's cached resolver, which can still consider a newly created module missing.
-                    async () => file,
-                )
-            } catch (error) {
-                if (integration.onDependency) {
-                    await trackModuleDependencies(file, integration.onDependency)
-                }
-                throw error
+            // Tailwind reports a module's transitive imports only after importing it. Walk them first, so an integration records each file (and its modification time) before the import reads it, and so a missing transitive target is reported even when the import fails.
+            if (integration.onDependency) {
+                await trackModuleDependencies(file, integration.onDependency)
             }
+            // Tailwind only collects transitive dependencies and busts ESM caches for relative module requests. Aliases resolving to local configs/plugins must follow that same path.
+            return loadModule(
+                `./${path.relative(from, file)}`,
+                from,
+                integration.onDependency ?? (() => {}),
+                // Reuse the fresh resolution instead of re-entering Tailwind's cached resolver, which can still consider a newly created module missing.
+                async () => file,
+            )
         },
     })
 }

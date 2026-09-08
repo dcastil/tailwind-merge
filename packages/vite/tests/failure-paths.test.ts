@@ -271,6 +271,42 @@ test('an edit landing during generation counts as a change for the next watch re
     await expect(dependenciesChanged(generated)).resolves.toBe(true)
 })
 
+test('an edit to a transitive @config import landing during the import counts as a change', async () => {
+    // Tailwind reports a config's own imports only after importing it; the configurator walks them first so their times are taken before the import reads them.
+    const root = await copyFixture('app')
+    const cssPath = path.join(root, 'app.css')
+    const configPath = path.join(root, 'tailwind.config.mjs')
+    const themePath = path.join(root, 'theme.mjs')
+    await writeFile(cssPath, "@import 'tailwindcss' source(none);\n@config './tailwind.config.mjs';\n")
+    // A module whose evaluation takes a moment (a top-level await stands in for a big plugin), importing a theme file.
+    await writeFile(
+        configPath,
+        "import { fontSize } from './theme.mjs'\nawait new Promise((resolve) => setTimeout(resolve, 600))\nexport default { theme: { extend: { fontSize } } }\n",
+    )
+    await writeFile(themePath, "export const fontSize = { huge: '2.5rem' }\n")
+    let edited = false
+    const generated = await generateRuntimeModule({
+        cssPath,
+        root,
+        integration: {
+            onDependency(file) {
+                if (file === configPath && !edited) {
+                    edited = true
+                    setTimeout(async () => {
+                        const later = new Date(Date.now() + 5_000)
+                        await writeFile(themePath, "export const fontSize = { giant: '9rem' }\n")
+                        await utimes(themePath, later, later)
+                    }, 200)
+                }
+            },
+        },
+    })
+    expect(edited).toBe(true)
+    expect(generated.dependencies.has(themePath)).toBe(true)
+    expect(hasLiteral(generated.code, 'huge')).toBe(true)
+    await expect(dependenciesChanged(generated)).resolves.toBe(true)
+})
+
 test('dependenciesChanged notices edited and deleted files of the CSS graph', async () => {
     const root = await copyFixture('app')
     const cssPath = path.join(root, 'app.css')
