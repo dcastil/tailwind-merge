@@ -84,11 +84,7 @@ async function loadDesignSystem(css: string, base: string, integration?: Tailwin
     if (!integration) {
         return __unstable__loadDesignSystem(css, { base })
     }
-    const engine = await (tailwindEngine ??= loadModule(
-        'tailwindcss',
-        path.dirname(fileURLToPath(import.meta.resolve('@tailwindcss/node'))),
-        () => {},
-    ).then<typeof TailwindEngine>(({ path: file }) => import(pathToFileURL(file).href)))
+    const engine = await (tailwindEngine ??= loadTailwindEngine())
     const resolveStylesheet = createStylesheetResolver(
         integration.resolveCss,
         integration.onDependency,
@@ -123,6 +119,19 @@ async function loadDesignSystem(css: string, base: string, integration?: Tailwin
 }
 
 let tailwindEngine: Promise<typeof TailwindEngine> | undefined
+
+/** Resolves and imports the compiler once per process. A failed load is not kept: the next generation retries, e.g. once an install has finished relinking node_modules, instead of every later generation in a dev server rethrowing the stale error. */
+function loadTailwindEngine(): Promise<typeof TailwindEngine> {
+    const engine = loadModule(
+        'tailwindcss',
+        path.dirname(fileURLToPath(import.meta.resolve('@tailwindcss/node'))),
+        () => {},
+    ).then<typeof TailwindEngine>(({ path: file }) => import(pathToFileURL(file).href))
+    engine.catch(() => {
+        tailwindEngine = undefined
+    })
+    return engine
+}
 
 /**
  * Caches `getClassList()` on a loaded design system. Tailwind rebuilds the list on every call, and the custom-utility, augmentation, and collision passes share it. Repeated rebuilds previously dominated generation time on themes with many custom utilities. A loaded design system never changes, so caching is safe; consumers replace the object for a new theme.
