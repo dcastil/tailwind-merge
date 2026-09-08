@@ -1,6 +1,7 @@
 import { existsSync } from 'node:fs'
 import path from 'node:path'
 
+import type { UsageScan } from '@tailwind-merge/configurator'
 import type { Plugin, ResolvedConfig, ViteDevServer } from 'vite'
 
 import { discoverCssRoot } from './discovery'
@@ -176,7 +177,7 @@ export default function tailwindMerge(
         }
     }
 
-    /** Runs both kinds of dev update through one generation/invalidation path; source-only edits may reuse the scanner, while CSS edits always rebuild it. The scheduler keeps this path serial. */
+    /** Runs both kinds of dev update through one invalidation path: a CSS edit regenerates, a source-only edit re-scans and re-prunes the retained classification. The scheduler keeps this path serial. */
     async function updateAndReload(trigger: UpdateTrigger) {
         const previous = await session.generation
         const cssPath = await cssRoot
@@ -188,9 +189,9 @@ export default function tailwindMerge(
             if (!pruning) {
                 return
             }
-            let classesHash: string
+            let scan: UsageScan
             try {
-                classesHash = hashClasses(pruning.scanner.scan().classes)
+                scan = pruning.scanner.scan()
             } catch (error) {
                 config.logger.warn(
                     `[@tailwind-merge/vite] Re-scanning your sources failed, keeping the current tailwind-merge config: ${error instanceof Error ? error.message : String(error)}`,
@@ -198,13 +199,21 @@ export default function tailwindMerge(
                 notifyUpdate({ trigger, regenerated: false, reloaded: false })
                 return
             }
-            if (classesHash === pruning.classesHash) {
+            if (hashClasses(scan.classes) === pruning.classesHash) {
                 notifyUpdate({ trigger, regenerated: false, reloaded: false })
                 return
             }
+            // The scan is handed over: re-pruning reuses the retained classification and must not scan again.
+            const repruned = await session.reprune(scan)
+            notifyUpdate({
+                trigger,
+                regenerated: repruned !== previous,
+                reloaded: reloadIfChanged(repruned, previous?.hash),
+            })
+            return
         }
 
-        const generated = await session.regenerate(trigger === 'sources')
+        const generated = await session.regenerate()
         notifyUpdate({
             trigger,
             regenerated: generated !== previous,

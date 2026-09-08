@@ -18,15 +18,16 @@ const { code, config, plan } = await generate(options)
 | `cacheSize` | `number` | Cache size passed through to the generated config. Defaults to the library's default. |
 | `encoding` | `'compact' \| 'exact'` | Finite-scale matching policy. Defaults to `'compact'`; see [encoding](./how-it-works.md#compact-and-exact-encoding). |
 | `format` | `'ts' \| 'js'` | Output language. Defaults to `'ts'`. Both forms are ES modules. |
-| `banner` | `string` | Additional comment lines below the generated-file notice. Provide valid comment text, including its comment delimiters. |
+| `banner` | `string \| PromiseLike<string>` | Additional comment lines below the generated-file notice. Provide valid comment text, including its comment delimiters. A promise is awaited when the module is emitted, at the end of generation. |
 | `importSource` | `string` | Specifier from which the generated module imports the library API. Defaults to `'tailwind-merge'`. An alternative must expose compatible `createTailwindMerge`, `validators`, and, for TypeScript output, `Config`. |
-| `prune` | `{ usedClasses: Iterable<string> }` | Retain the configuration reached by these raw class candidates, including variants, important markers, and postfix modifiers. Omit it to keep the full generated configuration. |
+| `prune` | `{ usedClasses: Iterable<string> \| PromiseLike<Iterable<string> \| null> }` | Retain the configuration reached by these raw class candidates, including variants, important markers, and postfix modifiers. Omit it to keep the full generated configuration. A promise is awaited only when pruning runs, after classification, so a source scan can overlap with generation; resolving it to `null` keeps the full configuration. |
 
 Results:
 
 - `code`: module source exporting `twMerge` and `getConfig`. TypeScript output uses `satisfies` and needs TypeScript 4.9 or newer when compiled as TypeScript; JavaScript output has no type syntax.
 - `config`: the generated configuration as an in-memory object. Use `createTailwindMerge(() => config)` when no file is needed.
 - `plan`: the intermediate configuration representation and its `report`. Treat its detailed structure as unstable.
+- `prune(usedClasses)`: the same result for another set of used classes, computed from the retained classification without loading the design system again. For watchers that re-scan sources after an edit while the CSS graph is unchanged.
 
 Generation rejects on errors; it does not log warnings or write files. Callers decide how to handle `plan.report.unassignedClasses`. The CLI prints them; the Vite plugin has its own documented failure behavior.
 

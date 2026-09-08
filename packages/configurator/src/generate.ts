@@ -11,7 +11,7 @@ import {
     declaredDeclarations,
     loadDesignSystems,
 } from './design-system.ts'
-import { emitModule } from './emit.ts'
+import { type EmitOptions, emitModule } from './emit.ts'
 import { materializeConfig } from './materialize.ts'
 import { type ConfigPlan, applyAugmentations, applyCustomUtilityPlan, buildPlan } from './plan.ts'
 import { prunePlan } from './prune.ts'
@@ -28,14 +28,14 @@ export interface GenerateOptions {
     cacheSize?: number
     /** How finite value sets (theme scales, custom-utility values) are encoded. 'compact' (default) picks the smallest matcher even when it accepts names beyond the theme — smallest bundle, but a nonexistent name like `rounded-xs` on a t-shirt scale can evict a real class. 'exact' enumerates finite names to avoid that overmatching, at a size cost; arbitrary-value types remain approximate. See `EncodingMode`. */
     encoding?: EncodingMode
-    /** Comment lines placed below the generated-file notice at the top of the emitted module, e.g. provenance info like input path and content hash. */
-    banner?: string
+    /** Comment lines placed below the generated-file notice at the top of the emitted module, e.g. provenance info like input path and content hash. May be a promise: it is awaited only when the module is emitted at the end of generation, so text that depends on work overlapping generation (like a source scan) needs no separate step. */
+    banner?: string | PromiseLike<string>
     /** Output language of the emitted module — see `EmitOptions.format`. Defaults to TypeScript. */
     format?: 'ts' | 'js'
     /** Module specifier the emitted code imports tailwind-merge's API from — see `EmitOptions.importSource`. */
     importSource?: string
-    /** Shrinks the generated config to the classes a project uses: class names as a source scanner finds them (variants, important markers, and postfix modifiers included — see `createSourceScanner`). Class groups and scale members no listed class reaches are dropped; every class list made of listed classes merges exactly as with the full config, while retained validators may also match unlisted classes. The result is reported in `plan.report.pruning`. */
-    prune?: { usedClasses: Iterable<string> }
+    /** Shrinks the generated config to the classes a project uses: class names as a source scanner finds them (variants, important markers, and postfix modifiers included — see `createSourceScanner`). Class groups and scale members no listed class reaches are dropped; every class list made of listed classes merges exactly as with the full config, while retained validators may also match unlisted classes. The result is reported in `plan.report.pruning`. The names may be a promise: pruning runs last, so a source scan can overlap with design-system loading and classification instead of preceding them; a promise resolving to `null` skips pruning and keeps the full config, for callers whose scan fails after generation has started. */
+    prune?: { usedClasses: Iterable<string> | PromiseLike<Iterable<string> | null> }
 }
 
 export interface GenerateResult {
@@ -45,6 +45,8 @@ export interface GenerateResult {
     config: AnyConfig
     /** Intermediate representation, including the report on encoding strategies, pruned groups, and augmentations. */
     plan: ConfigPlan
+    /** Prunes this generation to another set of used classes, skipping design-system loading and classification: the result is what `generate` would have returned for those classes with the same options. Meant for watchers that re-scan sources after an edit while the CSS graph is unchanged. */
+    prune(usedClasses: Iterable<string>): GenerateResult
 }
 
 /**
@@ -125,16 +127,26 @@ export async function generate(options: GenerateOptions): Promise<GenerateResult
     ]
 
     // Pruning runs last, on the finished plan: only then does classification see every member a used class could reach (custom utilities, augmented classes, collision corrections included).
-    const finalPlan = options.prune ? prunePlan(plan, options.prune.usedClasses) : plan
+    const usedClasses = options.prune ? await options.prune.usedClasses : null
+    return assembleResult(plan, usedClasses, {
+        banner: await options.banner,
+        format: options.format,
+        importSource: options.importSource,
+    })
+}
 
+/** Everything after classification: prune to the used classes, if any, then emit and materialize. Kept apart so a result can be re-pruned for other classes without repeating the expensive part. */
+function assembleResult(
+    plan: ConfigPlan,
+    usedClasses: Iterable<string> | null,
+    emitOptions: EmitOptions,
+): GenerateResult {
+    const finalPlan = usedClasses ? prunePlan(plan, usedClasses) : plan
     return {
-        code: emitModule(finalPlan, {
-            banner: options.banner,
-            format: options.format,
-            importSource: options.importSource,
-        }),
+        code: emitModule(finalPlan, emitOptions),
         config: materializeConfig(finalPlan),
         plan: finalPlan,
+        prune: (nextUsedClasses) => assembleResult(plan, nextUsedClasses, emitOptions),
     }
 }
 

@@ -4,9 +4,11 @@ import path from 'node:path'
 
 import {
     type EncodingMode,
+    type GenerateResult,
     type PruneReport,
     type SourceScanner,
     type TailwindIntegration,
+    type UsageScan,
     createSourceScanner,
     generate,
 } from '@tailwind-merge/configurator'
@@ -17,6 +19,8 @@ export interface GeneratedRuntimeModule {
     code: string
     /** sha-256 of `code` — the dev loop's change gate: regenerations that produce identical output must not invalidate or reload anything. */
     hash: string
+    /** The configurator's result behind `code`, retained so a usage change can re-prune the same classification instead of regenerating. */
+    result: GenerateResult
     /** Absolute paths of every file the generation read: the entrypoint, `@import`ed stylesheets, and `@config`/`@plugin` modules. Watching these is what triggers regeneration. */
     dependencies: Set<string>
     /** Modification times of the dependencies as generation read them, so a `vite build --watch` rebuild can tell whether the CSS graph changed without re-reading it. */
@@ -46,16 +50,16 @@ export interface GenerateRuntimeModuleOptions {
     cacheSize?: number
     encoding?: EncodingMode
     integration?: TailwindIntegration
-    /** Prune the config to the classes found in the project's sources. `autoDetectBases` is where Tailwind's automatic source detection starts (the CSS's `source(…)`, when set, wins); `scanner` reuses an existing scanner when only the sources changed, skipping the compile that discovers them. Omit the option for the full config. */
-    prune?: { autoDetectBases: string[]; scanner?: SourceScanner }
+    /** Prune the config to the classes found in the project's sources. `autoDetectBases` is where Tailwind's automatic source detection starts (the CSS's `source(…)`, when set, wins). Omit the option for the full config. */
+    prune?: { autoDetectBases: string[] }
 }
 
 /**
  * Generates the virtual runtime module from the project's Tailwind CSS entrypoint.
  *
- * Always supplies dependency hooks to the configurator's loaders, even without custom resolution. The same load that generates the config therefore discovers its dependencies; a separate compile for watching is unnecessary. Reused scanners contribute their previously discovered dependencies too. Each dependency's modification time is taken when it is reported, as it is read: taken after generation, an edit landing mid-generation would be recorded as the baseline and a watch rebuild would keep the stale module.
+ * Always supplies dependency hooks to the configurator's loaders, even without custom resolution. The same load that generates the config therefore discovers its dependencies; a separate compile for watching is unnecessary. Each dependency's modification time is taken when it is reported, as it is read: taken after generation, an edit landing mid-generation would be recorded as the baseline and a watch rebuild would keep the stale module.
  *
- * A failing scan (no oxide binary for the platform, sources Tailwind can't resolve) never fails the generation: the module is generated with the full config and `pruningError` carries the reason — pruning is an optimization, and falling back preserves the full generated config's behavior.
+ * The source scan runs alongside generation rather than before it — its compile of the CSS graph and the source walk only have to finish before pruning, which runs last. A failing scan (no oxide binary for the platform, sources Tailwind can't resolve) never fails the generation: the module is generated with the full config and `pruningError` carries the reason — pruning is an optimization, and falling back preserves the full generated config's behavior.
  */
 export async function generateRuntimeModule(
     options: GenerateRuntimeModuleOptions,
@@ -79,26 +83,22 @@ export async function generateRuntimeModule(
         },
     }
 
-    let scanner: SourceScanner | undefined
-    let scan: ReturnType<SourceScanner['scan']> | undefined
     let pruningError: Error | undefined
-    if (options.prune) {
-        try {
-            scanner =
-                options.prune.scanner ??
-                (await createSourceScanner({
-                    css,
-                    base,
-                    autoDetectBases: options.prune.autoDetectBases,
-                    integration,
-                }))
-            scan = scanner.scan()
-        } catch (error) {
-            pruningError = error instanceof Error ? error : new Error(String(error))
-            scanner = undefined
-        }
-    }
+    const scanning: Promise<{ scanner: SourceScanner; scan: UsageScan } | null> = options.prune
+        ? createSourceScanner({
+              css,
+              base,
+              autoDetectBases: options.prune.autoDetectBases,
+              integration,
+          })
+              .then((scanner) => ({ scanner, scan: scanner.scan() }))
+              .catch((error: unknown) => {
+                  pruningError = error instanceof Error ? error : new Error(String(error))
+                  return null
+              })
+        : Promise.resolve(null)
 
+    const sourceLine = `// Source: ${path.relative(options.root, options.cssPath) || options.cssPath} (served in-memory by @tailwind-merge/vite)`
     const result = await generate({
         css,
         base,
@@ -107,20 +107,20 @@ export async function generateRuntimeModule(
         encoding: options.encoding,
         format: 'js',
         importSource: INTERNAL_TAILWIND_MERGE,
-        banner: [
-            `// Source: ${path.relative(options.root, options.cssPath) || options.cssPath} (served in-memory by @tailwind-merge/vite)`,
-            ...(scan ? ['// Pruned to the classes found in the project\'s sources'] : []),
-        ].join('\n'),
-        prune: scan ? { usedClasses: scan.classes } : undefined,
+        banner: scanning.then((scanned) =>
+            [sourceLine, ...(scanned ? [PRUNED_LINE] : [])].join('\n'),
+        ),
+        prune: options.prune
+            ? { usedClasses: scanning.then((scanned) => scanned?.scan.classes ?? null) }
+            : undefined,
     })
-    for (const file of scanner?.dependencies ?? []) {
+    const scanned = await scanning
+    for (const file of scanned?.scanner.dependencies ?? []) {
         recordDependency(file)
     }
 
-    const code = result.code + RUNTIME_APPENDIX
     return {
-        code,
-        hash: createHash('sha256').update(code).digest('hex'),
+        ...assembleModule(result),
         dependencies,
         dependencyMtimes: new Map(
             await Promise.all(
@@ -129,18 +129,46 @@ export async function generateRuntimeModule(
         ),
         cssPath: options.cssPath,
         pruning:
-            scanner && scan && result.plan.report.pruning
-                ? {
-                      report: result.plan.report.pruning,
-                      scanner,
-                      classesHash: hashClasses(scan.classes),
-                      files: scan.files,
-                      globs: scan.globs,
-                  }
+            scanned && result.plan.report.pruning
+                ? pruningState(scanned.scanner, scanned.scan, result.plan.report.pruning)
                 : undefined,
         pruningError,
     }
 }
+
+/**
+ * Re-prunes a module for a fresh scan of the same, unchanged CSS graph — the dev server's and watch build's reaction to a source edit that changed the used classes. Pruning and emission run on the retained classification; nothing is loaded or classified again, and the dependency graph and its modification times carry over.
+ */
+export function pruneRuntimeModule(
+    generated: GeneratedRuntimeModule,
+    pruning: PruningState,
+    scan: UsageScan,
+): GeneratedRuntimeModule {
+    const result = generated.result.prune(scan.classes)
+    return {
+        ...generated,
+        ...assembleModule(result),
+        // A pruned result always carries the pruning report.
+        pruning: pruningState(pruning.scanner, scan, result.plan.report.pruning!),
+    }
+}
+
+function assembleModule(result: GenerateResult): Pick<GeneratedRuntimeModule, 'code' | 'hash' | 'result'> {
+    const code = result.code + RUNTIME_APPENDIX
+    return { code, hash: createHash('sha256').update(code).digest('hex'), result }
+}
+
+function pruningState(scanner: SourceScanner, scan: UsageScan, report: PruneReport): PruningState {
+    return {
+        report,
+        scanner,
+        classesHash: hashClasses(scan.classes),
+        files: scan.files,
+        globs: scan.globs,
+    }
+}
+
+const PRUNED_LINE = "// Pruned to the classes found in the project's sources"
 
 /** Order-independent fingerprint of a scan's class names. */
 export function hashClasses(classes: readonly string[]): string {

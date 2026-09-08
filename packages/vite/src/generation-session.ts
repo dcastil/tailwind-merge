@@ -1,11 +1,14 @@
+import { type UsageScan } from '@tailwind-merge/configurator'
 import { clearRequireCache } from '@tailwindcss/node/require-cache'
 
 import {
     type GeneratedRuntimeModule,
     type GenerateRuntimeModuleOptions,
+    type PruningState,
     dependenciesChanged,
     generateRuntimeModule,
     hashClasses,
+    pruneRuntimeModule,
 } from './generation'
 
 interface GenerationSessionOptions extends Omit<GenerateRuntimeModuleOptions, 'cssPath'> {
@@ -33,9 +36,20 @@ export function createGenerationSession(options: GenerationSessionOptions) {
             return generation
         },
 
-        /** Schedule after the previous attempt, including a rejection. Source-only changes can reuse the scanner and module cache. */
-        regenerate(reuseScanner = false) {
-            generation = generation.catch(() => null).then(() => run(reuseScanner))
+        /** Schedule after the previous attempt, including a rejection. */
+        regenerate() {
+            generation = generation.catch(() => null).then(() => run())
+            return generation
+        },
+
+        /** Source-only changes re-prune the current module for the caller's fresh scan — no loading, no classification — behind any running attempt, like a regeneration. Without a pruned module there is nothing to re-prune. */
+        reprune(scan: UsageScan) {
+            generation = generation.catch(() => null).then(() => {
+                if (current?.pruning) {
+                    reprune(current, current.pruning, scan)
+                }
+                return current
+            })
             return generation
         },
 
@@ -45,13 +59,13 @@ export function createGenerationSession(options: GenerationSessionOptions) {
                 if (!previous || (await dependenciesChanged(previous))) {
                     return run()
                 }
-                if (
-                    previous.pruning &&
-                    hashClasses(previous.pruning.scanner.scan().classes) !== previous.pruning.classesHash
-                ) {
-                    return run(true)
+                if (previous.pruning) {
+                    const scan = previous.pruning.scanner.scan()
+                    if (hashClasses(scan.classes) !== previous.pruning.classesHash) {
+                        reprune(previous, previous.pruning, scan)
+                    }
                 }
-                return previous
+                return current
             })
             return generation
         },
@@ -63,25 +77,19 @@ export function createGenerationSession(options: GenerationSessionOptions) {
         },
     }
 
-    async function run(reuseScanner = false): Promise<GeneratedRuntimeModule | null> {
+    async function run(): Promise<GeneratedRuntimeModule | null> {
         const cssPath = await cssRoot
         if (cssPath === null) {
             return null
         }
         try {
             // Tailwind refreshes ESM itself; CommonJS modules and parents holding their exports need invalidation before either scanning or design-system loading.
-            if (!reuseScanner) {
-                clearRequireCache([...dependencies])
-            }
+            clearRequireCache([...dependencies])
             trackDependency(cssPath)
             const generated = await generateRuntimeModule({
                 ...generationOptions,
                 cssPath,
                 integration: { ...generationOptions.integration, onDependency: trackDependency },
-                prune: generationOptions.prune && {
-                    ...generationOptions.prune,
-                    scanner: reuseScanner ? current?.pruning?.scanner : undefined,
-                },
             })
             current = generated
             dependencies = new Set(generated.dependencies)
@@ -90,6 +98,11 @@ export function createGenerationSession(options: GenerationSessionOptions) {
             onError(error, current)
         }
         return current
+    }
+
+    function reprune(generated: GeneratedRuntimeModule, pruning: PruningState, scan: UsageScan) {
+        current = pruneRuntimeModule(generated, pruning, scan)
+        onGenerated(current)
     }
 
     /** Observe files, missing targets, and recovery directories before an attempt can fail. The caller registers its watcher immediately or drains the accumulated set when the watcher starts. */
