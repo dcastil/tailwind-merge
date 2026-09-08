@@ -143,6 +143,10 @@ jobs:
                   # No registry-url on purpose: it would write an .npmrc auth line referencing the unset NODE_AUTH_TOKEN, which pnpm's config loader rejects. pnpm publishes to its default registry through npm trusted publishing (OIDC), needing no token plumbing.
                   package-manager-cache: false
             - run: corepack enable
+            # pnpm resolves `workspace:` specifiers at publish time by reading the linked package's manifest from node_modules (the vite package depends on tailwind-merge that way), so the released package's dependencies are installed here — for that package only, with lifecycle scripts disabled, so no dependency code runs in the job holding the OIDC token. `catalog:` specifiers need no install; they resolve from pnpm-workspace.yaml.
+            - run: pnpm install --frozen-lockfile --ignore-scripts --filter "$PACKAGE_NAME"
+              env:
+                  PACKAGE_NAME: ${{ needs.build-prod.outputs.package-name }}
             - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
               with:
                   name: build-output
