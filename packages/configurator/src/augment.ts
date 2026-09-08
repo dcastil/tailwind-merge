@@ -100,8 +100,9 @@ export function buildAugmentations({
         }
         handledNames.add(registrationName)
 
+        // Classify the positive spelling: the class list sorts negative names first, and `-col-full` bucketed under its empty first segment would only see vanilla negatives — none exist for grid columns — while the `col` bucket holds the exemplar it needs.
         const targetGroupId = classifyByProperties(
-            className,
+            registrationName,
             properties,
             exemplarsByFirstSegment,
             vanilla,

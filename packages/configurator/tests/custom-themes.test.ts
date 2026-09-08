@@ -154,3 +154,23 @@ describe('minimal theme with heavy resets', async () => {
         expect(plan.report.scaleStrategies['blur']).toBe('empty')
     })
 })
+
+describe('theme scales whose vanilla siblings have no negative form', async () => {
+    // Tailwind lists `-col-full` before `col-full`. Classifying the signed name bucketed it under an empty first segment, where no grid-column exemplar exists, and the positive name was then treated as handled.
+    const { twMerge, plan } = await generateFixture(css`
+        @import 'tailwindcss';
+        @theme {
+            --grid-column-full: 1 / -1;
+            --hue-rotate-tint: 30deg;
+        }
+    `)
+
+    test('the positive names are classified through their own bucket', () => {
+        expect(plan.report.unassignedClasses).toEqual([])
+        expectMerges(twMerge, {
+            'col-full col-span-2': 'col-span-2',
+            'col-span-2 col-full': 'col-full',
+            'hue-rotate-tint hue-rotate-90': 'hue-rotate-90',
+        })
+    })
+})
