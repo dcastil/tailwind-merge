@@ -77,10 +77,13 @@ export function setupPluginTests() {
     afterEach(async () => {
         await activeServer?.close()
         activeServer = undefined
+        // A watch build's bundle write can still be running when a test closes its watcher (Rollup finishes a write in flight instead of aborting it), which surfaces as ENOTEMPTY while the copy is being removed underneath it. Node retries the removal on exactly that error class after a backoff, so a write that outlives its test by a few hundred milliseconds costs a retry instead of the test.
         await Promise.all(
             temporaryDirectories
                 .splice(0)
-                .map((directory) => rm(directory, { recursive: true, force: true })),
+                .map((directory) =>
+                    rm(directory, { recursive: true, force: true, maxRetries: 5, retryDelay: 200 }),
+                ),
         )
     })
     afterAll(() => rm(cacheDirectory, { recursive: true, force: true }))

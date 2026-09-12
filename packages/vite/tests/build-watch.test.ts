@@ -42,9 +42,21 @@ test.each([false, true])(
             resolve: { alias: libraryAliases },
             build: { write: false, minify: false, watch: { chokidar: { usePolling: true } } },
         })) as Rollup.RollupWatcher
+        // `code` is captured mid-cycle, before Rollup writes the bundle to dist (watch mode writes regardless of `write: false`), and a write in flight when the watcher closes runs to completion — into a directory the harness is about to remove. So the test settles on the END of a cycle whose bundle contains the class, which Rollup emits only after the write, and keeps the listener's result cleanup that `nextWatchBuild` performs per cycle.
+        let built = false
+        const onEvent = async (event: Rollup.RollupWatcherEvent) => {
+            if (event.code === 'BUNDLE_END') {
+                await event.result.close()
+            } else if (event.code === 'ERROR') {
+                await event.result?.close()
+            } else if (event.code === 'END' && hasLiteral(code, 'huge')) {
+                built = true
+            }
+        }
         try {
             await nextWatchBuild(watcher)
             expect(hasLiteral(code, 'huge')).toBe(false)
+            watcher.on('event', onEvent)
             await mkdir(path.join(templates, 'nested'))
             let sequence = 0
             // Rollup exposes no watcher-ready event, and its first END precedes polling initialization. Create fresh templates until observed: only creation can trigger the rebuild, never an edit of an already-watched file or a guessed delay.
@@ -56,11 +68,12 @@ test.each([false, true])(
                             '<div class="text-huge"></div>\n',
                         )
                     }
-                    expect(hasLiteral(code, 'huge')).toBe(true)
+                    expect(built).toBe(true)
                 },
                 { timeout: 5_000, interval: 100 },
             )
         } finally {
+            watcher.off('event', onEvent)
             await watcher.close()
         }
     },
