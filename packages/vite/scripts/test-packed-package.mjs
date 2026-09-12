@@ -114,7 +114,6 @@ async function assertTarballLayout(tarballPath) {
         'package/tsdown.config.ts',
         'package/vitest.config.mts',
         'package/eslint.config.mjs',
-        'package/.npmrc',
     ]
     for (const entry of entries) {
         for (const forbidden of forbiddenPatterns) {

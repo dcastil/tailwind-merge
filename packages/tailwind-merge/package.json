@@ -65,11 +65,11 @@
         "test:types": "tsc --noEmit && tsc --noEmit --project tests/tsconfig.json",
         "test:types:compat": "node node_modules/typescript-compat/bin/tsc --project scripts/typescript-compatibility/tsconfig.json",
         "lint": "eslint --max-warnings 0 .",
+        "release": "pnpm version --tag-version-prefix=tailwind-merge@ --message=tailwind-merge@%s",
         "preversion": "if [ -n \"$DANYS_MACHINE\" ]; then git checkout main && git pull; fi",
         "version": "node ../../scripts/update-pinned-links.mjs && zx scripts/update-readme.mjs",
         "postversion": "if [ -n \"$DANYS_MACHINE\" ]; then git push --follow-tags && open https://github.com/dcastil/tailwind-merge/releases; fi"
     },
-    "dependencies": {},
     "devDependencies": {
         "@babel/core": "^8.0.1",
         "@babel/preset-env": "^8.0.2",
