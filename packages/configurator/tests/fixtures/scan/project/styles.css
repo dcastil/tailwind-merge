@@ -1,0 +1,2 @@
+/* CSS files are never scanned for candidates. */
+.legacy { @apply m-99; }

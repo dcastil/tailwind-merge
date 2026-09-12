@@ -1,0 +1,497 @@
+/*
+ * Third-party test fixture, pinned copy of kagisearch/kite-public (MIT, (c) Kagi Search).
+ * Source: https://github.com/kagisearch/kite-public/blob/c4fc3b579c3b/src/app.css
+ * Fetched 2026-08-09. Apart from this header and the inline `stripped` markers below, the content is verbatim upstream.
+ * Stripped imports of npm packages this workspace does not install:
+ *   @import 'overlayscrollbars/styles/overlayscrollbars.css';
+ */
+@import 'tailwindcss';
+@custom-variant dark (&:where(.dark, .dark *));
+@custom-variant blue-light (&:where(.blue-light, .blue-light *));
+@custom-variant blue-dark (&:where(.blue-dark, .blue-dark *));
+@custom-variant rtl (&:where([dir="rtl"], [dir="rtl"] *));
+@custom-variant ltr (&:where([dir="ltr"], [dir="ltr"] *));
+/* stripped (package not installed in this workspace): @import 'overlayscrollbars/styles/overlayscrollbars.css'; */
+
+@theme {
+	/* Font Families */
+	--font-lufga: 'lufga', system-ui, sans-serif;
+
+	/* Colors */
+	--color-graphite: #18181a;
+	--color-graphite-25: #fafafb;
+	--color-graphite-50: #f5f5f5;
+	--color-graphite-70: #f3f3f3;
+	--color-graphite-100: #e6e6e8;
+	--color-graphite-200: #cfcfd1;
+	--color-graphite-300: #acacaf;
+	--color-graphite-400: #9f9fa5;
+	--color-graphite-500: #87878e;
+	--color-graphite-600: #707077;
+	--color-graphite-700: #5a5a60;
+	--color-graphite-800: #454549;
+	--color-graphite-850: #39393c;
+	--color-graphite-900: #2f2f31;
+	--color-graphite-950: #232325;
+	--color-graphite-1000: #18181a;
+
+	--color-test: #131533;
+	--color-test-25: #f8f9fc;
+	--color-test-50: #eef0f7;
+	--color-test-70: #e2e4f0;
+	--color-test-100: #d5d7e7;
+	--color-test-200: #b8bcdb;
+	--color-test-300: #9ca1cc;
+	--color-test-400: #8287be;
+	--color-test-600: #555b98;
+	--color-test-700: #434882;
+	--color-test-800: #33376c;
+	--color-test-850: #2a2e5d;
+	--color-test-900: #23254e;
+	--color-test-950: #1a1c40;
+
+	--color-chrome: #fbfbfe;
+	--color-chrome-25: #fbfbfe;
+	--color-chrome-50: #f7f7fc;
+	--color-chrome-70: #f3f3fc;
+	--color-chrome-100: #e8e8f0;
+	--color-chrome-200: #cfcfdb;
+	--color-chrome-300: #b7b7c5;
+	--color-chrome-400: #9fa0af;
+	--color-chrome-500: #878898;
+	--color-chrome-600: #707181;
+	--color-chrome-700: #5a5a6a;
+	--color-chrome-800: #454553;
+	--color-chrome-850: #393947;
+	--color-chrome-900: #2f2f3b;
+	--color-chrome-950: #23232f;
+	--color-chrome-1000: #181824;
+
+	--color-purple-300: #c9c1ff;
+	--color-purple-400: #c0b8ff;
+	--color-purple-500: #9185e0;
+	--color-purple-600: #6c5edc;
+	--color-purple-800: #4d41a4;
+	--color-purple-900: #3f3399;
+
+	--color-white: #ffffff;
+	--color-yellow: #ffb319;
+	--color-warning: #ff964a;
+	--color-info: #4A67C7;
+	--color-danger: #ff5a0a;
+	--color-success: #3F8611;
+	--color-calm: #edf0f5;
+	--color-blue: #224fc1;
+
+	/* Primary Colors */
+	--color-primary: var(--color-graphite-1000);
+	--color-primary-25: var(--color-graphite-25);
+	--color-primary-50: var(--color-graphite-50);
+	--color-primary-70: var(--color-graphite-70);
+	--color-primary-100: var(--color-graphite-100);
+	--color-primary-200: var(--color-graphite-200);
+	--color-primary-300: var(--color-graphite-300);
+	--color-primary-400: var(--color-graphite-400);
+	--color-primary-600: var(--color-graphite-600);
+	--color-primary-700: var(--color-graphite-700);
+	--color-primary-800: var(--color-graphite-800);
+	--color-primary-850: var(--color-graphite-850);
+	--color-primary-900: var(--color-graphite-900);
+	--color-primary-950: var(--color-graphite-950);
+
+	/* Backgrounds */
+	--color-modal-bg: var(--color-white);
+	--color-input-bg: var(--color-white);
+	--color-app-bg: var(--color-white);
+	--color-tooltip-bg: var(--color-graphite-800);
+	--color-dark-bg: var(--color-graphite-950);
+
+	/* Accents */
+	--color-accent-links: var(--color-purple-600);
+	--color-on-accent: var(--color-graphite-25);
+	--color-accent-yellow: var(--color-yellow);
+	--color-on-yellow: var(--color-graphite-1000);
+	--color-accent-warning: var(--color-warning);
+	--color-accent-alert: var(--color-danger);
+	--color-accent-info: var(--color-info);
+	--color-accent-success: var(--color-success);
+
+	/* Hovers and Overlays */
+	--color-overlay: rgba(24, 24, 26, 0.4);
+	--color-general-hover-states: rgba(172, 172, 175, 0.2);
+	--color-assistant-hover-state: var(--color-graphite-25);
+
+	/* Focus Ring Colors */
+	--color-focus-ring: #93c5fd; /* blue-300 for light mode */
+	--color-ring-focus-ring: var(--color-focus-ring); /* For Tailwind ring-focus-ring class */
+    
+	/* Animations */
+	--animate-fade: fadeIn 0.5s ease-in-out;
+
+	/* Global animation settings */
+	--transition-speed: 0.2s;
+	--transition-easing: ease-in-out;
+
+	/* Highlight colors - light mode default */
+	--highlight-color: rgba(147, 51, 234, 0.2); /* Purple with opacity for light mode */
+	--selection-color: rgba(147, 51, 234, 0.2); /* Purple with opacity for light mode */
+
+	/* Skeleton loading colors - light mode */
+	--skeleton-start: #eeedf6;
+	--skeleton-middle: #d8d5eb;
+	--skeleton-end: #fcfbfb;
+
+	/* Z-index scale - Tailwind v4 utilities (use z-dropdown, z-modal, etc.) */
+	--z-index-base: 0;
+	--z-index-dropdown: 10;
+	--z-index-sticky: 20;
+	--z-index-fixed: 30;
+	--z-index-drawer: 40;
+	--z-index-modal-backdrop: 50;
+	--z-index-modal: 60;
+	--z-index-popover: 70;
+	--z-index-tooltip: 80;
+	--z-index-notification: 90;
+	--z-index-max: 100;
+
+	@keyframes fadeIn {
+		from {
+			opacity: 0;
+		}
+		to {
+			opacity: 1;
+		}
+	}
+}
+
+/* Dark mode overrides */
+.dark {
+	--highlight-color: rgba(
+		168,
+		85,
+		247,
+		0.4
+	); /* Brighter purple with higher opacity for dark mode */
+	--selection-color: rgba(
+		168,
+		85,
+		247,
+		0.4
+	); /* Brighter purple with higher opacity for dark mode */
+
+	/* Skeleton loading colors - dark mode */
+	--skeleton-start: #3d3a4f;
+	--skeleton-middle: #2a2836;
+	--skeleton-end: #4a4660;
+
+	/* Dark mode primary color overrides */
+	--color-primary: var(--color-graphite-70);
+	--color-primary-25: var(--color-graphite-950);
+	--color-primary-50: var(--color-graphite-900);
+	--color-primary-70: var(--color-graphite-850);
+	--color-primary-100: var(--color-graphite-800);
+	--color-primary-200: var(--color-graphite-700);
+	--color-primary-300: var(--color-graphite-600);
+	--color-primary-400: var(--color-graphite-400);
+	--color-primary-600: var(--color-graphite-300);
+	--color-primary-700: var(--color-graphite-200);
+	--color-primary-800: var(--color-graphite-100);
+	--color-primary-850: var(--color-graphite-70);
+	--color-primary-900: var(--color-graphite-50);
+	--color-primary-950: var(--color-graphite-25);
+
+	/* Dark mode test/blue color overrides */
+	--color-test: var(--color-test-70);
+	--color-test-25: var(--color-test-950);
+	--color-test-50: var(--color-test-900);
+	--color-test-70: var(--color-test-850);
+	--color-test-100: var(--color-test-800);
+	--color-test-200: var(--color-test-700);
+	--color-test-300: var(--color-test-600);
+	--color-test-600: var(--color-test-300);
+	--color-test-700: var(--color-test-200);
+	--color-test-800: var(--color-test-100);
+	--color-test-850: var(--color-test-70);
+	--color-test-900: var(--color-test-50);
+	--color-test-950: var(--color-test-25);
+
+	/* Dark mode semantic color overrides */
+	--color-modal-bg: var(--color-graphite-950);
+	--color-input-bg: var(--color-graphite-900);
+	--color-app-bg: var(--color-graphite-950);
+	--color-tooltip-bg: var(--color-primary-200);
+	--color-dark-bg: var(--color-graphite-1000);
+
+	/* Dark mode accent color overrides */
+	--color-accent-links: var(--color-purple-300);
+	--color-on-accent: var(--color-primary);
+
+	/* Dark mode focus ring color override */
+	--color-focus-ring: #2563eb; /* blue-600 for dark mode */
+	--color-ring-focus-ring: var(--color-focus-ring); /* For Tailwind ring-focus-ring class */
+}
+
+/* Blue light theme overrides */
+.blue-light {
+	--color-primary: var(--color-test);
+	--color-primary-25: var(--color-test-25);
+	--color-primary-50: var(--color-test-50);
+	--color-primary-70: var(--color-test-70);
+	--color-primary-100: var(--color-test-100);
+	--color-primary-200: var(--color-test-200);
+	--color-primary-300: var(--color-test-300);
+	--color-primary-400: var(--color-test-400);
+	--color-primary-600: var(--color-test-600);
+	--color-primary-700: var(--color-test-700);
+	--color-primary-800: var(--color-test-800);
+	--color-primary-850: var(--color-test-850);
+	--color-primary-900: var(--color-test-900);
+	--color-primary-950: var(--color-test-950);
+
+	/* Blue light semantic color overrides */
+	--color-tooltip-bg: var(--color-primary-800);
+	--color-dark-bg: var(--color-test-950);
+
+	/* Blue light accent color overrides */
+	--color-on-accent: var(--color-primary-25);
+	--color-accent-info: var(--color-blue);
+
+	/* Blue light hovers and overlays overrides */
+	--color-overlay: rgba(19, 21, 51, 0.4);
+	--color-assistant-hover-state: var(--color-primary-25);
+}
+
+/* Blue dark theme overrides */
+.blue-dark {
+	--color-primary: var(--color-test-70);
+	--color-primary-25: var(--color-test-950);
+	--color-primary-50: var(--color-test-900);
+	--color-primary-70: var(--color-test-850);
+	--color-primary-100: var(--color-test-800);
+	--color-primary-200: var(--color-test-700);
+	--color-primary-300: var(--color-test-600);
+	--color-primary-400: var(--color-test-400);
+	--color-primary-600: var(--color-test-300);
+	--color-primary-700: var(--color-test-200);
+	--color-primary-800: var(--color-test-100);
+	--color-primary-850: var(--color-test-70);
+	--color-primary-900: var(--color-test-50);
+	--color-primary-950: var(--color-test-25);
+
+	/* Blue dark semantic color overrides */
+	--color-modal-bg: var(--color-test-950);
+	--color-input-bg: var(--color-test-900);
+	--color-app-bg: var(--color-test);
+	--color-tooltip-bg: var(--color-primary-200);
+	--color-dark-bg: var(--color-test);
+
+	/* Blue dark accent color overrides */
+	--color-accent-links: var(--color-purple-300);
+	--color-on-accent: var(--color-primary-25);
+	--color-accent-info: var(--color-info);
+
+	/* Blue dark hovers and overlays overrides */
+	--color-overlay: rgba(19, 21, 51, 0.4);
+	--color-assistant-hover-state: var(--color-primary-25);
+}
+
+/* Global selection style */
+::selection {
+	background-color: var(--selection-color) !important;
+	color: inherit;
+}
+
+/* Global styles for text highlighting and transitions */
+span[data-absolute-pos] {
+	transition: all var(--transition-speed) var(--transition-easing);
+}
+
+span.highlight {
+	background-color: var(--highlight-color);
+	transition: background-color var(--transition-speed) var(--transition-easing);
+}
+
+@font-face {
+	font-family: 'lufga';
+	src:
+		url('/fonts/lufga/lufga-regular-webfont.woff2') format('woff2'),
+		url('/fonts/lufga/lufga-regular-webfont.woff') format('woff'),
+		url('/fonts/lufga/lufga-regular-webfont.ttf') format('truetype');
+	font-weight: normal;
+	font-style: normal;
+}
+
+@font-face {
+	font-family: 'lufga';
+	src: url('/fonts/lufga/lufga-medium-webfont.ttf') format('truetype');
+	font-weight: 500;
+	font-style: normal;
+	font-display: fallback;
+}
+
+@font-face {
+	font-family: 'lufga';
+	src:
+		url('/fonts/lufga/lufga-semibold-webfont.woff2') format('woff2'),
+		url('/fonts/lufga/lufga-semibold-webfont.woff') format('woff'),
+		url('/fonts/lufga/lufga-semibold-webfont.ttf') format('truetype');
+	font-weight: 600 700;
+	font-style: normal;
+	font-display: fallback;
+}
+
+@font-face {
+	font-family: 'lufga';
+	src: url('/fonts/lufga/lufga-light-webfont.ttf') format('truetype');
+	font-weight: 300;
+	font-style: normal;
+	font-display: fallback;
+}
+
+select {
+	background: url("data:image/svg+xml; utf8, <svg xmlns='http://www.w3.org/2000/svg' style='color: %23808080' width='20'  height='20'  viewBox='0 0 24 24'  fill='currentColor'  class='icon icon-tabler icons-tabler-filled icon-tabler-caret-down'><path stroke='none' d='M0 0h24v24H0z' fill='none'/><path d='M18 9c.852 0 1.297 .986 .783 1.623l-.076 .084l-6 6a1 1 0 0 1 -1.32 .083l-.094 -.083l-6 -6l-.083 -.094l-.054 -.077l-.054 -.096l-.017 -.036l-.027 -.067l-.032 -.108l-.01 -.053l-.01 -.06l-.004 -.057v-.118l.005 -.058l.009 -.06l.01 -.052l.032 -.108l.027 -.067l.07 -.132l.065 -.09l.073 -.081l.094 -.083l.077 -.054l.096 -.054l.036 -.017l.067 -.027l.108 -.032l.053 -.01l.06 -.01l.057 -.004l12.059 -.002z' /></svg>")
+		no-repeat right 10px center;
+	appearance: none;
+}
+
+/* Text alignment highlight */
+:global(span.highlight) {
+	background-color: var(--highlight-color);
+	transition: all 0.2s ease-in-out;
+}
+
+.tabler-icon {
+	stroke-width: 1.5;
+}
+
+/* Universal Font Classes */
+.font-universal {
+	font-family: var(--font-universal);
+	font-feature-settings:
+		'kern' 1,
+		'liga' 1,
+		'ccmp' 1,
+		'mark' 1,
+		'mkmk' 1;
+	font-variant-ligatures: common-ligatures;
+	text-rendering: optimizeLegibility;
+}
+
+.font-universal-input {
+	font-family: var(--font-universal);
+	font-feature-settings:
+		'kern' 1,
+		'liga' 1,
+		'ccmp' 1,
+		'mark' 1,
+		'mkmk' 1;
+	font-variant-ligatures: common-ligatures;
+	text-rendering: optimizeLegibility;
+}
+
+.font-universal-output {
+	font-family: var(--font-universal);
+	font-feature-settings:
+		'kern' 1,
+		'liga' 1,
+		'ccmp' 1,
+		'mark' 1,
+		'mkmk' 1;
+	font-variant-ligatures: common-ligatures;
+	text-rendering: optimizeLegibility;
+}
+
+/* OverlayScrollbars theming - Light theme (default) */
+.os-scrollbar {
+  --os-handle-bg: rgba(0, 0, 0, 0.2);
+  --os-handle-bg-hover: rgba(0, 0, 0, 0.3);
+  --os-handle-bg-active: rgba(0, 0, 0, 0.4);
+  --os-track-bg: transparent;
+  --os-track-bg-hover: rgba(0, 0, 0, 0.05);
+  --os-track-bg-active: rgba(0, 0, 0, 0.1);
+}
+
+/* OverlayScrollbars theming - Dark theme */
+.dark .os-scrollbar {
+  --os-handle-bg: rgba(255, 255, 255, 0.2);
+  --os-handle-bg-hover: rgba(255, 255, 255, 0.3);
+  --os-handle-bg-active: rgba(255, 255, 255, 0.4);
+  --os-track-bg: transparent;
+  --os-track-bg-hover: rgba(255, 255, 255, 0.05);
+  --os-track-bg-active: rgba(255, 255, 255, 0.1);
+}
+
+/* Test Color Icon Class */
+.icon-test-color {
+	color: var(--color-primary-600);
+	transition: color var(--transition-speed) var(--transition-easing);
+}
+
+/* Apply hover effect when parent button/link is hovered */
+button:hover .icon-test-color,
+a:hover .icon-test-color {
+	color: var(--color-primary-800);
+}
+
+/* Icon Color Classes */
+.icon-color {
+	color: var(--color-primary-800);
+}
+
+.icon-color-hover {
+	color: var(--color-primary-800);
+	transition: color var(--transition-speed) var(--transition-easing);
+}
+
+.icon-color-hover:hover {
+	color: var(--color-primary);
+}
+
+.icon-color-muted {
+	color: var(--color-primary-600);
+}
+
+.icon-color-muted-hover {
+	color: var(--color-primary-600);
+	transition: color var(--transition-speed) var(--transition-easing);
+}
+
+.icon-color-muted-hover:hover {
+	color: var(--color-primary-300);
+}
+
+.icon-color-disabled {
+	color: var(--color-primary-400);
+	opacity: 0.5;
+}
+
+/* Typography: text-balance for headings, text-pretty for body */
+h1, h2, h3, h4, h5, h6 {
+	text-wrap: balance;
+}
+
+p {
+	text-wrap: pretty;
+}
+
+/* Scrollbar hiding utility - use class="hide-scrollbar" */
+.hide-scrollbar {
+	-ms-overflow-style: none;
+	scrollbar-width: none;
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+	display: none;
+}
+
+/* Respect user preference for reduced motion */
+@media (prefers-reduced-motion: reduce) {
+	*,
+	*::before,
+	*::after {
+		animation-duration: 0.01ms !important;
+		animation-iteration-count: 1 !important;
+		transition-duration: 0.01ms !important;
+		scroll-behavior: auto !important;
+	}
+}

@@ -1,0 +1,192 @@
+// @ts-check
+
+import path from 'node:path'
+
+import { getBabelOutputPlugin } from '@rollup/plugin-babel'
+import { nodeResolve } from '@rollup/plugin-node-resolve'
+import typescript from '@rollup/plugin-typescript'
+import { defineConfig } from 'rollup'
+import del from 'rollup-plugin-delete'
+import { dts } from 'rollup-plugin-dts'
+
+import pkg from '../package.json' with { type: 'json' }
+
+/**
+ * Preserves the generated-code semantics of Babel 7's `@babel/preset-env` `loose: true` option after Babel 8 removed it. The documented migration's `arrayLikeIsIterable` assumption is replaced with `iterableIsArray` because every transformed iterable in this package is an array; this avoids Babel 8's generic iterable helpers and keeps the generated JavaScript byte-for-byte equivalent to Babel 7.
+ *
+ * @see https://babeljs.io/docs/assumptions#migrating-from-babelpreset-envs-loose-and-spec-modes
+ */
+const babelLooseAssumptions = {
+    constantReexports: true,
+    ignoreFunctionLength: true,
+    ignoreToPrimitiveHint: true,
+    iterableIsArray: true,
+    mutableTemplateObject: true,
+    noClassCalls: true,
+    noDocumentAll: true,
+    objectRestNoSymbols: true,
+    privateFieldsAsProperties: true,
+    pureGetters: true,
+    setClassMethods: true,
+    setComputedProperties: true,
+    setPublicClassFields: true,
+    setSpreadProperties: true,
+    skipForOfIteratorClosing: true,
+    superIsCallableConstructor: true,
+}
+
+const modernTargets = '> 0.5%, last 2 versions, Firefox ESR, not dead, maintained node versions'
+
+export default defineConfig([
+    // Default entry point
+    {
+        input: pkg.source,
+        output: [
+            getOutputConfig({
+                file: pkg.exports['.'].import,
+                format: 'esm',
+                targets: modernTargets,
+            }),
+            getOutputConfig({
+                file: pkg.exports['.'].require,
+                format: 'cjs',
+                targets: modernTargets,
+            }),
+        ],
+        external: /node_modules/,
+        plugins: [
+            del({ targets: 'dist/*' }),
+            nodeResolve(),
+            typescript({
+                compilerOptions: {
+                    outDir: path.dirname(pkg.exports['.'].import),
+                },
+            }),
+        ],
+    },
+
+    // es5 entry point
+    {
+        input: pkg.source,
+        output: [
+            getOutputConfig({
+                file: pkg.exports['./es5'].import,
+                format: 'esm',
+                targets: 'supports es5',
+            }),
+            getOutputConfig({
+                file: pkg.exports['./es5'].require,
+                format: 'cjs',
+                targets: 'supports es5',
+            }),
+        ],
+        external: /node_modules/,
+        plugins: [
+            nodeResolve(),
+            typescript({
+                compilerOptions: {
+                    // We don't want to emit declaration files more than once
+                    declaration: false,
+                    declarationMap: false,
+                    outDir: path.dirname(pkg.exports['./es5'].import),
+                    // This is needed to correct source map paths
+                    sourceRoot: '../src',
+                },
+            }),
+        ],
+    },
+
+    // Unstable entry point for tooling built on tailwind-merge internals. Same modern targets as the default entry point; no es5 variant since it isn't meant for application bundles (see docs/versioning.md).
+    {
+        input: 'src/unstable-do-not-import.ts',
+        output: [
+            getOutputConfig({
+                file: pkg.exports['./unstable-do-not-import'].import,
+                format: 'esm',
+                targets: modernTargets,
+            }),
+            getOutputConfig({
+                file: pkg.exports['./unstable-do-not-import'].require,
+                format: 'cjs',
+                targets: modernTargets,
+            }),
+        ],
+        external: /node_modules/,
+        plugins: [
+            nodeResolve(),
+            typescript({
+                compilerOptions: {
+                    outDir: path.dirname(pkg.exports['./unstable-do-not-import'].import),
+                },
+            }),
+        ],
+    },
+
+    // Type declarations of default and es5 entry points
+    {
+        input: 'dist/index.d.ts',
+        output: {
+            file: pkg.exports['.'].types,
+            format: 'esm',
+        },
+        plugins: [dts()],
+    },
+
+    // Type declarations of the unstable entry point. Also cleans up the intermediate declaration files, which must happen after every dts bundle above is built from them.
+    {
+        input: 'dist/unstable-do-not-import.d.ts',
+        output: {
+            file: pkg.exports['./unstable-do-not-import'].types,
+            format: 'esm',
+        },
+        plugins: [
+            dts(),
+            del({
+                targets: ['dist/lib', 'dist/index.d.ts', 'dist/unstable-do-not-import.d.ts'],
+                hook: 'buildEnd',
+                runOnce: true,
+            }),
+        ],
+    },
+])
+
+/**
+ * Creates a shared output configuration so every public bundle receives the same Babel transforms while retaining its format-specific file path and runtime targets.
+ *
+ * @param {object} param0
+ * @param {string} param0.file
+ * @param {'esm' | 'cjs'} param0.format
+ * @param {string} param0.targets
+ * @returns
+ */
+function getOutputConfig({ file, format, targets }) {
+    /** @satisfies {import('rollup').OutputOptions} */
+    const config = {
+        file,
+        format,
+        sourcemap: true,
+        freeze: false,
+        generatedCode: 'es2015',
+        plugins: [
+            getBabelOutputPlugin({
+                assumptions: babelLooseAssumptions,
+                presets: [
+                    [
+                        '@babel/preset-env',
+                        {
+                            exclude: ['transform-typeof-symbol'],
+                            modules: false,
+                            targets,
+                        },
+                    ],
+                ],
+                plugins: [
+                    'babel-plugin-annotate-pure-calls',
+                    ['babel-plugin-polyfill-regenerator', { method: 'usage-pure' }],
+                ],
+            }),
+        ],
+    }
+
+    return config
+}

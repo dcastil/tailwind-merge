@@ -1,0 +1,64 @@
+# Drafts releases for the tailwind-merge package. Releases are per package with namespaced tags; tag-prefix scopes previous-release lookup and version resolution to this package's tags, and include-paths keeps pull requests that don't touch the package out of the draft. The autolabeler applies repo-wide PR labels and intentionally lives only in this config — the auto_label job reads it from here once.
+name-template: 'tailwind-merge@$RESOLVED_VERSION'
+tag-template: 'tailwind-merge@$RESOLVED_VERSION'
+tag-prefix: 'tailwind-merge@'
+include-paths:
+    - packages/tailwind-merge
+template: |
+    $CHANGES
+
+    **Full Changelog**: https://github.com/dcastil/tailwind-merge/compare/$PREVIOUS_TAG...tailwind-merge@$RESOLVED_VERSION
+category-template: '### $TITLE'
+change-template: '- $TITLE by @$AUTHOR in https://github.com/dcastil/tailwind-merge/pull/$NUMBER'
+change-title-escapes: '\<*_&'
+no-changes-template: 'No changes'
+categories:
+    - title: '⚠️ Needs Changelog Edit'
+      label: 'needs changelog edit'
+    - title: 'Breaking Changes'
+      label: 'breaking'
+    - title: 'New Features'
+      label: 'feature'
+    - title: 'Bug Fixes'
+      label: 'bug'
+    - title: 'Documentation'
+      label: 'documentation'
+    - title: 'Other'
+      label: 'other'
+exclude-labels:
+    - 'skip changelog'
+version-resolver:
+    major:
+        labels:
+            - 'breaking'
+    minor:
+        labels:
+            - 'feature'
+    patch:
+        labels:
+            - 'bug'
+            - 'documentation'
+            - 'other'
+    default: 'patch'
+autolabeler:
+    - label: 'feature'
+      branch:
+          - '/\bfeature\b/i'
+      title:
+          - '/\bfeature\b/i'
+    - label: 'bug'
+      branch:
+          - '/\b(bug|bugfix|fix)\b/i'
+      title:
+          - '/\b(bug|bugfix|fix)\b/i'
+    - label: 'documentation'
+      branch:
+          - '/\b(documentation|docs)\b/i'
+      title:
+          - '/\b(documentation|docs)\b/i'
+    - label: 'other'
+      branch:
+          - '/^other\b/i'
+    - label: 'breaking'
+      branch:
+          - '/^breaking-/i'

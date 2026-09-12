@@ -1,0 +1,3 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`generate from vanilla Tailwind CSS > matches Tailwind conflict semantics across the design-system class list 1`] = `[]`;

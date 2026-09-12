@@ -28,6 +28,7 @@ if (require.main === module) {
 
 /**
  * @typedef {{
+ *   packageName: string | null
  *   major: number
  *   minor: number
  *   patch: number
@@ -184,8 +185,10 @@ if (require.main === module) {
  */
 
 /**
+ * `baseRef` is null only for a package's 0.1.0 first release, where no base exists to compare against.
+ *
  * @typedef {{
- *   baseRef: string
+ *   baseRef: string | null
  *   headRef: string
  * }} CompareRefs
  */
@@ -245,12 +248,17 @@ async function main() {
     }
     const shaPrereleaseContext = getShaPrereleaseContext(currentVersion)
 
+    // Releases are per package with namespaced tags; un-prefixed tags (legacy v* history) belong to the fallback package. All base-tag selection and existing-comment guards are scoped to the current tag's package so the packages release independently of each other.
+    const fallbackPackageName = getInput('fallback-package-name', 'tailwind-merge')
+    const currentPackageName = resolveTagPackageName(currentVersion, fallbackPackageName)
+
     log(`Current tag: ${currentTag}`)
+    log(`Current package: ${currentPackageName}`)
     log(`Dry run: ${dryRun}`)
 
     const currentRelease = await getCurrentRelease(token, owner, repo, currentTag, payload?.release)
     const releaseLabel = currentRelease.name || currentRelease.tag
-    const npmPackageName = npmPackageNameInput || repo
+    const npmPackageName = npmPackageNameInput || currentPackageName
     const releaseUrl = shaPrereleaseContext
         ? npmVersionUrl(npmPackageName, currentTag)
         : currentRelease.htmlUrl
@@ -282,7 +290,15 @@ async function main() {
         shaPrereleaseContext,
         baseTagInput,
         npmPackageName,
+        fallbackPackageName,
     )
+
+    if (baseRef === null) {
+        log(
+            `${currentTag} is the first release of ${currentPackageName} (0.1.0 with no prior release history) — there is no base to compare against, skipping release comments.`,
+        )
+        return
+    }
 
     log(`Base ref: ${baseRef}`)
     log(`Head ref: ${headRef}`)
@@ -304,7 +320,14 @@ async function main() {
         return
     }
 
-    let targets = await collectLinkedIssuesAndPrs(token, owner, repo, commits, skipLabels)
+    let targets = await collectLinkedIssuesAndPrs(
+        token,
+        owner,
+        repo,
+        commits,
+        skipLabels,
+        currentPackageName,
+    )
     log(`Resolved targets: ${targets.length}`)
 
     if (!targets.length) {
@@ -313,8 +336,12 @@ async function main() {
     }
 
     if (currentVersion.isPrerelease) {
-        targets = await filterTargetsWithoutReleaseComments(targets, async (issueNumber) =>
-            requestPaginated(token, `/repos/${owner}/${repo}/issues/${issueNumber}/comments`),
+        targets = await filterTargetsWithoutReleaseComments(
+            targets,
+            currentPackageName,
+            fallbackPackageName,
+            async (issueNumber) =>
+                requestPaginated(token, `/repos/${owner}/${repo}/issues/${issueNumber}/comments`),
         )
         if (!targets.length) {
             log('All prerelease targets already have release comments. Nothing to do.')
@@ -322,7 +349,14 @@ async function main() {
         }
     }
 
-    const guardViolations = await checkGuardViolations(token, owner, repo, targets, currentVersion)
+    const guardViolations = await checkGuardViolations(
+        token,
+        owner,
+        repo,
+        targets,
+        currentVersion,
+        fallbackPackageName,
+    )
     if (guardViolations.length > 0) {
         const details = guardViolations
             .slice(0, 20)
@@ -371,6 +405,7 @@ async function main() {
  * @param {ShaPrereleaseContext | null} shaPrereleaseContext
  * @param {string} baseTagInput
  * @param {string} npmPackageName
+ * @param {string} fallbackPackageName
  * @returns {Promise<CompareRefs>}
  */
 async function resolveCompareRefs(
@@ -382,6 +417,7 @@ async function resolveCompareRefs(
     shaPrereleaseContext,
     baseTagInput,
     npmPackageName,
+    fallbackPackageName,
 ) {
     let baseRef = ''
     let headRef = currentTag
@@ -410,27 +446,40 @@ async function resolveCompareRefs(
         const releases = await requestPaginated(token, `/repos/${owner}/${repo}/releases`)
         /** @type {ReleaseRecord[]} */
         const publishedReleases = releases.filter((release) => !release.draft)
-        baseRef = pickBaseTag(currentTag, currentVersion, publishedReleases, '')
+        baseRef = pickBaseTag(currentTag, currentVersion, publishedReleases, '', fallbackPackageName)
     }
 
     return { baseRef, headRef }
 }
 
 /**
- * Resolves linked issue/PR numbers from commits and associated PR metadata.
+ * Resolves linked issue/PR numbers only from commits and PRs that change the released package. A shared comparison range or associated PR alone does not establish that a change ships in this release.
  *
  * @param {string} token
  * @param {string} owner
  * @param {string} repo
  * @param {CommitRecord[]} commits
  * @param {string[]} skipLabels
+ * @param {string} currentPackageName
  * @returns {Promise<number[]>}
  */
-async function collectLinkedIssuesAndPrs(token, owner, repo, commits, skipLabels) {
+async function collectLinkedIssuesAndPrs(token, owner, repo, commits, skipLabels, currentPackageName) {
+    const packagePaths = releasePackagePaths(currentPackageName)
     /** @type {Set<number>} */
     const linkedIssuesPrs = new Set()
+    /** @type {Map<number, boolean>} */
+    const prScope = new Map()
 
     for (const commit of commits) {
+        if (
+            !(await hasPackageChanges(
+                token,
+                `/repos/${owner}/${repo}/commits/${commit.sha}`,
+                packagePaths,
+            ))
+        ) {
+            continue
+        }
         const commitUrl = `https://github.com/${owner}/${repo}/commit/${commit.sha}`
 
         const data = await requestGraphQL(
@@ -505,12 +554,25 @@ async function collectLinkedIssuesAndPrs(token, owner, repo, commits, skipLabels
         const resource = queryData.resource
         if (!resource) continue
 
+        /** @type {GraphQLAssociatedPrNode[]} */
+        const scopedPrs = []
+        for (const { node: pr } of resource.associatedPullRequests?.edges || []) {
+            let inScope = prScope.get(pr.number)
+            if (inScope === undefined) {
+                inScope = await hasPackageChanges(
+                    token,
+                    `/repos/${owner}/${repo}/pulls/${pr.number}/files`,
+                    packagePaths,
+                )
+                prScope.set(pr.number, inScope)
+            }
+            if (inScope) scopedPrs.push(pr)
+        }
+
         const commitHtmlSegments = [
             resource.messageHeadlineHTML || '',
             resource.messageBodyHTML || '',
-            ...(resource.associatedPullRequests?.edges || []).map(
-                (edge) => edge?.node?.bodyHTML || '',
-            ),
+            ...scopedPrs.map((pr) => pr.bodyHTML || ''),
         ].join(' ')
 
         for (const match of commitHtmlSegments.matchAll(closesMatcher)) {
@@ -520,8 +582,7 @@ async function collectLinkedIssuesAndPrs(token, owner, repo, commits, skipLabels
             }
         }
 
-        for (const edge of resource.associatedPullRequests?.edges || []) {
-            const pr = edge.node
+        for (const pr of scopedPrs) {
             const prLabels = (pr.labels?.nodes || []).map((label) => label.name)
             if (shouldSkipPr(skipLabels, prLabels)) {
                 log(`Skipping PR #${pr.number} because skip-label matched`)
@@ -560,17 +621,79 @@ async function collectLinkedIssuesAndPrs(token, owner, repo, commits, skipLabels
 }
 
 /**
- * Removes targets that already received any release-commenter comment.
+ * Source ownership follows the release-drafter scopes: Vite bundles the configurator but consumes the library as a separate package. Historical library source/docs/tests paths remain eligible when a comparison reaches before the monorepo move; root infrastructure needs a manual changelog entry.
+ *
+ * @param {string} packageName
+ * @returns {string[]}
+ */
+function releasePackagePaths(packageName) {
+    switch (packageName) {
+        case 'tailwind-merge':
+            return ['packages/tailwind-merge/', 'src/', 'docs/', 'tests/']
+        case '@tailwind-merge/vite':
+            return ['packages/vite/', 'packages/configurator/']
+        default:
+            throw new Error(`No release notification paths configured for package ${packageName}`)
+    }
+}
+
+/**
+ * Checks paginated commit or PR file changes, including the old path of a rename out of the package. GitHub limits both endpoints to a fixed number of files; reaching that cap without a match is inconclusive and must fail before posting rather than silently omit a package's targets.
+ *
+ * @param {string} token
+ * @param {string} pathname
+ * @param {string[]} packagePaths
+ * @returns {Promise<boolean>}
+ */
+async function hasPackageChanges(token, pathname, packagePaths) {
+    const pageSize = 100
+    const fileLimit = 3000
+    for (let page = 1; ; page += 1) {
+        /** @type {{ filename: string, previous_filename?: string }[] | { files?: { filename: string, previous_filename?: string }[] } | null} */
+        const payload = await requestJson(token, 'GET', pathname, { per_page: pageSize, page })
+        const files = Array.isArray(payload) ? payload : payload?.files
+        if (!Array.isArray(files)) {
+            throw new Error(`Missing changed-file data for ${pathname}`)
+        }
+        if (
+            files.some((file) =>
+                packagePaths.some(
+                    (prefix) =>
+                        file.filename.startsWith(prefix) ||
+                        file.previous_filename?.startsWith(prefix),
+                ),
+            )
+        ) {
+            return true
+        }
+        if (files.length < pageSize) return false
+        if (page * pageSize >= fileLimit) {
+            throw new Error(`Cannot establish package scope for ${pathname}: changed-file limit reached`)
+        }
+    }
+}
+
+/**
+ * Removes targets that already received a release-commenter comment for the same package.
  *
  * Prerelease runs can cover an overlapping compare range after a version bump because their
  * base is resolved from npm-published SHA prereleases. The first prerelease comment is the useful
  * signal for a PR or issue; later prerelease passes should keep moving without adding more noise.
+ * Comments for other packages don't count: a PR touching two packages legitimately receives one
+ * comment per package release.
  *
  * @param {number[]} targetNumbers
+ * @param {string} currentPackageName
+ * @param {string} fallbackPackageName
  * @param {(issueNumber: number) => Promise<IssueComment[]>} loadComments
  * @returns {Promise<number[]>}
  */
-async function filterTargetsWithoutReleaseComments(targetNumbers, loadComments) {
+async function filterTargetsWithoutReleaseComments(
+    targetNumbers,
+    currentPackageName,
+    fallbackPackageName,
+    loadComments,
+) {
     /** @type {number[]} */
     const nextTargets = []
     /** @type {SkippedTarget[]} */
@@ -578,7 +701,11 @@ async function filterTargetsWithoutReleaseComments(targetNumbers, loadComments) 
 
     for (const issueNumber of targetNumbers) {
         const comments = await loadComments(issueNumber)
-        const existingReleaseComment = findReleaseComment(comments)
+        const existingReleaseComment = findReleaseComment(
+            comments,
+            currentPackageName,
+            fallbackPackageName,
+        )
 
         if (existingReleaseComment) {
             skippedTargets.push({
@@ -604,15 +731,23 @@ async function filterTargetsWithoutReleaseComments(targetNumbers, loadComments) 
 }
 
 /**
- * Finds the first release-commenter marker or legacy release URL in a list of comments.
+ * Finds the first release-commenter marker or legacy release URL in a list of comments that belongs to the given package.
  *
  * @param {IssueComment[]} comments
+ * @param {string} currentPackageName
+ * @param {string} fallbackPackageName
  * @returns {ReleaseComment | null}
  */
-function findReleaseComment(comments) {
+function findReleaseComment(comments, currentPackageName, fallbackPackageName) {
     for (const comment of comments) {
         const existingTag = extractReleaseTagFromComment(comment.body || '')
-        if (!existingTag || !parseTag(existingTag)) continue
+        if (!existingTag) continue
+
+        const existingVersion = parseTag(existingTag)
+        if (!existingVersion) continue
+        if (resolveTagPackageName(existingVersion, fallbackPackageName) !== currentPackageName) {
+            continue
+        }
 
         return {
             tag: existingTag,
@@ -644,20 +779,30 @@ function formatSkippedTargetDetails(skippedTargets) {
 }
 
 /**
- * Validates that targets do not already have release comments that would make this run unsafe.
+ * Validates that targets do not already have release comments that would make this run unsafe. The guard is scoped to the current tag's package: comments left by another package's releases are expected on pull requests that touched both packages and never count as violations.
  *
  * @param {string} token
  * @param {string} owner
  * @param {string} repo
  * @param {number[]} targetNumbers
  * @param {ParsedTag} currentVersion
+ * @param {string} fallbackPackageName
  * @returns {Promise<GuardViolation[]>}
  */
-async function checkGuardViolations(token, owner, repo, targetNumbers, currentVersion) {
+async function checkGuardViolations(
+    token,
+    owner,
+    repo,
+    targetNumbers,
+    currentVersion,
+    fallbackPackageName,
+) {
     if (currentVersion.isPrerelease) {
         log('Current release is a prerelease, skipping stable-release duplicate guard')
         return []
     }
+
+    const currentPackageName = resolveTagPackageName(currentVersion, fallbackPackageName)
 
     /** @type {GuardViolation[]} */
     const violations = []
@@ -676,6 +821,11 @@ async function checkGuardViolations(token, owner, repo, targetNumbers, currentVe
 
             const existingVersion = parseTag(existingTag)
             if (!existingVersion) continue
+            if (
+                resolveTagPackageName(existingVersion, fallbackPackageName) !== currentPackageName
+            ) {
+                continue
+            }
 
             if (compareSemver(existingVersion, currentVersion) === 0) {
                 violations.push({
@@ -851,22 +1001,60 @@ function parseBooleanInput(rawValue) {
 }
 
 /**
- * Parses a semver tag with optional `v` or `refs/tags/` prefixes.
+ * @typedef {{
+ *   packageName: string | null
+ *   versionText: string
+ * }} TagNameSplit
+ */
+
+/**
+ * Splits an optional package prefix off a tag and normalizes the version text. Monorepo release tags are `<package-name>@<version>` where the package name may itself be scoped (`@scope/name`), so the split happens at the last `@` past position 0; tags without a package prefix are the repo's pre-monorepo history and keep the legacy leading-`v` handling.
+ *
+ * @param {string} rawTag
+ * @returns {TagNameSplit}
+ */
+function splitTagPackageName(rawTag) {
+    let normalized = rawTag.trim()
+    if (normalized.startsWith('refs/tags/')) {
+        normalized = normalized.slice('refs/tags/'.length)
+    }
+
+    const separatorIndex = normalized.lastIndexOf('@')
+    if (separatorIndex > 0) {
+        return {
+            packageName: normalized.slice(0, separatorIndex),
+            versionText: normalized.slice(separatorIndex + 1),
+        }
+    }
+
+    return {
+        packageName: null,
+        versionText: normalized.startsWith('v') ? normalized.slice(1) : normalized,
+    }
+}
+
+/**
+ * Resolves which package a parsed tag belongs to. Tags without a package prefix (legacy `v*` and plain npm version strings) belong to the fallback package, so the pre-monorepo release history stays attached to it.
+ *
+ * @param {ParsedTag} version
+ * @param {string} fallbackPackageName
+ * @returns {string}
+ */
+function resolveTagPackageName(version, fallbackPackageName) {
+    return version.packageName ?? fallbackPackageName
+}
+
+/**
+ * Parses a semver tag with an optional `<package-name>@` namespace prefix and optional legacy `v` or `refs/tags/` prefixes.
  *
  * @param {string | null | undefined} tag
  * @returns {ParsedTag | null}
  */
 function parseTag(tag) {
     if (!tag) return null
-    let normalized = tag.trim()
-    if (normalized.startsWith('refs/tags/')) {
-        normalized = normalized.slice('refs/tags/'.length)
-    }
-    if (normalized.startsWith('v')) {
-        normalized = normalized.slice(1)
-    }
+    const { packageName, versionText } = splitTagPackageName(tag)
 
-    const match = normalized.match(
+    const match = versionText.match(
         /^(\d+)\.(\d+)\.(\d+)(?:-([0-9A-Za-z.-]+))?(?:\+([0-9A-Za-z.-]+))?$/,
     )
     if (!match) return null
@@ -875,6 +1063,7 @@ function parseTag(tag) {
     const prerelease = prereleaseRaw ? prereleaseRaw.split('.') : []
 
     return {
+        packageName,
         major: Number.parseInt(majorRaw, 10),
         minor: Number.parseInt(minorRaw, 10),
         patch: Number.parseInt(patchRaw, 10),
@@ -1227,20 +1416,13 @@ function npmRegistryPath(packageName) {
 }
 
 /**
- * Converts a git-like tag string into an npm version string.
+ * Converts a git-like tag string into an npm version string, dropping any package namespace prefix.
  *
  * @param {string} tag
  * @returns {string}
  */
 function npmVersionFromTag(tag) {
-    let normalized = tag
-    if (normalized.startsWith('refs/tags/')) {
-        normalized = normalized.slice('refs/tags/'.length)
-    }
-    if (normalized.startsWith('v')) {
-        normalized = normalized.slice(1)
-    }
-    return normalized
+    return splitTagPackageName(tag).versionText
 }
 
 /**
@@ -1568,15 +1750,18 @@ async function getCurrentRelease(token, owner, repo, currentTag, payloadRelease)
 }
 
 /**
- * Picks the most recent semver-compatible base tag for comparison.
+ * Picks the most recent semver-compatible base tag for comparison, considering only releases of the same package. Legacy un-prefixed tags count as the fallback package's releases, so the first namespaced release still finds the pre-monorepo history as its base.
+ *
+ * Returns null for a 0.1.0 release with no same-package history: 0.1.0 is always a package's first version in this repo, so having no base is the expected state rather than an error, and the caller skips commenting (use a manual base-tag input if comments are wanted for a first release). Every other empty result still throws — for a version above 0.1.0, missing history means release tooling is broken, and failing loudly beats silently skipping comments.
  *
  * @param {string} currentTag
  * @param {ParsedTag} currentVersion
  * @param {ReleaseRecord[]} allReleases
  * @param {string} manualBaseTag
- * @returns {string}
+ * @param {string} fallbackPackageName
+ * @returns {string | null}
  */
-function pickBaseTag(currentTag, currentVersion, allReleases, manualBaseTag) {
+function pickBaseTag(currentTag, currentVersion, allReleases, manualBaseTag, fallbackPackageName) {
     if (manualBaseTag) {
         const parsedManualTag = parseTag(manualBaseTag)
         if (!parsedManualTag) {
@@ -1585,11 +1770,14 @@ function pickBaseTag(currentTag, currentVersion, allReleases, manualBaseTag) {
         return manualBaseTag
     }
 
+    const currentPackageName = resolveTagPackageName(currentVersion, fallbackPackageName)
+
     /** @type {Array<{tag: string, version: ParsedTag}>} */
     const parsedReleases = []
     for (const release of allReleases) {
         const version = parseTag(release.tag_name)
         if (!version) continue
+        if (resolveTagPackageName(version, fallbackPackageName) !== currentPackageName) continue
         parsedReleases.push({ tag: release.tag_name, version })
     }
 
@@ -1600,11 +1788,27 @@ function pickBaseTag(currentTag, currentVersion, allReleases, manualBaseTag) {
         .sort((left, right) => compareSemver(right.version, left.version))
 
     if (!candidates.length) {
+        if (isFirstReleaseVersion(currentVersion)) {
+            return null
+        }
+
         const mode = currentVersion.isPrerelease ? 'all semver tags' : 'stable tags'
-        throw new Error(`Could not find previous release tag for ${currentTag} in ${mode}`)
+        throw new Error(
+            `Could not find previous release tag for ${currentTag} (package ${currentPackageName}) in ${mode}`,
+        )
     }
 
     return candidates[0].tag
+}
+
+/**
+ * Checks for the stable 0.1.0 version that every package in this repo starts its release history with.
+ *
+ * @param {ParsedTag} version
+ * @returns {boolean}
+ */
+function isFirstReleaseVersion(version) {
+    return version.major === 0 && version.minor === 1 && version.patch === 0 && !version.isPrerelease
 }
 
 /**
@@ -1621,12 +1825,16 @@ function shouldSkipPr(skipLabels, prLabels) {
 
 module.exports = {
     __testing: {
+        checkGuardViolations,
+        collectLinkedIssuesAndPrs,
         compareCoreVersion,
         filterTargetsWithoutReleaseComments,
         findReleaseComment,
         formatPostedCommentsSummary,
         getIssueCommentUrl,
+        npmVersionFromTag,
         parseTag,
+        pickBaseTag,
         pickShaPrereleaseCandidatePool,
         postCommentsAndLabels,
         releaseCommentMarker,

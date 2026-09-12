@@ -25,10 +25,13 @@ jobs:
             - run: pnpm lint
             - run: pnpm test:types
             - run: pnpm test
-            - run: pnpm build
+            - run: pnpm --filter tailwind-merge build
             - uses: actions/upload-artifact@v7
               with:
                   name: build-output
-                  path: dist
+                  path: packages/tailwind-merge/dist
                   if-no-files-found: error
-            - run: pnpm test:exports
+            - run: pnpm --filter tailwind-merge test:exports
+            # The vite package's build and packed-tarball gate come after the library's build on purpose: the gate resolves tailwind-merge through its published shape (dist and types), which the library build above just produced.
+            - run: pnpm --filter @tailwind-merge/vite build
+            - run: pnpm --filter @tailwind-merge/vite test:exports

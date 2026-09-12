@@ -1,0 +1,4 @@
+contain: contain-content contain-inline-size contain-layout contain-none contain-paint contain-size contain-strict contain-style
+mask: mask-circle mask-ellipse
+transform: transform-border transform-content transform-fill transform-stroke transform-view
+translate: translate-3d

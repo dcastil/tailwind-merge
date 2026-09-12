@@ -2,6 +2,8 @@
 
 Use this guide when updating tailwind-merge for a new Tailwind CSS version.
 
+All `src/`, `tests/`, and `docs/` paths in this file are relative to the library package `packages/tailwind-merge/`; run the quoted commands from that directory (or through `pnpm --filter tailwind-merge`).
+
 The main risk in this work is false confidence: Tailwind release notes, deployed docs, source code, and website docs can land at different times. Treat every feature as something to verify from official sources before changing `src/lib/default-config.ts` or parser behavior.
 
 ## Official sources

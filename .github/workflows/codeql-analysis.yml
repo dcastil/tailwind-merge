@@ -34,7 +34,8 @@ jobs:
                   languages: javascript
             - run: corepack enable
             - run: pnpm install --frozen-lockfile
-            - run: pnpm build
+            - run: pnpm --filter tailwind-merge build
+            - run: pnpm --filter @tailwind-merge/vite build
             - name: Perform CodeQL Analysis
               uses: github/codeql-action/analyze@v4
 

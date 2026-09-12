@@ -1,0 +1,60 @@
+/*
+ * Third-party test fixture, pinned copy of openai/openai-fm (MIT, (c) OpenAI).
+ * Source: https://github.com/openai/openai-fm/blob/434b7f762290/src/app/globals.css
+ * Fetched 2026-08-09. Apart from this header and the inline `stripped` markers below, the content is verbatim upstream.
+ */
+@import "tailwindcss";
+
+:root {
+  --background: #ececec;
+  --foreground: #222;
+  --primary: #ff4a00;
+  --page-max-width: 1300px;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-primary: var(--primary);
+  --color-screen: #f3f3f3;
+  --color-black-10: rgba(0, 0, 0, 0.1);
+  --color-black-50: rgba(0, 0, 0, 0.5);
+}
+
+@theme static {
+  --radius-xs: 0.125rem;
+  --radius-sm: 0.25rem;
+  --radius-md: 0.375rem;
+  --radius-lg: 0.5rem;
+  --radius-xl: 0.75rem;
+  --radius-2xl: 1rem;
+  --radius-3xl: 1.5rem;
+  --radius-4xl: 2rem;
+
+  --shadow-textarea: rgba(0, 0, 0, 0.15) 0px 1px 2px 0px inset,
+    rgba(0, 0, 0, 0.08) 1px -2px 2px 0px inset;
+}
+
+html {
+  font-size: 14px;
+  line-height: 130%;
+}
+
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+
+  @variant sm {
+    background-image: linear-gradient(
+      to bottom right,
+      #f8f8f8,
+      var(--background) 20%
+    );
+    background-repeat: no-repeat;
+  }
+}
+
+svg {
+  display: block;
+  flex-shrink: 0;
+}

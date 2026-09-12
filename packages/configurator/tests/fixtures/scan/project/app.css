@@ -1,0 +1,6 @@
+/* Scan fixture: automatic detection under the project directory, an explicit source outside it, an excluded directory, and a safelist with an exclusion. */
+@import 'tailwindcss';
+@source '../extra';
+@source not './ignored';
+@source inline('{hover:,focus:,}underline');
+@source not inline("bg-red-500");

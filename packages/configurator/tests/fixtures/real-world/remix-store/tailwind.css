@@ -1,0 +1,365 @@
+/*
+ * Third-party test fixture, pinned copy of remix-run/remix-store (MIT, (c) Shopify Inc.).
+ * Source: https://github.com/remix-run/remix-store/blob/f0d979cb55ef/app/tailwind.css
+ * Fetched 2026-08-09. Apart from this header and the inline `stripped` markers below, the content is verbatim upstream.
+ * Stripped imports of npm packages this workspace does not install:
+ *   @import "tw-animate-css";
+ */
+@import "tailwindcss";
+/* stripped (package not installed in this workspace): @import "tw-animate-css"; */
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --font-*: initial;
+  --font-sans:
+    "Inter", ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji",
+    "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  --font-mono:
+    "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+    "Liberation Mono", "Courier New", monospace;
+  --font-title: "Lexend Zetta", ui-sans-serif, system-ui, sans-serif;
+
+  --breakpoint-*: initial;
+  --breakpoint-sm: 430px;
+  --breakpoint-md: 810px;
+  --breakpoint-lg: 1400px;
+  --breakpoint-xl: 1640px;
+  --breakpoint-2xl: 2000px;
+  --breakpoint-3xl: 2700px;
+
+  --color-*: initial;
+  --color-inherit: inherit;
+  --color-current: currentColor;
+  --color-transparent: transparent;
+
+  --color-blue-400: #54bbff;
+  --color-blue-brand: #20aaff;
+  --color-blue-600: #367cff;
+
+  --color-green-brand: #80e464;
+
+  --color-yellow-brand: #ffdf5f;
+
+  --color-pink-brand: #ff65db;
+
+  --color-red-brand: #ff5148;
+
+  --color-black: #000000;
+  --color-white: #ffffff;
+
+  --color-gray-50: #f7f7f7;
+  --color-gray-100: #e3e3e3;
+  --color-gray-200: #c8c8c8;
+  --color-gray-300: #a4a4a4;
+  --color-gray-400: #818181;
+  --color-gray-500: #666666;
+  --color-gray-600: #515151;
+  --color-gray-700: #434343;
+  --color-gray-800: #212121;
+  --color-gray-900: #111111;
+
+  --text-*: initial;
+  --text-xs: 0.75rem;
+  --text-xs--line-height: 1rem;
+  --text-sm: 0.875rem;
+  --text-sm--line-height: 1.25rem;
+  --text-base: 1rem;
+  --text-base--line-height: 1.4rem;
+  --text-lg: 1.125rem;
+  --text-lg--line-height: 1.75rem;
+  --text-xl: 1.25rem;
+  --text-xl--line-height: 1.75rem;
+  --text-2xl: 1.5rem;
+  --text-2xl--line-height: 2rem;
+  --text-3xl: 1.875rem;
+  --text-3xl--line-height: 2.25rem;
+  --text-4xl: 2.25rem;
+  --text-4xl--line-height: 2.5rem;
+  --text-5xl: 3rem;
+  --text-5xl--line-height: 1;
+  --text-6xl: 4rem;
+  --text-6xl--line-height: 1;
+  --text-7xl: 4.5rem;
+  --text-7xl--line-height: 1;
+  --text-8xl: 5.25rem;
+  --text-8xl--line-height: 1;
+  --text-9xl: 8rem;
+  --text-9xl--line-height: 1;
+
+  --ease-snap: cubic-bezier(0.13, 0.74, 0.41, 0.92);
+
+  --animate-pulse-radial: pulse-radial 4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  --animate-spin: spin 3s linear infinite;
+  --animate-marquee: marquee 25s linear infinite;
+
+  @keyframes pulse-radial {
+    0%,
+    100% {
+      background-size: 20% 20%;
+    }
+    50% {
+      background-size: 80% 80%;
+    }
+  }
+
+  @keyframes marquee {
+    0% {
+      transform: translateX(-0%);
+    }
+    100% {
+      transform: translateX(-50%);
+    }
+  }
+}
+
+@font-face {
+  font-family: "Inter";
+  font-weight: 100 900;
+  font-display: swap;
+  font-style: normal;
+  src: url("/font/inter-roman-latin-var.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Inter";
+  font-weight: 100 900;
+  font-display: swap;
+  font-style: italic;
+  src: url("/font/inter-italic-latin-var.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "JetBrains Mono";
+  font-weight: 100 900;
+  font-display: swap;
+  font-style: normal;
+  src: url("/font/jet-brains-mono.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Lexend Zetta";
+  font-weight: 900;
+  font-display: swap;
+  font-style: normal;
+  src: url("/font/lexend-zetta-black.woff2") format("woff2");
+}
+
+:root {
+  --header-height: 80px;
+
+  @media (width >= theme(--breakpoint-md)) {
+    --header-height: 136px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    --animate-marquee: none;
+  }
+}
+
+@layer base {
+  html,
+  body {
+    @apply font-sans text-white scheme-dark;
+  }
+
+  a {
+    @apply text-white transition-colors duration-300 ease-in-out hover:text-blue-brand;
+  }
+}
+
+@utility icon-animation {
+  --animated-link-duration: 200ms;
+  --animated-link-delay: 150ms;
+
+  transition:
+    max-width var(--animated-link-duration) var(--ease-snap)
+      var(--animated-link-delay),
+    margin var(--animated-link-duration) var(--ease-snap)
+      var(--animated-link-delay),
+    scale var(--animated-link-duration) var(--ease-snap),
+    opacity var(--animated-link-duration) var(--ease-snap);
+
+  @variant group-hover {
+    transition:
+      max-width var(--animated-link-duration) var(--ease-snap),
+      margin var(--animated-link-duration) var(--ease-snap),
+      scale var(--animated-link-duration) var(--ease-snap)
+        var(--animated-link-delay),
+      opacity var(--animated-link-duration) var(--ease-snap)
+        var(--animated-link-delay);
+  }
+}
+
+@keyframes check-appear {
+  0% {
+    transform: scale(0.75) rotate(-12deg);
+  }
+
+  30% {
+    transform: rotate(10deg);
+  }
+
+  100% {
+    transform: scale(1) rotate(0);
+  }
+}
+
+@utility add-to-cart-icon {
+  transform: scale(0.75) rotate(-12deg);
+  animation: check-appear 400ms var(--ease-snap) 200ms forwards;
+}
+
+@keyframes product-image-bounce {
+  0% {
+    transform: scale(1);
+  }
+
+  45% {
+    transform: scale(1.05);
+  }
+
+  100% {
+    transform: scale(1.02);
+  }
+}
+
+@utility animate-product-image-bounce {
+  transform: scale(1.02);
+  animation: product-image-bounce 420ms cubic-bezier(0.16, 1, 0.3, 1) both;
+
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+    transform: scale(1);
+  }
+}
+
+@keyframes runner-brand-background {
+  0%,
+  100% {
+    background-color: var(--color-blue-brand);
+  }
+
+  20% {
+    background-color: var(--color-green-brand);
+  }
+
+  40% {
+    background-color: var(--color-red-brand);
+  }
+
+  60% {
+    background-color: var(--color-pink-brand);
+  }
+
+  80% {
+    background-color: var(--color-yellow-brand);
+  }
+}
+
+@utility runner-brand-background {
+  background-color: var(--color-blue-brand);
+  animation: runner-brand-background 14s ease-in-out infinite;
+
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+  }
+}
+
+@keyframes footer-gradient-strip {
+  0% {
+    transform: scaleY(0.25);
+  }
+
+  100% {
+    transform: scaleY(1);
+  }
+}
+
+@keyframes footer-gradient-strip-shade {
+  0% {
+    opacity: 0.3;
+  }
+
+  100% {
+    opacity: 0.85;
+  }
+}
+
+@utility footer-gradient-strip-animated {
+  animation: footer-gradient-strip 5000ms cubic-bezier(0.8, 0, 0.2, 1) infinite
+    alternate both;
+  animation-delay: calc(var(--strip-delay) - 5000ms);
+
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+    transform: scaleY(1);
+  }
+}
+
+@utility footer-gradient-strip-shade-animated {
+  animation: footer-gradient-strip-shade 5600ms ease-in-out infinite alternate
+    both;
+  animation-delay: -5600ms;
+
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+    opacity: 0.58;
+  }
+}
+
+@utility rich-text {
+  ul {
+    list-style: none;
+  }
+  ul li {
+    position: relative;
+    padding-left: 1em;
+    line-height: 1.6em;
+  }
+  ul li::before {
+    content: "•";
+    position: absolute;
+    left: 0;
+  }
+
+  a {
+    @apply text-blue-brand transition-none hover:text-blue-brand hover:underline;
+  }
+}
+
+@utility policy-container {
+  @apply -mt-12 px-9;
+
+  & h2 {
+    @apply mt-12 text-2xl/tight font-bold md:text-4xl/tight lg:text-[2.5rem]/tight;
+  }
+
+  & p {
+    @apply mt-6 text-sm lg:text-base;
+  }
+
+  & a {
+    @apply text-blue-brand transition-none hover:text-blue-brand hover:underline;
+  }
+
+  & blockquote {
+    @apply mt-6 bg-gray-800 p-6;
+  }
+
+  & blockquote p:first-child {
+    @apply mt-0;
+  }
+
+  & ul {
+    @apply list-disc pl-6;
+  }
+
+  & ol {
+    @apply list-decimal pl-6;
+  }
+
+  & li {
+    @apply static mt-4 pl-0;
+  }
+}

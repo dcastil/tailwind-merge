@@ -1,0 +1,39 @@
+import fs from 'fs'
+import { fileURLToPath } from 'url'
+
+import { globby } from 'globby'
+import { expect, test } from 'vitest'
+
+import { twMerge } from '../src'
+
+const twMergeExampleRegex =
+    /twMerge\((?<arguments>[\w\s\-:[\]#(),!&%\n'"]+?)\)(?!.*(?<!\/\/.*)')\s*\n?\s*\/\/\s*→\s*['"](?<result>.+)['"]/g
+
+test('docs examples', () => {
+    expect.assertions(63)
+
+    return forEachFile(['README.md', 'docs/**/*.md'], (fileContent) => {
+        Array.from(fileContent.matchAll(twMergeExampleRegex)).forEach((match) => {
+            // eslint-disable-next-line no-eval
+            const args = eval(`[${match.groups!.arguments}]`)
+            expect(twMerge(...args)).toBe(match.groups!.result)
+        })
+    })
+})
+
+async function forEachFile(patterns: string | string[], callback: (fileContent: string) => void) {
+    const paths = await globby(patterns, {
+        // Anchored to the package root so the patterns resolve identically whether Vitest runs from the repo root (projects mode) or from this package.
+        cwd: fileURLToPath(new URL('..', import.meta.url)),
+        dot: true,
+        absolute: true,
+        onlyFiles: true,
+        unique: true,
+    })
+
+    await Promise.all(
+        paths.map((filePath) =>
+            fs.promises.readFile(filePath, { encoding: 'utf-8' }).then(callback),
+        ),
+    )
+}

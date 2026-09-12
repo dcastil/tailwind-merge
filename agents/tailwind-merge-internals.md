@@ -2,6 +2,10 @@
 
 This file is a practical map for agent-driven changes in this repo.
 
+Since the 2026-08-10 monorepo migration the library lives in `packages/tailwind-merge/`; all `src/`, `tests/`, `docs/`, and `scripts/` paths in this file are relative to that package directory unless a path starts with `packages/` or `.github/`.
+
+Links from the library's `docs/` to repository-wide files must traverse three parents; for example, `../../../.github/CONTRIBUTING.md`. Resolve relative links from the owning document after moving files, not from the repository root.
+
 ## How merge execution works
 
 1. `twMerge` in `src/lib/tw-merge.ts` is created via `createTailwindMerge(getDefaultConfig)`.
@@ -27,6 +31,8 @@ This file is a practical map for agent-driven changes in this repo.
 6. `createSortModifiers` in `src/lib/sort-modifiers.ts`:
    - alphabetically sorts non-sensitive modifiers,
    - preserves placement around arbitrary/order-sensitive modifiers.
+
+The unstable tooling entry point also exports `createClassGroupLookup` from `src/lib/class-group-lookup.ts`. It runs one candidate through `mergeClassList` with an observing class-map function and returns every successful lookup, including a slash class's intermediate base. The configurator uses this to preserve lookup dependencies during pruning. Keep this instrumentation outside the normal merge path; it is an adapter for build-time inspection, not a second implementation of modifier or lookup semantics. Both built ESM/CJS export checks exercise it.
 
 ## Performance constraints in hot-path code
 
@@ -79,14 +85,20 @@ The hot paths are `src/lib/merge-classlist.ts` and `src/lib/class-group-utils.ts
 - `tests/public-api.test.ts` guards runtime exports and broad type usage.
 - `tests/tw-merge.benchmark.ts` is for performance benchmarking (`pnpm bench`), not correctness gating in CI.
 
-Run a single test file or test by name with Vitest's filter syntax: `pnpm test:watch tests/modifiers.test.ts` or `pnpm test:watch -t "test name pattern"`.
+Run a single test file or test by name with Vitest's filter syntax: `pnpm --filter tailwind-merge test:watch tests/modifiers.test.ts` or `pnpm --filter tailwind-merge test:watch -t "test name pattern"`.
+
+Package-specific generation, scanning, and Vite test guidance lives in [configurator development](./configurator.md#debugging-and-validation) and [Vite plugin development](./vite-plugin.md#testing-and-remaining-coverage).
+
+Vitest is set up as one project per package: each package's `vitest.config.mts` carries its aliases and plugins, and the root `vitest.config.mts` aggregates them (plus an inline project for `.github/actions/**/*.test.mjs`, since the local actions aren't workspace packages) so root `pnpm test` runs everything with coverage. Because collection is scoped to those projects, stray test files elsewhere in the repo — notably full repo copies in `.claude/` worktrees, which the pre-monorepo root config silently collected and ran as duplicates — never join the suite.
+
+The root coverage configuration measures `packages/*/src/**/*.ts`, including the configurator and Vite plugin. In projects mode, package-local coverage settings do not control the aggregate report. Coverage is diagnostic, with no percentage threshold; use uncovered branches to guide behavioral tests rather than weakening assertions or padding the percentage. The Vitest report does not capture code executed by spawned CLI/build processes, so interpret unmeasured entrypoints alongside their integration tests.
 
 Recommended local sequence for non-trivial changes:
 1. `pnpm lint`
 2. `pnpm test:types`
 3. `pnpm test`
-4. `pnpm build`
-5. `pnpm test:exports`
+4. `pnpm --filter tailwind-merge build`
+5. `pnpm --filter tailwind-merge test:exports`
 
 ## Build and packaging
 
@@ -102,20 +114,25 @@ Recommended local sequence for non-trivial changes:
   - `scripts/test-built-package-exports.mjs`
   - Both scripts execute the default and ES5 bundles so build-tool upgrades cannot break only the legacy entry point unnoticed.
 - `pnpm test:types` type-checks both the source and the test suite with the development compiler. `scripts/typescript-compatibility/consumer.ts` separately compiles the built declaration bundle with the `typescript-compat` compiler alias pinned to TypeScript 3.8.3. `pnpm test:exports` includes the compatibility check because TypeScript 3.8 is the documented minimum consumer version; keep the alias excluded from Renovate updates and treat any increase to this floor as a major-version change.
-- `README.md` is generated from `docs/README.md` by `scripts/update-readme.mjs` (run in `version` script via `zx`).
+- `scripts/update-readme.mjs` (run in the `version` script via `zx`) generates two targets from `docs/README.md`: the package `README.md` shipped to npm, and the section between the `tailwind-merge-docs` markers in the repo-level `README.md`; it fails the version step loudly when the repo README's markers are missing.
+- The `version` script also runs the repo-wide `scripts/update-pinned-links.mjs` (repo root, dependency-free Node), which re-pins every link pinned to the package's newest existing tag onto the tag being released, verifying targets against the working tree and failing loudly — without touching anything — when a linked path no longer resolves. Older-tag links are deliberately historical and stay untouched, changelog directories are excluded from scanning entirely, and the `twm-historical` query parameter on a link shields it individually for the rare historical link elsewhere.
+
+For the Vite package's tsdown build, workspace/published export split, and packed-consumer gate, read [Vite build and packaging](./vite-plugin.md#build-and-packaging).
 
 ## CI Behavior And Security
 
 Treat this section as the source of truth for CI and publish security guardrails. Keep detailed CI guidance here instead of duplicating it in `AGENTS.md` unless a rule is critical enough to be visible before opening specialized docs.
 
-- The repo uses a pnpm workspace rooted at `pnpm-workspace.yaml`; the root package remains `tailwind-merge`, and `.github/actions/metrics-report` is a workspace package so action dependencies share the root lockfile.
+- The repo uses a pnpm workspace rooted at `pnpm-workspace.yaml`; the root manifest is a private orchestrator (`tailwind-merge-monorepo`), the library is the `packages/tailwind-merge` workspace package, and `.github/actions/metrics-report` is a workspace package so action dependencies share the root lockfile.
+- CI steps that target the library use `pnpm --filter tailwind-merge <script>`; build artifacts live at `packages/tailwind-merge/dist`, and `npm publish`/version-stamping steps run with `working-directory: packages/tailwind-merge` because npm operates on the manifest in its working directory.
+- The metrics-report action measures the PR base branch by checking it out in place, so `.github/actions/metrics-report/src/utils/path.mjs` resolves the library root per call, falling back to the repo root for pre-monorepo base branches where the library manifest still sat there. `pnpm --filter tailwind-merge build` works on both layouts because the pre-monorepo root package carried the same name.
 - pnpm 11 requires Node 22 or newer and no longer reads pnpm-specific settings from `.npmrc` or the `pnpm` field in `package.json`; keep repository settings in `pnpm-workspace.yaml`.
 - CI enables Corepack so the root `packageManager` pin selects the pnpm version before every frozen install. For pnpm major updates, run both `pnpm install` and `pnpm install --frozen-lockfile` with the new pinned version, and commit any lockfile migration produced by the non-frozen install.
 - `pnpm-workspace.yaml` sets `minimumReleaseAge: 4320` (minutes, i.e. three days) with `minimumReleaseAgeStrict: true`, so dependency versions must be at least three days old before pnpm installs them. It also allows the `esbuild` dependency build script because the metrics action imports esbuild directly.
 - `.github/renovate.json` sets `minimumReleaseAge: "4 days"` (all datasources) so Renovate never proposes versions that pnpm strict mode would reject during lockfile updates; the extra day over pnpm's three days is a deliberate buffer against boundary races. If the pnpm cooldown changes, keep the Renovate value at least as large. Renovate exempts vulnerability alerts from its cooldown, but pnpm strict mode still blocks immature versions at install time; use pnpm's `minimumReleaseAgeExclude` if a security fix must land early.
-- `.github/workflows/test.yml` runs `pnpm lint`, `pnpm test:types`, `pnpm test`, `pnpm build`, and `pnpm test:exports`.
-- `.github/workflows/benchmark.yml` runs `pnpm bench` with CodSpeed tokenless uploads for this public repository; do not pass static CodSpeed upload tokens to jobs that execute PR benchmark code.
-- `.github/workflows/codeql-analysis.yml` runs CodeQL for both JavaScript/TypeScript and GitHub Actions workflows; the Actions analysis uses the `security-extended` query suite to catch workflow-specific security issues. It also runs on PRs that touch `.github/actions/**` or `.github/workflows/**` so CI-control-plane changes are scanned before merge.
+- `.github/workflows/test.yml` runs `pnpm lint`, `pnpm test:types`, `pnpm test`, `pnpm --filter tailwind-merge build`, `pnpm --filter tailwind-merge test:exports`, then `pnpm --filter @tailwind-merge/vite build` and `pnpm --filter @tailwind-merge/vite test:exports` — the vite steps after the library build because the packed-tarball gate resolves tailwind-merge through its published dist and types.
+- `.github/workflows/benchmark.yml` runs `pnpm --filter tailwind-merge bench` with CodSpeed tokenless uploads for this public repository; do not pass static CodSpeed upload tokens to jobs that execute PR benchmark code.
+- `.github/workflows/codeql-analysis.yml` runs CodeQL for both JavaScript/TypeScript and GitHub Actions workflows; the JavaScript job builds the library and Vite package with explicit package filters, since the workspace root has no build script. The Actions analysis uses the `security-extended` query suite to catch workflow-specific security issues. It also runs on PRs that touch `.github/actions/**` or `.github/workflows/**` so CI-control-plane changes are scanned before merge.
 - Every workflow should declare explicit least-privilege `permissions`; read-only build/test jobs use `contents: read`, and write scopes should appear only on the jobs that need them.
 - Pin every `actions/checkout` use to an immutable commit and set `persist-credentials: false` unless the job must push commits or tags through git; checkout receives the job token even in read-only jobs.
 - `actions/checkout` v7+ blocks fork pull request code under `pull_request_target` and PR-triggered `workflow_run`; never set `allow-unsafe-pr-checkout: true`. Keep `label.yml` checkout-free, keep the metrics comment job on the base SHA, and keep release-comment workflow runs restricted to successful `push` events on `main`.
@@ -124,11 +141,14 @@ Treat this section as the source of truth for CI and publish security guardrails
 - Local JavaScript GitHub Actions use `runs.using: node24`; keep action scripts compatible with the declared runner and avoid runtime-fragile ESM features, such as JSON module import assertion syntax, when a simple filesystem read works across supported Node versions.
 - `.github/workflows/metrics-report.yml` keeps PR code execution in a read-only `generate-report` job and posts comments from a separate `post-comment` job that checks out trusted base-repo code. The metrics report action itself only writes the generated comment body to the artifact path and must not post PR comments directly. If a transition PR introduces or moves the trusted posting script, the workflow should skip the `post-comment` job at the job level until that script exists in the base checkout rather than running PR-provided posting code with write permissions.
 - `.github/workflows/npm-publish.yml`:
-  - publishes `dev` tag on `main` pushes,
-  - publishes production on release events,
-  - keeps dependency installation, linting, tests, and builds in non-OIDC jobs,
+  - publishes `dev` tag on `main` pushes (tailwind-merge only for now),
+  - publishes production on release events, routing by the namespaced tag prefix (`tailwind-merge@*` and legacy `v*` map to `packages/tailwind-merge`, `@tailwind-merge/vite@*` to `packages/vite`, anything else fails),
+  - the release build job builds the library alongside the released package (`pnpm --filter tailwind-merge --filter "$PACKAGE_NAME" build` — the vite package's test:exports needs the library's published shape; duplicate filters collapse for tailwind-merge releases, and pnpm's topological order builds the library before the vite package) and runs the released package's `test:exports` unconditionally,
+  - publishes with `pnpm publish --access public --provenance --ignore-scripts --no-git-checks` (plus `--tag dev` in the dev flow): pnpm applies `publishConfig` field overrides at pack time (the vite exports swap) and implements npm trusted publishing natively — it fetches the GitHub OIDC id-token, exchanges it per package at the registry, and publishes through npm's own libnpmpublish vendored inside pnpm. `--provenance` must be explicit because pnpm reads it from flags/config, not from `publishConfig.provenance`; `--no-git-checks` because CI checkouts are detached HEADs (and the dev flow's version stamp dirties the tree),
+  - the publish jobs enable corepack (for pnpm) and deliberately set no `registry-url` in setup-node: that input writes an `.npmrc` auth line referencing the unset `NODE_AUTH_TOKEN` env var, and pnpm fails config loading on unresolvable env references in `.npmrc`,
+  - keeps linting, tests, and builds in non-OIDC jobs,
   - avoids dependency caches in the publish workflow,
-  - grants `id-token: write` only to minimal publish jobs that download the verified `dist` artifact and run `npm publish --ignore-scripts`,
+  - grants `id-token: write` only to minimal publish jobs that download the verified `dist` artifact and run `pnpm publish --ignore-scripts`. The release publish job first runs `pnpm install --frozen-lockfile --ignore-scripts --filter "$PACKAGE_NAME"` because pnpm rewrites `workspace:` specifiers at publish time by reading the linked package's manifest from `node_modules` — without it, publishing the vite package fails with `ERR_PNPM_CANNOT_RESOLVE_WORKSPACE_PROTOCOL`. The filter installs only the released package's dependencies, and `--ignore-scripts` keeps dependency code from running in the job. The dev publish job stays install-free: it publishes tailwind-merge only, whose specifiers are all `catalog:` and resolve from `pnpm-workspace.yaml`,
   - pins `actions/download-artifact` to an immutable commit in the OIDC jobs and keeps digest mismatches fatal so corrupted or substituted artifacts cannot reach npm publishing.
 - `.github/workflows/label.yml` uses `pull_request_target` only for labeling metadata; do not add repository checkout or PR-code execution to that workflow. `gh` commands in that workflow must pass `--repo` explicitly because there is intentionally no `.git` checkout for repository inference.
 - `.github/workflows/draft-release.yml` runs the release-drafter autolabeler under `pull_request_target` for the same reason: the plain `pull_request` token is read-only on fork PRs, so labeling fails with "Resource not accessible by integration" (seen on PR #689). Like `label.yml`, the `auto_label` job must stay checkout-free and never execute PR code.

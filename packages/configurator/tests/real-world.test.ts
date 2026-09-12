@@ -1,0 +1,171 @@
+import { readFile } from 'node:fs/promises'
+import { fileURLToPath } from 'node:url'
+
+import { describe, expect, test } from 'vitest'
+
+import { materializeConfig } from '../src/materialize'
+import { prunePlan } from '../src/prune'
+
+import {
+    assertExactClassificationParity,
+    assertPruningEquivalence,
+    assertTailwindConformance,
+    generateFixture,
+    sampleUsedClasses,
+} from './fixture-utils'
+
+// Pinned CSS entrypoints of six public Tailwind v4 projects (see fixtures/real-world/README.md for sources, licenses, and preprocessing). Each runs the full pipeline: generation, the conformance sweep over every consecutive class-list pair, and a snapshot of the emitted module — which doubles as documentation of what generated output looks like for real projects. One curated expectation per project pins the finding that made it worth including.
+const PROJECTS = [
+    {
+        name: 'shadcn',
+        entry: 'shadcn/globals.css',
+        // border-grid is @apply border-border/50 dark:border-border — its dark-mode color must survive a later unconditional border color.
+        curated: (twMerge: (classList: string) => string) => {
+            expect(twMerge('border-green-950 border-grid')).toBe('border-grid')
+            expect(twMerge('border-grid border-green-950')).toBe('border-grid border-green-950')
+        },
+    },
+    {
+        name: 'supabase',
+        entry: 'supabase/config/tailwind.config.css',
+        // --background-color-200 is a numeric-named sub-namespace color token: mask-b-from-200 is a color stop composing with position stops. The hit-area family carries per-side state in --hit-area-* variables behind identical ::before scaffolding, so siblings compose while broader values subsume narrower ones.
+        curated: (twMerge: (classList: string) => string) => {
+            expect(twMerge('mask-b-from-100% mask-b-from-200')).toBe(
+                'mask-b-from-100% mask-b-from-200',
+            )
+            expect(twMerge('mask-b-from-red-500 mask-b-from-200')).toBe('mask-b-from-200')
+            expect(twMerge('hit-area-l-96 hit-area-r-0')).toBe('hit-area-l-96 hit-area-r-0')
+            expect(twMerge('hit-area-l-2 hit-area-4')).toBe('hit-area-4')
+        },
+    },
+    {
+        name: 'openai-fm',
+        entry: 'openai-fm/globals.css',
+        // Custom shadow values from a mixed `@theme static` / `@theme inline` setup join the shadow scale.
+        curated: (twMerge: (classList: string) => string) => {
+            expect(twMerge('shadow-textarea shadow-lg')).toBe('shadow-lg')
+        },
+    },
+    {
+        name: 'flowbite',
+        entry: 'flowbite/src/app.css',
+        // A --z-index-* namespace the default config has no theme key for; the augmentation pass picks the values up.
+        curated: (twMerge: (classList: string) => string) => {
+            expect(twMerge('shadow-inner shadow-lg')).toBe('shadow-lg')
+        },
+    },
+    {
+        name: 'kite',
+        entry: 'kite/app.css',
+        // Custom z-index values (z-modal, z-tooltip, …) merge with each other and the numeric scale, issue #657's pattern in the wild.
+        curated: (twMerge: (classList: string) => string) => {
+            expect(twMerge('z-modal z-tooltip')).toBe('z-tooltip')
+            expect(twMerge('z-50 z-modal')).toBe('z-modal')
+        },
+    },
+    {
+        name: 'remix-store',
+        entry: 'remix-store/tailwind.css',
+        // Custom animation and easing values join their scales; multi-namespace resets shrink the config.
+        curated: (twMerge: (classList: string) => string) => {
+            expect(twMerge('animate-pulse animate-marquee')).toBe('animate-marquee')
+            expect(twMerge('ease-out ease-snap')).toBe('ease-snap')
+        },
+    },
+    {
+        name: 'replit',
+        entry: 'replit/theme.css',
+        // The design system that motivated this project: utility-specific color sub-namespaces (--text-color-*, --border-color-*, --outline-color-*) and dedicated spacing namespaces (--padding-*, --gap-*, --inset-*) invisible to the default config. border-thin is a width, not a color, so it composes with border colors instead of wrongly conflicting; p-md/gap-md merge within their utilities; custom easings and outline offsets merge as scale values.
+        curated: (twMerge: (classList: string) => string) => {
+            expect(twMerge('text-secondary-text text-placeholder-text')).toBe(
+                'text-placeholder-text',
+            )
+            expect(twMerge('text-secondary-text text-sm')).toBe('text-secondary-text text-sm')
+            expect(twMerge('border-thin border-surface-border-subtle')).toBe(
+                'border-thin border-surface-border-subtle',
+            )
+            expect(twMerge('border-thin border-thick')).toBe('border-thick')
+            expect(twMerge('p-md p-4')).toBe('p-4')
+            expect(twMerge('gap-md gap-2')).toBe('gap-2')
+            expect(twMerge('inset-xs inset-2xl')).toBe('inset-2xl')
+            expect(twMerge('ease-snappy ease-chill')).toBe('ease-chill')
+            expect(twMerge('outline-offset-thin outline-offset-2')).toBe('outline-offset-2')
+            // The deprecated start-*/end-* spellings compile from --inset-* too, but Tailwind never suggests them — alias probing covers them.
+            expect(twMerge('start-xs start-2xl')).toBe('start-2xl')
+            expect(twMerge('end-sm inset-e-xl')).toBe('inset-e-xl')
+            // Axis shorthands compile to logical properties in v4 and evict the logical sides — the default-config fix this fixture's design system prompted (PR #705), inherited since the rebase onto main.
+            expect(twMerge('ps-md px-xl')).toBe('px-xl')
+            expect(twMerge('start-sm inset-x-lg')).toBe('inset-x-lg')
+        },
+    },
+]
+
+describe.each(PROJECTS)('$name', ({ name, entry, curated }) => {
+    const entryUrl = new URL(`fixtures/real-world/${entry}`, import.meta.url)
+    // Start each project's generation when its tests run, rather than loading every theme during collection and charging that contention to the first test's timeout. generateFixture memoizes the expensive work across assertions.
+    const getFixture = () => readFile(entryUrl, 'utf8').then((css) =>
+        generateFixture(css, fileURLToPath(new URL('.', entryUrl))),
+    )
+
+    test('conforms to Tailwind conflict semantics across the class list', async () => {
+        const { twMerge, plan, designSystem } = await getFixture()
+        assertTailwindConformance(designSystem, twMerge, plan)
+    })
+
+    test('leaves nothing unassigned', async () => {
+        const { plan } = await getFixture()
+        expect(plan.report.unassignedClasses).toEqual([])
+    })
+
+    // eslint-disable-next-line vitest/expect-expect -- the assertions live in each project's `curated` callback above
+    test('project-specific merges work', async () => {
+        const { twMerge } = await getFixture()
+        curated(twMerge)
+    })
+
+    test('emitted module matches its file snapshot', async () => {
+        const { code } = await getFixture()
+        await expect(code).toMatchFileSnapshot(`./__snapshots__/real-world/${name}.snap.ts`)
+    })
+
+    // The pruning invariant at real-theme scale: a sampled usage (every 7th class of the class list, decorated with variants/important/postfix) must merge exactly like the full config, and every used class must be attributable to the members the walk keeps.
+    test('pruned to a sampled usage, merges those classes exactly like the full config', async () => {
+        const { config, plan, designSystem } = await getFixture()
+        const usedClasses = sampleUsedClasses(designSystem, 7)
+        const pruned = prunePlan(plan, usedClasses)
+
+        assertPruningEquivalence(config, materializeConfig(pruned), usedClasses)
+        expect(pruned.report.pruning!.unprunedClassGroups).toEqual([])
+        expect(pruned.classGroups.size).toBeLessThan(plan.classGroups.size)
+    })
+})
+
+// The exact-encoding option came out of this fixture's design system (field feedback: a nonexistent name matching a compact scale validator evicted a real class). One real-world theme running exact mode end to end keeps the option honest at scale — the sweep for conflict semantics, the parity gate against undermatch — without doubling the whole suite; behavioral specifics live in exact-encoding.test.ts.
+describe('replit with exact encoding', () => {
+    const entryUrl = new URL('fixtures/real-world/replit/theme.css', import.meta.url)
+    const getFixtures = () => readFile(entryUrl, 'utf8').then((css) => {
+        const base = fileURLToPath(new URL('.', entryUrl))
+        return Promise.all([
+            generateFixture(css, base, { encoding: 'exact' }),
+            generateFixture(css, base),
+        ])
+    })
+
+    test('conforms to Tailwind conflict semantics across the class list', async () => {
+        const [exact] = await getFixtures()
+        assertTailwindConformance(exact.designSystem, exact.twMerge, exact.plan)
+    })
+
+    test('classifies every compiling class exactly like compact mode', async () => {
+        const [exact, compact] = await getFixtures()
+        assertExactClassificationParity(exact.designSystem, exact.config, compact.config)
+    })
+
+    test('no scale falls back to a validator strategy', async () => {
+        const [exact] = await getFixtures()
+        expect(exact.plan.report.encoding).toBe('exact')
+        for (const strategy of Object.values(exact.plan.report.scaleStrategies)) {
+            expect(strategy).not.toMatch(/validator:|mixed:/)
+        }
+    })
+})

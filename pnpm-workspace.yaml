@@ -1,9 +1,21 @@
 packages:
-  - .
   - .github/actions/metrics-report
+  - packages/*
+
+# Tool versions shared across workspace packages so per-package devDependencies cannot drift. Only tools consumed by more than one workspace project belong here; single-consumer dependencies stay pinned in their package manifest.
+catalog:
+  '@types/node': ^24.13.3
+  eslint: ^9.39.5
+  typescript: ^6.0.3
+  vitest: ^4.1.10
 
 minimumReleaseAge: 4320
 minimumReleaseAgeStrict: true
+
+# The configurator's peer range names the first tailwind-merge release that ships the APIs it needs (themeKey on theme getters, createClassGroupUtils). The workspace runs the unreleased source, which already includes them, so the version-number mismatch is expected until that release.
+peerDependencyRules:
+  allowedVersions:
+    '@tailwind-merge/configurator>tailwind-merge': '>=3.6.0'
 
 allowBuilds:
   esbuild: true

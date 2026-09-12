@@ -1,0 +1,122 @@
+/*
+ * Third-party test fixture: Replit's Tailwind CSS v4 theme configuration (a work in progress at the time of sharing).
+ * Not from a public repository — provided directly by Replit and included in this repo's tests with their permission (2026-08-11).
+ * This design system is the configuration that motivated the configurator project: utility-specific sub-namespaces (--text-color-*, --background-color-*, --border-color-*, --outline-color-*) and dedicated spacing namespaces (--padding-*, --gap-*, --margin-*, --inset-*) that tailwind-merge's default config cannot know about.
+ * The plain CSS variables it references (--surface-color, --text-color, …) live outside this excerpt; classification only needs the theme value names, so the fixture omits them.
+ * Apart from this header and the marked @import line below, the content is verbatim as shared.
+ */
+/* added (not part of the shared excerpt, which is theme-only): */
+@import 'tailwindcss';
+
+@theme inline {
+  --spacing: 4px;
+  --background-color-surface: var(--surface-color);
+  --text-color-text: var(--text-color);
+  --text-color-secondary-text: var(--secondary-text-color);
+  --text-color-tertiary-text: var(--tertiary-text-color);
+  --text-color-placeholder-text: var(--placeholder-text-color);
+  --border-color-surface-border-subtle: var(--surface-border-color-subtle);
+  --border-color-surface-border-regular: var(--surface-border-color-regular);
+  --border-color-surface-border-strong: var(--surface-border-color-strong);
+  --outline-color-surface-border-subtle: var(--surface-border-color-subtle);
+  --outline-color-surface-border-regular: var(--surface-border-color-regular);
+  --outline-color-surface-border-strong: var(--surface-border-color-strong);
+  --outline-color-accent-primary-default: var(--accent-primary-default);
+  --padding-xs: 2px;
+  --padding-sm: 4px;
+  --padding-md: 8px;
+  --padding-lg: 12px;
+  --padding-xl: 16px;
+  --padding-2xl: 20px;
+  --gap-xs: 2px;
+  --gap-sm: 4px;
+  --gap-md: 8px;
+  --gap-lg: 12px;
+  --gap-xl: 16px;
+  --gap-2xl: 20px;
+  --margin-xs: 2px;
+  --margin-sm: 4px;
+  --margin-md: 8px;
+  --margin-lg: 12px;
+  --margin-xl: 16px;
+  --margin-2xl: 20px;
+  --inset-xs: 2px;
+  --inset-sm: 4px;
+  --inset-md: 8px;
+  --inset-lg: 12px;
+  --inset-xl: 16px;
+  --inset-2xl: 20px;
+  --height-4xs: 12px;
+  --height-3xs: 16px;
+  --height-2xs: 20px;
+  --height-xs: 24px;
+  --height-sm: 28px;
+  --height-md: 32px;
+  --height-lg: 36px;
+  --height-xl: 40px;
+  --height-2xl: 44px;
+  --min-height-4xs: 12px;
+  --min-height-3xs: 16px;
+  --min-height-2xs: 20px;
+  --min-height-xs: 24px;
+  --min-height-sm: 28px;
+  --min-height-md: 32px;
+  --min-height-lg: 36px;
+  --min-height-xl: 40px;
+  --min-height-2xl: 44px;
+  --max-height-4xs: 12px;
+  --max-height-3xs: 16px;
+  --max-height-2xs: 20px;
+  --max-height-xs: 24px;
+  --max-height-sm: 28px;
+  --max-height-md: 32px;
+  --max-height-lg: 36px;
+  --max-height-xl: 40px;
+  --max-height-2xl: 44px;
+  --container-4xs: 224px;
+  --container-5xs: 192px;
+  --border-width-thin: 0.5px;
+  --border-width-regular: 1px;
+  --border-width-thick: 2px;
+  --border-width-thicker: 3px;
+  --outline-width-thin: 0.5px;
+  --outline-width-regular: 1px;
+  --outline-width-thick: 2px;
+  --outline-width-thicker: 3px;
+  --outline-offset-thin: 0.5px;
+  --outline-offset-regular: 1px;
+  --outline-offset-thick: 2px;
+  --outline-offset-thicker: 3px;
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-2xl: 24px;
+  --radius-full: 999px;
+  --ease-snappy: var(--transition-timing-function-snappy);
+  --ease-chill: var(--transition-timing-function-chill);
+  --text-xs: var(--font-size-small);
+  --text-xs--line-height: var(--line-height-small);
+  --text-sm: var(--font-size-default);
+  --text-sm--line-height: var(--line-height-default);
+  --text-base: var(--font-size-subhead-default);
+  --text-base--line-height: var(--line-height-subhead-default);
+  --text-xl: var(--font-size-subhead-big);
+  --text-xl--line-height: var(--line-height-subhead-big);
+  --text-2xl: var(--font-size-header-default);
+  --text-2xl--line-height: var(--line-height-header-default);
+  --leading-tight: var(--line-height-header-big);
+  --leading-snug: var(--line-height-subhead-default);
+  --leading-normal: var(--line-height-small);
+  --font-default: var(--font-family-default);
+  --font-code: var(--font-family-code);
+  --font-brand: var(--font-family-brand);
+  --font-brand-variable: var(--font-family-brand-variable);
+  --font-brand-pixel: var(--font-family-brand-pixel);
+  --breakpoint-sm: 640px;
+  --breakpoint-md: 768px;
+  --breakpoint-lg: 1024px;
+  --breakpoint-xl: 1280px;
+  --breakpoint-2xl: 1536px;
+  --spacing: 4px;
+}
