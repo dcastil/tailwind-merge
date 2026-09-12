@@ -50,7 +50,7 @@
         "test:types": "tsc --noEmit",
         "test:exports": "node scripts/test-packed-package.mjs",
         "release": "pnpm version --tag-version-prefix=@tailwind-merge/vite@ --message=@tailwind-merge/vite@%s",
-        "version": "node ../../scripts/update-pinned-links.mjs"
+        "version": "node ../../scripts/update-pinned-links.mjs && node ../../scripts/pin-readme-links.mjs"
     },
     "peerDependencies": {
         "@tailwindcss/vite": "~4.3.3",
