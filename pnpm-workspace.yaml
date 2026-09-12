@@ -22,3 +22,5 @@ allowBuilds:
 minimumReleaseAgeExclude:
   # Renovate security update: vitest@4.1.11
   - vitest@4.1.11
+  # Renovate security update: postcss@8.5.23
+  - postcss@8.5.23
