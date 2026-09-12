@@ -144,7 +144,7 @@ function MyComponent() {
     return (
         <>
             <Button className="w-full">No danger</Button>
-            <Button className="w-full bg-red-500!" >Danger!</Button>
+            <Button className="w-full bg-red-500!">Danger!</Button>
         </>
     )
 }
@@ -159,7 +159,6 @@ function join(...args) {
 ```
 
 The main downside of this approach is that it only works one level deep (you can't override the `bg-red-500!` class in the example above). But if you don't need to be able to override styles through multiple levels of composition, this might be the most lightweight approach possible.
-
 
 ### Using Tailwind's custom variant
 
@@ -187,7 +186,12 @@ function MyComponent() {
 }
 
 function Button({ className, ...props }) {
-    return <button {...props} className={join('component:bg-blue-500 component:text-white', className)} />
+    return (
+        <button
+            {...props}
+            className={join('component:bg-blue-500 component:text-white', className)}
+        />
+    )
 }
 
 function join(...args) {

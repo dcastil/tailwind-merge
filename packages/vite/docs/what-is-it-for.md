@@ -2,7 +2,7 @@
 
 tailwind-merge resolves conflicts between Tailwind classes in JS — `twMerge('p-2 p-4')` keeps only `p-4`. To do that it must know, for every class, which group of conflicting styles it belongs to.
 
-The standalone tailwind-merge package can't know *your* theme, so its default configuration approximates the **default** Tailwind theme with loose patterns. The moment you customize your theme, that approximation breaks down:
+The standalone tailwind-merge package can't know _your_ theme, so its default configuration approximates the **default** Tailwind theme with loose patterns. The moment you customize your theme, that approximation breaks down:
 
 - A custom font size `--text-huge: 2.5rem` produces `text-huge`, which the default config misreads as a text **color** — so `twMerge('text-huge text-sm')` keeps both classes and your element gets an ambiguous font size ([tailwind-merge#684](https://github.com/dcastil/tailwind-merge/issues/684)).
 - Whole namespaces the default config doesn't model — `--z-index-*`, `--border-width-*`, utility-specific colors like `--text-color-*` — silently fall through to wrong groups.

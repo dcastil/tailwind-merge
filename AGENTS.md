@@ -36,6 +36,7 @@ This repository is a pnpm monorepo hosting `tailwind-merge` — a TypeScript lib
 - The root manifest's `devEngines.runtime` must encode the real documented Node floor (currently `>=22.18.0`), not a rounded-down one: pnpm validates dependency `engines` against the range's minimum version, and a floor looser than a dependency's own requirement makes pnpm silently skip optional dependencies during install — this is how rolldown's platform binary went missing under an earlier `>=22`, with only a debug-level log mentioning it.
 
 Core commands (repo root):
+
 - `pnpm install --frozen-lockfile`
 - `pnpm lint` — lints root files, then every package's own lint script (`pnpm --recursive lint`)
 - `pnpm test` — runs every package's Vitest project plus the local GitHub actions' tests through the root projects config, with coverage
@@ -43,15 +44,18 @@ Core commands (repo root):
 - `pnpm test:watch` — cross-package watch mode
 
 Library-specific commands (run with `pnpm --filter tailwind-merge <script>` from anywhere, or plain `pnpm <script>` inside `packages/tailwind-merge/`):
+
 - `build`
 - `test:exports`
 - `bench`
 
 Vite-plugin-specific commands (run with `pnpm --filter @tailwind-merge/vite <script>`, or plain `pnpm <script>` inside `packages/vite/`):
+
 - `build` — tsdown, ESM bundles plus declarations for all three subpaths into `dist/`
 - `test:exports` — packs the tarball and verifies the published shape; requires both this package's and the library's `build` to have run first (see [Vite build and packaging](./agents/vite-plugin.md#build-and-packaging) for what it checks)
 
 Monorepo conventions:
+
 - Shared tool versions (eslint, typescript, vitest, @types/node) live in the `catalog:` section of `pnpm-workspace.yaml`; package manifests reference them as `"catalog:"`. Single-consumer dependencies stay pinned in their package manifest.
 - Every package lints with its own `eslint.config.mjs` spreading `eslint.config.base.mjs` from the root, and tests with its own `vitest.config.mts`; the root configs only orchestrate.
 - No task runner (turborepo or similar) and no affected-only CI on purpose: at the current package count the full suite is fast, and running everything keeps cross-package effects (a tailwind-merge change must exercise the Vite plugin tests) trivially correct. Revisit when the package count grows or build times make caching pay off.

@@ -18,18 +18,18 @@ Boundaries: one Tailwind root per plugin instance, Vite 6+ (Environment API), an
 
 ## Architecture and invariants
 
-| File in `packages/vite/` | Responsibility |
-| --- | --- |
-| `src/index.ts` | Plugin hooks, eager generation, runtime interception, update subscription API, watching, and reload/failure policy. |
-| `src/discovery.ts` | Bounded CSS marker search, imported-candidate elimination, and ambiguity errors. |
-| `src/resolution.ts` | Vite-compatible CSS/JavaScript resolution shared by discovery, generation, and scanning. |
-| `src/generation-session.ts` | Owns the pending attempt, last good module, retained dependencies, cache invalidation, and build-watch refresh decisions for one resolved Vite configuration. |
-| `src/generation.ts` | Calls the configurator, gathers dependencies, fingerprints output and source usage, and appends the runtime export surface. |
-| `src/prune-options.ts` | Resolves app/library/build/dev defaults and integration-specific automatic-detection bases. |
-| `src/updates.ts` | Coalesces and serializes dev edits, preserves CSS-update priority, and cancels pending work on disposal. |
-| `src/runtime.ts` | Real fallback module and consumer type surface. |
-| `src/tailwind-merge.ts` | Internal re-export allowing the virtual module to resolve the plugin's own library dependency. |
-| `tsdown.config.ts`, `scripts/test-packed-package.mjs` | Build output and packed-consumer verification. |
+| File in `packages/vite/`                              | Responsibility                                                                                                                                                |
+| ----------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `src/index.ts`                                        | Plugin hooks, eager generation, runtime interception, update subscription API, watching, and reload/failure policy.                                           |
+| `src/discovery.ts`                                    | Bounded CSS marker search, imported-candidate elimination, and ambiguity errors.                                                                              |
+| `src/resolution.ts`                                   | Vite-compatible CSS/JavaScript resolution shared by discovery, generation, and scanning.                                                                      |
+| `src/generation-session.ts`                           | Owns the pending attempt, last good module, retained dependencies, cache invalidation, and build-watch refresh decisions for one resolved Vite configuration. |
+| `src/generation.ts`                                   | Calls the configurator, gathers dependencies, fingerprints output and source usage, and appends the runtime export surface.                                   |
+| `src/prune-options.ts`                                | Resolves app/library/build/dev defaults and integration-specific automatic-detection bases.                                                                   |
+| `src/updates.ts`                                      | Coalesces and serializes dev edits, preserves CSS-update priority, and cancels pending work on disposal.                                                      |
+| `src/runtime.ts`                                      | Real fallback module and consumer type surface.                                                                                                               |
+| `src/tailwind-merge.ts`                               | Internal re-export allowing the virtual module to resolve the plugin's own library dependency.                                                                |
+| `tsdown.config.ts`, `scripts/test-packed-package.mjs` | Build output and packed-consumer verification.                                                                                                                |
 
 Discovery must be eager: `@tailwindcss/vite` discovers CSS lazily as modules flow through the pipeline and offers no root option to read. A runtime import may arrive first. `css` overrides discovery; otherwise choose the import-graph top among files with Tailwind markers. Ambiguity errors, while no root warns and uses the default runtime. The algorithm is a filesystem heuristic, not proof that the selected CSS is the app's only live theme.
 

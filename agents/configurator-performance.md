@@ -16,24 +16,24 @@ Measurements used esbuild to bundle each emitted module with the engine, then mi
 
 Full/pruned sizes below are bytes in minified / gzip / brotli order. The measured engine alone was 4,594 / 2,009 / 1,828 B. Sampled full-versus-pruned classification and pair checks reported no mismatches for these samples.
 
-| Theme (usage sample) | Encoding | Groups full → pruned | Tokens scanned / classified | Full | Pruned | Pruned vs. full (brotli) |
-| --- | --- | --- | --- | --- | --- | --- |
-| vanilla (shadcn/ui v4 registry components, 61 files) | compact | 379 → 138 | 2,038 / 905 | 31,835 / 8,775 / 7,640 | 12,646 / 4,884 / 4,409 | −42% |
-| | exact | 379 → 138 | | 33,783 / 8,964 / 7,823 | 12,718 / 4,903 / 4,418 | −44% |
-| shadcn (`apps/v4`) | compact | 385 → 190 | 16,630 / 3,583 | 32,830 / 9,044 / 7,872 | 17,204 / 6,077 / 5,453 | −31% |
-| | exact | 385 → 190 | | 34,829 / 9,245 / 8,059 | 18,123 / 6,320 / 5,654 | −30% |
-| supabase (`apps/studio` + `packages/ui`) | compact | 406 → 189 | 55,576 / 3,524 | 47,178 / 11,498 / 9,473 | 20,033 / 6,695 / 6,007 | −37% |
-| | exact | 405 → 187 | | 61,097 / 12,517 / 9,939 | 20,874 / 6,966 / 6,236 | −37% |
-| openai-fm (`src`) | compact | 379 → 64 | 1,826 / 180 | 31,909 / 8,811 / 7,697 | 9,187 / 3,899 / 3,521 | −54% |
-| | exact | 379 → 64 | | 33,857 / 9,001 / 7,793 | 9,186 / 3,900 / 3,544 | −55% |
-| flowbite-svelte (`src`) | compact | 379 → 178 | 12,157 / 3,528 | 31,861 / 8,787 / 7,648 | 17,597 / 5,660 / 5,052 | −34% |
-| | exact | 379 → 178 | | 33,923 / 8,980 / 7,818 | 23,167 / 6,661 / 5,839 | −25% |
-| kite-public (`src`) | compact | 379 → 139 | 12,822 / 1,000 | 32,350 / 8,985 / 7,852 | 13,153 / 5,111 / 4,576 | −42% |
-| | exact | 379 → 139 | | 34,616 / 9,207 / 8,005 | 14,255 / 5,382 / 4,791 | −40% |
-| remix-store (`app`) | compact | 387 → 116 | 1,999 / 541 | 39,513 / 9,037 / 7,854 | 12,154 / 4,748 / 4,302 | −45% |
-| | exact | 387 → 116 | | 42,756 / 9,186 / 8,008 | 12,258 / 4,795 / 4,355 | −46% |
-| replit (no public sources) | compact | 379 | — | 37,472 / 10,139 / 8,544 | — | — |
-| | exact | 379 | | 39,535 / 10,339 / 8,652 | — | — |
+| Theme (usage sample)                                 | Encoding | Groups full → pruned | Tokens scanned / classified | Full                    | Pruned                 | Pruned vs. full (brotli) |
+| ---------------------------------------------------- | -------- | -------------------- | --------------------------- | ----------------------- | ---------------------- | ------------------------ |
+| vanilla (shadcn/ui v4 registry components, 61 files) | compact  | 379 → 138            | 2,038 / 905                 | 31,835 / 8,775 / 7,640  | 12,646 / 4,884 / 4,409 | −42%                     |
+|                                                      | exact    | 379 → 138            |                             | 33,783 / 8,964 / 7,823  | 12,718 / 4,903 / 4,418 | −44%                     |
+| shadcn (`apps/v4`)                                   | compact  | 385 → 190            | 16,630 / 3,583              | 32,830 / 9,044 / 7,872  | 17,204 / 6,077 / 5,453 | −31%                     |
+|                                                      | exact    | 385 → 190            |                             | 34,829 / 9,245 / 8,059  | 18,123 / 6,320 / 5,654 | −30%                     |
+| supabase (`apps/studio` + `packages/ui`)             | compact  | 406 → 189            | 55,576 / 3,524              | 47,178 / 11,498 / 9,473 | 20,033 / 6,695 / 6,007 | −37%                     |
+|                                                      | exact    | 405 → 187            |                             | 61,097 / 12,517 / 9,939 | 20,874 / 6,966 / 6,236 | −37%                     |
+| openai-fm (`src`)                                    | compact  | 379 → 64             | 1,826 / 180                 | 31,909 / 8,811 / 7,697  | 9,187 / 3,899 / 3,521  | −54%                     |
+|                                                      | exact    | 379 → 64             |                             | 33,857 / 9,001 / 7,793  | 9,186 / 3,900 / 3,544  | −55%                     |
+| flowbite-svelte (`src`)                              | compact  | 379 → 178            | 12,157 / 3,528              | 31,861 / 8,787 / 7,648  | 17,597 / 5,660 / 5,052 | −34%                     |
+|                                                      | exact    | 379 → 178            |                             | 33,923 / 8,980 / 7,818  | 23,167 / 6,661 / 5,839 | −25%                     |
+| kite-public (`src`)                                  | compact  | 379 → 139            | 12,822 / 1,000              | 32,350 / 8,985 / 7,852  | 13,153 / 5,111 / 4,576 | −42%                     |
+|                                                      | exact    | 379 → 139            |                             | 34,616 / 9,207 / 8,005  | 14,255 / 5,382 / 4,791 | −40%                     |
+| remix-store (`app`)                                  | compact  | 387 → 116            | 1,999 / 541                 | 39,513 / 9,037 / 7,854  | 12,154 / 4,748 / 4,302 | −45%                     |
+|                                                      | exact    | 387 → 116            |                             | 42,756 / 9,186 / 8,008  | 12,258 / 4,795 / 4,355 | −46%                     |
+| replit (no public sources)                           | compact  | 379                  | —                           | 37,472 / 10,139 / 8,544 | —                      | —                        |
+|                                                      | exact    | 379                  |                             | 39,535 / 10,339 / 8,652 | —                      | —                        |
 
 Compact pruning reduced the whole compressed bundle by roughly 31–54% across these samples. Exact generally had a small additional compressed cost, but the flowbite-svelte palette-heavy sample added 787 B brotli (+15.6%) over pruned compact output. Pruning gives each color-consuming group a different subset, reducing cross-group sharing. This is why compact remains the single default even when pruning is enabled.
 
@@ -51,7 +51,7 @@ Reproduce the focused coverage test from the repository root with `pnpm exec vit
 
 Both sibling suites were profiled with Vitest's JSON reporter (`pnpm vitest run --reporter=json --outputFile=<file>` in the package) and per-file durations summed from `testResults`, which shows the two things that decide wall time: the sum of all files (CPU, spread over the worker pool) and the longest single file (the floor, since one worker runs a file serially). Configurator: 18.8 s wall / 119 s CPU before, about 10.1 s wall / 86 s CPU after, 359 → 360 tests. Vite plugin: 18.3 s wall before, 10.9 s after, 123 tests unchanged. Local numbers on an Apple M4 Max (16 logical cores) with Node 22 and Tailwind 4.3.3. On the hosted runner (4 cores) the root run's Vitest duration went from 210–215 s to 175–177 s, its summed test time from 543–556 s to 441–446 s: about 17–19 %, not the local halving, because with few cores wall time tracks total CPU rather than the longest file, so only the removed work counts there and the Vite file split adds nothing.
 
-Where a configurator fixture's time went, in isolation: a full `generate` about 140 ms, of which Tailwind's `getClassList()` enumeration is about 40 ms per design system (project and vanilla both), the custom-utility and augmentation passes about 55 ms; loading a design system itself is about 5 ms, an emitted-module round trip about 12 ms, and the accounted-for check under 10 ms. Three test-side inefficiencies were removed without dropping assertions: every `prune` fixture was a second full generation of the same CSS (now a re-prune of the unpruned result); every fixture loaded and enumerated its own vanilla system (now shared per worker); and plans emitted in the fixture's own format were re-imported (now memoized). Sharing the *project* between generation and the sweeps was tried and reverted: the variant-cache slowdown described above made the sweeps' compilations 4–5× slower, more than the shared class list saved. On the Vite side the per-edit cost is fixed waiting, so the gain came from splitting the dominant file into two topics of comparable duration.
+Where a configurator fixture's time went, in isolation: a full `generate` about 140 ms, of which Tailwind's `getClassList()` enumeration is about 40 ms per design system (project and vanilla both), the custom-utility and augmentation passes about 55 ms; loading a design system itself is about 5 ms, an emitted-module round trip about 12 ms, and the accounted-for check under 10 ms. Three test-side inefficiencies were removed without dropping assertions: every `prune` fixture was a second full generation of the same CSS (now a re-prune of the unpruned result); every fixture loaded and enumerated its own vanilla system (now shared per worker); and plans emitted in the fixture's own format were re-imported (now memoized). Sharing the _project_ between generation and the sweeps was tried and reverted: the variant-cache slowdown described above made the sweeps' compilations 4–5× slower, more than the shared class list saved. On the Vite side the per-edit cost is fixed waiting, so the gain came from splitting the dominant file into two topics of comparable duration.
 
 ## Reproducing a comparison
 

@@ -10,27 +10,27 @@ Links from the library's `docs/` to repository-wide files must traverse three pa
 
 1. `twMerge` in `src/lib/tw-merge.ts` is created via `createTailwindMerge(getDefaultConfig)`.
 2. `createTailwindMerge` in `src/lib/create-tailwind-merge.ts`:
-   - lazily builds config utils on first call,
-   - joins inputs via `twJoin`,
-   - caches final joined-input results,
-   - calls `mergeClassList` on cache miss.
+    - lazily builds config utils on first call,
+    - joins inputs via `twJoin`,
+    - caches final joined-input results,
+    - calls `mergeClassList` on cache miss.
 3. `mergeClassList` in `src/lib/merge-classlist.ts`:
-   - parses classes,
-   - walks from right to left so "last class wins",
-   - resolves class group IDs and asymmetric conflicts,
-   - keeps non-Tailwind/external classes untouched.
+    - parses classes,
+    - walks from right to left so "last class wins",
+    - resolves class group IDs and asymmetric conflicts,
+    - keeps non-Tailwind/external classes untouched.
 4. `createClassGroupUtils` in `src/lib/class-group-utils.ts`:
-   - compiles class definitions into a recursive map + validator list,
-   - maps class names to class group IDs,
-   - assigns arbitrary properties (`[key:value]`) synthetic group IDs prefixed with `ARBITRARY_PROPERTY_PREFIX` (e.g. `arbitrary..key`) so distinct properties conflict independently,
-   - returns conflicting groups, including postfix-modifier conflicts.
+    - compiles class definitions into a recursive map + validator list,
+    - maps class names to class group IDs,
+    - assigns arbitrary properties (`[key:value]`) synthetic group IDs prefixed with `ARBITRARY_PROPERTY_PREFIX` (e.g. `arbitrary..key`) so distinct properties conflict independently,
+    - returns conflicting groups, including postfix-modifier conflicts.
 5. `createParseClassName` in `src/lib/parse-class-name.ts`:
-   - parses stacked modifiers with bracket/paren depth tracking,
-   - supports important modifier (`!`) and legacy v3 position,
-   - supports optional prefix and `experimentalParseClassName` override.
+    - parses stacked modifiers with bracket/paren depth tracking,
+    - supports important modifier (`!`) and legacy v3 position,
+    - supports optional prefix and `experimentalParseClassName` override.
 6. `createSortModifiers` in `src/lib/sort-modifiers.ts`:
-   - alphabetically sorts non-sensitive modifiers,
-   - preserves placement around arbitrary/order-sensitive modifiers.
+    - alphabetically sorts non-sensitive modifiers,
+    - preserves placement around arbitrary/order-sensitive modifiers.
 
 The unstable tooling entry point also exports `createClassGroupLookup` from `src/lib/class-group-lookup.ts`. It runs one candidate through `mergeClassList` with an observing class-map function and returns every successful lookup, including a slash class's intermediate base. The configurator uses this to preserve lookup dependencies during pruning. Keep this instrumentation outside the normal merge path; it is an adapter for build-time inspection, not a second implementation of modifier or lookup semantics. Both built ESM/CJS export checks exercise it.
 
@@ -46,35 +46,35 @@ The hot paths are `src/lib/merge-classlist.ts` and `src/lib/class-group-utils.ts
 ## Files to edit by intent
 
 - Add or change Tailwind utility support:
-  - `src/lib/default-config.ts`
-  - Usually paired with tests in `tests/tailwind-css-versions.test.ts` and focused utility tests.
-  - For a full Tailwind CSS version update, follow `agents/tailwind-css-version-update.md`.
+    - `src/lib/default-config.ts`
+    - Usually paired with tests in `tests/tailwind-css-versions.test.ts` and focused utility tests.
+    - For a full Tailwind CSS version update, follow `agents/tailwind-css-version-update.md`.
 
 - Change conflict behavior:
-  - `src/lib/default-config.ts` (`conflictingClassGroups`, `conflictingClassGroupModifiers`)
-  - `tests/class-group-conflicts.test.ts`
-  - `tests/conflicts-across-class-groups.test.ts`
+    - `src/lib/default-config.ts` (`conflictingClassGroups`, `conflictingClassGroupModifiers`)
+    - `tests/class-group-conflicts.test.ts`
+    - `tests/conflicts-across-class-groups.test.ts`
 
 - Change parser/modifier behavior:
-  - `src/lib/parse-class-name.ts`
-  - `src/lib/sort-modifiers.ts`
-  - `tests/modifiers.test.ts`
-  - `tests/arbitrary-variants.test.ts`
-  - `tests/experimental-parse-class-name.test.ts`
+    - `src/lib/parse-class-name.ts`
+    - `src/lib/sort-modifiers.ts`
+    - `tests/modifiers.test.ts`
+    - `tests/arbitrary-variants.test.ts`
+    - `tests/experimental-parse-class-name.test.ts`
 
 - Change config extension APIs:
-  - `src/lib/extend-tailwind-merge.ts`
-  - `src/lib/create-tailwind-merge.ts`
-  - `src/lib/merge-configs.ts`
-  - `tests/create-tailwind-merge.test.ts`
-  - `tests/extend-tailwind-merge.test.ts`
-  - `tests/merge-configs.test.ts`
-  - `tests/type-generics.test.ts`
+    - `src/lib/extend-tailwind-merge.ts`
+    - `src/lib/create-tailwind-merge.ts`
+    - `src/lib/merge-configs.ts`
+    - `tests/create-tailwind-merge.test.ts`
+    - `tests/extend-tailwind-merge.test.ts`
+    - `tests/merge-configs.test.ts`
+    - `tests/type-generics.test.ts`
 
 - Change validators:
-  - `src/lib/validators.ts`
-  - `tests/validators.test.ts`
-  - Any impacted arbitrary-value tests
+    - `src/lib/validators.ts`
+    - `tests/validators.test.ts`
+    - Any impacted arbitrary-value tests
 
 ## Testing strategy in this repo
 
@@ -94,6 +94,7 @@ Vitest is set up as one project per package: each package's `vitest.config.mts` 
 The root coverage configuration measures `packages/*/src/**/*.ts`, including the configurator and Vite plugin. In projects mode, package-local coverage settings do not control the aggregate report. Coverage is diagnostic, with no percentage threshold; use uncovered branches to guide behavioral tests rather than weakening assertions or padding the percentage. The Vitest report does not capture code executed by spawned CLI/build processes, so interpret unmeasured entrypoints alongside their integration tests.
 
 Recommended local sequence for non-trivial changes:
+
 1. `pnpm lint`
 2. `pnpm test:types`
 3. `pnpm test`
@@ -103,16 +104,16 @@ Recommended local sequence for non-trivial changes:
 ## Build and packaging
 
 - Build uses Rollup (`scripts/rollup.config.mjs`) to produce:
-  - ESM and CJS bundles,
-  - ES5 variants,
-  - unified type declarations.
+    - ESM and CJS bundles,
+    - ES5 variants,
+    - unified type declarations.
 - The `build` script passes Rollup `--forceExit` because the TypeScript Rollup plugin can leave referenced file-watch handles open after a non-watch build has already written all outputs.
 - Babel 8 performs the final target-specific transforms for all four JavaScript bundles. Its `@babel/preset-env` `bugfixes` behavior is unconditional, and the removed `loose: true` option is preserved through top-level assumptions plus the `transform-typeof-symbol` exclusion in `scripts/rollup.config.mjs`. The config deliberately replaces the migration guide's `arrayLikeIsIterable` with `iterableIsArray` because Babel disallows enabling both and every transformed spread and destructuring operand is an array; this suppresses generic iterable helpers and keeps the generated JavaScript bundles equivalent in size and behavior to the Babel 7 bundles.
 - TypeScript 6 requires the source `rootDir` to be explicit when declaration output is redirected by Rollup, so `tsconfig.json` fixes it to `src`. Module resolution uses `Bundler`, matching the Rollup build and avoiding the deprecated `Node`/`node10` resolver.
 - Export smoke tests:
-  - `scripts/test-built-package-exports.cjs`
-  - `scripts/test-built-package-exports.mjs`
-  - Both scripts execute the default and ES5 bundles so build-tool upgrades cannot break only the legacy entry point unnoticed.
+    - `scripts/test-built-package-exports.cjs`
+    - `scripts/test-built-package-exports.mjs`
+    - Both scripts execute the default and ES5 bundles so build-tool upgrades cannot break only the legacy entry point unnoticed.
 - `pnpm test:types` type-checks both the source and the test suite with the development compiler. `scripts/typescript-compatibility/consumer.ts` separately compiles the built declaration bundle with the `typescript-compat` compiler alias pinned to TypeScript 3.8.3. `pnpm test:exports` includes the compatibility check because TypeScript 3.8 is the documented minimum consumer version; keep the alias excluded from Renovate updates and treat any increase to this floor as a major-version change.
 - `scripts/update-readme.mjs` (run in the `version` script via `zx`) generates two targets from `docs/README.md`: the package `README.md` shipped to npm, and the section between the `tailwind-merge-docs` markers in the repo-level `README.md`; it fails the version step loudly when the repo README's markers are missing.
 - The `version` script also runs the repo-wide `scripts/update-pinned-links.mjs` (repo root, dependency-free Node), which re-pins every link pinned to the package's newest existing tag onto the tag being released, verifying targets against the working tree and failing loudly — without touching anything — when a linked path no longer resolves. Older-tag links are deliberately historical and stay untouched, changelog directories are excluded from scanning entirely, and the `twm-historical` query parameter on a link shields it individually for the rare historical link elsewhere.
@@ -141,22 +142,22 @@ Treat this section as the source of truth for CI and publish security guardrails
 - Local JavaScript GitHub Actions use `runs.using: node24`; keep action scripts compatible with the declared runner and avoid runtime-fragile ESM features, such as JSON module import assertion syntax, when a simple filesystem read works across supported Node versions.
 - `.github/workflows/metrics-report.yml` keeps PR code execution in a read-only `generate-report` job and posts comments from a separate `post-comment` job that checks out trusted base-repo code. The metrics report action itself only writes the generated comment body to the artifact path and must not post PR comments directly. If a transition PR introduces or moves the trusted posting script, the workflow should skip the `post-comment` job at the job level until that script exists in the base checkout rather than running PR-provided posting code with write permissions.
 - `.github/workflows/npm-publish.yml`:
-  - publishes `dev` tag builds of tailwind-merge and the vite package on `main` pushes: one build job builds both (library first, topologically) and runs both `test:exports` gates, one OIDC job stamps both manifests with `scripts/stamp-dev-version.mjs` (dev version plus the vite package's exact pin on the library's same-commit dev version) and publishes the library before the vite package. The configurator has no dev release; it ships inlined in the vite bundle,
-  - publishes production on release events, routing by the namespaced tag prefix (`tailwind-merge@*` and legacy `v*` map to `packages/tailwind-merge`, `@tailwind-merge/vite@*` to `packages/vite`, anything else fails),
-  - the release build job builds the library alongside the released package (`pnpm --filter tailwind-merge --filter "$PACKAGE_NAME" build` — the vite package's test:exports needs the library's published shape; duplicate filters collapse for tailwind-merge releases, and pnpm's topological order builds the library before the vite package) and runs the released package's `test:exports` unconditionally,
-  - publishes with `pnpm publish --access public --provenance --ignore-scripts --no-git-checks` (plus `--tag dev` in the dev flow): pnpm applies `publishConfig` field overrides at pack time (the vite exports swap) and implements npm trusted publishing natively — it fetches the GitHub OIDC id-token, exchanges it per package at the registry, and publishes through npm's own libnpmpublish vendored inside pnpm. `--provenance` must be explicit because pnpm reads it from flags/config, not from `publishConfig.provenance`; `--no-git-checks` because CI checkouts are detached HEADs (and the dev flow's version stamp dirties the tree),
-  - the publish jobs enable corepack (for pnpm) and deliberately set no `registry-url` in setup-node: that input writes an `.npmrc` auth line referencing the unset `NODE_AUTH_TOKEN` env var, and pnpm fails config loading on unresolvable env references in `.npmrc`,
-  - keeps linting, tests, and builds in non-OIDC jobs,
-  - avoids dependency caches in the publish workflow,
-  - grants `id-token: write` only to minimal publish jobs that download the verified `dist` artifact and run `pnpm publish --ignore-scripts`. The release publish job first runs `pnpm install --frozen-lockfile --ignore-scripts --filter "$PACKAGE_NAME"` because pnpm rewrites `workspace:` specifiers at publish time by reading the linked package's manifest from `node_modules` — without it, publishing the vite package fails with `ERR_PNPM_CANNOT_RESOLVE_WORKSPACE_PROTOCOL`. The filter installs only the released package's dependencies, and `--ignore-scripts` keeps dependency code from running in the job. The dev publish job runs the same filtered install for the vite package because its devDependencies keep the inlined configurator's `workspace:*` specifier; tailwind-merge alone would need no install, since its specifiers are all `catalog:` and resolve from `pnpm-workspace.yaml`,
-  - pins `actions/download-artifact` to an immutable commit in the OIDC jobs and keeps digest mismatches fatal so corrupted or substituted artifacts cannot reach npm publishing.
+    - publishes `dev` tag builds of tailwind-merge and the vite package on `main` pushes: one build job builds both (library first, topologically) and runs both `test:exports` gates, one OIDC job stamps both manifests with `scripts/stamp-dev-version.mjs` (dev version plus the vite package's exact pin on the library's same-commit dev version) and publishes the library before the vite package. The configurator has no dev release; it ships inlined in the vite bundle,
+    - publishes production on release events, routing by the namespaced tag prefix (`tailwind-merge@*` and legacy `v*` map to `packages/tailwind-merge`, `@tailwind-merge/vite@*` to `packages/vite`, anything else fails),
+    - the release build job builds the library alongside the released package (`pnpm --filter tailwind-merge --filter "$PACKAGE_NAME" build` — the vite package's test:exports needs the library's published shape; duplicate filters collapse for tailwind-merge releases, and pnpm's topological order builds the library before the vite package) and runs the released package's `test:exports` unconditionally,
+    - publishes with `pnpm publish --access public --provenance --ignore-scripts --no-git-checks` (plus `--tag dev` in the dev flow): pnpm applies `publishConfig` field overrides at pack time (the vite exports swap) and implements npm trusted publishing natively — it fetches the GitHub OIDC id-token, exchanges it per package at the registry, and publishes through npm's own libnpmpublish vendored inside pnpm. `--provenance` must be explicit because pnpm reads it from flags/config, not from `publishConfig.provenance`; `--no-git-checks` because CI checkouts are detached HEADs (and the dev flow's version stamp dirties the tree),
+    - the publish jobs enable corepack (for pnpm) and deliberately set no `registry-url` in setup-node: that input writes an `.npmrc` auth line referencing the unset `NODE_AUTH_TOKEN` env var, and pnpm fails config loading on unresolvable env references in `.npmrc`,
+    - keeps linting, tests, and builds in non-OIDC jobs,
+    - avoids dependency caches in the publish workflow,
+    - grants `id-token: write` only to minimal publish jobs that download the verified `dist` artifact and run `pnpm publish --ignore-scripts`. The release publish job first runs `pnpm install --frozen-lockfile --ignore-scripts --filter "$PACKAGE_NAME"` because pnpm rewrites `workspace:` specifiers at publish time by reading the linked package's manifest from `node_modules` — without it, publishing the vite package fails with `ERR_PNPM_CANNOT_RESOLVE_WORKSPACE_PROTOCOL`. The filter installs only the released package's dependencies, and `--ignore-scripts` keeps dependency code from running in the job. The dev publish job runs the same filtered install for the vite package because its devDependencies keep the inlined configurator's `workspace:*` specifier; tailwind-merge alone would need no install, since its specifiers are all `catalog:` and resolve from `pnpm-workspace.yaml`,
+    - pins `actions/download-artifact` to an immutable commit in the OIDC jobs and keeps digest mismatches fatal so corrupted or substituted artifacts cannot reach npm publishing.
 - `.github/workflows/label.yml` uses `pull_request_target` only for labeling metadata; do not add repository checkout or PR-code execution to that workflow. `gh` commands in that workflow must pass `--repo` explicitly because there is intentionally no `.git` checkout for repository inference.
 - `.github/workflows/draft-release.yml` runs the release-drafter autolabeler under `pull_request_target` for the same reason: the plain `pull_request` token is read-only on fork PRs, so labeling fails with "Resource not accessible by integration" (seen on PR #689). Like `label.yml`, the `auto_label` job must stay checkout-free and never execute PR code.
 - `.github/workflows/comment-released-prs-and-issues.yml`:
-  - runs local action `.github/actions/release-commenter`,
-  - runs on `release.published`, on manual `workflow_dispatch`, and after successful `npm Publish` workflow completion for `push` events on `main`,
-  - keeps the `workflow_run` checkout on trusted default-branch code and reads the triggering main commit's package metadata through the GitHub API instead of checking out the triggering SHA,
-  - supports manual `workflow_dispatch` with optional `head_tag`, `base_tag`, `dry_run`, and `npm_package_name`.
+    - runs local action `.github/actions/release-commenter`,
+    - runs on `release.published`, on manual `workflow_dispatch`, and after successful `npm Publish` workflow completion for `push` events on `main`,
+    - keeps the `workflow_run` checkout on trusted default-branch code and reads the triggering main commit's package metadata through the GitHub API instead of checking out the triggering SHA,
+    - supports manual `workflow_dispatch` with optional `head_tag`, `base_tag`, `dry_run`, and `npm_package_name`.
 
 ## Practical guardrails
 

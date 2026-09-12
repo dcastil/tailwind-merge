@@ -8,14 +8,14 @@ node packages/configurator/src/cli.ts \
     --output /path/to/app/tw-merge.generated.ts
 ```
 
-| Argument | Meaning |
-| --- | --- |
-| `--input`, `-i` | Required CSS entrypoint path. Relative paths resolve from the working directory. |
-| `--output`, `-o` | Required generated-module path. Missing parent directories are created. |
-| `--format ts\|js` | Override the output language. Without it, `.js`, `.mjs`, and `.cjs` select JavaScript; other extensions select TypeScript. |
-| `--encoding compact\|exact` | Encoding policy, defaulting to compact. See [the tradeoff](./how-it-works.md#compact-and-exact-encoding). |
-| `--prune [directory]` | Enable usage pruning. Automatic source detection starts from the supplied directory, or the working directory when omitted. |
-| `--check` | Compare regenerated contents against the output file without writing it. |
+| Argument                    | Meaning                                                                                                                     |
+| --------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| `--input`, `-i`             | Required CSS entrypoint path. Relative paths resolve from the working directory.                                            |
+| `--output`, `-o`            | Required generated-module path. Missing parent directories are created.                                                     |
+| `--format ts\|js`           | Override the output language. Without it, `.js`, `.mjs`, and `.cjs` select JavaScript; other extensions select TypeScript.  |
+| `--encoding compact\|exact` | Encoding policy, defaulting to compact. See [the tradeoff](./how-it-works.md#compact-and-exact-encoding).                   |
+| `--prune [directory]`       | Enable usage pruning. Automatic source detection starts from the supplied directory, or the working directory when omitted. |
+| `--check`                   | Compare regenerated contents against the output file without writing it.                                                    |
 
 Both output languages use ES-module imports and exports. Use `.mjs` or an appropriately configured `.js` file for JavaScript output; choosing `.cjs` does not produce CommonJS.
 

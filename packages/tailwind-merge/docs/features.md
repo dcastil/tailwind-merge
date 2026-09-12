@@ -84,6 +84,7 @@ twMerge('text-[length:theme(myCustomScale.rebecca)] text-lg')
 ```
 
 Common labels you might need:
+
 - `length:` - for sizes/lengths (font-size, width, etc.)
 - `color:` - for colors
 - `position:` - for background-position

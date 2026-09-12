@@ -45,8 +45,8 @@ twMerge('px-2 py-1 bg-red hover:bg-dark-red', 'p-3 bg-[#B91C1C]')
 
 This repository is a monorepo. The docs above belong to the tailwind-merge package — what most visitors are here for — and everything package-specific (source, docs, changelog) lives in the package directories.
 
-| Package | Description |
-| --- | --- |
-| [tailwind-merge](./packages/tailwind-merge) ([npm](https://www.npmjs.com/package/tailwind-merge)) | The library itself — see the docs above. |
-| [@tailwind-merge/vite](./packages/vite/README.md) | Automatic theme configuration and source-based pruning for Vite apps. No stable release yet; dev builds on npm under the `dev` tag. |
-| [@tailwind-merge/configurator](./packages/configurator/README.md) | JavaScript API and CLI for generating a theme-specific merge module. Unreleased; API remains unstable. |
+| Package                                                                                           | Description                                                                                                                         |
+| ------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| [tailwind-merge](./packages/tailwind-merge) ([npm](https://www.npmjs.com/package/tailwind-merge)) | The library itself — see the docs above.                                                                                            |
+| [@tailwind-merge/vite](./packages/vite/README.md)                                                 | Automatic theme configuration and source-based pruning for Vite apps. No stable release yet; dev builds on npm under the `dev` tag. |
+| [@tailwind-merge/configurator](./packages/configurator/README.md)                                 | JavaScript API and CLI for generating a theme-specific merge module. Unreleased; API remains unstable.                              |
