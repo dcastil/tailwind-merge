@@ -1,5 +1,38 @@
 # Changelog for v3 releases
 
+## v3.7.0
+
+### New Features
+
+- Prepare some upcoming changes by [@dcastil](https://github.com/dcastil) in [#713](https://github.com/dcastil/tailwind-merge/pull/713)
+    - Theme getters returned by `fromTheme` now expose the theme key they read as a `themeKey` property, so tooling can identify the referenced theme scale without calling the getter.
+    - Release tags now include the package name, starting with `tailwind-merge@3.7.0`.
+
+### Bug Fixes
+
+- Fix arbitrary values using `color()` or `light-dark()` being classified as lengths instead of colors by [@ddussi](https://github.com/ddussi) in [#712](https://github.com/dcastil/tailwind-merge/pull/712)
+- Fix bare `bg-conic` not merging with other background image classes by [@dcastil](https://github.com/dcastil) in [#708](https://github.com/dcastil/tailwind-merge/pull/708)
+- Fix `columns-auto` not conflicting with other `columns` classes by [@dcastil](https://github.com/dcastil) in [#707](https://github.com/dcastil/tailwind-merge/pull/707)
+- Fix container sizes like `inline-2xl` not merging by [@dcastil](https://github.com/dcastil) in [#706](https://github.com/dcastil/tailwind-merge/pull/706)
+- Fix `max-h-none` missing in max-h class group by [@mutewinter](https://github.com/mutewinter) in [#704](https://github.com/dcastil/tailwind-merge/pull/704)
+- Fix axis shorthands like `px` not overriding logical sides like `ps` by [@dcastil](https://github.com/dcastil) in [#705](https://github.com/dcastil/tailwind-merge/pull/705)
+- Fix `leading-none` being removed when the leading theme scale is overridden by [@chatman-media](https://github.com/chatman-media) in [#689](https://github.com/dcastil/tailwind-merge/pull/689)
+- Fix deprecated `shadow-inner` being classified as shadow color instead of shadow by [@dcastil](https://github.com/dcastil) in [#703](https://github.com/dcastil/tailwind-merge/pull/703)
+
+### Documentation
+
+- Add Deno to install instructions by [@bartlomieju](https://github.com/bartlomieju) in [#687](https://github.com/dcastil/tailwind-merge/pull/687)
+- Add missing `text-shadow` theme key to configuration docs by [@dcastil](https://github.com/dcastil) in [`3e6d208`](https://github.com/dcastil/tailwind-merge/commit/3e6d2080a9905b5cc55f4b1515450544e761ded7)
+
+### Other
+
+- Switch package manager from yarn to pnpm by [@dcastil](https://github.com/dcastil) in [#680](https://github.com/dcastil/tailwind-merge/pull/680)
+- Harden CI security by [@dcastil](https://github.com/dcastil) in [#679](https://github.com/dcastil/tailwind-merge/pull/679)
+
+**Full Changelog**: [`v3.6.0...tailwind-merge@3.7.0`](https://github.com/dcastil/tailwind-merge/compare/v3.6.0...tailwind-merge@3.7.0)
+
+Thanks to [@brandonmcconnell](https://github.com/brandonmcconnell), [@manavm1990](https://github.com/manavm1990), [@langy](https://github.com/langy), [@roboflow](https://github.com/roboflow), [@syntaxfm](https://github.com/syntaxfm), [@getsentry](https://github.com/getsentry), [@codecov](https://github.com/codecov), a private sponsor, [@openclaw](https://github.com/openclaw), [@sourcegraph](https://github.com/sourcegraph), [@cesarvcanal](https://github.com/cesarvcanal), [@CasperKristiansson](https://github.com/CasperKristiansson), [@jbisasky](https://github.com/jbisasky), [@frontendmasters](https://github.com/frontendmasters) and more via [@thnxdev](https://github.com/thnxdev) for sponsoring tailwind-merge! ❤️
+
 ## v3.6.0
 
 ### New Features
