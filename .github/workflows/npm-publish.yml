@@ -129,6 +129,9 @@ jobs:
             - run: pnpm --filter "$PACKAGE_NAME" test:exports
               env:
                   PACKAGE_NAME: ${{ steps.resolve_package.outputs.name }}
+            # A plugin release resolves its tailwind-merge dependency on the registry, unlike the packed gate, which links the workspace build. This checks that the range's lowest version is published and ships every unstable-entry-point import the bundled configurator makes, so the plugin cannot ship against a library release that lacks the internals it was built with.
+            - if: steps.resolve_package.outputs.name == '@tailwind-merge/vite'
+              run: pnpm --filter @tailwind-merge/vite test:library-release
             - uses: actions/upload-artifact@v7
               with:
                   name: build-output

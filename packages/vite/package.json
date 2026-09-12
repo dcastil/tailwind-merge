@@ -49,6 +49,7 @@
         "test:watch": "vitest",
         "test:types": "tsc --noEmit",
         "test:exports": "node scripts/test-packed-package.mjs",
+        "test:library-release": "node scripts/check-library-release.mjs",
         "release": "pnpm version --tag-version-prefix=@tailwind-merge/vite@ --message=@tailwind-merge/vite@%s",
         "version": "node ../../scripts/update-pinned-links.mjs && node ../../scripts/pin-readme-links.mjs"
     },
