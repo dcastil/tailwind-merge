@@ -154,6 +154,22 @@ describe('generate from vanilla Tailwind CSS', () => {
         expect(module.getConfig()).toEqual(materializeConfig(pruned))
     })
 
+    test("a result's prune yields what generating with the prune option would have", async () => {
+        // The fixture helper derives every pruned fixture from the unpruned one through this method instead of generating twice; the contract it relies on — same classification, same emission options — is pinned here against the real thing.
+        const usedClasses = ['p-4', 'px-2', 'hover:text-red-500', 'text-[2rem]', 'bg-linear-to-r']
+        const options = { css: vanillaCss, base, encoding: 'exact' as const, format: 'js' as const, banner: '// banner' }
+        const generated = await generate({ ...options, prune: { usedClasses } })
+        const reprunedFromFull = (await generate(options)).prune(usedClasses)
+        const reprunedFromPruned = generated.prune(usedClasses)
+
+        for (const repruned of [reprunedFromFull, reprunedFromPruned]) {
+            expect(repruned.code).toBe(generated.code)
+            expect(repruned.config).toEqual(generated.config)
+            expect(repruned.plan.report.pruning).toEqual(generated.plan.report.pruning)
+        }
+        expect(generated.plan.report.pruning?.classifiedClassCount).toBe(usedClasses.length)
+    })
+
     test('importSource substitutes the module the emitted code imports from', () => {
         const emitted = emitModule(plan, { importSource: '@tailwind-merge/vite/tailwind-merge' })
 

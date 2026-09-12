@@ -47,6 +47,12 @@ Moving modifier-order detection after utility classification and augmentation re
 
 Reproduce the focused coverage test from the repository root with `pnpm exec vitest run --project @tailwind-merge/configurator packages/configurator/tests/real-world.test.ts -t supabase --coverage --reporter=verbose`. For profiling, start and stop Node's inspector CPU profiler around fixture generation and conformance; separate their costs before deciding whether the test or production generation needs changing.
 
+## Test-suite profiling, 2026-09-12
+
+Both sibling suites were profiled with Vitest's JSON reporter (`pnpm vitest run --reporter=json --outputFile=<file>` in the package) and per-file durations summed from `testResults`, which shows the two things that decide wall time: the sum of all files (CPU, spread over the worker pool) and the longest single file (the floor, since one worker runs a file serially). Configurator: 18.8 s wall / 119 s CPU before, about 10.1 s wall / 86 s CPU after, 359 → 360 tests. Vite plugin: 18.3 s wall before, 10.9 s after, 123 tests unchanged. Local numbers on an Apple M4 Max (16 logical cores) with Node 22 and Tailwind 4.3.3; hosted runners have fewer cores, so the CPU reduction matters more there than the wall-time figures suggest.
+
+Where a configurator fixture's time went, in isolation: a full `generate` about 140 ms, of which Tailwind's `getClassList()` enumeration is about 40 ms per design system (project and vanilla both), the custom-utility and augmentation passes about 55 ms; loading a design system itself is about 5 ms, an emitted-module round trip about 12 ms, and the accounted-for check under 10 ms. Three test-side inefficiencies were removed without dropping assertions: every `prune` fixture was a second full generation of the same CSS (now a re-prune of the unpruned result); every fixture loaded and enumerated its own vanilla system (now shared per worker); and plans emitted in the fixture's own format were re-imported (now memoized). Sharing the *project* between generation and the sweeps was tried and reverted: the variant-cache slowdown described above made the sweeps' compilations 4–5× slower, more than the shared class list saved. On the Vite side the per-edit cost is fixed waiting, so the gain came from splitting the dominant file into two topics of comparable duration.
+
 ## Reproducing a comparison
 
 1. Build the matching workspace library and generate from a pinned fixture's CSS with `generate`.

@@ -57,12 +57,22 @@ export interface GenerateResult {
  * Classes the theme creates outside the standard namespaces (compat sub-namespaces like `--text-color-*`, or namespaces without a theme key like `--z-index-*`) are found by diffing against a vanilla design system of the same Tailwind installation and classified empirically by their compiled CSS declarations, so no namespace mapping needs to be hand-maintained anywhere.
  */
 export async function generate(options: GenerateOptions): Promise<GenerateResult> {
-    const themeKeys = Object.keys(getDefaultConfig().theme)
-    const { project, vanilla } = await loadDesignSystems({
+    const designSystems = await loadDesignSystems({
         css: options.css,
         base: options.base,
         integration: options.integration,
     })
+    return generateFromDesignSystems(designSystems, options)
+}
+
+/**
+ * The classification and emission half of `generate`, on design systems the caller has already loaded. Not part of the public API — `generate` is the entry point and loads the systems itself. The test fixtures use the split to hand one loaded project to both generation and their own conformance sweeps, sharing its class list and compiled-declaration caches instead of loading and compiling the same theme twice, and to reuse one vanilla system across every fixture in a worker.
+ */
+export async function generateFromDesignSystems(
+    { project, vanilla }: { project: DesignSystemAccess; vanilla: DesignSystemAccess },
+    options: Omit<GenerateOptions, 'css' | 'base' | 'integration'>,
+): Promise<GenerateResult> {
+    const themeKeys = Object.keys(getDefaultConfig().theme)
     const encoding = options.encoding ?? 'compact'
 
     const plan = buildPlan({

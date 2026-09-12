@@ -7,13 +7,14 @@ import { expect } from 'vitest'
 import { createTailwindMerge, twMerge as defaultTwMerge } from 'tailwind-merge'
 import { type AnyConfig, createClassGroupUtils } from 'tailwind-merge/unstable-do-not-import'
 
-import { type ConfigPlan, type GenerateOptions, generate } from '../src'
+import { type ConfigPlan, type GenerateOptions, type GenerateResult } from '../src'
 import { materializeConfig } from '../src/materialize'
 import {
     type DesignSystemAccess,
     declaredDeclarations,
     loadDesignSystems,
 } from '../src/design-system'
+import { generateFromDesignSystems } from '../src/generate'
 
 import { acceptableResults, mergeVerdict } from './oracle'
 
@@ -49,12 +50,14 @@ export interface GeneratedFixture {
     twMerge: (classList: string) => string
     /** The project's loaded design system, for conformance sweeps and compiled-CSS lookups. */
     designSystem: DesignSystemAccess
+    /** Prunes this fixture to a set of used classes through the result's own `prune`, which reuses the finished classification: what `generate` would have returned for those classes with the same options, at the cost of emission alone. The pruned fixture passes the same emitted-module round trip. */
+    prune: (usedClasses: Iterable<string>) => Promise<GeneratedFixture>
 }
 
 /**
  * Generates a config from fixture CSS and bundles everything fixture tests need: the merge function built from the materialized config, the plan report, the emitted code, and the loaded design system for conformance sweeps.
  *
- * Generation is the expensive part of every fixture (0.1–1 s, depending on the theme), so results are memoized per CSS, base, and options within the worker: tests anywhere in a file can ask for the vanilla theme, or share a theme between describe blocks, without paying twice. Every generated fixture also passes through the emitted-module round trip (see `importEmittedModule`), the one gate that proves the code the emitter writes builds the same config the tests exercise in memory.
+ * Generation is the expensive part of every fixture (0.1–1 s, depending on the theme), so results are memoized per CSS, base, and options within the worker: tests anywhere in a file can ask for the vanilla theme, or share a theme between describe blocks, without paying twice. A fixture with a `prune` option is derived from the unpruned fixture of the same CSS and options by re-pruning it (see `GeneratedFixture.prune`) rather than generated a second time; the equivalence of the two paths is pinned in generate.test.ts. Every generated fixture also passes through the emitted-module round trip (see `importEmittedModule`), the one gate that proves the code the emitter writes builds the same config the tests exercise in memory.
  */
 export function generateFixture(
     css: string,
@@ -64,7 +67,13 @@ export function generateFixture(
     const key = JSON.stringify([css, base, options])
     let fixture = fixtureCache.get(key)
     if (!fixture) {
-        fixture = buildFixture(css, base, options)
+        const { prune, ...unprunedOptions } = options
+        fixture = prune
+            ? generateFixture(css, base, unprunedOptions).then(async (unpruned) => {
+                  const usedClasses = await prune.usedClasses
+                  return usedClasses === null ? unpruned : unpruned.prune(usedClasses)
+              })
+            : buildFixture(css, base, unprunedOptions)
         fixtureCache.set(key, fixture)
     }
     return fixture
@@ -75,18 +84,29 @@ const fixtureCache = new Map<string, Promise<GeneratedFixture>>()
 async function buildFixture(
     css: string,
     base: string,
-    options: Omit<GenerateOptions, 'css' | 'base'>,
+    options: Omit<GenerateOptions, 'css' | 'base' | 'prune'>,
 ): Promise<GeneratedFixture> {
-    const { code, config, plan } = await generate({ css, base, ...options })
+    const result = await generateFromDesignSystems(await loadFixtureDesignSystems(css, base), options)
+    // The fixture's own design system is loaded apart from the one generation classified on purpose: generation inspects every variant's selectors, which fills Tailwind's parsed-variant cache on that object, and each later candidate compilation on it sorts the whole cache again — several times slower per class, which the conformance sweeps over the full class list would pay in full. A fresh object compiles at normal speed; its class list and compiled declarations are cached separately from generation's.
     const { project } = await loadDesignSystems({ css, base })
+    const fixture = await assembleFixture(result, project, options.format)
 
-    const emitted = await importEmittedModule(code, options.format ?? 'ts')
+    await assertEveryCompilingClassIsAccountedFor(project, result.plan)
+
+    return fixture
+}
+
+/** Bundles a generation result — the full one or a re-pruned one — after its emitted-module round trip. */
+async function assembleFixture(
+    result: GenerateResult,
+    project: DesignSystemAccess,
+    format: GenerateOptions['format'],
+): Promise<GeneratedFixture> {
+    const { code, config, plan } = result
+
+    const emitted = await importEmittedModule(code, format ?? 'ts')
     // The emitted module and the materialized config come from the same plan, so they must describe the same config — validators are compared by reference, which holds because both import the same tailwind-merge module instance.
     expect(emitted.getConfig()).toEqual(config)
-
-    if (options.prune === undefined) {
-        await assertEveryCompilingClassIsAccountedFor(project, plan)
-    }
 
     return {
         code,
@@ -94,8 +114,28 @@ async function buildFixture(
         plan,
         twMerge: createTailwindMerge(() => config),
         designSystem: project,
+        prune: (usedClasses) => assembleFixture(result.prune(usedClasses), project, format),
     }
 }
+
+/**
+ * Loads the design systems generation classifies on: the fixture's project, paired with a vanilla system shared by every fixture of the worker with the same base and importance. Generation only ever reads the vanilla system, so sharing it is safe, and the compiled declarations of the vanilla exemplars the classification passes probe stay cached across fixtures.
+ */
+async function loadFixtureDesignSystems(
+    css: string,
+    base: string,
+): Promise<{ project: DesignSystemAccess; vanilla: DesignSystemAccess }> {
+    const { project, vanilla } = await loadDesignSystems({ css, base })
+    const key = JSON.stringify([base, project.important])
+    let shared = sharedVanillaDesignSystems.get(key)
+    if (!shared) {
+        shared = vanilla
+        sharedVanillaDesignSystems.set(key, shared)
+    }
+    return { project, vanilla: shared }
+}
+
+const sharedVanillaDesignSystems = new Map<string, DesignSystemAccess>()
 
 /**
  * The classification invariant every unpruned fixture must hold: a class Tailwind suggests and compiles is either classified by the generated config or listed in the report — never silently dropped. Three bugs of exactly that shape (compat sub-namespace phantoms, reset names re-added through a sub-namespace, negative-first classification) escaped the merge-behavior tests because no fixture happened to exercise them; this check runs over every fixture, real-world themes included. The vanilla config's own gaps (tracked by vanilla-coverage.test.ts) are inherited by every theme and excluded here.
@@ -147,7 +187,9 @@ function vanillaGaps(): Promise<Set<string>> {
     return (vanillaGapsPromise ??= (async () => {
         const css = "@import 'tailwindcss';"
         const [{ plan }, { project }] = await Promise.all([
-            generate({ css, base: fixtureBase }),
+            loadFixtureDesignSystems(css, fixtureBase).then((designSystems) =>
+                generateFromDesignSystems(designSystems, {}),
+            ),
             loadDesignSystems({ css, base: fixtureBase }),
         ])
         return new Set(unclassifiedCompilingClasses(project, plan))
@@ -156,8 +198,28 @@ function vanillaGaps(): Promise<Set<string>> {
 
 /**
  * Writes emitted module code to a worker-private temp directory inside tests/ and imports it through Vitest, so the code runs exactly as a consumer's build would run it: the TypeScript is transformed, `tailwind-merge` resolves through the package's vitest alias, and `getConfig()` yields a real config object. The directory lives inside tests/ because the alias only applies to files Vite serves from the project; it is removed when the worker exits, and `tests/global-setup.ts` sweeps anything a crashed run left behind.
+ *
+ * Imports are memoized per code and format: identical code yields the same module, so importing it again proves nothing the first import didn't, and tests that emit a fixture's plan in every format re-import the format the fixture already went through (see `generateFixture`) — the emitted modules are the same code, byte for byte.
  */
-export async function importEmittedModule(
+export function importEmittedModule(
+    code: string,
+    format: 'ts' | 'js',
+): Promise<{ getConfig: () => AnyConfig; twMerge: (classList: string) => string }> {
+    const key = `${format}\0${code}`
+    let module = emittedModuleCache.get(key)
+    if (!module) {
+        module = writeAndImportEmittedModule(code, format)
+        emittedModuleCache.set(key, module)
+    }
+    return module
+}
+
+const emittedModuleCache = new Map<
+    string,
+    Promise<{ getConfig: () => AnyConfig; twMerge: (classList: string) => string }>
+>()
+
+async function writeAndImportEmittedModule(
     code: string,
     format: 'ts' | 'js',
 ): Promise<{ getConfig: () => AnyConfig; twMerge: (classList: string) => string }> {
