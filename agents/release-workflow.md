@@ -69,7 +69,9 @@ pnpm publish --tag dev --access public --no-git-checks --ignore-scripts
 git checkout -- package.json README.md
 ```
 
-Publish without `--provenance`: provenance needs a CI OIDC token and fails locally. Then configure the trusted publisher (repository `dcastil/tailwind-merge`, workflow `npm-publish.yml`, no environment) on the package's npm access page or with `npx npm@latest trust github @tailwind-merge/vite --file npm-publish.yml --repo dcastil/tailwind-merge --allow-publish` (`npm trust` needs npm 11.15 or newer). Automatic dev publishing of the plugin from the publish workflow is wired up once the trusted publisher exists; until then a merge to `main` publishes only the library's dev package.
+Publish without `--provenance`: provenance needs a CI OIDC token and fails locally. Then configure the trusted publisher (repository `dcastil/tailwind-merge`, workflow `npm-publish.yml`, no environment) on the package's npm access page or with `npx npm@latest trust github @tailwind-merge/vite --file npm-publish.yml --repo dcastil/tailwind-merge --allow-publish` (`npm trust` needs npm 11.15 or newer). With the trusted publisher in place, the publish workflow's dev jobs publish both packages on every `main` push: the build job builds both and runs both `test:exports` gates, the OIDC job stamps both manifests with the script and publishes the library before the plugin, so the plugin's exact pin always resolves. The bootstrap publish set `latest` as well as `dev` on the plugin, which npm does for a package's first version regardless of `--tag`; the first stable release moves `latest` to a real version.
+
+The release commenter's dev pass stays library-only (it reads the library manifest for the head tag, and the action fails when npm has no prior dev version of a package); plugin dev builds do not comment on issues until that pass is extended.
 
 ## Release commenter behavior
 
@@ -78,7 +80,7 @@ The workflow `.github/workflows/comment-released-prs-and-issues.yml` uses the lo
 - It runs for:
   - published GitHub releases,
   - manual workflow dispatch,
-  - completed successful `npm Publish` runs triggered by `push` on `main` (dev-release comment pass, tailwind-merge only; the synthetic head tag is `tailwind-merge@<version>-dev.<sha>`).
+  - completed successful `npm Publish` runs triggered by `push` on `main` (dev-release comment pass, tailwind-merge only even though the same run also publishes the vite package's dev build; the synthetic head tag is `tailwind-merge@<version>-dev.<sha>`).
 - Base-tag selection is scoped to the released tag's package. Legacy un-prefixed tags belong to the `fallback-package-name` input (default `tailwind-merge`).
 - Target collection separately checks each commit's changed files, then the changed files of its associated PRs, before reading their closing references or connected-issue timelines. An unrelated package's commit or PR must not announce its issues as released. PR scope results are cached within the run. The Vite scope includes the bundled configurator; the library scope includes its package directory plus historical root `src/`, `docs/`, and `tests/` paths for comparisons spanning the monorepo move. Root infrastructure remains outside automatic notification scope.
 - Changed-file checks paginate both REST endpoints and include a rename's previous path, so changes moved out of a package still count. Missing file data or reaching GitHub's file-list cap without establishing scope fails before posting. Keep `releasePackagePaths()` in the action aligned with the release-drafter configs when adding packages or changing bundle ownership. Mocked tests cover mixed ranges, linked issues, pagination, renames, and dry runs without contacting GitHub.

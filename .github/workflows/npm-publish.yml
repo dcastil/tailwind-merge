@@ -24,11 +24,18 @@ jobs:
                   package-manager-cache: false
             - run: corepack enable
             - run: pnpm install --frozen-lockfile
-            - run: pnpm --filter tailwind-merge build
+            # Both dev packages build here; pnpm's topological order builds the library before the vite package, whose test:exports verifies its packed tarball against the library's built shape. The configurator is inlined into the vite bundle and has no dev release of its own.
+            - run: pnpm --filter tailwind-merge --filter @tailwind-merge/vite build
+            - run: pnpm --filter tailwind-merge --filter @tailwind-merge/vite test:exports
             - uses: actions/upload-artifact@v7
               with:
-                  name: build-output
+                  name: build-output-tailwind-merge
                   path: packages/tailwind-merge/dist
+                  if-no-files-found: error
+            - uses: actions/upload-artifact@v7
+              with:
+                  name: build-output-vite
+                  path: packages/vite/dist
                   if-no-files-found: error
 
     publish-dev:
@@ -50,24 +57,28 @@ jobs:
                   # No registry-url on purpose: it would write an .npmrc auth line referencing the unset NODE_AUTH_TOKEN, which pnpm's config loader rejects. pnpm publishes to its default registry through npm trusted publishing (OIDC), needing no token plumbing.
                   package-manager-cache: false
             - run: corepack enable
+            # The vite package's devDependencies keep a `workspace:` specifier (the inlined configurator), which pnpm rewrites at publish time by reading the linked manifest from node_modules — the same scripts-disabled, package-filtered install the release job uses, so no dependency code runs in the job holding the OIDC token. tailwind-merge needs no install: its specifiers are all `catalog:` and resolve from pnpm-workspace.yaml.
+            - run: pnpm install --frozen-lockfile --ignore-scripts --filter @tailwind-merge/vite
             - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
               with:
-                  name: build-output
+                  name: build-output-tailwind-merge
                   path: packages/tailwind-merge/dist
                   digest-mismatch: error
-            - name: Set dev package version
-              working-directory: packages/tailwind-merge
+            - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+              with:
+                  name: build-output-vite
+                  path: packages/vite/dist
+                  digest-mismatch: error
+            # Stamps `<version>-dev.<sha>` on both manifests and pins the vite package's tailwind-merge dependency to the library's same-commit dev version (see the script header for why the pin is exact). Both stamps run before either publish so the manifests agree before anything leaves the runner.
+            - name: Stamp dev versions
               run: |
-                  node --input-type=module <<'EOF'
-                  import fs from 'node:fs'
-
-                  const packageJson = JSON.parse(fs.readFileSync('package.json', 'utf8'))
-                  packageJson.version = `${packageJson.version}-dev.${process.env.GITHUB_SHA}`
-                  fs.writeFileSync('package.json', `${JSON.stringify(packageJson, null, 4)}\n`)
-                  EOF
-            # pnpm instead of npm so publishing matches the release flow: publishConfig field overrides are applied at pack time and trusted publishing runs through pnpm's native OIDC flow. --provenance must be explicit (pnpm does not read publishConfig.provenance); --no-git-checks because the version stamp above dirties the tree and the checkout is a detached HEAD.
+                  (cd packages/tailwind-merge && node ../../scripts/stamp-dev-version.mjs)
+                  (cd packages/vite && node ../../scripts/stamp-dev-version.mjs)
+            # pnpm instead of npm so publishing matches the release flow: publishConfig field overrides are applied at pack time and trusted publishing runs through pnpm's native OIDC flow. --provenance must be explicit (pnpm does not read publishConfig.provenance); --no-git-checks because the version stamp above dirties the tree and the checkout is a detached HEAD. The library publishes first because the vite dev build depends on exactly this version.
             - run: pnpm publish --access public --tag dev --provenance --ignore-scripts --no-git-checks
               working-directory: packages/tailwind-merge
+            - run: pnpm publish --access public --tag dev --provenance --ignore-scripts --no-git-checks
+              working-directory: packages/vite
 
     build-prod:
         if: github.event_name == 'release' && github.event.action == 'published'

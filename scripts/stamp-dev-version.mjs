@@ -22,7 +22,8 @@ const REGISTRY_URL = 'https://registry.npmjs.org'
 const sha = resolveSha()
 const manifestPath = path.join(packageDir, 'package.json')
 const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'))
-const devVersion = `${manifest.version}-dev.${sha}`
+const devSuffix = `-dev.${sha}`
+const devVersion = `${manifest.version}${devSuffix}`
 
 log(`Stamping ${manifest.name}@${devVersion}`)
 
@@ -39,7 +40,10 @@ for (const [dependencyName, range] of Object.entries(manifest.dependencies ?? {}
         fail(`${dependencyName} uses the workspace protocol but is not a workspace package`)
     }
 
-    const pinnedVersion = `${dependencyVersion}-dev.${sha}`
+    // Stamping several packages in one checkout means a dependency's manifest may already carry this commit's dev suffix; never stack a second one.
+    const pinnedVersion = dependencyVersion.endsWith(devSuffix)
+        ? dependencyVersion
+        : `${dependencyVersion}${devSuffix}`
     manifest.dependencies[dependencyName] = pinnedVersion
     pinnedDependencies.push({ name: dependencyName, version: pinnedVersion })
     log(`Pinned ${dependencyName} to ${pinnedVersion}`)
