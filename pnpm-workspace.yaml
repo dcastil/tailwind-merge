@@ -24,3 +24,5 @@ minimumReleaseAgeExclude:
   - vitest@4.1.11
   # Renovate security update: postcss@8.5.23
   - postcss@8.5.23
+  # Renovate security update: vite@7.3.5
+  - vite@7.3.5
