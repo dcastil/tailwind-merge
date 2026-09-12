@@ -24,7 +24,7 @@ twMerge('text-huge text-sm') // → 'text-sm'
 
 The default encoding favors bundle size; [exact encoding](./docs/how-it-works.md#compact-and-exact-encoding) avoids overmatching finite theme scales. Optional [pruning](./docs/how-it-works.md#pruning-to-source-usage) removes unused configuration using Tailwind's own sources and scanner.
 
-**Status: unreleased, with an unstable API.** Use it from this repository for now. For Vite applications, prefer [@tailwind-merge/vite](../vite/README.md), which handles generation and watching automatically; that package is also awaiting its first release. Direct configurator use is useful for other build pipelines and generated files.
+**Status: unreleased, with an unstable API.** Use it from this repository for now. For Vite applications, prefer [@tailwind-merge/vite](../vite/README.md), which handles generation and watching automatically; that package has dev builds on npm ahead of its first stable release. Direct configurator use is useful for other build pipelines and generated files.
 
 ## Documentation
 

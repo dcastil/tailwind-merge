@@ -21,13 +21,13 @@ twMerge('text-huge text-sm')
 ```
 
 - Zero configuration: your Tailwind CSS entrypoint is auto-detected, the merge config is generated from the theme Tailwind actually resolves
-- One package to add once released: tailwind-merge is supplied as the plugin's runtime dependency
+- One package to add: tailwind-merge is supplied as the plugin's runtime dependency
 - Nothing written to disk: the generated module is served in-memory, so no checked-in artifacts and no TypeScript-server churn
 - Quiet in development: the config regenerates only when your Tailwind configuration changes, and reloads only when the result actually differs
 - Small in production: the config is pruned to the classes found in your sources — the same files Tailwind scans — with substantial savings in the [measured project samples](../../agents/configurator-performance.md)
 - Declares support for Vite 6–8 and the Tailwind CSS v4.3 line; see [coverage limits](./docs/limitations.md)
 
-> **Status: unreleased, pre-1.0.** The implementation is ready for local evaluation with a matching library build. A new tailwind-merge release is required before the plugin's first publication. Treat it as not production-ready until 1.0.0 — see [Versioning](./docs/versioning.md).
+> **Status: pre-release, pre-1.0.** There is no stable release yet. Dev builds of every commit on `main` are published to npm under the `dev` tag for evaluation — see [Getting started](./docs/getting-started.md#availability-and-installation). Treat the plugin as not production-ready until 1.0.0 — see [Versioning](./docs/versioning.md).
 
 ## Get started
 

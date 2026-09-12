@@ -40,18 +40,36 @@ The tag and version-commit format is set by each package's `release` script, whi
 
 ### First Vite release
 
-Release the next tailwind-merge update before the Vite plugin. Automatic Vite dev releases remain disabled; a merge to `main` only publishes the library's dev package. Do not change that as part of routine development or documentation work.
+Release the next tailwind-merge update before the Vite plugin. Dev builds of the plugin are a separate track from its first stable release: see [Dev releases](#dev-releases) below for the stamping script, the one-time bootstrap publish, and the trusted-publisher setup that automatic dev publishing depends on.
 
 The selected initial plugin release is `0.1.0`, with no prerelease suffix or alternate dist-tag. It is the only new package intended for initial publication: the configurator is inlined and keeps an unstable direct API until a separately planned release. This is a sequencing decision, not a promise that the configurator stays unpublished forever.
 
 Before publishing:
 
-1. Release a library version containing the generator's required `themeKey`, classification/parser exports, and matching configuration semantics. The plugin packs its `workspace:^` dependency as `tailwind-merge: ^3.6.0` because that is the local manifest version (the caret range keeps later library patches installable without a plugin release); the actual `v3.6.0` release lacks the unstable entry point. A packed check against the workspace library cannot establish that a registry install will work. Verify the packed dependency after the library version bump, and test installation against that actual release.
-2. Configure a trusted publisher for the new npm package (repository `dcastil/tailwind-merge`, workflow `npm-publish.yml`). The library's configuration does not cover a second package. Verify npm's current first-publication setup when releasing; a bootstrap publish may be needed before trusted publishing can be configured.
-3. Set the plugin's release version and remove `private: true` only when preparing that release. Keep the configurator private. Add the plugin's initial changelog/release text and update the unreleased notices in its README/getting-started/versioning docs.
+1. Done with `tailwind-merge@3.7.0`, which ships the generator's required `themeKey`, classification/parser exports, and matching configuration semantics; the plugin's `workspace:^` dependency now packs as `tailwind-merge: ^3.7.0` (the caret range keeps later library patches installable without a plugin release). Re-check this whenever the plugin starts relying on library internals newer than the latest library release: a packed check against the workspace library cannot establish that a registry install will work, so verify the packed dependency after the next library version bump and test installation against that actual release.
+2. The trusted publisher for `@tailwind-merge/vite` is set up as part of the dev-release bootstrap (see [Dev releases](#dev-releases)); the stable release reuses it. The library's configuration does not cover a second package.
+3. Set the plugin's release version when preparing that release. The plugin manifest carries no `private` flag since dev builds made it a published package; the configurator keeps `private: true` because it is never published. Add the plugin's initial changelog/release text and update the pre-release notices in its README/getting-started/versioning docs.
 4. Run the library and plugin builds, packed-package gates, and repo-wide checks. The [Vite packaging guide](./vite-plugin.md#build-and-packaging) explains the pnpm export rewrite and which consumer behavior the gate verifies.
 
-Local field trials before that release must resolve both the plugin and library to matching checkout builds. Installing only a plugin tarball while letting its library dependency resolve to the old registry version does not meet that requirement.
+Field trials use dev builds (`@tailwind-merge/vite@dev`), which pin the same-commit library dev build. Trials against local checkouts must likewise resolve both packages to matching builds; installing only a plugin tarball while letting its library dependency resolve to a registry release does not meet that requirement.
+
+### Dev releases
+
+`scripts/stamp-dev-version.mjs` prepares a package for a dev publish; run it from the package directory. It stamps `<version>-dev.<sha>` (`GITHUB_SHA` in CI, `HEAD` locally), pins `workspace:` runtime dependencies to the exact same-SHA dev version of that workspace package (the plugin's bundled configurator imports the library's unstable entry point, so a registry release could lack the internals the same commit changed), and rewrites relative README links to commit-pinned absolute links so the npm page resolves them. `--check-registry` verifies that every pinned dependency version is already on npm; a local publish needs that, CI does not because it publishes the library first in the same job. The script dirties the working tree by design; restore the manifest and README from git after publishing locally.
+
+npm cannot attach a trusted publisher to a package name that has never been published, so the plugin's first publish is a one-time local dev publish with a token — the only step of the whole flow that uses one — after which the trusted publisher covers all later dev and stable publishes. The bootstrap, on a clean checkout of the pushed `main` commit whose library dev release has finished publishing:
+
+```bash
+pnpm install --frozen-lockfile
+pnpm --filter tailwind-merge --filter @tailwind-merge/vite build
+pnpm --filter @tailwind-merge/vite test:exports
+cd packages/vite
+node ../../scripts/stamp-dev-version.mjs --check-registry
+pnpm publish --tag dev --access public --no-git-checks --ignore-scripts
+git checkout -- package.json README.md
+```
+
+Publish without `--provenance`: provenance needs a CI OIDC token and fails locally. Then configure the trusted publisher (repository `dcastil/tailwind-merge`, workflow `npm-publish.yml`, no environment) on the package's npm access page or with `npx npm@latest trust github @tailwind-merge/vite --file npm-publish.yml --repo dcastil/tailwind-merge --allow-publish` (`npm trust` needs npm 11.15 or newer). Automatic dev publishing of the plugin from the publish workflow is wired up once the trusted publisher exists; until then a merge to `main` publishes only the library's dev package.
 
 ## Release commenter behavior
 

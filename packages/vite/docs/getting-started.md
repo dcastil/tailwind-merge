@@ -4,30 +4,23 @@
 
 - Vite 6, 7, or 8
 - Tailwind CSS v4 processed by Vite — the usual [`@tailwindcss/vite`](https://tailwindcss.com/docs/installation/using-vite) setup (the currently supported Tailwind line is v4.3)
-- The published plugin will supply tailwind-merge as a dependency. Before release, local evaluation must explicitly resolve the plugin and library to matching checkout builds.
+- Nothing else: tailwind-merge comes with the plugin as its runtime dependency, so your app needs no direct dependency on it
 
 ## Availability and installation
 
-The plugin is currently unreleased. Use matching local builds from this repository for evaluation; the [development guide](../../../agents/vite-plugin.md#build-and-packaging) describes building and verifying them, and the [release guide](../../../agents/release-workflow.md#first-vite-release) records the dependency prerequisite. Installing only a plugin tarball against the old registry library will not work.
-
-Build and verify the local packages from the repository root:
+There is no stable release yet. Every commit on `main` is published to npm as a dev build under the `dev` tag, with a version like `0.0.0-dev.<commit sha>`: the first part is the last stable release the build corresponds to (`0.0.0` until the first one), the hash is the git commit. Dev builds are meant for evaluation, not production. Pin the exact version you tested rather than the tag, because the next commit replaces what `dev` points to.
 
 ```bash
-pnpm install --frozen-lockfile
-pnpm --filter tailwind-merge build
-pnpm --filter @tailwind-merge/vite build
-pnpm --filter @tailwind-merge/vite test:exports
-```
-
-For a separate test app, make its package manager resolve both packages to these local builds, including the plugin's transitive `tailwind-merge` dependency. The packed-package check demonstrates that paired setup; it does not install the plugin into your app.
-
-After the first release, installation will be:
-
-```bash
-pnpm add -D @tailwind-merge/vite
+pnpm add -D @tailwind-merge/vite@dev
 ```
 
 (or `npm install -D` / `yarn add -D` / `bun add -D`)
+
+Each dev build depends on the exact tailwind-merge dev build of the same commit rather than on a released library version, because the plugin's generator relies on library internals that can change between commits. That keeps generation and runtime consistent, and it means your app may end up with a second, dev copy of tailwind-merge next to any release it depends on directly. Import `twMerge` from `@tailwind-merge/vite/runtime` and the plugin uses its own copy.
+
+After the first stable release, installation will be the same command without the `@dev` suffix.
+
+To work against local checkout builds instead, the [development guide](../../../agents/vite-plugin.md#build-and-packaging) describes building and verifying both packages.
 
 ## Set up
 
