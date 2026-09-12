@@ -46,7 +46,7 @@ The stable import surface. While Vite runs, it serves the module generated from 
 
 ### `twMerge`
 
-[tailwind-merge's `twMerge`](https://github.com/dcastil/tailwind-merge/blob/v3.6.0/docs/api-reference.md#twmerge), configured for your theme.
+[tailwind-merge's `twMerge`](https://github.com/dcastil/tailwind-merge/blob/tailwind-merge@3.7.0/packages/tailwind-merge/docs/api-reference.md#twmerge), configured for your theme.
 
 ### `getConfig`
 
@@ -54,7 +54,7 @@ Returns the generated configuration object, freshly built per call. Useful for c
 
 ### `extendTailwindMerge`
 
-Like [tailwind-merge's `extendTailwindMerge`](https://github.com/dcastil/tailwind-merge/blob/v3.6.0/docs/api-reference.md#extendtailwindmerge), but it extends **your generated configuration** instead of the default one — which is what you want when adding class groups that don't come from your CSS:
+Like [tailwind-merge's `extendTailwindMerge`](https://github.com/dcastil/tailwind-merge/blob/tailwind-merge@3.7.0/packages/tailwind-merge/docs/api-reference.md#extendtailwindmerge), but it extends **your generated configuration** instead of the default one — which is what you want when adding class groups that don't come from your CSS:
 
 ```ts
 import { extendTailwindMerge } from '@tailwind-merge/vite/runtime'
@@ -72,7 +72,7 @@ Generated configurations carry resolved scales inline, so changing only `theme` 
 
 ### `twJoin`, `createTailwindMerge`, `mergeConfigs`, `validators`
 
-Re-exported unchanged from tailwind-merge, so customization never requires a direct tailwind-merge dependency. See the [tailwind-merge API reference](https://github.com/dcastil/tailwind-merge/blob/v3.6.0/docs/api-reference.md).
+Re-exported unchanged from tailwind-merge, so customization never requires a direct tailwind-merge dependency. See the [tailwind-merge API reference](https://github.com/dcastil/tailwind-merge/blob/tailwind-merge@3.7.0/packages/tailwind-merge/docs/api-reference.md).
 
 ### Types
 
