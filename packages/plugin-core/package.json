@@ -1,0 +1,34 @@
+{
+    "name": "@tailwind-merge/plugin-core",
+    "version": "0.0.0",
+    "private": true,
+    "description": "Shared core of the tailwind-merge bundler plugins: Tailwind CSS root discovery, runtime-module generation, and the generation session that watches and refreshes it.",
+    "license": "MIT",
+    "author": "Dany Castillo",
+    "type": "module",
+    "exports": {
+        ".": "./src/index.ts"
+    },
+    "scripts": {
+        "lint": "eslint --max-warnings 0 .",
+        "test": "vitest --no-watch",
+        "test:watch": "vitest",
+        "test:types": "tsc --noEmit"
+    },
+    "dependencies": {
+        "@tailwind-merge/configurator": "workspace:*"
+    },
+    "peerDependencies": {
+        "@tailwindcss/node": "^4.3.3"
+    },
+    "devDependencies": {
+        "@tailwindcss/node": "^4.3.3",
+        "@tailwindcss/oxide": "^4.3.3",
+        "@types/node": "catalog:",
+        "eslint": "catalog:",
+        "tailwind-merge": "workspace:*",
+        "tailwindcss": "^4.3.3",
+        "typescript": "catalog:",
+        "vitest": "catalog:"
+    }
+}

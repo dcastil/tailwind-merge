@@ -71,10 +71,11 @@
         "tailwind-merge": "workspace:^"
     },
     "devDependencies": {
+        "@tailwind-merge/configurator": "workspace:*",
+        "@tailwind-merge/plugin-core": "workspace:*",
         "@tailwindcss/vite": "~4.3.3",
         "@types/node": "catalog:",
         "eslint": "catalog:",
-        "@tailwind-merge/configurator": "workspace:*",
         "tailwindcss": "~4.3.3",
         "tsdown": "^0.22.14",
         "typescript": "catalog:",

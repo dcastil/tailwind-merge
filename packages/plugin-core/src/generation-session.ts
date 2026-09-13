@@ -9,16 +9,19 @@ import {
     generateRuntimeModule,
     hashClasses,
     pruneRuntimeModule,
-} from './generation'
+} from './generation.ts'
 
-interface GenerationSessionOptions extends Omit<GenerateRuntimeModuleOptions, 'cssPath'> {
+export interface GenerationSessionOptions extends Omit<GenerateRuntimeModuleOptions, 'cssPath'> {
+    /** Resolves to the discovered (or configured) CSS entrypoint, null when the project has none; rejects on ambiguity. */
     cssRoot: Promise<string | null>
     onGenerated: (generated: GeneratedRuntimeModule) => void
-    /** Dev logs the error and retains the last good module; builds throw to reject the attempt. Discovery errors always propagate. */
+    /** A dev server logs the error and retains the last good module; builds throw to reject the attempt. Discovery errors always propagate. */
     onError: (error: unknown, current: GeneratedRuntimeModule | null) => void
 }
 
-/** Owns generation for one resolved Vite configuration. Failed attempts retain their dependency discoveries alongside the last good graph; only a success replaces serving state and dependencies. Both dev updates and build-watch use this lifecycle. */
+export type GenerationSession = ReturnType<typeof createGenerationSession>
+
+/** Owns generation for one resolved plugin configuration. Failed attempts retain their dependency discoveries alongside the last good graph; only a success replaces serving state and dependencies. Dev updates, watch builds, and bundler loader re-runs all go through this lifecycle. */
 export function createGenerationSession(options: GenerationSessionOptions) {
     const { cssRoot, onGenerated, onError, ...generationOptions } = options
     let current: GeneratedRuntimeModule | null = null
@@ -44,29 +47,37 @@ export function createGenerationSession(options: GenerationSessionOptions) {
 
         /** Source-only changes re-prune the current module for the caller's fresh scan — no loading, no classification — behind any running attempt, like a regeneration. Without a pruned module there is nothing to re-prune. */
         reprune(scan: UsageScan) {
-            generation = generation.catch(() => null).then(() => {
-                if (current?.pruning) {
-                    reprune(current, current.pruning, scan)
-                }
-                return current
-            })
+            generation = generation
+                .catch(() => null)
+                .then(() => {
+                    if (current?.pruning) {
+                        reprune(current, current.pruning, scan)
+                    }
+                    return current
+                })
             return generation
         },
 
-        /** Watch builds reuse unchanged successes but always retry failures, even before the first successful generation. A module holding the full config because its source scan failed is retried too, so pruning returns (and the warning repeats) once the cause is gone rather than after the next CSS edit. */
+        /** Reuses an unchanged success but always retries a failure, even before the first successful generation. A module holding the full config because its source scan failed is retried too, so pruning returns (and the warning repeats) once the cause is gone rather than after the next CSS edit. */
         refresh() {
-            generation = generation.catch(() => null).then(async (previous) => {
-                if (!previous || previous.pruningError || (await dependenciesChanged(previous))) {
-                    return run()
-                }
-                if (previous.pruning) {
-                    const scan = previous.pruning.scanner.scan()
-                    if (hashClasses(scan.classes) !== previous.pruning.classesHash) {
-                        reprune(previous, previous.pruning, scan)
+            generation = generation
+                .catch(() => null)
+                .then(async (previous) => {
+                    if (
+                        !previous ||
+                        previous.pruningError ||
+                        (await dependenciesChanged(previous))
+                    ) {
+                        return run()
                     }
-                }
-                return current
-            })
+                    if (previous.pruning) {
+                        const scan = previous.pruning.scanner.scan()
+                        if (hashClasses(scan.classes) !== previous.pruning.classesHash) {
+                            reprune(previous, previous.pruning, scan)
+                        }
+                    }
+                    return current
+                })
             return generation
         },
 

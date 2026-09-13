@@ -1,0 +1,46 @@
+# Plugin core development
+
+Read this for work on `packages/plugin-core/`, the private package inlined into the bundler plugins — today the Vite plugin ([Vite guide](./vite-plugin.md)), with further bundlers as sibling wrappers. Generation and scanning themselves live in the [configurator](./configurator.md); the core sits between the configurator and a plugin. It decides _which_ CSS root configures a project, _what_ module to serve for the plugin's runtime subpath, and _when_ a served module can be reused, re-pruned, or must be regenerated.
+
+## Ownership
+
+| File in `packages/plugin-core/src/` | Responsibility                                                                                                                                                                                                |
+| ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `index.ts`                          | The surface both plugins import: discovery, module generation helpers, the generation session.                                                                                                                |
+| `discovery.ts`                      | Bounded CSS marker search, imported-candidate elimination, ambiguity errors.                                                                                                                                  |
+| `generation.ts`                     | Calls the configurator, gathers dependencies and their modification times, fingerprints source usage, assembles the served module (emitted code plus the runtime appendix), and provides the fallback module. |
+| `generation-session.ts`             | Owns the pending attempt, last good module, retained dependencies, cache invalidation, and refresh decisions for one plugin configuration.                                                                    |
+
+Plugins own everything bundler-specific: root selection, resolution hooks, how the module reaches the bundler (Vite's virtual module, a loader where a bundler has none), dependency registration and watching, reload policy, logging, and failure policy (a dev server keeps the last good module, a build fails). The core takes the plugin's identity as options — `packageName` for the banner and the ambiguity error's prefix, `importSource` for the specifier the served module imports tailwind-merge from — and never logs on its own. Keep it that way: a new bundler wrapper should need nothing from here beyond these entry points.
+
+## Discovery invariants
+
+Discovery is eager and filesystem-based: a plugin's runtime module can be requested before any CSS has flowed through a bundler pipeline, so the root must be known up front. Scan `.css`, `.pcss`, and `.postcss` entrypoints below the project directory; other filenames and excluded directories (dot-directories such as `.next` and `.svelte-kit`, `node_modules`, build outputs, `public`) require the plugin's `css` option. The algorithm is a heuristic, not proof that the selected CSS is the app's only live theme.
+
+Root elimination follows transitive local CSS imports through files without Tailwind markers, including explicit intermediate paths outside the project directory. Cache file contents and visit each path once so shared imports and cycles terminate. Marker files remain the candidate set: following a dependency must not turn an import-only stylesheet into a new candidate or hide genuinely independent roots. Import traversal must prefer existing files regardless of extension before adding the implicit `.css` suffix, so mixed-extension and extensionless intermediates still connect imported candidates.
+
+Key candidates, cached statements, visited files, and imported edges by real filesystem paths. Scanning a symlinked project root preserves the symlink spelling, while the stylesheet resolver can return the physical path; comparing those strings directly invents independent roots. Keep the original paths alongside their identities for import resolution, the selected entrypoint, and root-relative diagnostics.
+
+Tokenize discovery input with the configurator's shared `cssStatements` helper and cache the resulting statements. Both root markers and import traversal must match active statements from their start; raw-text regexes mistake comments or quoted examples for directives and can either invent roots or hide real ones. Block headers must be included for markers such as `@theme`, and comments between directive tokens must remain whitespace. Scanner safelists use the same lexical boundaries.
+
+`@custom-variant` and `@source` are root markers too: an entrypoint importing a Tailwind base and defining variants or adding source directives must win over that base, or order-sensitive modifier inference reads the wrong design system and the pruning scanner misses sources only the entrypoint names. Discovery uses the same `createStylesheetResolver` helper as generation and scanning, including package fields/conditions and directory `style` entries; a file-exists plus `.css` suffix approximation can disconnect imported token files and report false independent roots. Unresolved discovery imports contribute no graph edge; generation remains responsible for errors and recovery dependencies.
+
+## Generation and session invariants
+
+- Always collect the CSS/module graph through the configurator's integration callbacks, even when no custom resolvers are needed; the explicit design-system loaders already observe stylesheet resolution, JavaScript loading, and failures, so no second Tailwind compilation is needed for watching. Each dependency's modification time is taken when it is reported, as generation reads it: taken afterwards, an edit racing a slow generation would become the baseline and a later refresh would keep the stale module.
+- The source scan runs alongside generation; a failing scan never fails the generation but sets `pruningError`, and the module then holds the full config. `pruneRuntimeModule` re-prunes a retained classification for a fresh scan without loading or classifying again; `hashClasses` is the order-independent usage fingerprint that tells real usage changes from noise.
+- The served module is the configurator's `format: 'js'` output plus the runtime appendix (`extendTailwindMerge` over the generated config, re-exports of the library helpers). The appendix and `fallbackModuleCode` must export exactly the names each plugin's runtime file exports; each plugin has a parity test, and `fromTheme` is intentionally absent because generated configs carry an empty `theme`.
+- The session: `generation` is the eager first attempt; `regenerate` chains a new run behind any running attempt; `reprune` re-prunes the current module for a caller's scan; `refresh` reuses an unchanged success, re-prunes when a re-scan changes the used classes, and always retries failures and modules whose scan failed; `dispose` drains the attempt and clears the require cache. Failed attempts retain their dependency discoveries alongside the last good graph (missing targets and their existing parent directories included) so plugins can watch for repairs; only a success replaces serving state and dependencies. CommonJS modules and their parents are invalidated through `@tailwindcss/node/require-cache` before every run.
+- `onError` decides the failure policy per plugin and mode: throwing rejects the attempt (builds), returning keeps the last good module (dev servers).
+
+## Testing
+
+`pnpm --filter @tailwind-merge/plugin-core test` covers discovery (pure filesystem cases: import-graph tops, ambiguity, symlinks, comments, cycles, skipped directories), generation (the modification-time races and `dependenciesChanged`), and the session (dev and build modes through consecutive failures, scan-failure retry, re-pruning on usage changes). Fixture copies go to `tests/.tmp-*` (gitignored, swept by the global setup) nested one level below the temp directory like the plugins' copies — see the [oxide gitignore trap](./configurator.md#debugging-and-validation). The library resolves to source through the Vitest aliases and the tsconfig paths; the configurator through its workspace link.
+
+Watching, invalidation, reload, and loader/virtual-module behavior are the plugins' responsibility and are tested in their suites against real servers and builds.
+
+## Packaging and release scope
+
+Private and never published: the plugins list it under `devDependencies` with `workspace:*` and inline it through tsdown, whose `deps.onlyBundle: []` guard treats the workspace link (outside `node_modules`) as local source; its own `@tailwind-merge/configurator` dependency is inlined the same way. `@tailwindcss/node` is a peer for the require-cache helper; everything else reaches it through the configurator.
+
+Changes here ship in every plugin release, so the release scope wiring — the release-drafter configs, the release commenter's package paths, and the plugins' `test:library-release` source lists — must include `packages/plugin-core`. Run `pnpm --filter @tailwind-merge/plugin-core test` and `test:types` for changes here, then the plugin suites.

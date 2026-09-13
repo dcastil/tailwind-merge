@@ -13,20 +13,22 @@ import {
     generate,
 } from '@tailwind-merge/configurator'
 
-/** A generated runtime module ready to serve as the virtual `@tailwind-merge/vite/runtime`. */
+/** A generated runtime module ready to serve in place of a plugin's runtime subpath. */
 export interface GeneratedRuntimeModule {
-    /** JavaScript source of the module: the configurator's emitted module (in its `format: 'js'` shape — Vite's own esbuild transform does not reliably process virtual ids, so the served code must parse as-is) plus the runtime appendix. */
+    /** JavaScript source of the module: the configurator's emitted module (in its `format: 'js'` shape, since a plugin serves the code as-is without a transform of its own) plus the runtime appendix. */
     code: string
-    /** sha-256 of `code` — the dev loop's change gate: regenerations that produce identical output must not invalidate or reload anything. */
+    /** sha-256 of `code` — the change gate: regenerations that produce identical output must not invalidate or reload anything. */
     hash: string
     /** The configurator's result behind `code`, retained so a usage change can re-prune the same classification instead of regenerating. */
     result: GenerateResult
     /** Absolute paths of every file the generation read: the entrypoint, `@import`ed stylesheets, and `@config`/`@plugin` modules. Watching these is what triggers regeneration. */
     dependencies: Set<string>
-    /** Modification times of the dependencies as generation read them, so a `vite build --watch` rebuild can tell whether the CSS graph changed without re-reading it. */
+    /** Modification times of the dependencies as generation read them, so a later refresh can tell whether the CSS graph changed without re-reading it. */
     dependencyMtimes: Map<string, number | null>
     /** The entrypoint the module was generated from, kept for regeneration. */
     cssPath: string
+    /** The specifier the module imports tailwind-merge's API from, kept because re-pruning re-assembles the module. */
+    importSource: string
     /** Present when the module was pruned to the classes found in the project's sources. */
     pruning?: PruningState
     /** Set when pruning was requested but the sources could not be scanned — the module then holds the full config, and the caller decides how loudly to say so. */
@@ -46,7 +48,12 @@ export interface PruningState {
 
 export interface GenerateRuntimeModuleOptions {
     cssPath: string
+    /** The project directory, used to print the entrypoint's path in the module's banner. */
     root: string
+    /** The plugin generating the module, named in its banner so readers of the served code can tell where it came from. */
+    packageName: string
+    /** Module specifier the generated module and its runtime appendix import tailwind-merge's API from. A virtual module has no filesystem location, so it needs a specifier resolvable from anywhere (the Vite plugin's own re-export subpath); a module served in place of a real file inside the plugin package can import `tailwind-merge` directly. */
+    importSource: string
     cacheSize?: number
     encoding?: EncodingMode
     integration?: TailwindIntegration
@@ -55,9 +62,9 @@ export interface GenerateRuntimeModuleOptions {
 }
 
 /**
- * Generates the virtual runtime module from the project's Tailwind CSS entrypoint.
+ * Generates the runtime module from the project's Tailwind CSS entrypoint.
  *
- * Always supplies dependency hooks to the configurator's loaders, even without custom resolution. The same load that generates the config therefore discovers its dependencies; a separate compile for watching is unnecessary. Each dependency's modification time is taken when it is reported, as it is read: taken after generation, an edit landing mid-generation would be recorded as the baseline and a watch rebuild would keep the stale module.
+ * Always supplies dependency hooks to the configurator's loaders, even without custom resolution. The same load that generates the config therefore discovers its dependencies; a separate compile for watching is unnecessary. Each dependency's modification time is taken when it is reported, as it is read: taken after generation, an edit landing mid-generation would be recorded as the baseline and a later refresh would keep the stale module.
  *
  * The source scan runs alongside generation rather than before it — its compile of the CSS graph and the source walk only have to finish before pruning, which runs last. A failing scan (no oxide binary for the platform, sources Tailwind can't resolve) never fails the generation: the module is generated with the full config and `pruningError` carries the reason — pruning is an optimization, and falling back preserves the full generated config's behavior.
  */
@@ -98,7 +105,7 @@ export async function generateRuntimeModule(
               })
         : Promise.resolve(null)
 
-    const sourceLine = `// Source: ${path.relative(options.root, options.cssPath) || options.cssPath} (served in-memory by @tailwind-merge/vite)`
+    const sourceLine = `// Source: ${path.relative(options.root, options.cssPath) || options.cssPath} (served in-memory by ${options.packageName})`
     const result = await generate({
         css,
         base,
@@ -106,7 +113,7 @@ export async function generateRuntimeModule(
         cacheSize: options.cacheSize,
         encoding: options.encoding,
         format: 'js',
-        importSource: INTERNAL_TAILWIND_MERGE,
+        importSource: options.importSource,
         banner: scanning.then((scanned) =>
             [sourceLine, ...(scanned ? [PRUNED_LINE] : [])].join('\n'),
         ),
@@ -120,7 +127,7 @@ export async function generateRuntimeModule(
     }
 
     return {
-        ...assembleModule(result),
+        ...assembleModule(result, options.importSource),
         dependencies,
         dependencyMtimes: new Map(
             await Promise.all(
@@ -128,6 +135,7 @@ export async function generateRuntimeModule(
             ),
         ),
         cssPath: options.cssPath,
+        importSource: options.importSource,
         pruning:
             scanned && result.plan.report.pruning
                 ? pruningState(scanned.scanner, scanned.scan, result.plan.report.pruning)
@@ -137,7 +145,7 @@ export async function generateRuntimeModule(
 }
 
 /**
- * Re-prunes a module for a fresh scan of the same, unchanged CSS graph — the dev server's and watch build's reaction to a source edit that changed the used classes. Pruning and emission run on the retained classification; nothing is loaded or classified again, and the dependency graph and its modification times carry over.
+ * Re-prunes a module for a fresh scan of the same, unchanged CSS graph — a plugin's reaction to a source edit that changed the used classes. Pruning and emission run on the retained classification; nothing is loaded or classified again, and the dependency graph and its modification times carry over.
  */
 export function pruneRuntimeModule(
     generated: GeneratedRuntimeModule,
@@ -147,14 +155,17 @@ export function pruneRuntimeModule(
     const result = generated.result.prune(scan.classes)
     return {
         ...generated,
-        ...assembleModule(result),
+        ...assembleModule(result, generated.importSource),
         // A pruned result always carries the pruning report.
         pruning: pruningState(pruning.scanner, scan, result.plan.report.pruning!),
     }
 }
 
-function assembleModule(result: GenerateResult): Pick<GeneratedRuntimeModule, 'code' | 'hash' | 'result'> {
-    const code = result.code + RUNTIME_APPENDIX
+function assembleModule(
+    result: GenerateResult,
+    importSource: string,
+): Pick<GeneratedRuntimeModule, 'code' | 'hash' | 'result'> {
+    const code = result.code + runtimeAppendix(importSource)
     return { code, hash: createHash('sha256').update(code).digest('hex'), result }
 }
 
@@ -172,7 +183,9 @@ const PRUNED_LINE = "// Pruned to the classes found in the project's sources"
 
 /** Order-independent fingerprint of a scan's class names. */
 export function hashClasses(classes: readonly string[]): string {
-    return createHash('sha256').update([...classes].sort().join('\n')).digest('hex')
+    return createHash('sha256')
+        .update([...classes].sort().join('\n'))
+        .digest('hex')
 }
 
 /** Whether any dependency's modification time differs from the recorded one — deleted files count as changed. */
@@ -205,16 +218,12 @@ function readMtime(file: string): Promise<number | null> {
 }
 
 /**
- * Where the virtual module imports tailwind-merge's API from: this package's own re-export (src/tailwind-merge.ts). A virtual module has no filesystem location, so a bare 'tailwind-merge' would resolve from the project root and fail under strict package managers — the plugin package itself is the one specifier guaranteed resolvable from anywhere in the user's project, being their direct dependency.
+ * Appended to the configurator's emitted module (which exports `getConfig` and `twMerge` and already imports `createTailwindMerge`) so the served module's export surface mirrors each plugin's runtime fallback. Plain JavaScript on purpose — types live in the plugin's runtime file, which is what TypeScript resolves for the subpath.
  */
-const INTERNAL_TAILWIND_MERGE = '@tailwind-merge/vite/tailwind-merge'
-
-/**
- * Appended to the configurator's emitted module (which exports `getConfig` and `twMerge` and already imports `createTailwindMerge`) so the virtual module's export surface mirrors runtime.ts. Plain JavaScript on purpose — types live in runtime.ts, which is what TypeScript resolves for the subpath.
- */
-const RUNTIME_APPENDIX = `
-export { createTailwindMerge, mergeConfigs, twJoin, validators } from '${INTERNAL_TAILWIND_MERGE}'
-import { mergeConfigs as mergeConfigsForExtend } from '${INTERNAL_TAILWIND_MERGE}'
+function runtimeAppendix(importSource: string): string {
+    return `
+export { createTailwindMerge, mergeConfigs, twJoin, validators } from '${importSource}'
+import { mergeConfigs as mergeConfigsForExtend } from '${importSource}'
 
 // Like tailwind-merge's extendTailwindMerge, but extending this project's generated config instead of the default one.
 export const extendTailwindMerge = (configExtension, ...createConfig) =>
@@ -222,10 +231,13 @@ export const extendTailwindMerge = (configExtension, ...createConfig) =>
         ? createTailwindMerge(getConfig, configExtension, ...createConfig)
         : createTailwindMerge(() => mergeConfigsForExtend(getConfig(), configExtension), ...createConfig)
 `
+}
 
 /**
- * Served for the virtual module when generation has never succeeded (the CSS is broken from the start, or a `@plugin` package is missing): the same default-config surface as runtime.ts. Once a generation has succeeded, later failures keep serving the last good module instead.
+ * Served for the runtime subpath when generation has never succeeded (the CSS is broken from the start, or a `@plugin` package is missing): the same default-config surface as a plugin's runtime fallback file. Once a generation has succeeded, later failures keep serving the last good module instead.
  */
-export const FALLBACK_MODULE_CODE = `
-export { createTailwindMerge, extendTailwindMerge, getDefaultConfig as getConfig, mergeConfigs, twJoin, twMerge, validators } from '${INTERNAL_TAILWIND_MERGE}'
+export function fallbackModuleCode(importSource: string): string {
+    return `
+export { createTailwindMerge, extendTailwindMerge, getDefaultConfig as getConfig, mergeConfigs, twJoin, twMerge, validators } from '${importSource}'
 `
+}
