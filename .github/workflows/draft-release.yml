@@ -34,6 +34,19 @@ jobs:
                   config-name: release-drafter-vite.yml
                   token: ${{ github.token }}
 
+    update_release_draft_next:
+        if: github.event_name == 'push'
+        runs-on: ubuntu-latest
+        permissions:
+            contents: write
+            pull-requests: read
+        steps:
+            # Pinned from release-drafter/release-drafter@v7.3.0.
+            - uses: release-drafter/release-drafter@c2e2804cc59f45f57076a99af580d0fedb697927
+              with:
+                  config-name: release-drafter-next.yml
+                  token: ${{ github.token }}
+
     auto_label:
         if: github.event_name == 'pull_request_target'
         runs-on: ubuntu-latest

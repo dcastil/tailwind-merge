@@ -1,0 +1,6 @@
+/* `source('.')` limits Tailwind's source detection to this directory: the fixture copy lives in a gitignored temp directory, where Tailwind's scanner turns its ignore rules off and would otherwise read the `.next` output as sources. */
+@import 'tailwindcss' source('.');
+
+@theme {
+    --text-huge: 2.5rem;
+}

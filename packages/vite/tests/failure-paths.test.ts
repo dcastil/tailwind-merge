@@ -1,11 +1,10 @@
-import { readFile, rm, utimes, writeFile } from 'node:fs/promises'
+import { readFile, writeFile } from 'node:fs/promises'
 import path from 'node:path'
 
 import { type Rollup, build } from 'vite'
 import { expect, test } from 'vitest'
 
 import tailwindMerge from '../src/index'
-import { dependenciesChanged, generateRuntimeModule } from '../src/generation'
 
 import {
     RUNTIME_SPECIFIER,
@@ -168,83 +167,4 @@ test('a breaking edit keeps the last good module in service, and the next good e
     expect(fixingEdit).toEqual({ trigger: 'config', regenerated: true, reloaded: true })
     const after = await server.ssrLoadModule(RUNTIME_SPECIFIER)
     expect(after.twMerge('text-big text-sm')).toBe('text-sm')
-})
-
-test('an edit landing during generation counts as a change for the next watch rebuild', async () => {
-    // Modification times are taken as files are reported, so a save that races the (slow) generation is not recorded as the baseline the rebuild compares against.
-    const root = await copyFixture('app')
-    const cssPath = path.join(root, 'app.css')
-    const tokensPath = path.join(root, 'tokens.css')
-    await writeFile(cssPath, "@import 'tailwindcss' source(none);\n@import './tokens.css';\n")
-    await writeFile(tokensPath, '@theme { --text-huge: 2.5rem; }\n')
-    let edited = false
-    const generated = await generateRuntimeModule({
-        cssPath,
-        root,
-        integration: {
-            async onDependency(file) {
-                if (file === tokensPath && !edited) {
-                    edited = true
-                    const later = new Date(Date.now() + 5_000)
-                    await writeFile(tokensPath, '@theme { --text-big: 2rem; }\n')
-                    await utimes(tokensPath, later, later)
-                }
-            },
-        },
-    })
-    expect(edited).toBe(true)
-    await expect(dependenciesChanged(generated)).resolves.toBe(true)
-})
-
-test('an edit to a transitive @config import landing during the import counts as a change', async () => {
-    // Tailwind reports a config's own imports only after importing it; the configurator walks them first so their times are taken before the import reads them.
-    const root = await copyFixture('app')
-    const cssPath = path.join(root, 'app.css')
-    const configPath = path.join(root, 'tailwind.config.mjs')
-    const themePath = path.join(root, 'theme.mjs')
-    await writeFile(cssPath, "@import 'tailwindcss' source(none);\n@config './tailwind.config.mjs';\n")
-    // A module whose evaluation takes a moment (a top-level await stands in for a big plugin), importing a theme file.
-    await writeFile(
-        configPath,
-        "import { fontSize } from './theme.mjs'\nawait new Promise((resolve) => setTimeout(resolve, 600))\nexport default { theme: { extend: { fontSize } } }\n",
-    )
-    await writeFile(themePath, "export const fontSize = { huge: '2.5rem' }\n")
-    let edited = false
-    const generated = await generateRuntimeModule({
-        cssPath,
-        root,
-        integration: {
-            onDependency(file) {
-                if (file === configPath && !edited) {
-                    edited = true
-                    setTimeout(async () => {
-                        const later = new Date(Date.now() + 5_000)
-                        await writeFile(themePath, "export const fontSize = { giant: '9rem' }\n")
-                        await utimes(themePath, later, later)
-                    }, 200)
-                }
-            },
-        },
-    })
-    expect(edited).toBe(true)
-    expect(generated.dependencies.has(themePath)).toBe(true)
-    expect(hasLiteral(generated.code, 'huge')).toBe(true)
-    await expect(dependenciesChanged(generated)).resolves.toBe(true)
-})
-
-test('dependenciesChanged notices edited and deleted files of the CSS graph', async () => {
-    const root = await copyFixture('app')
-    const cssPath = path.join(root, 'app.css')
-    const generated = await generateRuntimeModule({ cssPath, root })
-    expect(generated.dependencies.has(cssPath)).toBe(true)
-    await expect(dependenciesChanged(generated)).resolves.toBe(false)
-
-    // Same content, newer modification time: `vite build --watch` rebuilds regenerate on that signal alone.
-    const later = new Date(Date.now() + 5_000)
-    await utimes(cssPath, later, later)
-    await expect(dependenciesChanged(generated)).resolves.toBe(true)
-
-    const fresh = await generateRuntimeModule({ cssPath, root })
-    await rm(cssPath)
-    await expect(dependenciesChanged(fresh)).resolves.toBe(true)
 })

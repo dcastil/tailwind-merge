@@ -24,7 +24,7 @@ jobs:
                   package-manager-cache: false
             - run: corepack enable
             - run: pnpm install --frozen-lockfile
-            # Both dev packages build here; pnpm's topological order builds the library before the vite package, whose test:exports verifies its packed tarball against the library's built shape. The configurator is inlined into the vite bundle and has no dev release of its own.
+            # Both dev packages build here; pnpm's topological order builds the library before the vite package, whose test:exports verifies its packed tarball against the library's built shape. The plugin core and the configurator are inlined into the plugin bundles and have no dev release of their own. The Next.js package joins these jobs once its npm trusted publisher exists (its first publish is manual, see agents/release-workflow.md); until then a publish step for it would fail on every push.
             - run: pnpm --filter tailwind-merge --filter @tailwind-merge/vite build
             - run: pnpm --filter tailwind-merge --filter @tailwind-merge/vite test:exports
             - uses: actions/upload-artifact@v7
@@ -57,7 +57,7 @@ jobs:
                   # No registry-url on purpose: it would write an .npmrc auth line referencing the unset NODE_AUTH_TOKEN, which pnpm's config loader rejects. pnpm publishes to its default registry through npm trusted publishing (OIDC), needing no token plumbing.
                   package-manager-cache: false
             - run: corepack enable
-            # The vite package's devDependencies keep a `workspace:` specifier (the inlined configurator), which pnpm rewrites at publish time by reading the linked manifest from node_modules — the same scripts-disabled, package-filtered install the release job uses, so no dependency code runs in the job holding the OIDC token. tailwind-merge needs no install: its specifiers are all `catalog:` and resolve from pnpm-workspace.yaml.
+            # The vite package's devDependencies keep `workspace:` specifiers (the inlined plugin core and configurator), which pnpm rewrites at publish time by reading the linked manifests from node_modules — the same scripts-disabled, package-filtered install the release job uses, so no dependency code runs in the job holding the OIDC token. tailwind-merge needs no install: its specifiers are all `catalog:` and resolve from pnpm-workspace.yaml.
             - run: pnpm install --frozen-lockfile --ignore-scripts --filter @tailwind-merge/vite
             - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
               with:
@@ -102,6 +102,10 @@ jobs:
                           name=@tailwind-merge/vite
                           dir=packages/vite
                           ;;
+                      @tailwind-merge/next@*)
+                          name=@tailwind-merge/next
+                          dir=packages/next
+                          ;;
                       *)
                           echo "::error::Cannot resolve a workspace package from release tag ${RELEASE_TAG}"
                           exit 1
@@ -121,17 +125,19 @@ jobs:
             - run: pnpm install --frozen-lockfile
             - run: pnpm lint
             - run: pnpm test
-            # The library builds in every release flow: the vite package's test:exports verifies its packed tarball against tailwind-merge's published shape (dist and types). For a tailwind-merge release the two filters name the same package and it builds once; for a vite release pnpm's topological order builds the library first.
+            # The library builds in every release flow: the plugins' test:exports gates verify their packed tarballs against tailwind-merge's published shape (dist and types). For a tailwind-merge release the two filters name the same package and it builds once; for a plugin release pnpm's topological order builds the library first.
             - run: pnpm --filter tailwind-merge --filter "$PACKAGE_NAME" build
               env:
                   PACKAGE_NAME: ${{ steps.resolve_package.outputs.name }}
-            # Both packages ship a test:exports release gate: the library's built-bundle smoke tests, the vite package's packed-tarball verification.
+            # Every package ships a test:exports release gate: the library's built-bundle smoke tests, the plugins' packed-tarball verification.
             - run: pnpm --filter "$PACKAGE_NAME" test:exports
               env:
                   PACKAGE_NAME: ${{ steps.resolve_package.outputs.name }}
-            # A plugin release resolves its tailwind-merge dependency on the registry, unlike the packed gate, which links the workspace build. This checks that the range's lowest version is published and ships every unstable-entry-point import the bundled configurator makes, so the plugin cannot ship against a library release that lacks the internals it was built with.
-            - if: steps.resolve_package.outputs.name == '@tailwind-merge/vite'
-              run: pnpm --filter @tailwind-merge/vite test:library-release
+            # A plugin release resolves its tailwind-merge dependency on the registry, unlike the packed gate, which links the workspace build. This checks that the range's lowest version is published and ships every unstable-entry-point import the bundled plugin core and configurator make, so a plugin cannot ship against a library release that lacks the internals it was built with.
+            - if: startsWith(steps.resolve_package.outputs.name, '@tailwind-merge/')
+              run: pnpm --filter "$PACKAGE_NAME" test:library-release
+              env:
+                  PACKAGE_NAME: ${{ steps.resolve_package.outputs.name }}
             - uses: actions/upload-artifact@v7
               with:
                   name: build-output
@@ -157,7 +163,7 @@ jobs:
                   # No registry-url on purpose: it would write an .npmrc auth line referencing the unset NODE_AUTH_TOKEN, which pnpm's config loader rejects. pnpm publishes to its default registry through npm trusted publishing (OIDC), needing no token plumbing.
                   package-manager-cache: false
             - run: corepack enable
-            # pnpm resolves `workspace:` specifiers at publish time by reading the linked package's manifest from node_modules (the vite package depends on tailwind-merge that way), so the released package's dependencies are installed here — for that package only, with lifecycle scripts disabled, so no dependency code runs in the job holding the OIDC token. `catalog:` specifiers need no install; they resolve from pnpm-workspace.yaml.
+            # pnpm resolves `workspace:` specifiers at publish time by reading the linked package's manifest from node_modules (the plugins depend on tailwind-merge that way), so the released package's dependencies are installed here — for that package only, with lifecycle scripts disabled, so no dependency code runs in the job holding the OIDC token. `catalog:` specifiers need no install; they resolve from pnpm-workspace.yaml.
             - run: pnpm install --frozen-lockfile --ignore-scripts --filter "$PACKAGE_NAME"
               env:
                   PACKAGE_NAME: ${{ needs.build-prod.outputs.package-name }}

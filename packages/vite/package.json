@@ -49,7 +49,7 @@
         "test:watch": "vitest",
         "test:types": "tsc --noEmit",
         "test:exports": "node scripts/test-packed-package.mjs",
-        "test:library-release": "node scripts/check-library-release.mjs",
+        "test:library-release": "node ../../scripts/check-library-release.mjs --sources ../configurator/src ../plugin-core/src src",
         "release": "pnpm version --tag-version-prefix=@tailwind-merge/vite@ --message=@tailwind-merge/vite@%s",
         "version": "node ../../scripts/update-pinned-links.mjs && node ../../scripts/pin-readme-links.mjs"
     },
@@ -71,12 +71,13 @@
         "tailwind-merge": "workspace:^"
     },
     "devDependencies": {
+        "@tailwind-merge/configurator": "workspace:*",
+        "@tailwind-merge/plugin-core": "workspace:*",
         "@tailwindcss/vite": "~4.3.3",
         "@types/node": "catalog:",
         "eslint": "catalog:",
-        "@tailwind-merge/configurator": "workspace:*",
         "tailwindcss": "~4.3.3",
-        "tsdown": "^0.22.14",
+        "tsdown": "catalog:",
         "typescript": "catalog:",
         "vite": "^7.3.3",
         "vitest": "catalog:"

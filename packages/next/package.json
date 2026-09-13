@@ -1,0 +1,80 @@
+{
+    "name": "@tailwind-merge/next",
+    "version": "0.0.0",
+    "description": "Next.js plugin that generates a project-optimized twMerge from the project's Tailwind CSS.",
+    "license": "MIT",
+    "author": "Dany Castillo",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/dcastil/tailwind-merge.git",
+        "directory": "packages/next"
+    },
+    "homepage": "https://github.com/dcastil/tailwind-merge",
+    "bugs": {
+        "url": "https://github.com/dcastil/tailwind-merge/issues"
+    },
+    "type": "module",
+    "sideEffects": [
+        "./dist/runtime.mjs"
+    ],
+    "exports": {
+        ".": {
+            "types": "./dist/index.d.mts",
+            "default": "./dist/index.mjs"
+        },
+        "./runtime": {
+            "types": "./dist/runtime.d.mts",
+            "default": "./dist/runtime.mjs"
+        }
+    },
+    "files": [
+        "dist",
+        "src"
+    ],
+    "publishConfig": {
+        "access": "public",
+        "provenance": true
+    },
+    "scripts": {
+        "build": "tsdown",
+        "lint": "eslint --max-warnings 0 .",
+        "test": "vitest --no-watch",
+        "test:watch": "vitest",
+        "test:types": "tsc --noEmit",
+        "test:exports": "node scripts/test-packed-package.mjs",
+        "test:library-release": "node ../../scripts/check-library-release.mjs --sources ../configurator/src ../plugin-core/src src",
+        "release": "pnpm version --tag-version-prefix=@tailwind-merge/next@ --message=@tailwind-merge/next@%s",
+        "version": "node ../../scripts/update-pinned-links.mjs && node ../../scripts/pin-readme-links.mjs"
+    },
+    "peerDependencies": {
+        "@tailwindcss/postcss": "~4.3.3",
+        "next": "^16.0.0",
+        "tailwindcss": "~4.3.3"
+    },
+    "peerDependenciesMeta": {
+        "@tailwindcss/postcss": {
+            "optional": true
+        }
+    },
+    "dependencies": {
+        "@tailwindcss/node": "~4.3.3",
+        "@tailwindcss/oxide": "~4.3.3",
+        "enhanced-resolve": "^5.24.5",
+        "postcss": "^8.5.15",
+        "tailwind-merge": "workspace:^"
+    },
+    "devDependencies": {
+        "@tailwind-merge/configurator": "workspace:*",
+        "@tailwind-merge/plugin-core": "workspace:*",
+        "@tailwindcss/postcss": "~4.3.3",
+        "@types/node": "catalog:",
+        "eslint": "catalog:",
+        "next": "^16.3.3",
+        "react": "^19.2.0",
+        "react-dom": "^19.2.0",
+        "tailwindcss": "~4.3.3",
+        "tsdown": "catalog:",
+        "typescript": "catalog:",
+        "vitest": "catalog:"
+    }
+}

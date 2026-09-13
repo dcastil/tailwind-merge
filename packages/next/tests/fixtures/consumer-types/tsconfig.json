@@ -1,0 +1,17 @@
+{
+    // A consumer project's tsconfig, deliberately free of anything plugin-related: the zero-configuration claim is that the plugin entry and the runtime subpath type-check through ordinary package resolution. The exceptions are the paths mappings, which substitute the workspace's sources for the unbuilt dist directories — a real install resolves the published types instead (which the packed-package gate verifies).
+    "compilerOptions": {
+        "strict": true,
+        "module": "ESNext",
+        "moduleResolution": "Bundler",
+        "target": "ESNext",
+        "noEmit": true,
+        "skipLibCheck": true,
+        "paths": {
+            "@tailwind-merge/next": ["../../../src/index.ts"],
+            "@tailwind-merge/next/runtime": ["../../../src/runtime.ts"],
+            "tailwind-merge": ["../../../../tailwind-merge/src/index.ts"]
+        }
+    },
+    "include": ["main.ts"]
+}

@@ -7,18 +7,25 @@ import {
     cssStatements,
 } from '@tailwind-merge/configurator'
 
+export interface DiscoveryOptions {
+    /** The plugin's stylesheet resolution (aliases and the like), when its bundler has one. Omitted for ordinary filesystem and package resolution. */
+    resolveCss?: TailwindIntegration['resolveCss']
+    /** The plugin's package name, prefixed to the ambiguity error so users see which plugin is asking for the `css` option. */
+    packageName?: string
+}
+
 /**
- * Finds the project's Tailwind CSS entrypoint by scanning the Vite root for CSS files with Tailwind root markers.
+ * Finds the project's Tailwind CSS entrypoint by scanning `root` for CSS files with Tailwind root markers.
  *
- * The scan is eager and filesystem-based on purpose: `@tailwindcss/vite` discovers roots lazily from the module graph, but the virtual runtime module can be requested before any CSS has flowed through the pipeline, so this plugin must know the root up front.
+ * The scan is eager and filesystem-based on purpose: bundler integrations of Tailwind discover roots lazily from the module graph, but a plugin's runtime module can be requested before any CSS has flowed through the pipeline, so the plugin must know the root up front.
  *
- * When several files carry markers, files transitively `@import`ed by another candidate are dropped — a root is the top of its own import graph (a multi-file theme's token and utility layers all contain `@theme`/`@utility` markers of their own). Follow import-only intermediates, including explicit paths outside the scan root, and visit each file once to bound shared dependencies and cycles. More than one root after that is a hard error asking for the `css` option; none found returns null and the caller falls back to default tailwind-merge behavior.
+ * When several files carry markers, files transitively `@import`ed by another candidate are dropped — a root is the top of its own import graph (a multi-file theme's token and utility layers all contain `@theme`/`@utility` markers of their own). Follow import-only intermediates, including explicit paths outside the scan root, and visit each file once to bound shared dependencies and cycles. More than one root after that is a hard error asking for the plugin's `css` option; none found returns null and the caller falls back to default tailwind-merge behavior.
  */
 export async function discoverCssRoot(
     root: string,
-    resolveCss?: TailwindIntegration['resolveCss'],
+    { resolveCss, packageName }: DiscoveryOptions = {},
 ): Promise<string | null> {
-    // Graph identities use real paths: a symlinked Vite root and resolved imports can spell the same file differently. Keep scanned paths for import resolution, the selected entrypoint, and root-relative diagnostics.
+    // Graph identities use real paths: a symlinked project root and resolved imports can spell the same file differently. Keep scanned paths for import resolution, the selected entrypoint, and root-relative diagnostics.
     const candidates = new Map<string, string>()
     const statementsByFile = new Map<string, string[] | null>()
 
@@ -80,8 +87,9 @@ export async function discoverCssRoot(
     const listed = (roots.length > 1 ? roots : [...candidates.values()])
         .map((file) => `  - ${path.relative(root, file)}`)
         .join('\n')
+    const prefix = packageName ? `[${packageName}] ` : ''
     throw new Error(
-        `[@tailwind-merge/vite] Found multiple Tailwind CSS roots and cannot decide which one configures tailwind-merge:\n${listed}\nSet the plugin's \`css\` option to the entrypoint that defines your theme.`,
+        `${prefix}Found multiple Tailwind CSS roots and cannot decide which one configures tailwind-merge:\n${listed}\nSet the plugin's \`css\` option to the entrypoint that defines your theme.`,
     )
 }
 
@@ -98,11 +106,18 @@ async function readStatements(file: string): Promise<string[] | null> {
 }
 
 /** Directories that never contain the project's own Tailwind entrypoint. Dot-directories (.git, .next, .svelte-kit, …) are skipped wholesale in the walk. */
-const IGNORED_DIRECTORY_NAMES = new Set(['node_modules', 'dist', 'build', 'out', 'coverage', 'public'])
+const IGNORED_DIRECTORY_NAMES = new Set([
+    'node_modules',
+    'dist',
+    'build',
+    'out',
+    'coverage',
+    'public',
+])
 
 const CSS_EXTENSIONS = new Set(['.css', '.pcss', '.postcss'])
 
-/** Limit the eager scan to plain-CSS filenames supported by Vite. Following explicit imports is separate and does not impose an extension requirement. Symlinks are followed (a shared theme package linked into the app is a common layout), with directories visited once by real path so linked cycles terminate. */
+/** Limit the eager scan to plain-CSS filenames. Following explicit imports is separate and does not impose an extension requirement. Symlinks are followed (a shared theme package linked into the app is a common layout), with directories visited once by real path so linked cycles terminate. */
 async function collectCssFiles(
     directory: string,
     visited: Set<string> = new Set(),

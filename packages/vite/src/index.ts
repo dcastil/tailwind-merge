@@ -2,18 +2,18 @@ import { existsSync } from 'node:fs'
 import path from 'node:path'
 
 import type { UsageScan } from '@tailwind-merge/configurator'
+import {
+    type GeneratedRuntimeModule,
+    createGenerationSession,
+    discoverCssRoot,
+    fallbackModuleCode,
+    hashClasses,
+} from '@tailwind-merge/plugin-core'
 import type { Plugin, ResolvedConfig, ViteDevServer } from 'vite'
 
-import { discoverCssRoot } from './discovery'
-import { createGenerationSession } from './generation-session'
 import { autoDetectBases, resolvePruneOptions } from './prune-options'
 import { createTailwindIntegration } from './resolution'
 import { type UpdateTrigger, createUpdateScheduler } from './updates'
-import {
-    FALLBACK_MODULE_CODE,
-    GeneratedRuntimeModule,
-    hashClasses,
-} from './generation'
 
 export interface TailwindMergeOptions {
     /** Path to the project's Tailwind CSS entrypoint, relative to the Vite root. When omitted, the entrypoint is auto-detected within the root. Set this to disambiguate themes or select an entrypoint outside the discovery scan. */
@@ -84,10 +84,13 @@ export default function tailwindMerge(
         if (options.css !== undefined) {
             return path.resolve(config.root, options.css)
         }
-        const discovered = await discoverCssRoot(config.root, integration.resolveCss)
+        const discovered = await discoverCssRoot(config.root, {
+            resolveCss: integration.resolveCss,
+            packageName: PACKAGE_NAME,
+        })
         if (discovered === null) {
             config.logger.warn(
-                '[@tailwind-merge/vite] No Tailwind CSS root found — serving default tailwind-merge behavior. Set the `css` option to your Tailwind entrypoint if it uses another extension or is outside the scanned directories.',
+                `[${PACKAGE_NAME}] No Tailwind CSS root found — serving default tailwind-merge behavior. Set the \`css\` option to your Tailwind entrypoint if it uses another extension or is outside the scanned directories.`,
             )
         }
         return discovered
@@ -263,6 +266,8 @@ export default function tailwindMerge(
             session = createGenerationSession({
                 cssRoot,
                 root: config.root,
+                packageName: PACKAGE_NAME,
+                importSource: INTERNAL_TAILWIND_MERGE,
                 cacheSize: options.cacheSize,
                 encoding: options.encoding,
                 integration: { ...integration, onDependency: watchDependency },
@@ -349,7 +354,7 @@ export default function tailwindMerge(
             }
             const generated = await session.generation
             if (!generated) {
-                return FALLBACK_MODULE_CODE
+                return fallbackModuleCode(INTERNAL_TAILWIND_MERGE)
             }
             return generated.code
         },
@@ -380,7 +385,14 @@ export default function tailwindMerge(
     }
 }
 
+const PACKAGE_NAME = '@tailwind-merge/vite'
+
 const RUNTIME_SPECIFIER = '@tailwind-merge/vite/runtime'
 
 /** The \0 prefix marks the module as virtual for other plugins. The served code is already plain JavaScript (the configurator emits `format: 'js'`), so no extension is needed to route it through further transforms. */
 const VIRTUAL_MODULE_ID = '\0@tailwind-merge/vite/runtime'
+
+/**
+ * Where the virtual module imports tailwind-merge's API from: this package's own re-export (src/tailwind-merge.ts). A virtual module has no filesystem location, so a bare 'tailwind-merge' would resolve from the project root and fail under strict package managers — the plugin package itself is the one specifier guaranteed resolvable from anywhere in the user's project, being their direct dependency.
+ */
+const INTERNAL_TAILWIND_MERGE = '@tailwind-merge/vite/tailwind-merge'
