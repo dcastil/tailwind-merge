@@ -36,7 +36,7 @@ The plugin entry also exports the types `TailwindMergeOptions`, `PruneOptions`, 
 import { twMerge } from '@tailwind-merge/next/runtime'
 ```
 
-The stable import surface. While Next.js compiles your app, it serves the module generated from your theme; outside the Next.js compiler it falls back to tailwind-merge's default behavior with the same exports. Import it from [one file you control](./getting-started.md#set-up) rather than in every component, so that composing or replacing `twMerge` later stays a one-file change. The surface mirrors tailwind-merge's public API with your project's configuration swapped in:
+The stable import surface. While Next.js compiles your app, it serves the module generated from your theme; outside the Next.js compiler it falls back to tailwind-merge's default behavior with the same exports. I [recommend importing it through one file you control](./getting-started.md#set-up) rather than in every component, so that composing or replacing `twMerge` later stays a one-file change. The surface mirrors tailwind-merge's public API with your project's configuration swapped in:
 
 ### `twMerge`
 

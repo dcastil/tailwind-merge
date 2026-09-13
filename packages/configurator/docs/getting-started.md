@@ -28,7 +28,7 @@ There is no published CLI binary yet. The command runs the TypeScript entrypoint
 
 The generated module imports `createTailwindMerge` and `validators` from `tailwind-merge`. Make that dependency resolve to the matching library build in the consuming app. Tailwind and the configurator are build-time dependencies; neither is needed to execute the generated module.
 
-Re-export the generated function from a file you control and import it from there everywhere else in your app:
+Re-export the generated function from a file you control, together with anything else you use such as `twJoin` from `tailwind-merge`, and import it from there everywhere else in your app:
 
 ```ts
 // tw-merge.ts

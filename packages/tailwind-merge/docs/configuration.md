@@ -30,6 +30,8 @@ export { twMerge } from 'tailwind-merge'
 import { twMerge } from './tw-merge'
 ```
 
+Re-export whatever else you use from the package the same way, such as `twJoin`.
+
 The reason is that the default `twMerge` only knows the default Tailwind theme. Once you customize your theme, you'll likely need to [configure tailwind-merge](#usage-with-custom-tailwind-config) as well, which means replacing `twMerge` with a configured function. If every component imports `twMerge` from `tailwind-merge` directly, that is a change in every one of those files. With your own file in between, it's a change in one place:
 
 ```ts

@@ -56,7 +56,26 @@ export function Button({ className, ...props }) {
 }
 ```
 
-Importing the runtime subpath directly in every component works too, but a single file you control keeps later changes local to that file: wrapping `twMerge` in another function, [extending the generated configuration](./api-reference.md#extendtailwindmerge), or adopting a future change to the plugin's API such as the runtime import. If you already have a `cn` helper (every shadcn/ui project does), that file serves the same purpose.
+Re-export whatever else you use from the runtime the same way, such as `twJoin` or the `ClassNameValue` type.
+
+Importing the runtime subpath directly in every component works too, but a single file you control keeps later changes local to that file: wrapping `twMerge` in another function, [extending the generated configuration](./api-reference.md#extendtailwindmerge), or adopting a future change to the plugin's API such as the runtime import. For example, once you need class groups that don't come from your CSS, the file becomes this and nothing else in your app changes:
+
+```ts
+// tw-merge.ts
+import { extendTailwindMerge } from '@tailwind-merge/next/runtime'
+
+export { twJoin } from '@tailwind-merge/next/runtime'
+
+export const twMerge = extendTailwindMerge<'text-style'>({
+    extend: {
+        classGroups: {
+            'text-style': ['text-style-heading', 'text-style-body'],
+        },
+    },
+})
+```
+
+If you already have a `cn` helper (every shadcn/ui project does), that file serves the same purpose.
 
 That's it. The plugin finds your Tailwind CSS entrypoint on its own (typically `app/globals.css`) — only projects with several independent Tailwind roots need to point it at the right one via the [`css` option](./api-reference.md#options).
 
