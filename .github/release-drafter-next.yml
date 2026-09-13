@@ -1,15 +1,15 @@
-# Drafts releases for the @tailwind-merge/vite package, including the plugin core and configurator sources bundled into it. Releases are per package with namespaced tags; tag-prefix scopes previous-release lookup and version resolution to this package's tags. No autolabeler section here — PR labels are repo-wide and applied once via the tailwind-merge config.
-name-template: '@tailwind-merge/vite@$RESOLVED_VERSION'
-tag-template: '@tailwind-merge/vite@$RESOLVED_VERSION'
-tag-prefix: '@tailwind-merge/vite@'
+# Drafts releases for the @tailwind-merge/next package, including the plugin core and configurator sources bundled into it. Releases are per package with namespaced tags; tag-prefix scopes previous-release lookup and version resolution to this package's tags. No autolabeler section here — PR labels are repo-wide and applied once via the tailwind-merge config.
+name-template: '@tailwind-merge/next@$RESOLVED_VERSION'
+tag-template: '@tailwind-merge/next@$RESOLVED_VERSION'
+tag-prefix: '@tailwind-merge/next@'
 include-paths:
-    - packages/vite
+    - packages/next
     - packages/plugin-core
     - packages/configurator
 template: |
     $CHANGES
 
-    **Full Changelog**: https://github.com/dcastil/tailwind-merge/compare/$PREVIOUS_TAG...@tailwind-merge/vite@$RESOLVED_VERSION
+    **Full Changelog**: https://github.com/dcastil/tailwind-merge/compare/$PREVIOUS_TAG...@tailwind-merge/next@$RESOLVED_VERSION
 category-template: '### $TITLE'
 change-template: '- $TITLE by @$AUTHOR in https://github.com/dcastil/tailwind-merge/pull/$NUMBER'
 change-title-escapes: '\<*_&'

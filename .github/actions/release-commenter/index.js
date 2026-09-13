@@ -631,7 +631,9 @@ function releasePackagePaths(packageName) {
         case 'tailwind-merge':
             return ['packages/tailwind-merge/', 'src/', 'docs/', 'tests/']
         case '@tailwind-merge/vite':
-            return ['packages/vite/', 'packages/configurator/']
+            return ['packages/vite/', 'packages/plugin-core/', 'packages/configurator/']
+        case '@tailwind-merge/next':
+            return ['packages/next/', 'packages/plugin-core/', 'packages/configurator/']
         default:
             throw new Error(`No release notification paths configured for package ${packageName}`)
     }

@@ -14,7 +14,12 @@ afterEach(() => {
 
 test.each([
     ['tailwind-merge', [101, 104, 1001, 1004, 2001, 2004, 3001, 3004, 3006, 3007]],
-    ['@tailwind-merge/vite', [102, 103, 104, 1002, 1003, 1004, 2002, 2003, 2004, 3002, 3003, 3004]],
+    // The plugin core is bundled into both plugins, the configurator too: their changes belong to both plugin releases and to neither library release.
+    [
+        '@tailwind-merge/vite',
+        [102, 103, 104, 1002, 1003, 1004, 2002, 2003, 2004, 3002, 3003, 3004, 3010],
+    ],
+    ['@tailwind-merge/next', [103, 1003, 2003, 3003, 3009, 3010]],
 ])('scopes dry-run targets and their linked issues to %s', async (packageName, expected) => {
     const paths = {
         1: 'packages/tailwind-merge/src/index.ts',
@@ -25,6 +30,8 @@ test.each([
         6: 'src/lib/default-config.ts',
         7: 'archive/removed.ts',
         8: '.github/workflows/test.yml',
+        9: 'packages/next/src/index.ts',
+        10: 'packages/plugin-core/src/index.ts',
     }
     const records = Object.entries(paths).map(([number, filename]) => ({
         sha: number,

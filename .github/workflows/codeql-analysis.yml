@@ -36,6 +36,7 @@ jobs:
             - run: pnpm install --frozen-lockfile
             - run: pnpm --filter tailwind-merge build
             - run: pnpm --filter @tailwind-merge/vite build
+            - run: pnpm --filter @tailwind-merge/next build
             - name: Perform CodeQL Analysis
               uses: github/codeql-action/analyze@v4
 
