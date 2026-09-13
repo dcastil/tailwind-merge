@@ -106,7 +106,7 @@ function MyComponent({ forceHover, disabled, isMuted, className }) {
 
 You don't need to worry about potentially expensive re-renders here because tailwind-merge [caches results](./features.md#results-are-cached) so that a re-render with the same props and state becomes computationally lightweight as far as the call to `twMerge` goes.
 
-If you use a custom Tailwind CSS config, don't forget to [configure tailwind-merge](./configuration.md#usage-with-custom-tailwind-config) as well.
+If you use a custom Tailwind CSS config, don't forget to [configure tailwind-merge](./configuration.md#usage-with-custom-tailwind-config) as well. Either way, I recommend [importing `twMerge` from one file you control](./configuration.md#import-twmerge-from-one-place) rather than from the package directly, so that configuring it later stays a change in a single file.
 
 ## Alternatives
 

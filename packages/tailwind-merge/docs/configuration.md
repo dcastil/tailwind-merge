@@ -14,7 +14,36 @@ deno add tailwind-merge
 
 ## Basic usage
 
-If you're using Tailwind CSS without any extra config, you can use [`twMerge`](./api-reference.md#twmerge) right away. You can safely stop reading the documentation here.
+If you're using Tailwind CSS without any extra config, you can use [`twMerge`](./api-reference.md#twmerge) right away.
+
+### Import `twMerge` from one place
+
+Even if you don't need to configure anything, I recommend setting `twMerge` up in a file you control and importing it from that file everywhere in your project instead of importing it from the package directly.
+
+```ts
+// tw-merge.ts
+export { twMerge } from 'tailwind-merge'
+```
+
+```ts
+// Everywhere else in your project
+import { twMerge } from './tw-merge'
+```
+
+The reason is that the default `twMerge` only knows the default Tailwind theme. Once you customize your theme, you'll likely need to [configure tailwind-merge](#usage-with-custom-tailwind-config) as well, which means replacing `twMerge` with a configured function. If every component imports `twMerge` from `tailwind-merge` directly, that is a change in every one of those files. With your own file in between, it's a change in one place:
+
+```ts
+// tw-merge.ts
+import { extendTailwindMerge } from 'tailwind-merge'
+
+export const twMerge = extendTailwindMerge({
+    // Your configuration
+})
+```
+
+The same file is the natural place for anything else you might want to do with `twMerge` later, like [wrapping it in another function](./recipes.md#modifying-inputs-and-output-of-twmerge), adding a [plugin](#using-tailwind-merge-plugins), or swapping in a merge function generated from your CSS. If you already have a `cn` helper (as in every shadcn/ui project), that file serves the same purpose.
+
+You can safely stop reading the documentation here.
 
 ## Usage with custom Tailwind config
 

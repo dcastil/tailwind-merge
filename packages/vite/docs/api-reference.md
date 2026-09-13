@@ -42,7 +42,7 @@ const unsubscribe = plugin.api.onUpdate((update) => {
 import { twMerge } from '@tailwind-merge/vite/runtime'
 ```
 
-The stable import surface. While Vite runs, it serves the module generated from your theme; outside Vite it falls back to tailwind-merge's default behavior with the same exports. The surface mirrors tailwind-merge's public API with your project's configuration swapped in:
+The stable import surface. While Vite runs, it serves the module generated from your theme; outside Vite it falls back to tailwind-merge's default behavior with the same exports. Import it from [one file you control](./getting-started.md#set-up) rather than in every component, so that composing or replacing `twMerge` later stays a one-file change. The surface mirrors tailwind-merge's public API with your project's configuration swapped in:
 
 ### `twMerge`
 

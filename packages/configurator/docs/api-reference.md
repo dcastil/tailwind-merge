@@ -48,10 +48,11 @@ Generation rejects on errors; it does not log warnings or write files. Callers d
 ### Compose the generated configuration
 
 ```ts
+// tw-merge.ts
 import { createTailwindMerge, mergeConfigs } from 'tailwind-merge'
 import { getConfig } from './tw-merge.generated'
 
-const twMerge = createTailwindMerge(() =>
+export const twMerge = createTailwindMerge(() =>
     mergeConfigs(getConfig(), {
         extend: {
             classGroups: { 'text-style': ['text-style-heading', 'text-style-body'] },

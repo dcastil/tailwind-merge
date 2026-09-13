@@ -78,13 +78,16 @@ function ButtonPrimary(props) {
 You can wrap `twMerge` in another function which can modify the inputs and/or output.
 
 ```js
+// tw-merge.ts
 import { twMerge as twMergeOriginal } from 'tailwind-merge'
 
-function twMerge(...inputs) {
+export function twMerge(...inputs) {
     const modifiedInputs = modifyInputs(inputs)
     return twMergeOriginal(modifiedInputs)
 }
 ```
+
+If you keep the wrapper in the [file you import `twMerge` from everywhere](./configuration.md#import-twmerge-from-one-place), the rest of your code doesn't need to change.
 
 ---
 

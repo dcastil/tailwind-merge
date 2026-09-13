@@ -86,6 +86,8 @@ Self-improvement is required while working in this repo: whenever you discover u
 
 Avoid repeating the same guidance in both `AGENTS.md` and specialized `agents/*` docs unless the rule is critically important. Prefer keeping `AGENTS.md` as the high-level entry point and putting detailed workflow, architecture, release, or CI notes in the relevant specialized agent document.
 
+Cross-package user-docs convention: every package's docs recommend setting `twMerge` up in one project-owned file (shown as `tw-merge.ts`) and importing it from there, even without configuration, so that configuring, wrapping, or replacing `twMerge` later is a one-file change. The canonical explanation lives in the library's `docs/configuration.md` ("Import `twMerge` from one place"); the plugin and configurator getting-started pages carry their own short version. Keep new setup instructions and usage examples consistent with it.
+
 It is acceptable to periodically restructure agent documentation when files become too large, when topics are hard to find, or when the current organization no longer matches how the repo is maintained. Split files, rename sections, or move information between `AGENTS.md` and `agents/*` as needed, while preserving useful guidance and removing stale duplication.
 
 Required when relevant:

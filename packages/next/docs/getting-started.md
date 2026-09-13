@@ -41,15 +41,22 @@ export default withTailwindMerge(nextConfig)
 
 `withTailwindMerge` accepts an object or the [function form](https://nextjs.org/docs/app/api-reference/config/next-config-js#configuration-as-a-function) of the config, and composes with other wrappers — put it outermost if another wrapper cannot handle a function config, or wrap the object form directly.
 
-Then import `twMerge` from the runtime subpath anywhere in your app — in server components, client components, route handlers, or your `cn` helper:
+Then set `twMerge` up in one file of your project and import it from there everywhere else — in server components, client components, and route handlers alike:
 
 ```ts
-import { twMerge } from '@tailwind-merge/next/runtime'
+// tw-merge.ts
+export { twMerge } from '@tailwind-merge/next/runtime'
+```
+
+```ts
+import { twMerge } from './tw-merge'
 
 export function Button({ className, ...props }) {
     return <button className={twMerge('rounded bg-blue-600 px-3 py-1', className)} {...props} />
 }
 ```
+
+Importing the runtime subpath directly in every component works too, but a single file you control keeps later changes local to that file: wrapping `twMerge` in another function, [extending the generated configuration](./api-reference.md#extendtailwindmerge), or adopting a future change to the plugin's API such as the runtime import. If you already have a `cn` helper (every shadcn/ui project does), that file serves the same purpose.
 
 That's it. The plugin finds your Tailwind CSS entrypoint on its own (typically `app/globals.css`) — only projects with several independent Tailwind roots need to point it at the right one via the [`css` option](./api-reference.md#options).
 
@@ -57,7 +64,7 @@ That's it. The plugin finds your Tailwind CSS entrypoint on its own (typically `
 
 If your project already uses tailwind-merge directly (every shadcn/ui template does), migration is two steps:
 
-1. Rewire application imports to the runtime subpath, typically in one place as shown below.
+1. Rewire application imports to the runtime subpath, typically in one place as shown below. If your components still import `tailwind-merge` directly, this is the moment to route them through [one file](#set-up) instead.
 2. Once all direct uses are migrated, remove the application's `tailwind-merge` dependency. Keeping imports from both modules can retain the default config alongside the generated one. For pre-release local evaluation, keep any dependency override that supplies the matching library build.
 
 ```diff

@@ -28,13 +28,20 @@ There is no published CLI binary yet. The command runs the TypeScript entrypoint
 
 The generated module imports `createTailwindMerge` and `validators` from `tailwind-merge`. Make that dependency resolve to the matching library build in the consuming app. Tailwind and the configurator are build-time dependencies; neither is needed to execute the generated module.
 
-Import the generated function in your app:
+Re-export the generated function from a file you control and import it from there everywhere else in your app:
 
 ```ts
-import { twMerge } from '../tw-merge.generated'
+// tw-merge.ts
+export { twMerge } from './tw-merge.generated'
+```
+
+```ts
+import { twMerge } from './tw-merge'
 
 twMerge('text-huge text-sm') // 'text-sm' when your theme defines --text-huge
 ```
+
+The generated module is a build artifact: its location, output format, and the way you produce it can change as your build evolves, and your own file is also where you [compose the generated configuration](./api-reference.md#compose-the-generated-configuration) with extensions. Keeping application imports on that file turns each of those into a change in one place.
 
 Keep generated files outside Tailwind's scanned sources, or exclude them explicitly. The file contains class-name literals which otherwise count as source usage. For example, if `app.css` and the generated module share a directory:
 
