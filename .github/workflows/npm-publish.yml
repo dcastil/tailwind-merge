@@ -24,9 +24,9 @@ jobs:
                   package-manager-cache: false
             - run: corepack enable
             - run: pnpm install --frozen-lockfile
-            # Both dev packages build here; pnpm's topological order builds the library before the vite package, whose test:exports verifies its packed tarball against the library's built shape. The plugin core and the configurator are inlined into the plugin bundles and have no dev release of their own. The Next.js package joins these jobs once its npm trusted publisher exists (its first publish is manual, see agents/release-workflow.md); until then a publish step for it would fail on every push.
-            - run: pnpm --filter tailwind-merge --filter @tailwind-merge/vite build
-            - run: pnpm --filter tailwind-merge --filter @tailwind-merge/vite test:exports
+            # All three dev packages build here; pnpm's topological order builds the library before the plugins, whose test:exports gates verify their packed tarballs against the library's built shape. The plugin core and the configurator are inlined into the plugin bundles and have no dev release of their own. A new package joins these jobs only after its npm trusted publisher exists (see agents/release-workflow.md).
+            - run: pnpm --filter tailwind-merge --filter @tailwind-merge/vite --filter @tailwind-merge/next build
+            - run: pnpm --filter tailwind-merge --filter @tailwind-merge/vite --filter @tailwind-merge/next test:exports
             - uses: actions/upload-artifact@v7
               with:
                   name: build-output-tailwind-merge
@@ -36,6 +36,11 @@ jobs:
               with:
                   name: build-output-vite
                   path: packages/vite/dist
+                  if-no-files-found: error
+            - uses: actions/upload-artifact@v7
+              with:
+                  name: build-output-next
+                  path: packages/next/dist
                   if-no-files-found: error
 
     publish-dev:
@@ -57,8 +62,8 @@ jobs:
                   # No registry-url on purpose: it would write an .npmrc auth line referencing the unset NODE_AUTH_TOKEN, which pnpm's config loader rejects. pnpm publishes to its default registry through npm trusted publishing (OIDC), needing no token plumbing.
                   package-manager-cache: false
             - run: corepack enable
-            # The vite package's devDependencies keep `workspace:` specifiers (the inlined plugin core and configurator), which pnpm rewrites at publish time by reading the linked manifests from node_modules — the same scripts-disabled, package-filtered install the release job uses, so no dependency code runs in the job holding the OIDC token. tailwind-merge needs no install: its specifiers are all `catalog:` and resolve from pnpm-workspace.yaml.
-            - run: pnpm install --frozen-lockfile --ignore-scripts --filter @tailwind-merge/vite
+            # The plugins' devDependencies keep `workspace:` specifiers (the inlined plugin core and configurator), which pnpm rewrites at publish time by reading the linked manifests from node_modules — the same scripts-disabled, package-filtered install the release job uses, so no dependency code runs in the job holding the OIDC token. tailwind-merge needs no install: its specifiers are all `catalog:` and resolve from pnpm-workspace.yaml.
+            - run: pnpm install --frozen-lockfile --ignore-scripts --filter @tailwind-merge/vite --filter @tailwind-merge/next
             - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
               with:
                   name: build-output-tailwind-merge
@@ -69,16 +74,24 @@ jobs:
                   name: build-output-vite
                   path: packages/vite/dist
                   digest-mismatch: error
-            # Stamps `<version>-dev.<sha>` on both manifests and pins the vite package's tailwind-merge dependency to the library's same-commit dev version (see the script header for why the pin is exact). Both stamps run before either publish so the manifests agree before anything leaves the runner.
+            - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+              with:
+                  name: build-output-next
+                  path: packages/next/dist
+                  digest-mismatch: error
+            # Stamps `<version>-dev.<sha>` on all three manifests and pins the plugins' tailwind-merge dependency to the library's same-commit dev version (see the script header for why the pin is exact). All stamps run before any publish so the manifests agree before anything leaves the runner.
             - name: Stamp dev versions
               run: |
                   (cd packages/tailwind-merge && node ../../scripts/stamp-dev-version.mjs)
                   (cd packages/vite && node ../../scripts/stamp-dev-version.mjs)
-            # pnpm instead of npm so publishing matches the release flow: publishConfig field overrides are applied at pack time and trusted publishing runs through pnpm's native OIDC flow. --provenance must be explicit (pnpm does not read publishConfig.provenance); --no-git-checks because the version stamp above dirties the tree and the checkout is a detached HEAD. The library publishes first because the vite dev build depends on exactly this version.
+                  (cd packages/next && node ../../scripts/stamp-dev-version.mjs)
+            # pnpm instead of npm so publishing matches the release flow: publishConfig field overrides are applied at pack time and trusted publishing runs through pnpm's native OIDC flow. --provenance must be explicit (pnpm does not read publishConfig.provenance); --no-git-checks because the version stamp above dirties the tree and the checkout is a detached HEAD. The library publishes first because the plugins' dev builds depend on exactly this version.
             - run: pnpm publish --access public --tag dev --provenance --ignore-scripts --no-git-checks
               working-directory: packages/tailwind-merge
             - run: pnpm publish --access public --tag dev --provenance --ignore-scripts --no-git-checks
               working-directory: packages/vite
+            - run: pnpm publish --access public --tag dev --provenance --ignore-scripts --no-git-checks
+              working-directory: packages/next
 
     build-prod:
         if: github.event_name == 'release' && github.event.action == 'published'
