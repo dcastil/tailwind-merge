@@ -27,7 +27,7 @@ twMerge('text-huge text-sm')
 - Small in production: the config is pruned to the classes found in your sources — the same files Tailwind scans — with substantial savings in the [measured project samples](../../agents/configurator-performance.md)
 - Declares support for Next.js 16 with Turbopack or webpack and the Tailwind CSS v4.3 line; see [coverage limits](./docs/limitations.md)
 
-> **Status: pre-release, pre-1.0.** There is no stable release yet. Dev builds of every commit on `main` are published to npm under the `dev` tag for evaluation — see [Getting started](./docs/getting-started.md#availability-and-installation). Treat the plugin as not production-ready until 1.0.0 — see [Versioning](./docs/versioning.md).
+> **Status: pre-release, pre-1.0.** There is no stable release yet. Dev builds are published to npm under the `dev` tag for evaluation, manually for now — see [Getting started](./docs/getting-started.md#availability-and-installation). Treat the plugin as not production-ready until 1.0.0 — see [Versioning](./docs/versioning.md).
 
 ## Get started
 

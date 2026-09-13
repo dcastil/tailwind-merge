@@ -60,4 +60,4 @@ Run `pnpm --filter @tailwind-merge/next test` and `test:types` for plugin change
 
 ## Release boundaries
 
-The versioned surface is `withTailwindMerge`'s options and the `@tailwind-merge/next/runtime` exports; the loader module, the rule conditions, and the generated representation are internal. The first stable release is `0.1.0`; until then every `main` push publishes a dev build once the trusted publisher exists — the bootstrap publish and the sequencing against the library and the Vite plugin are in the [release guide](./release-workflow.md#first-nextjs-release).
+The versioned surface is `withTailwindMerge`'s options and the `@tailwind-merge/next/runtime` exports; the loader module, the rule conditions, and the generated representation are internal. The first stable release is `0.1.0`. Dev builds start with a manual first publish, which is also what creates the npm trusted publisher; only then does the package join the publish workflow's dev jobs — the bootstrap, the wiring to add afterwards, and the sequencing against the library and the Vite plugin are in the [release guide](./release-workflow.md#first-nextjs-release).

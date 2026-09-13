@@ -9,7 +9,7 @@
 
 ## Availability and installation
 
-There is no stable release yet. Every commit on `main` is published to npm as a dev build under the `dev` tag, with a version like `0.0.0-dev.<commit sha>`: the first part is the last stable release the build corresponds to (`0.0.0` until the first one), the hash is the git commit. Dev builds are meant for evaluation, not production. Pin the exact version you tested rather than the tag, because the next commit replaces what `dev` points to.
+There is no stable release yet. Dev builds are published to npm under the `dev` tag, with a version like `0.0.0-dev.<commit sha>`: the first part is the last stable release the build corresponds to (`0.0.0` until the first one), the hash is the git commit. They are published manually for now, so not every commit on `main` has one; automatic dev builds of every commit follow once the package's npm publishing is set up, as for the Vite plugin. Dev builds are meant for evaluation, not production. Pin the exact version you tested rather than the tag, because a newer build replaces what `dev` points to.
 
 ```bash
 pnpm add -D @tailwind-merge/next@dev

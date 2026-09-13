@@ -1,6 +1,6 @@
 # Versioning
 
-The package has no stable release yet; the first one will be `0.1.0`. Until then, and afterwards for every commit on `main`, dev builds are published under the `dev` dist-tag with versions like `0.0.0-dev.<commit sha>`: the first part is the last stable release the build corresponds to, the hash is the git commit. Dev builds can change or break on any commit and are for evaluation only. The following policy describes the stable release series.
+The package has no stable release yet; the first one will be `0.1.0`. Until then, dev builds are published under the `dev` dist-tag with versions like `0.0.0-dev.<commit sha>`: the first part is the last stable release the build corresponds to, the hash is the git commit. They are published manually for now; once automatic publishing is set up, every commit on `main` gets one, as for the Vite plugin. Dev builds can change or break on any commit and are for evaluation only. The following policy describes the stable release series.
 
 The plugin bundles the shared plugin core and the configurator, so fixes in either are included in plugin releases and their changelogs.
 
