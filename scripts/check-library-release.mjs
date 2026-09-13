@@ -1,6 +1,6 @@
-// Release gate for the plugin's tailwind-merge dependency. The packed-tarball gate (test-packed-package.mjs) links the workspace library, so it cannot tell whether the tailwind-merge release a consumer will actually install ships the internals the bundled configurator imports from `tailwind-merge/unstable-do-not-import`: the workspace source can carry unreleased APIs while the manifest still names an older version, and `workspace:^` then packs to a caret range starting at that version. Dev builds sidestep the problem by pinning the same-commit dev library (stamp-dev-version.mjs); a stable release cannot, so this script resolves the range's lowest version, downloads that release from the registry, and checks every imported value and type against it.
+// Release gate for a plugin's tailwind-merge dependency, shared by the Vite and Next.js packages. Each plugin's packed-tarball gate (its scripts/test-packed-package.mjs) links the workspace library, so it cannot tell whether the tailwind-merge release a consumer will actually install ships the internals the bundled plugin core and configurator import from `tailwind-merge/unstable-do-not-import`: the workspace source can carry unreleased APIs while the manifest still names an older version, and `workspace:^` then packs to a caret range starting at that version. Dev builds sidestep the problem by pinning the same-commit dev library (stamp-dev-version.mjs); a stable release cannot, so this script resolves the range's lowest version, downloads that release from the registry, and checks every imported value and type against it.
 //
-// Runs in the release build job for plugin releases (`pnpm --filter @tailwind-merge/vite test:library-release`) and needs network access. `--library-version <version>` checks a specific release instead of the manifest-derived minimum, e.g. to confirm an older release really lacks something.
+// Runs from the package directory (cwd = the package, like the other release scripts) in the release build job for plugin releases (`pnpm --filter <package> test:library-release`) and needs network access. `--sources <dir> …` names the source trees whose unstable imports must be covered — the package's own plus the workspace packages inlined into its bundle, relative to the package directory. `--library-version <version>` checks a specific release instead of the manifest-derived minimum, e.g. to confirm an older release really lacks something.
 
 import { execFileSync } from 'node:child_process'
 import fs from 'node:fs'
@@ -8,10 +8,9 @@ import os from 'node:os'
 import path from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 
-const packageDirectory = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
-const repoRoot = path.resolve(packageDirectory, '..', '..')
+const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
+const packageDirectory = process.cwd()
 const libraryDirectory = path.join(repoRoot, 'packages', 'tailwind-merge')
-const configuratorDirectory = path.join(repoRoot, 'packages', 'configurator')
 
 const LIBRARY_NAME = 'tailwind-merge'
 const UNSTABLE_SUBPATH = './unstable-do-not-import'
@@ -19,10 +18,7 @@ const UNSTABLE_SPECIFIER = `${LIBRARY_NAME}/unstable-do-not-import`
 const REGISTRY_URL = 'https://registry.npmjs.org'
 
 const libraryVersion = readLibraryVersionArgument() ?? resolveMinimumLibraryVersion()
-const requiredImports = collectUnstableImports([
-    path.join(configuratorDirectory, 'src'),
-    path.join(packageDirectory, 'src'),
-])
+const requiredImports = collectUnstableImports(readSourceDirectoryArguments())
 
 log(
     `Checking ${LIBRARY_NAME}@${libraryVersion} for ${requiredImports.values.size} value import(s) and ${requiredImports.types.size} type import(s) from ${UNSTABLE_SPECIFIER}`,
@@ -48,6 +44,20 @@ if (missing.length > 0) {
 log(
     `${LIBRARY_NAME}@${libraryVersion} ships everything the plugin imports from ${UNSTABLE_SPECIFIER}`,
 )
+
+/** The source trees to scan, as given after `--sources` up to the next flag, resolved against the package directory. */
+function readSourceDirectoryArguments() {
+    const index = process.argv.indexOf('--sources')
+    if (index === -1) fail('--sources needs at least one directory argument')
+
+    const directories = []
+    for (const argument of process.argv.slice(index + 1)) {
+        if (argument.startsWith('--')) break
+        directories.push(path.resolve(packageDirectory, argument))
+    }
+    if (directories.length === 0) fail('--sources needs at least one directory argument')
+    return directories
+}
 
 function readLibraryVersionArgument() {
     const index = process.argv.indexOf('--library-version')
