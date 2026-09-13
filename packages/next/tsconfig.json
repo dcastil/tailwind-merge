@@ -1,0 +1,39 @@
+{
+    "compilerOptions": {
+        // Type Checking — mirrors the root tsconfig so shared source files compile identically
+        "allowUnreachableCode": false,
+        "allowUnusedLabels": false,
+        "noFallthroughCasesInSwitch": true,
+        "noImplicitOverride": true,
+        "noUncheckedIndexedAccess": true,
+        "strict": true,
+        // Modules
+        "module": "ESNext",
+        "moduleResolution": "Bundler",
+        // The plugin core and configurator sources reached through the paths mapping below use explicit .ts import extensions, so this package's type-check must allow them. This package's own src/ uses extensionless imports on purpose: consumer projects type-check against it through paths mappings in the test fixtures, and their tsconfigs do not allow the extension.
+        "allowImportingTsExtensions": true,
+        // Maps the package names to workspace source so type-checking works without a prior build. Runtime resolution in tests goes through the pnpm workspace links instead.
+        "paths": {
+            "tailwind-merge": ["../tailwind-merge/src/index.ts"],
+            "tailwind-merge/unstable-do-not-import": [
+                "../tailwind-merge/src/unstable-do-not-import.ts"
+            ],
+            "@tailwind-merge/configurator": ["../configurator/src/index.ts"],
+            "@tailwind-merge/plugin-core": ["../plugin-core/src/index.ts"],
+            "@tailwind-merge/next/runtime": ["./src/runtime.ts"]
+        },
+        // Emit
+        "noEmit": true,
+        // @tailwindcss/node ships type declarations whose relative imports don't resolve under Bundler module resolution, and Next's declarations pull in more than this package touches. Both are only used in small slices here, so skipping lib checks is safe.
+        "skipLibCheck": true,
+        "types": ["node"],
+        // Interop Constraints
+        "esModuleInterop": true,
+        "forceConsistentCasingInFileNames": true,
+        // Language and Environment
+        "target": "ESNext"
+    },
+    "include": ["src/**/*", "tests/**/*"],
+    // Fixtures are consumer apps for the Next.js processes the tests spawn, not package code — they are exercised by running them, not by this tsconfig (the consumer-types fixture has its own tsconfig for exactly that purpose).
+    "exclude": ["tests/fixtures", "tests/.tmp-*"]
+}

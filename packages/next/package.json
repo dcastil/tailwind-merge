@@ -1,24 +1,31 @@
 {
-    "name": "@tailwind-merge/vite",
+    "name": "@tailwind-merge/next",
     "version": "0.0.0",
-    "description": "Vite plugin that generates a project-optimized twMerge from the project's Tailwind CSS.",
+    "description": "Next.js plugin that generates a project-optimized twMerge from the project's Tailwind CSS.",
     "license": "MIT",
     "author": "Dany Castillo",
     "repository": {
         "type": "git",
         "url": "https://github.com/dcastil/tailwind-merge.git",
-        "directory": "packages/vite"
+        "directory": "packages/next"
     },
     "homepage": "https://github.com/dcastil/tailwind-merge",
     "bugs": {
         "url": "https://github.com/dcastil/tailwind-merge/issues"
     },
     "type": "module",
-    "sideEffects": false,
+    "sideEffects": [
+        "./dist/runtime.mjs"
+    ],
     "exports": {
-        ".": "./src/index.ts",
-        "./runtime": "./src/runtime.ts",
-        "./tailwind-merge": "./src/tailwind-merge.ts"
+        ".": {
+            "types": "./dist/index.d.mts",
+            "default": "./dist/index.mjs"
+        },
+        "./runtime": {
+            "types": "./dist/runtime.d.mts",
+            "default": "./dist/runtime.mjs"
+        }
     },
     "files": [
         "dist",
@@ -26,21 +33,7 @@
     ],
     "publishConfig": {
         "access": "public",
-        "provenance": true,
-        "exports": {
-            ".": {
-                "types": "./dist/index.d.mts",
-                "default": "./dist/index.mjs"
-            },
-            "./runtime": {
-                "types": "./dist/runtime.d.mts",
-                "default": "./dist/runtime.mjs"
-            },
-            "./tailwind-merge": {
-                "types": "./dist/tailwind-merge.d.mts",
-                "default": "./dist/tailwind-merge.mjs"
-            }
-        }
+        "provenance": true
     },
     "scripts": {
         "build": "tsdown",
@@ -50,16 +43,16 @@
         "test:types": "tsc --noEmit",
         "test:exports": "node scripts/test-packed-package.mjs",
         "test:library-release": "node ../../scripts/check-library-release.mjs --sources ../configurator/src ../plugin-core/src src",
-        "release": "pnpm version --tag-version-prefix=@tailwind-merge/vite@ --message=@tailwind-merge/vite@%s",
+        "release": "pnpm version --tag-version-prefix=@tailwind-merge/next@ --message=@tailwind-merge/next@%s",
         "version": "node ../../scripts/update-pinned-links.mjs && node ../../scripts/pin-readme-links.mjs"
     },
     "peerDependencies": {
-        "@tailwindcss/vite": "~4.3.3",
-        "tailwindcss": "~4.3.3",
-        "vite": "^6.0.0 || ^7.0.0 || ^8.0.0"
+        "@tailwindcss/postcss": "~4.3.3",
+        "next": "^16.0.0",
+        "tailwindcss": "~4.3.3"
     },
     "peerDependenciesMeta": {
-        "@tailwindcss/vite": {
+        "@tailwindcss/postcss": {
             "optional": true
         }
     },
@@ -73,13 +66,15 @@
     "devDependencies": {
         "@tailwind-merge/configurator": "workspace:*",
         "@tailwind-merge/plugin-core": "workspace:*",
-        "@tailwindcss/vite": "~4.3.3",
+        "@tailwindcss/postcss": "~4.3.3",
         "@types/node": "catalog:",
         "eslint": "catalog:",
+        "next": "^16.3.3",
+        "react": "^19.2.0",
+        "react-dom": "^19.2.0",
         "tailwindcss": "~4.3.3",
         "tsdown": "catalog:",
         "typescript": "catalog:",
-        "vite": "^7.3.3",
         "vitest": "catalog:"
     }
 }

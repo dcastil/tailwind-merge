@@ -1,6 +1,6 @@
 # Plugin core development
 
-Read this for work on `packages/plugin-core/`, the private package inlined into the bundler plugins — today the Vite plugin ([Vite guide](./vite-plugin.md)), with further bundlers as sibling wrappers. Generation and scanning themselves live in the [configurator](./configurator.md); the core sits between the configurator and a plugin. It decides _which_ CSS root configures a project, _what_ module to serve for the plugin's runtime subpath, and _when_ a served module can be reused, re-pruned, or must be regenerated.
+Read this for work on `packages/plugin-core/`, the private package inlined into both bundler plugins ([Vite guide](./vite-plugin.md), [Next.js guide](./next-plugin.md)). Generation and scanning themselves live in the [configurator](./configurator.md); the core sits between the configurator and a plugin. It decides _which_ CSS root configures a project, _what_ module to serve for the plugin's runtime subpath, and _when_ a served module can be reused, re-pruned, or must be regenerated.
 
 ## Ownership
 
@@ -11,7 +11,7 @@ Read this for work on `packages/plugin-core/`, the private package inlined into 
 | `generation.ts`                     | Calls the configurator, gathers dependencies and their modification times, fingerprints source usage, assembles the served module (emitted code plus the runtime appendix), and provides the fallback module. |
 | `generation-session.ts`             | Owns the pending attempt, last good module, retained dependencies, cache invalidation, and refresh decisions for one plugin configuration.                                                                    |
 
-Plugins own everything bundler-specific: root selection, resolution hooks, how the module reaches the bundler (Vite's virtual module, a loader where a bundler has none), dependency registration and watching, reload policy, logging, and failure policy (a dev server keeps the last good module, a build fails). The core takes the plugin's identity as options — `packageName` for the banner and the ambiguity error's prefix, `importSource` for the specifier the served module imports tailwind-merge from — and never logs on its own. Keep it that way: a new bundler wrapper should need nothing from here beyond these entry points.
+Plugins own everything bundler-specific: root selection, resolution hooks, how the module reaches the bundler (Vite's virtual module, Next's loader), dependency registration and watching, reload policy, logging, and failure policy (a dev server keeps the last good module, a build fails). The core takes the plugin's identity as options — `packageName` for the banner and the ambiguity error's prefix, `importSource` for the specifier the served module imports tailwind-merge from — and never logs on its own. Keep it that way: a new bundler wrapper should need nothing from here beyond these entry points.
 
 ## Discovery invariants
 
@@ -41,6 +41,6 @@ Watching, invalidation, reload, and loader/virtual-module behavior are the plugi
 
 ## Packaging and release scope
 
-Private and never published: the plugins list it under `devDependencies` with `workspace:*` and inline it through tsdown, whose `deps.onlyBundle: []` guard treats the workspace link (outside `node_modules`) as local source; its own `@tailwind-merge/configurator` dependency is inlined the same way. `@tailwindcss/node` is a peer for the require-cache helper; everything else reaches it through the configurator.
+Private and never published: both plugins list it under `devDependencies` with `workspace:*` and inline it through tsdown, whose `deps.onlyBundle: []` guard treats the workspace link (outside `node_modules`) as local source; its own `@tailwind-merge/configurator` dependency is inlined the same way. `@tailwindcss/node` is a peer for the require-cache helper; everything else reaches it through the configurator.
 
-Changes here ship in every plugin release, so the release scope wiring — the release-drafter configs, the release commenter's package paths, and the plugins' `test:library-release` source lists — must include `packages/plugin-core`. Run `pnpm --filter @tailwind-merge/plugin-core test` and `test:types` for changes here, then the plugin suites.
+Changes here ship in both plugin releases: the release-drafter configs, the release commenter's package paths, and both plugins' `test:library-release` source lists include `packages/plugin-core`. Run `pnpm --filter @tailwind-merge/plugin-core test` and `test:types` for changes here, then both plugin suites.

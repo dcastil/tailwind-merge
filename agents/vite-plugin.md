@@ -1,6 +1,6 @@
 # Vite plugin development
 
-Read this for work on `packages/vite/`. User docs start in the [package README](../packages/vite/README.md); discovery, module generation, and the generation session live in the shared [plugin core](./plugin-core.md), and generator internals and source-scanning semantics live in the [configurator guide](./configurator.md). Shared CI security rules remain in [library internals](./tailwind-merge-internals.md#ci-behavior-and-security).
+Read this for work on `packages/vite/`. User docs start in the [package README](../packages/vite/README.md); discovery, module generation, and the generation session are shared with the Next.js plugin through the [plugin core](./plugin-core.md), and generator internals and source-scanning semantics live in the [configurator guide](./configurator.md). Shared CI security rules remain in [library internals](./tailwind-merge-internals.md#ci-behavior-and-security).
 
 ## Goals and strategy
 
@@ -14,7 +14,7 @@ The small plugin surface is deliberate: it lets users adopt the integration whil
 - Preserve ordinary package resolution and customization. Use a real typed runtime subpath that Vite redirects, with documented default-config behavior outside Vite. `extendTailwindMerge` extends the generated config. A caller explicitly importing plain `tailwind-merge` keeps that package's behavior.
 - Keep client and SSR inputs aligned by using the same CSS and filesystem sources. Do not prune independently to their different module graphs. The architecture targets equal generated code for equal inputs; explicit cross-build parity coverage remains to be added.
 
-Boundaries: one Tailwind root per plugin instance, Vite 6+ (Environment API), and the supported Tailwind peer line. Multiple independent roots require an explicit choice, not a merged theme. Other bundlers should be sibling wrappers on the same core. Intercepting bare `tailwind-merge` imports, runtime dual-copy warnings, and a separate shared runtime package are deferred until adoption demonstrates a need.
+Boundaries: one Tailwind root per plugin instance, Vite 6+ (Environment API), and the supported Tailwind peer line. Multiple independent roots require an explicit choice, not a merged theme. Other bundlers are sibling wrappers on the same core — the [Next.js plugin](./next-plugin.md) is the first. Intercepting bare `tailwind-merge` imports, runtime dual-copy warnings, and a separate shared runtime package are deferred until adoption demonstrates a need.
 
 ## Architecture and invariants
 
@@ -83,7 +83,7 @@ Pruning logs its result by default, without an opt-out hint on every line; `prun
 
 The suite also verifies runtime surface parity, consumer types, discovery, both plugins together, out-of-root themes/sources, safelists, and the absence of the default config from successful generated builds. Generation failure/recovery runs through a real watch build. A prior manual browser smoke test exercised cold optimization, compiled Tailwind styles, theme reload, and no reload on a comment-only edit; that was a one-off check, not automated browser coverage.
 
-Remaining work: a Tailwind/Vite version matrix; real framework integrations such as SvelteKit, React Router, Nuxt, and Astro; explicit client/SSR production parity; the consumer's inherited Vitest-config flow; pruning behavior after source deletion in a running watcher; and repeatable browser coverage. Plain programmatic Vite and SSR module tests do not imply those integrations are verified.
+Remaining work: a Tailwind/Vite version matrix; real framework integrations such as SvelteKit, React Router, Nuxt, and Astro; explicit client/SSR production parity; the consumer's inherited Vitest-config flow; pruning behavior after source deletion in a running watcher; and repeatable browser coverage. Plain programmatic Vite and SSR module tests do not imply those integrations are verified. Next.js is covered by its own plugin, not by this one.
 
 Run `pnpm --filter @tailwind-merge/vite test` and `test:types` for plugin changes, then the repo-wide checks. See [configurator testing notes](./configurator.md#debugging-and-validation) for the oxide/gitignored-directory trap that dictates fixture layout.
 
@@ -104,6 +104,6 @@ Run `pnpm --filter @tailwind-merge/vite test` and `test:types` for plugin change
 
 ## Release boundaries
 
-The initial public package is the Vite wrapper, with the plugin core and configurator inlined and the library as a regular dependency. Plugin options and runtime exports are the intended versioned surface; the internal re-export and generated representation are not. The selected first release is `0.1.0`, with pre-1.0 compatibility expectations documented for users.
+The public packages are the Vite wrapper and the Next.js wrapper, each with the plugin core and configurator inlined and the library as a regular dependency. Plugin options and runtime exports are the intended versioned surface; the internal re-export and generated representation are not. The selected first release is `0.1.0`, with pre-1.0 compatibility expectations documented for users.
 
 The matching tailwind-merge update (3.7.0) is released. The plugin manifest carries no `private` flag because dev builds of every `main` commit publish it (stamped by `scripts/stamp-dev-version.mjs`); the configurator keeps `private: true` because it is never published. Publishing setup, the dev-release bootstrap, and the trusted-publisher prerequisite for automatic dev publishing are owned by the [release guide](./release-workflow.md#dev-releases).

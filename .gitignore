@@ -3,6 +3,8 @@
 /.vscode/
 /packages/configurator/dist/
 /packages/configurator/tests/.tmp-*/
+/packages/next/dist/
+/packages/next/tests/.tmp-*/
 /packages/plugin-core/tests/.tmp-*/
 /packages/tailwind-merge/dist/
 /packages/vite/dist/

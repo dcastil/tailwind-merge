@@ -1,0 +1,3 @@
+{
+    // Turbopack applies loader rules to code in node_modules only when the project has a tsconfig.json or jsconfig.json, even an empty one (observed with Next.js 16.3). create-next-app writes one for every project; the plugin warns when neither exists.
+}
