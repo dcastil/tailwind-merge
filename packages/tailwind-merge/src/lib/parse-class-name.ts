@@ -82,9 +82,19 @@ export const createParseClassName = (config: AnyConfig) => {
             hasImportantModifier = true
         }
 
+        // `maybePostfixModifierPosition` is relative to `baseClassName`, so it must be shifted by
+        // however much the important modifier shortened the name. A leading `!` is removed from
+        // the front, which moves every following index down by one; the position was measured
+        // against `baseClassNameWithImportantModifier`, so without this correction `!text-lg/7`
+        // reports 8 instead of 7 and consumers slice `"text-lg/"`, matching no class group.
+        const importantModifierOffset =
+            hasImportantModifier && baseClassNameWithImportantModifier.startsWith(IMPORTANT_MODIFIER)
+                ? IMPORTANT_MODIFIER.length
+                : 0
+
         const maybePostfixModifierPosition =
             postfixModifierPosition && postfixModifierPosition > modifierStart
-                ? postfixModifierPosition - modifierStart
+                ? postfixModifierPosition - modifierStart - importantModifierOffset
                 : undefined
 
         return createResultObject(
