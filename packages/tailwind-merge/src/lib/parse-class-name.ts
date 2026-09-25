@@ -88,7 +88,8 @@ export const createParseClassName = (config: AnyConfig) => {
         // against `baseClassNameWithImportantModifier`, so without this correction `!text-lg/7`
         // reports 8 instead of 7 and consumers slice `"text-lg/"`, matching no class group.
         const importantModifierOffset =
-            hasImportantModifier && baseClassNameWithImportantModifier.startsWith(IMPORTANT_MODIFIER)
+            hasImportantModifier &&
+            baseClassNameWithImportantModifier.startsWith(IMPORTANT_MODIFIER)
                 ? IMPORTANT_MODIFIER.length
                 : 0
 
