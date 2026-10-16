@@ -2315,6 +2315,7 @@ export const getConfig = () => {
             'fvn-spacing': ['fvn-normal'],
             'fvn-fraction': ['fvn-normal'],
             'line-clamp': ['display', 'overflow'],
+            sr: ['position', 'size', 'w', 'h', 'min-w', 'max-w', 'min-h', 'max-h', 'min-inline-size', 'max-inline-size', 'min-block-size', 'max-block-size', 'p', 'px', 'py', 'ps', 'pe', 'pbs', 'pbe', 'pt', 'pr', 'pb', 'pl', 'm', 'mx', 'my', 'ms', 'me', 'mbs', 'mbe', 'mt', 'mr', 'mb', 'ml', 'overflow', 'overflow-x', 'overflow-y', 'whitespace'],
             rounded: ['rounded-s', 'rounded-e', 'rounded-t', 'rounded-r', 'rounded-b', 'rounded-l', 'rounded-ss', 'rounded-se', 'rounded-ee', 'rounded-es', 'rounded-tl', 'rounded-tr', 'rounded-br', 'rounded-bl'],
             'rounded-s': ['rounded-ss', 'rounded-es'],
             'rounded-e': ['rounded-se', 'rounded-ee'],
