@@ -69,6 +69,8 @@ twMerge('border-2 border-[light-dark(rgb(50%_0%_0%),black)]')
 // → 'border-2 border-[light-dark(rgb(50%_0%_0%),black)]'
 ```
 
+Lengths using the quarter-millimeter unit `Q` are also detected automatically. Font sizes, border widths, and outline widths using this unit are kept alongside colors without a `length:` label.
+
 **When labels are necessary**:
 
 For ambiguous classes where tailwind-merge cannot determine the type from context (like `text-*` which can be font-size OR color), you need to use [CSS data type labels](https://tailwindcss.com/docs/adding-custom-styles#resolving-ambiguities):
