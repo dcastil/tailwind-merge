@@ -99,6 +99,7 @@ test('isArbitraryImage', () => {
 test('isArbitraryLength', () => {
     expect(isArbitraryLength('[3.7%]')).toBe(true)
     expect(isArbitraryLength('[481px]')).toBe(true)
+    expect(isArbitraryLength('[1Q]')).toBe(true)
     expect(isArbitraryLength('[19.1rem]')).toBe(true)
     expect(isArbitraryLength('[50vw]')).toBe(true)
     expect(isArbitraryLength('[56vh]')).toBe(true)
