@@ -59,3 +59,32 @@ test('line-clamp classes do create conflicts correctly', () => {
     expect(twMerge('overflow-auto inline line-clamp-1')).toBe('line-clamp-1')
     expect(twMerge('line-clamp-1 overflow-auto inline')).toBe('line-clamp-1 overflow-auto inline')
 })
+
+test('sr utilities override the properties they reset', () => {
+    // Tailwind emits `relative` after `sr-only`, so both classes leave the element in flow.
+    expect(twMerge('relative sr-only')).toBe('sr-only')
+    expect(twMerge('relative mb-1 sr-only')).toBe('sr-only')
+    expect(twMerge('absolute fixed sticky sr-only')).toBe('sr-only')
+    expect(twMerge('static not-sr-only')).toBe('not-sr-only')
+
+    expect(twMerge('w-full h-screen size-full sr-only')).toBe('sr-only')
+    expect(twMerge('min-w-full max-w-xs min-h-screen max-h-full sr-only')).toBe('sr-only')
+    expect(twMerge('min-inline-full max-block-screen sr-only')).toBe('sr-only')
+    expect(twMerge('p-4 px-2 ps-1 pt-1 m-4 mx-2 -mt-1 sr-only')).toBe('sr-only')
+    expect(twMerge('overflow-auto overflow-x-visible whitespace-nowrap sr-only')).toBe('sr-only')
+
+    // A later class is an intentional override, including across a variant.
+    expect(twMerge('sr-only relative')).toBe('sr-only relative')
+    expect(twMerge('sr-only p-4')).toBe('sr-only p-4')
+    expect(twMerge('not-sr-only relative')).toBe('not-sr-only relative')
+    expect(twMerge('relative md:sr-only')).toBe('relative md:sr-only')
+    expect(twMerge('hover:p-4 hover:sr-only')).toBe('hover:sr-only')
+    expect(twMerge('sr-only md:not-sr-only md:relative md:p-4')).toBe(
+        'sr-only md:not-sr-only md:relative md:p-4',
+    )
+
+    // `not-sr-only` does not restore border width, so a border has to survive both orders.
+    expect(twMerge('border-2 sr-only')).toBe('border-2 sr-only')
+    expect(twMerge('sr-only border-2')).toBe('sr-only border-2')
+    expect(twMerge('border-t-2 not-sr-only')).toBe('border-t-2 not-sr-only')
+})
