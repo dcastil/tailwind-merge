@@ -102,6 +102,7 @@ test('isArbitraryLength', () => {
     expect(isArbitraryLength('[19.1rem]')).toBe(true)
     expect(isArbitraryLength('[50vw]')).toBe(true)
     expect(isArbitraryLength('[56vh]')).toBe(true)
+    expect(isArbitraryLength('[10q]')).toBe(true)
     expect(isArbitraryLength('[length:var(--arbitrary)]')).toBe(true)
 
     expect(isArbitraryLength('1')).toBe(false)
