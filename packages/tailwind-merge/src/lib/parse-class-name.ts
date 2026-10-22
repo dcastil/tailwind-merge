@@ -59,6 +59,15 @@ export const createParseClassName = (config: AnyConfig) => {
             else if (currentCharacter === ']') bracketDepth--
             else if (currentCharacter === '(') parenDepth++
             else if (currentCharacter === ')') parenDepth--
+            else if (currentCharacter === '\\') index++
+            else if (currentCharacter === '"' || currentCharacter === "'") {
+                // Quoted delimiters do not affect nesting or separate modifiers.
+                while (++index < len) {
+                    const quotedCharacter = className[index]
+                    if (quotedCharacter === '\\') index++
+                    else if (quotedCharacter === currentCharacter) break
+                }
+            }
         }
 
         const baseClassNameWithImportantModifier =

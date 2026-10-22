@@ -50,6 +50,36 @@ test('arbitrary variants with attribute selectors', () => {
     )
 })
 
+test.each([
+    "data-[label='[']",
+    "data-[label=']']",
+    "data-[label='(']",
+    "data-[label=')']",
+    'data-[label="["]',
+    'data-[label=")"]',
+    "[&[data-label='[']]",
+    "[&[data-label=']']]",
+    "[&[data-label='(']]",
+    "[&[data-label=')']]",
+    String.raw`data-[label='it\'s[']`,
+    String.raw`data-[label="say\"("]`,
+    String.raw`data-[label='"[']`,
+    String.raw`data-[label="'("]`,
+    String.raw`data-[label='\\']`,
+    "data-[label='open']",
+    String.raw`data-[label=\']`,
+])('arbitrary variants with quoted and escaped delimiters: %s', (modifier) => {
+    expect(twMerge(`${modifier}:p-2`, `${modifier}:p-4`)).toBe(`${modifier}:p-4`)
+    expect(twMerge(`${modifier}:hover:p-2`, `hover:${modifier}:p-4`)).toBe(
+        modifier.startsWith('[')
+            ? `${modifier}:hover:p-2 hover:${modifier}:p-4`
+            : `hover:${modifier}:p-4`,
+    )
+    expect(twMerge(`${modifier}:leading-8!`, `${modifier}:text-lg/7!`)).toBe(
+        `${modifier}:text-lg/7!`,
+    )
+})
+
 test('arbitrary variants with multiple attribute selectors', () => {
     expect(
         twMerge(
