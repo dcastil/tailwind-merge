@@ -35,6 +35,20 @@ test('handles color() functions with percentages correctly', () => {
     )
 })
 
+test.each(['contrast-color(hsl(0_0%_0%))', 'device-cmyk(0%_0%_0%_100%)'])(
+    'handles %s color functions with percentages correctly',
+    (color) => {
+        expect(twMerge('text-[12px]', `text-[${color}]`)).toBe(`text-[12px] text-[${color}]`)
+        expect(twMerge(`text-[${color}]`, 'text-[12px]')).toBe(`text-[${color}] text-[12px]`)
+        expect(twMerge('text-red-500', `text-[${color}]`)).toBe(`text-[${color}]`)
+        expect(twMerge(`text-[${color}]`, 'text-red-500')).toBe('text-red-500')
+        expect(twMerge('border-2', `border-[${color}]`)).toBe(`border-2 border-[${color}]`)
+        expect(twMerge(`border-[${color}]`, 'border-2')).toBe(`border-[${color}] border-2`)
+        expect(twMerge('stroke-2', `stroke-[${color}]`)).toBe(`stroke-2 stroke-[${color}]`)
+        expect(twMerge(`stroke-[${color}]`, 'stroke-2')).toBe(`stroke-[${color}] stroke-2`)
+    },
+)
+
 test('handles light-dark() functions with percentages correctly', () => {
     expect(twMerge('text-sm text-[light-dark(white,rgb(0_0_0/50%))]')).toBe(
         'text-sm text-[light-dark(white,rgb(0_0_0/50%))]',

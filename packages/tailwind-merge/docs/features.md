@@ -67,6 +67,10 @@ twMerge('text-sm text-[color(srgb_100%_0%_0%)]')
 // → 'text-sm text-[color(srgb_100%_0%_0%)]'
 twMerge('border-2 border-[light-dark(rgb(50%_0%_0%),black)]')
 // → 'border-2 border-[light-dark(rgb(50%_0%_0%),black)]'
+twMerge('text-[12px] text-[contrast-color(hsl(0_0%_0%))]')
+// → 'text-[12px] text-[contrast-color(hsl(0_0%_0%))]'
+twMerge('text-[12px] text-[device-cmyk(0%_0%_0%_100%)]')
+// → 'text-[12px] text-[device-cmyk(0%_0%_0%_100%)]'
 ```
 
 **When labels are necessary**:
