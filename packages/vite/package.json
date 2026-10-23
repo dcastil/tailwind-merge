@@ -79,7 +79,7 @@
         "tailwindcss": "~4.3.3",
         "tsdown": "catalog:",
         "typescript": "catalog:",
-        "vite": "^7.3.3",
+        "vite": "^7.3.7",
         "vitest": "catalog:"
     }
 }
