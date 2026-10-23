@@ -55,6 +55,8 @@ The hot paths are `src/lib/merge-classlist.ts` and `src/lib/class-group-utils.ts
     - `tests/class-group-conflicts.test.ts`
     - `tests/conflicts-across-class-groups.test.ts`
 
+- Any `default-config.ts` change also flows into `packages/configurator`: its emitted-module snapshots (`tests/__snapshots__/**/*.snap.ts`) copy the default config's groups and conflicts, and the vanilla-coverage ratchet lists the default config's gaps (see [configurator development](./configurator.md#debugging-and-validation)). Run the configurator suite and review both snapshot diffs.
+
 - Change parser/modifier behavior:
     - `src/lib/parse-class-name.ts`
     - `src/lib/sort-modifiers.ts`
