@@ -35,6 +35,29 @@ test('axis shorthands override logical sides', () => {
     expect(twMerge('scroll-pbe-2 scroll-py-4')).toBe('scroll-py-4')
 })
 
+test('place shorthands override align and justify longhands', () => {
+    // place-content, place-items and place-self compile to the CSS shorthands that set both their align-* and justify-* longhands.
+    expect(twMerge('content-start place-content-center')).toBe('place-content-center')
+    expect(twMerge('justify-start place-content-center')).toBe('place-content-center')
+    expect(twMerge('content-start justify-between place-content-center')).toBe(
+        'place-content-center',
+    )
+    expect(twMerge('place-content-center content-start')).toBe('place-content-center content-start')
+    expect(twMerge('items-start place-items-center')).toBe('place-items-center')
+    expect(twMerge('items-baseline-last place-items-center')).toBe('place-items-center')
+    expect(twMerge('justify-items-start place-items-center')).toBe('place-items-center')
+    expect(twMerge('place-items-center items-start')).toBe('place-items-center items-start')
+    expect(twMerge('self-start place-self-center')).toBe('place-self-center')
+    expect(twMerge('justify-self-start place-self-center')).toBe('place-self-center')
+    expect(twMerge('place-self-center justify-self-start')).toBe(
+        'place-self-center justify-self-start',
+    )
+    expect(twMerge('items-start md:place-items-center')).toBe('items-start md:place-items-center')
+    expect(twMerge('justify-items-start place-content-center')).toBe(
+        'justify-items-start place-content-center',
+    )
+})
+
 test('ring and shadow classes do not create conflict', () => {
     expect(twMerge('ring shadow')).toBe('ring shadow')
     expect(twMerge('ring-2 shadow-md')).toBe('ring-2 shadow-md')
