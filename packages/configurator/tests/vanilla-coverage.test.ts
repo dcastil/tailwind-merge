@@ -15,8 +15,8 @@ const INTENTIONAL_DIVERGENCES: { pair: string; reason: string }[] = [
     { pair: 'col-end → col-start-end', reason: 'composition, tailwind-merge#176' },
     { pair: 'row-start → row-start-end', reason: 'composition, tailwind-merge#176' },
     { pair: 'row-end → row-start-end', reason: 'composition, tailwind-merge#176' },
-    // `sr-only` resets position, size, padding, margin, overflow, clip and white-space, so it does control an earlier `p-4` — but it is a toggle that `not-sr-only` (typically under a breakpoint variant: `sr-only md:not-sr-only`) reverts, and the classes it hides must survive for that moment. The library's `sr` group therefore conflicts with nothing.
-    { pair: '* → sr', reason: 'toggle, reverted by not-sr-only' },
+    // `sr-only` does reset position, size, spacing, overflow and white-space, and those are real conflicts now (tailwind-merge#722): the unprefixed utilities sort after `sr-only`, so keeping them undoes the hide, and `not-sr-only` resets the same properties itself. Border width is the exception. `not-sr-only` does not restore it, so removing an earlier `border-2` would also drop the border after the reveal.
+    { pair: '* → sr', reason: 'border width survives not-sr-only' },
 ]
 
 // The generated vanilla config classifies existing classes exactly like tailwind-merge's default config (generate.test.ts proves that), so checking it against Tailwind itself checks the default config too — something the library's own suite cannot do, because only this package has Tailwind's compiler at hand. The checks here are deliberately absolute rather than differential: the conformance sweep only asks Tailwind where generated and default config disagree, and 97 % of its consecutive pairs share a class group, so gaps both configs inherit and cross-group conflict semantics never reach it. Every test snapshots its known divergences, grouped and with one example each, as a ratchet: a new line is a regression (or a newly found gap) to look at, a removed line is a fix. Divergences the library maintains on purpose live in `INTENTIONAL_DIVERGENCES` instead.
@@ -119,7 +119,10 @@ describe('the generated vanilla config against Tailwind itself', async () => {
     })
 
     /** Where the generated config's merge of `first second` disagrees with Tailwind's verdict — keyed by class-group pair so the snapshots list one example per pair, and null when the pair agrees or one class compiles to nothing. */
-    function describeDivergence(first: string, second: string): { key: string; line: string } | null {
+    function describeDivergence(
+        first: string,
+        second: string,
+    ): { key: string; line: string } | null {
         const firstDeclarations = declaredDeclarations(designSystem, first)
         const secondDeclarations = declaredDeclarations(designSystem, second)
         if (firstDeclarations === null || secondDeclarations === null) {
@@ -134,7 +137,8 @@ describe('the generated vanilla config against Tailwind itself', async () => {
             return null
         }
         const key = `${getClassGroupId(first) ?? '(unclassified)'} → ${getClassGroupId(second) ?? '(unclassified)'}`
-        const outcome = verdict === 'merge' ? 'kept both, Tailwind: merge' : 'merged, Tailwind: keep both'
+        const outcome =
+            verdict === 'merge' ? 'kept both, Tailwind: merge' : 'merged, Tailwind: keep both'
         return { key, line: `${key}  |  ${first} ${second}  |  ${outcome}` }
     }
 })
