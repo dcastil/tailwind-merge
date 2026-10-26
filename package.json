@@ -11,7 +11,7 @@
         "test:types": "pnpm --recursive test:types"
     },
     "devDependencies": {
-        "@vitest/coverage-v8": "^4.1.10",
+        "@vitest/coverage-v8": "^4.1.12",
         "@vitest/eslint-plugin": "^1.6.24",
         "eslint": "catalog:",
         "eslint-plugin-import": "^2.32.0",
