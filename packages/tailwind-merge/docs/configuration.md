@@ -45,6 +45,31 @@ export const twMerge = extendTailwindMerge({
 
 The same file is the natural place for anything else you might want to do with `twMerge` later, like [wrapping it in another function](./recipes.md#modifying-inputs-and-output-of-twmerge), adding a [plugin](#using-tailwind-merge-plugins), or swapping in a merge function generated from your CSS. If you already have a `cn` helper (as in every shadcn/ui project), that file serves the same purpose.
 
+To make sure nobody imports `twMerge` from the package directly by accident, you can use ESLint's [`no-restricted-imports`](https://eslint.org/docs/latest/rules/no-restricted-imports) rule. Leave out your own file, since it re-exports `twMerge` from the package:
+
+```js
+// eslint.config.js
+export default [
+    {
+        ignores: ['**/tw-merge.ts'],
+        rules: {
+            'no-restricted-imports': [
+                'error',
+                {
+                    paths: [
+                        {
+                            name: 'tailwind-merge',
+                            importNames: ['twMerge'],
+                            message: 'Please import twMerge from your tw-merge file instead.',
+                        },
+                    ],
+                },
+            ],
+        },
+    },
+]
+```
+
 You can safely stop reading the documentation here.
 
 ## Usage with custom Tailwind config
