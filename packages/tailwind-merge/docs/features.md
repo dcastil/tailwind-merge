@@ -43,6 +43,8 @@ twMerge('bg-black bg-(--my-color) bg-[color:var(--mystery-var)]')
 twMerge('grid-cols-[1fr,auto] grid-cols-2') // → 'grid-cols-2'
 ```
 
+Quoted strings in arbitrary values and variants support both single and double quotes, including escaped quotes. Brackets, parentheses, and separators inside these strings are treated as literal content. For example, `data-[label='[']:p-2` conflicts with `data-[label='[']:p-4`, despite the unmatched bracket inside the attribute value.
+
 #### Type detection for arbitrary values
 
 tailwind-merge automatically detects the type of arbitrary values in most cases, but sometimes explicit labels are needed.
