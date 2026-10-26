@@ -8,7 +8,7 @@ catalog:
   eslint: ^9.39.5
   tsdown: ^0.22.14
   typescript: ^6.0.3
-  vitest: ^4.1.10
+  vitest: ^4.1.12
 
 minimumReleaseAge: 4320
 minimumReleaseAgeStrict: true
@@ -22,5 +22,5 @@ minimumReleaseAgeExclude:
   - postcss@8.5.23
   # Renovate security update: vite@7.3.5
   - vite@7.3.5
-  # Renovate security update: next@16.3.6 || 16.3.8
-  - next@16.3.6 || 16.3.8
+  # Renovate security update: next@16.3.6 || 16.3.8 || 16.4.3 || 16.4.1
+  - next@16.3.6 || 16.3.8 || 16.4.3 || 16.4.1
