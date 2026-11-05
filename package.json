@@ -12,19 +12,19 @@
     },
     "devDependencies": {
         "@vitest/coverage-v8": "^4.1.12",
-        "@vitest/eslint-plugin": "^1.6.24",
+        "@vitest/eslint-plugin": "^1.6.28",
         "eslint": "catalog:",
         "eslint-plugin-import": "^2.32.0",
-        "prettier": "^3.9.6",
+        "prettier": "^3.9.10",
         "typescript": "catalog:",
-        "typescript-eslint": "^8.65.0",
+        "typescript-eslint": "^8.72.1",
         "vitest": "catalog:"
     },
-    "packageManager": "pnpm@11.18.0",
+    "packageManager": "pnpm@11.28.10",
     "devEngines": {
         "runtime": {
             "name": "node",
-            "version": ">=22.18.0",
+            "version": ">=22.23.4",
             "onFail": "error"
         }
     }
