@@ -322,6 +322,7 @@ interface Validators {
     isArbitraryVariableFamilyName(value: string): boolean
     isArbitraryVariableImage(value: string): boolean
     isArbitraryVariableLength(value: string): boolean
+    isArbitraryVariableMaskPosition(value: string): boolean
     isArbitraryVariablePosition(value: string): boolean
     isArbitraryVariableShadow(value: string): boolean
     isArbitraryVariableSize(value: string): boolean
@@ -379,16 +380,17 @@ These validators check arbitrary values (values in square brackets `[...]`):
 
 These validators check arbitrary CSS variables (values in parentheses `(...)`):
 
-| Validator                       | Description                                                       | Example Match                           | Common Use           |
-| ------------------------------- | ----------------------------------------------------------------- | --------------------------------------- | -------------------- |
-| `isArbitraryVariable`           | Checks if value is a CSS variable in parentheses                  | `(--my-var)`                            | Generic CSS variable |
-| `isArbitraryVariableLength`     | Checks for variables with `length` label                          | `(length:--my-length)`                  | Length properties    |
-| `isArbitraryVariableSize`       | Checks for variables with `size`, `length`, or `percentage` label | `(size:--my-size)`                      | Size properties      |
-| `isArbitraryVariablePosition`   | Checks for variables with `position` label                        | `(position:--my-position)`              | Position properties  |
-| `isArbitraryVariableImage`      | Checks for variables with `image` or `url` label                  | `(image:--my-image)`                    | Image properties     |
-| `isArbitraryVariableFamilyName` | Checks for variables with `family-name` label                     | `(family-name:--my-font)`               | Font-family          |
-| `isArbitraryVariableWeight`     | Checks for variables with `weight` or `number` label, or no label | `(weight:--my-fw)`, `(--my-weight)`     | Font-weight          |
-| `isArbitraryVariableShadow`     | Checks for variables with `shadow` label or no label              | `(shadow:--my-shadow)`, `(--my-shadow)` | Shadow properties    |
+| Validator                         | Description                                                                       | Example Match                           | Common Use                   |
+| --------------------------------- | --------------------------------------------------------------------------------- | --------------------------------------- | ---------------------------- |
+| `isArbitraryVariable`             | Checks if value is a CSS variable in parentheses                                  | `(--my-var)`                            | Generic CSS variable         |
+| `isArbitraryVariableLength`       | Checks for variables with `length` label                                          | `(length:--my-length)`                  | Length properties            |
+| `isArbitraryVariableSize`         | Checks for variables with `size`, `length`, or `percentage` label                 | `(size:--my-size)`                      | Size properties              |
+| `isArbitraryVariablePosition`     | Checks for variables with `position` label                                        | `(position:--my-position)`              | Position properties          |
+| `isArbitraryVariableMaskPosition` | Checks for variables with `position`, `percentage` or `length` label, or no label | `(length:--my-stop)`, `(--my-stop)`     | Mask gradient stop positions |
+| `isArbitraryVariableImage`        | Checks for variables with `image` or `url` label                                  | `(image:--my-image)`                    | Image properties             |
+| `isArbitraryVariableFamilyName`   | Checks for variables with `family-name` label                                     | `(family-name:--my-font)`               | Font-family                  |
+| `isArbitraryVariableWeight`       | Checks for variables with `weight` or `number` label, or no label                 | `(weight:--my-fw)`, `(--my-weight)`     | Font-weight                  |
+| `isArbitraryVariableShadow`       | Checks for variables with `shadow` label or no label                              | `(shadow:--my-shadow)`, `(--my-shadow)` | Shadow properties            |
 
 ### Usage Examples
 

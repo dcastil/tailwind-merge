@@ -17,6 +17,7 @@ const {
     isArbitraryVariableFamilyName,
     isArbitraryVariableImage,
     isArbitraryVariableLength,
+    isArbitraryVariableMaskPosition,
     isArbitraryVariablePosition,
     isArbitraryVariableShadow,
     isArbitraryVariableSize,
@@ -229,6 +230,18 @@ test('isArbitraryVariableLength', () => {
     expect(isArbitraryVariableLength('(other:test)')).toBe(false)
     expect(isArbitraryVariableLength('(test)')).toBe(false)
     expect(isArbitraryVariableLength('length:test')).toBe(false)
+})
+
+test('isArbitraryVariableMaskPosition', () => {
+    expect(isArbitraryVariableMaskPosition('(position:test)')).toBe(true)
+    expect(isArbitraryVariableMaskPosition('(percentage:test)')).toBe(true)
+    expect(isArbitraryVariableMaskPosition('(length:test)')).toBe(true)
+    expect(isArbitraryVariableMaskPosition('(--my-stop)')).toBe(true)
+
+    expect(isArbitraryVariableMaskPosition('(color:test)')).toBe(false)
+    expect(isArbitraryVariableMaskPosition('(other:test)')).toBe(false)
+    expect(isArbitraryVariableMaskPosition('position:test')).toBe(false)
+    expect(isArbitraryVariableMaskPosition('[position:test]')).toBe(false)
 })
 
 test('isArbitraryVariablePosition', () => {

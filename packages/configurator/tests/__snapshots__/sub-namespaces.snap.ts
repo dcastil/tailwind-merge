@@ -32,6 +32,7 @@ export const getConfig = () => {
         isArbitraryImage,
         isArbitraryVariableShadow,
         isArbitraryShadow,
+        isArbitraryVariableMaskPosition,
     } = v
 
     /** Named `--spacing-*` theme values. The bare `--spacing` multiplier is set, which makes every number a valid spacing value (e.g. p-13). */
@@ -1170,12 +1171,24 @@ export const getConfig = () => {
             'mask-image-linear-pos': [{ 'mask-linear': [isNumber] }],
             'mask-image-linear-from-pos': [
                 {
-                    'mask-linear-from': [isNumber, isPercent, isArbitraryVariablePosition, isArbitraryPosition],
+                    'mask-linear-from': [
+                        isNumber,
+                        isPercent,
+                        isArbitraryVariableMaskPosition,
+                        isArbitraryPosition,
+                        isArbitraryLength,
+                    ],
                 },
             ],
             'mask-image-linear-to-pos': [
                 {
-                    'mask-linear-to': [isNumber, isPercent, isArbitraryVariablePosition, isArbitraryPosition],
+                    'mask-linear-to': [
+                        isNumber,
+                        isPercent,
+                        isArbitraryVariableMaskPosition,
+                        isArbitraryPosition,
+                        isArbitraryLength,
+                    ],
                 },
             ],
             'mask-image-linear-from-color': [
@@ -1188,12 +1201,24 @@ export const getConfig = () => {
             ],
             'mask-image-t-from-pos': [
                 {
-                    'mask-t-from': [isNumber, isPercent, isArbitraryVariablePosition, isArbitraryPosition],
+                    'mask-t-from': [
+                        isNumber,
+                        isPercent,
+                        isArbitraryVariableMaskPosition,
+                        isArbitraryPosition,
+                        isArbitraryLength,
+                    ],
                 },
             ],
             'mask-image-t-to-pos': [
                 {
-                    'mask-t-to': [isNumber, isPercent, isArbitraryVariablePosition, isArbitraryPosition],
+                    'mask-t-to': [
+                        isNumber,
+                        isPercent,
+                        isArbitraryVariableMaskPosition,
+                        isArbitraryPosition,
+                        isArbitraryLength,
+                    ],
                 },
             ],
             'mask-image-t-from-color': [
@@ -1206,12 +1231,24 @@ export const getConfig = () => {
             ],
             'mask-image-r-from-pos': [
                 {
-                    'mask-r-from': [isNumber, isPercent, isArbitraryVariablePosition, isArbitraryPosition],
+                    'mask-r-from': [
+                        isNumber,
+                        isPercent,
+                        isArbitraryVariableMaskPosition,
+                        isArbitraryPosition,
+                        isArbitraryLength,
+                    ],
                 },
             ],
             'mask-image-r-to-pos': [
                 {
-                    'mask-r-to': [isNumber, isPercent, isArbitraryVariablePosition, isArbitraryPosition],
+                    'mask-r-to': [
+                        isNumber,
+                        isPercent,
+                        isArbitraryVariableMaskPosition,
+                        isArbitraryPosition,
+                        isArbitraryLength,
+                    ],
                 },
             ],
             'mask-image-r-from-color': [
@@ -1224,12 +1261,24 @@ export const getConfig = () => {
             ],
             'mask-image-b-from-pos': [
                 {
-                    'mask-b-from': [isNumber, isPercent, isArbitraryVariablePosition, isArbitraryPosition],
+                    'mask-b-from': [
+                        isNumber,
+                        isPercent,
+                        isArbitraryVariableMaskPosition,
+                        isArbitraryPosition,
+                        isArbitraryLength,
+                    ],
                 },
             ],
             'mask-image-b-to-pos': [
                 {
-                    'mask-b-to': [isNumber, isPercent, isArbitraryVariablePosition, isArbitraryPosition],
+                    'mask-b-to': [
+                        isNumber,
+                        isPercent,
+                        isArbitraryVariableMaskPosition,
+                        isArbitraryPosition,
+                        isArbitraryLength,
+                    ],
                 },
             ],
             'mask-image-b-from-color': [
@@ -1242,12 +1291,24 @@ export const getConfig = () => {
             ],
             'mask-image-l-from-pos': [
                 {
-                    'mask-l-from': [isNumber, isPercent, isArbitraryVariablePosition, isArbitraryPosition],
+                    'mask-l-from': [
+                        isNumber,
+                        isPercent,
+                        isArbitraryVariableMaskPosition,
+                        isArbitraryPosition,
+                        isArbitraryLength,
+                    ],
                 },
             ],
             'mask-image-l-to-pos': [
                 {
-                    'mask-l-to': [isNumber, isPercent, isArbitraryVariablePosition, isArbitraryPosition],
+                    'mask-l-to': [
+                        isNumber,
+                        isPercent,
+                        isArbitraryVariableMaskPosition,
+                        isArbitraryPosition,
+                        isArbitraryLength,
+                    ],
                 },
             ],
             'mask-image-l-from-color': [
@@ -1260,12 +1321,24 @@ export const getConfig = () => {
             ],
             'mask-image-x-from-pos': [
                 {
-                    'mask-x-from': [isNumber, isPercent, isArbitraryVariablePosition, isArbitraryPosition],
+                    'mask-x-from': [
+                        isNumber,
+                        isPercent,
+                        isArbitraryVariableMaskPosition,
+                        isArbitraryPosition,
+                        isArbitraryLength,
+                    ],
                 },
             ],
             'mask-image-x-to-pos': [
                 {
-                    'mask-x-to': [isNumber, isPercent, isArbitraryVariablePosition, isArbitraryPosition],
+                    'mask-x-to': [
+                        isNumber,
+                        isPercent,
+                        isArbitraryVariableMaskPosition,
+                        isArbitraryPosition,
+                        isArbitraryLength,
+                    ],
                 },
             ],
             'mask-image-x-from-color': [
@@ -1278,12 +1351,24 @@ export const getConfig = () => {
             ],
             'mask-image-y-from-pos': [
                 {
-                    'mask-y-from': [isNumber, isPercent, isArbitraryVariablePosition, isArbitraryPosition],
+                    'mask-y-from': [
+                        isNumber,
+                        isPercent,
+                        isArbitraryVariableMaskPosition,
+                        isArbitraryPosition,
+                        isArbitraryLength,
+                    ],
                 },
             ],
             'mask-image-y-to-pos': [
                 {
-                    'mask-y-to': [isNumber, isPercent, isArbitraryVariablePosition, isArbitraryPosition],
+                    'mask-y-to': [
+                        isNumber,
+                        isPercent,
+                        isArbitraryVariableMaskPosition,
+                        isArbitraryPosition,
+                        isArbitraryLength,
+                    ],
                 },
             ],
             'mask-image-y-from-color': [
@@ -1297,12 +1382,24 @@ export const getConfig = () => {
             'mask-image-radial': [{ 'mask-radial': [isArbitraryVariable, isArbitraryValue] }],
             'mask-image-radial-from-pos': [
                 {
-                    'mask-radial-from': [isNumber, isPercent, isArbitraryVariablePosition, isArbitraryPosition],
+                    'mask-radial-from': [
+                        isNumber,
+                        isPercent,
+                        isArbitraryVariableMaskPosition,
+                        isArbitraryPosition,
+                        isArbitraryLength,
+                    ],
                 },
             ],
             'mask-image-radial-to-pos': [
                 {
-                    'mask-radial-to': [isNumber, isPercent, isArbitraryVariablePosition, isArbitraryPosition],
+                    'mask-radial-to': [
+                        isNumber,
+                        isPercent,
+                        isArbitraryVariableMaskPosition,
+                        isArbitraryPosition,
+                        isArbitraryLength,
+                    ],
                 },
             ],
             'mask-image-radial-from-color': [
@@ -1337,12 +1434,24 @@ export const getConfig = () => {
             'mask-image-conic-pos': [{ 'mask-conic': [isNumber] }],
             'mask-image-conic-from-pos': [
                 {
-                    'mask-conic-from': [isNumber, isPercent, isArbitraryVariablePosition, isArbitraryPosition],
+                    'mask-conic-from': [
+                        isNumber,
+                        isPercent,
+                        isArbitraryVariableMaskPosition,
+                        isArbitraryPosition,
+                        isArbitraryLength,
+                    ],
                 },
             ],
             'mask-image-conic-to-pos': [
                 {
-                    'mask-conic-to': [isNumber, isPercent, isArbitraryVariablePosition, isArbitraryPosition],
+                    'mask-conic-to': [
+                        isNumber,
+                        isPercent,
+                        isArbitraryVariableMaskPosition,
+                        isArbitraryPosition,
+                        isArbitraryLength,
+                    ],
                 },
             ],
             'mask-image-conic-from-color': [
