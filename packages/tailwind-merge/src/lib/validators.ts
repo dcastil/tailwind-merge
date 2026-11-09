@@ -5,6 +5,10 @@ const tshirtUnitRegex = /^(\d+(\.\d+)?)?(xs|sm|md|lg|xl)$/
 const lengthUnitRegex =
     /\d+(%|px|r?em|[sdl]?v([hwib]|min|max)|pt|pc|in|cm|mm|cap|ch|ex|r?lh|cq(w|h|i|b|min|max))|\b(calc|min|max|clamp)\(.+\)|^0$/
 const colorFunctionRegex = /^(rgba?|hsla?|hwb|(ok)?(lab|lch)|color-mix|color|light-dark)\(.+\)$/
+const maskColorFunctionRegex =
+    /^(rgba?|hsla?|hwb|(ok)?(lab|lch)|color-mix|color|light-dark|--alpha)\(/i
+const maskPositionRegex =
+    /^(?:_*[+-]?(?:\d|\.\d)|[\w-]+\(|_*(?:inherit|initial|revert(?:-layer)?|unset)_*$)/i
 // Shadow always begins with x and y offset separated by underscore optionally prepended by inset
 const shadowRegex = /^(inset_)?-?((\d+)?\.?(\d+)[a-z]+|0)_-?((\d+)?\.?(\d+)[a-z]+|0)/
 const imageRegex =
@@ -28,6 +32,10 @@ const isLengthOnly = (value: string) =>
     // I could also use lookbehind assertion in `lengthUnitRegex` but that isn't supported widely enough.
     lengthUnitRegex.test(value) && !colorFunctionRegex.test(value)
 
+const isMaskPosition = (value: string) =>
+    // Mask stops default to positions for variables and non-color CSS functions, including angles.
+    maskPositionRegex.test(value) && !maskColorFunctionRegex.test(value)
+
 const isNever = () => false
 
 const isShadow = (value: string) => shadowRegex.test(value)
@@ -50,6 +58,9 @@ export const isArbitraryValue = (value: string) => arbitraryValueRegex.test(valu
 export const isArbitraryLength = (value: string) =>
     getIsArbitraryValue(value, isLabelLength, isLengthOnly)
 
+export const isArbitraryMaskPosition = (value: string) =>
+    getIsArbitraryValue(value, isLabelMaskPosition, isMaskPosition)
+
 export const isArbitraryNumber = (value: string) =>
     getIsArbitraryValue(value, isLabelNumber, isNumber)
 
@@ -70,6 +81,9 @@ export const isArbitraryVariable = (value: string) => arbitraryVariableRegex.tes
 
 export const isArbitraryVariableLength = (value: string) =>
     getIsArbitraryVariable(value, isLabelLength)
+
+export const isArbitraryVariableMaskPosition = (value: string) =>
+    getIsArbitraryVariable(value, isLabelMaskPosition, true)
 
 export const isArbitraryVariableFamilyName = (value: string) =>
     getIsArbitraryVariable(value, isLabelFamilyName)
@@ -134,6 +148,8 @@ const isLabelImage = (label: string) => label === 'image' || label === 'url'
 const isLabelSize = (label: string) => label === 'length' || label === 'size' || label === 'bg-size'
 
 const isLabelLength = (label: string) => label === 'length'
+
+const isLabelMaskPosition = (label: string) => label !== 'color'
 
 const isLabelNumber = (label: string) => label === 'number'
 

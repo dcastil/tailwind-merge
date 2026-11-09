@@ -80,6 +80,8 @@ The hot paths are `src/lib/merge-classlist.ts` and `src/lib/class-group-utils.ts
 
 - Unit/behavior tests are granular by feature area in `tests/*.test.ts`.
 - Color-function regression tests should verify preservation of length utilities and replacement of other colors in `tests/colors.test.ts`.
+- Mask axis conflicts are directional: each `mask-image-x-*` group overrides its left/right counterparts, and each `mask-image-y-*` group overrides top/bottom; later edge classes remain refinements. Keep `from`/`to` and position/color groups independent, with regressions in `tests/mask-image.test.ts`. The configurator copies these conflicts into emitted modules, so changes also require reviewing and updating its file snapshots.
+- Mask stop arbitrary values need the mask-specific position validators: lengths, numbers, angles, and unlabeled variables are positions, while colors must remain independent. Generic background-position validators only recognize position labels and would misclassify these mask positions as colors. Keep changes scoped to masks; the configurator also serializes the validators into its emitted-module snapshots.
 - `tests/tailwind-css-versions.test.ts` is the compatibility anchor for Tailwind feature coverage by version.
 - `tests/docs-examples.test.ts` enforces that documented `twMerge(...) // -> ...` examples stay correct. Its extraction regex supports a limited set of characters (for example, `/` in arguments is excluded); verify new examples are collected and update the assertion count when adding supported examples.
 - `tests/public-api.test.ts` guards runtime exports and broad type usage.
