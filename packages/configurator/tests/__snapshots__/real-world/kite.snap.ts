@@ -32,6 +32,8 @@ export const getConfig = () => {
         isArbitraryImage,
         isArbitraryVariableShadow,
         isArbitraryShadow,
+        isArbitraryVariableMaskPosition,
+        isArbitraryMaskPosition,
     } = v
 
     /** The bare `--spacing` multiplier is set, which makes every number a valid spacing value (e.g. p-13). */
@@ -1184,84 +1186,84 @@ export const getConfig = () => {
             'mask-image-linear-pos': [{ 'mask-linear': [isNumber] }],
             'mask-image-linear-from-pos': [
                 {
-                    'mask-linear-from': [isNumber, isPercent, isArbitraryVariablePosition, isArbitraryPosition],
+                    'mask-linear-from': [isNumber, isPercent, isArbitraryVariableMaskPosition, isArbitraryMaskPosition],
                 },
             ],
             'mask-image-linear-to-pos': [
                 {
-                    'mask-linear-to': [isNumber, isPercent, isArbitraryVariablePosition, isArbitraryPosition],
+                    'mask-linear-to': [isNumber, isPercent, isArbitraryVariableMaskPosition, isArbitraryMaskPosition],
                 },
             ],
             'mask-image-linear-from-color': [{ 'mask-linear-from': [...scaleColor, isArbitraryVariable, isArbitraryValue] }],
             'mask-image-linear-to-color': [{ 'mask-linear-to': [...scaleColor, isArbitraryVariable, isArbitraryValue] }],
             'mask-image-t-from-pos': [
                 {
-                    'mask-t-from': [isNumber, isPercent, isArbitraryVariablePosition, isArbitraryPosition],
+                    'mask-t-from': [isNumber, isPercent, isArbitraryVariableMaskPosition, isArbitraryMaskPosition],
                 },
             ],
             'mask-image-t-to-pos': [
                 {
-                    'mask-t-to': [isNumber, isPercent, isArbitraryVariablePosition, isArbitraryPosition],
+                    'mask-t-to': [isNumber, isPercent, isArbitraryVariableMaskPosition, isArbitraryMaskPosition],
                 },
             ],
             'mask-image-t-from-color': [{ 'mask-t-from': [...scaleColor, isArbitraryVariable, isArbitraryValue] }],
             'mask-image-t-to-color': [{ 'mask-t-to': [...scaleColor, isArbitraryVariable, isArbitraryValue] }],
             'mask-image-r-from-pos': [
                 {
-                    'mask-r-from': [isNumber, isPercent, isArbitraryVariablePosition, isArbitraryPosition],
+                    'mask-r-from': [isNumber, isPercent, isArbitraryVariableMaskPosition, isArbitraryMaskPosition],
                 },
             ],
             'mask-image-r-to-pos': [
                 {
-                    'mask-r-to': [isNumber, isPercent, isArbitraryVariablePosition, isArbitraryPosition],
+                    'mask-r-to': [isNumber, isPercent, isArbitraryVariableMaskPosition, isArbitraryMaskPosition],
                 },
             ],
             'mask-image-r-from-color': [{ 'mask-r-from': [...scaleColor, isArbitraryVariable, isArbitraryValue] }],
             'mask-image-r-to-color': [{ 'mask-r-to': [...scaleColor, isArbitraryVariable, isArbitraryValue] }],
             'mask-image-b-from-pos': [
                 {
-                    'mask-b-from': [isNumber, isPercent, isArbitraryVariablePosition, isArbitraryPosition],
+                    'mask-b-from': [isNumber, isPercent, isArbitraryVariableMaskPosition, isArbitraryMaskPosition],
                 },
             ],
             'mask-image-b-to-pos': [
                 {
-                    'mask-b-to': [isNumber, isPercent, isArbitraryVariablePosition, isArbitraryPosition],
+                    'mask-b-to': [isNumber, isPercent, isArbitraryVariableMaskPosition, isArbitraryMaskPosition],
                 },
             ],
             'mask-image-b-from-color': [{ 'mask-b-from': [...scaleColor, isArbitraryVariable, isArbitraryValue] }],
             'mask-image-b-to-color': [{ 'mask-b-to': [...scaleColor, isArbitraryVariable, isArbitraryValue] }],
             'mask-image-l-from-pos': [
                 {
-                    'mask-l-from': [isNumber, isPercent, isArbitraryVariablePosition, isArbitraryPosition],
+                    'mask-l-from': [isNumber, isPercent, isArbitraryVariableMaskPosition, isArbitraryMaskPosition],
                 },
             ],
             'mask-image-l-to-pos': [
                 {
-                    'mask-l-to': [isNumber, isPercent, isArbitraryVariablePosition, isArbitraryPosition],
+                    'mask-l-to': [isNumber, isPercent, isArbitraryVariableMaskPosition, isArbitraryMaskPosition],
                 },
             ],
             'mask-image-l-from-color': [{ 'mask-l-from': [...scaleColor, isArbitraryVariable, isArbitraryValue] }],
             'mask-image-l-to-color': [{ 'mask-l-to': [...scaleColor, isArbitraryVariable, isArbitraryValue] }],
             'mask-image-x-from-pos': [
                 {
-                    'mask-x-from': [isNumber, isPercent, isArbitraryVariablePosition, isArbitraryPosition],
+                    'mask-x-from': [isNumber, isPercent, isArbitraryVariableMaskPosition, isArbitraryMaskPosition],
                 },
             ],
             'mask-image-x-to-pos': [
                 {
-                    'mask-x-to': [isNumber, isPercent, isArbitraryVariablePosition, isArbitraryPosition],
+                    'mask-x-to': [isNumber, isPercent, isArbitraryVariableMaskPosition, isArbitraryMaskPosition],
                 },
             ],
             'mask-image-x-from-color': [{ 'mask-x-from': [...scaleColor, isArbitraryVariable, isArbitraryValue] }],
             'mask-image-x-to-color': [{ 'mask-x-to': [...scaleColor, isArbitraryVariable, isArbitraryValue] }],
             'mask-image-y-from-pos': [
                 {
-                    'mask-y-from': [isNumber, isPercent, isArbitraryVariablePosition, isArbitraryPosition],
+                    'mask-y-from': [isNumber, isPercent, isArbitraryVariableMaskPosition, isArbitraryMaskPosition],
                 },
             ],
             'mask-image-y-to-pos': [
                 {
-                    'mask-y-to': [isNumber, isPercent, isArbitraryVariablePosition, isArbitraryPosition],
+                    'mask-y-to': [isNumber, isPercent, isArbitraryVariableMaskPosition, isArbitraryMaskPosition],
                 },
             ],
             'mask-image-y-from-color': [{ 'mask-y-from': [...scaleColor, isArbitraryVariable, isArbitraryValue] }],
@@ -1269,12 +1271,12 @@ export const getConfig = () => {
             'mask-image-radial': [{ 'mask-radial': [isArbitraryVariable, isArbitraryValue] }],
             'mask-image-radial-from-pos': [
                 {
-                    'mask-radial-from': [isNumber, isPercent, isArbitraryVariablePosition, isArbitraryPosition],
+                    'mask-radial-from': [isNumber, isPercent, isArbitraryVariableMaskPosition, isArbitraryMaskPosition],
                 },
             ],
             'mask-image-radial-to-pos': [
                 {
-                    'mask-radial-to': [isNumber, isPercent, isArbitraryVariablePosition, isArbitraryPosition],
+                    'mask-radial-to': [isNumber, isPercent, isArbitraryVariableMaskPosition, isArbitraryMaskPosition],
                 },
             ],
             'mask-image-radial-from-color': [{ 'mask-radial-from': [...scaleColor, isArbitraryVariable, isArbitraryValue] }],
@@ -1303,12 +1305,12 @@ export const getConfig = () => {
             'mask-image-conic-pos': [{ 'mask-conic': [isNumber] }],
             'mask-image-conic-from-pos': [
                 {
-                    'mask-conic-from': [isNumber, isPercent, isArbitraryVariablePosition, isArbitraryPosition],
+                    'mask-conic-from': [isNumber, isPercent, isArbitraryVariableMaskPosition, isArbitraryMaskPosition],
                 },
             ],
             'mask-image-conic-to-pos': [
                 {
-                    'mask-conic-to': [isNumber, isPercent, isArbitraryVariablePosition, isArbitraryPosition],
+                    'mask-conic-to': [isNumber, isPercent, isArbitraryVariableMaskPosition, isArbitraryMaskPosition],
                 },
             ],
             'mask-image-conic-from-color': [{ 'mask-conic-from': [...scaleColor, isArbitraryVariable, isArbitraryValue] }],
@@ -1636,6 +1638,14 @@ export const getConfig = () => {
             'border-color': ['border-color-x', 'border-color-y', 'border-color-s', 'border-color-e', 'border-color-bs', 'border-color-be', 'border-color-t', 'border-color-r', 'border-color-b', 'border-color-l'],
             'border-color-x': ['border-color-s', 'border-color-e', 'border-color-r', 'border-color-l'],
             'border-color-y': ['border-color-bs', 'border-color-be', 'border-color-t', 'border-color-b'],
+            'mask-image-x-from-pos': ['mask-image-r-from-pos', 'mask-image-l-from-pos'],
+            'mask-image-x-to-pos': ['mask-image-r-to-pos', 'mask-image-l-to-pos'],
+            'mask-image-x-from-color': ['mask-image-r-from-color', 'mask-image-l-from-color'],
+            'mask-image-x-to-color': ['mask-image-r-to-color', 'mask-image-l-to-color'],
+            'mask-image-y-from-pos': ['mask-image-t-from-pos', 'mask-image-b-from-pos'],
+            'mask-image-y-to-pos': ['mask-image-t-to-pos', 'mask-image-b-to-pos'],
+            'mask-image-y-from-color': ['mask-image-t-from-color', 'mask-image-b-from-color'],
+            'mask-image-y-to-color': ['mask-image-t-to-color', 'mask-image-b-to-color'],
             translate: ['translate-x', 'translate-y', 'translate-none'],
             'translate-none': ['translate', 'translate-x', 'translate-y', 'translate-z'],
             'scroll-m': ['scroll-mx', 'scroll-my', 'scroll-ms', 'scroll-me', 'scroll-mbs', 'scroll-mbe', 'scroll-mt', 'scroll-mr', 'scroll-mb', 'scroll-ml'],

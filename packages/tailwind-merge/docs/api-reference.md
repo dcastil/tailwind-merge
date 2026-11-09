@@ -313,6 +313,7 @@ interface Validators {
     isArbitraryFamilyName(value: string): boolean
     isArbitraryImage(value: string): boolean
     isArbitraryLength(value: string): boolean
+    isArbitraryMaskPosition(value: string): boolean
     isArbitraryNumber(value: string): boolean
     isArbitraryPosition(value: string): boolean
     isArbitraryShadow(value: string): boolean
@@ -322,6 +323,7 @@ interface Validators {
     isArbitraryVariableFamilyName(value: string): boolean
     isArbitraryVariableImage(value: string): boolean
     isArbitraryVariableLength(value: string): boolean
+    isArbitraryVariableMaskPosition(value: string): boolean
     isArbitraryVariablePosition(value: string): boolean
     isArbitraryVariableShadow(value: string): boolean
     isArbitraryVariableSize(value: string): boolean
@@ -375,6 +377,8 @@ These validators check arbitrary values (values in square brackets `[...]`):
 | `isArbitraryImage`      | Checks for image-like values (starts with `image:`, `url:`, `linear-gradient(`, etc.)     | `[url('/path.png')]`, `[image:var(--img)]`                                 | Background-image                  |
 | `isArbitraryShadow`     | Checks for shadow patterns (two lengths separated by underscore, optionally with `inset`) | `[0_35px_60px_-15px_rgba(0,0,0,0.3)]`, `[inset_0_4px_8px_rgba(0,0,0,0.1)]` | Box-shadow, text-shadow           |
 
+`isArbitraryMaskPosition` recognizes mask stop positions such as `[20px]`, `[.25turn]`, and `[var(--position)]`, while preserving named, hexadecimal, function, and explicitly labeled colors as colors. Unlike generic position validators, it follows the mask utilities' default to positions for non-color functions and type labels.
+
 ### Arbitrary Variable Validators
 
 These validators check arbitrary CSS variables (values in parentheses `(...)`):
@@ -389,6 +393,8 @@ These validators check arbitrary CSS variables (values in parentheses `(...)`):
 | `isArbitraryVariableFamilyName` | Checks for variables with `family-name` label                     | `(family-name:--my-font)`               | Font-family          |
 | `isArbitraryVariableWeight`     | Checks for variables with `weight` or `number` label, or no label | `(weight:--my-fw)`, `(--my-weight)`     | Font-weight          |
 | `isArbitraryVariableShadow`     | Checks for variables with `shadow` label or no label              | `(shadow:--my-shadow)`, `(--my-shadow)` | Shadow properties    |
+
+`isArbitraryVariableMaskPosition` recognizes mask stop variables such as `(--position)`, `(length:--position)`, and `(angle:--position)`. A `color:` label, as in `(color:--mask-color)`, keeps the variable in the color group.
 
 ### Usage Examples
 

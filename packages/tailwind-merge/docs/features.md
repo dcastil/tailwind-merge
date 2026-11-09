@@ -15,6 +15,7 @@ twMerge('p-5 p-2 p-4') // → 'p-4'
 ```ts
 twMerge('p-3 px-5') // → 'p-3 px-5'
 twMerge('inset-x-4 right-4') // → 'inset-x-4 right-4'
+twMerge('mask-x-to-blue-500 mask-r-to-red-500') // → 'mask-x-to-blue-500 mask-r-to-red-500'
 ```
 
 ### Resolves non-trivial conflicts
@@ -23,6 +24,17 @@ twMerge('inset-x-4 right-4') // → 'inset-x-4 right-4'
 twMerge('inset-x-px -inset-1') // → '-inset-1'
 twMerge('bottom-auto inset-y-6') // → 'inset-y-6'
 twMerge('inline block') // → 'block'
+twMerge('mask-r-to-red-500 mask-x-to-blue-500') // → 'mask-x-to-blue-500'
+twMerge('mask-t-from-50% mask-y-from-20%') // → 'mask-y-from-20%'
+```
+
+Mask axis utilities override earlier matching edge utilities: `mask-x-*` covers left and right, and `mask-y-*` covers top and bottom. The `from` and `to` stops, and their positions and colors, remain independent.
+
+Arbitrary mask stop positions also remain separate from colors. Mask stop variables without a type label are positions; use `color:` for color variables.
+
+```ts
+twMerge('mask-r-from-red-500 mask-x-from-(--fade)') // → 'mask-r-from-red-500 mask-x-from-(--fade)'
+twMerge('mask-r-from-red-500 mask-x-from-(color:--fade)') // → 'mask-x-from-(color:--fade)'
 ```
 
 ### Supports modifiers and stacked modifiers
