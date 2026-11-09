@@ -79,6 +79,9 @@ export const isArbitraryVariablePosition = (value: string) =>
 
 export const isArbitraryVariableSize = (value: string) => getIsArbitraryVariable(value, isLabelSize)
 
+export const isArbitraryVariableMaskPosition = (value: string) =>
+    getIsArbitraryVariable(value, isLabelMaskPosition, true)
+
 export const isArbitraryVariableImage = (value: string) =>
     getIsArbitraryVariable(value, isLabelImage)
 
@@ -128,6 +131,8 @@ const getIsArbitraryVariable = (
 // Labels
 
 const isLabelPosition = (label: string) => label === 'position' || label === 'percentage'
+
+const isLabelMaskPosition = (label: string) => isLabelPosition(label) || isLabelLength(label)
 
 const isLabelImage = (label: string) => label === 'image' || label === 'url'
 

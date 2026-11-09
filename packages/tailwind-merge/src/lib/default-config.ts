@@ -15,6 +15,7 @@ import {
     isArbitraryVariableFamilyName,
     isArbitraryVariableImage,
     isArbitraryVariableLength,
+    isArbitraryVariableMaskPosition,
     isArbitraryVariablePosition,
     isArbitraryVariableShadow,
     isArbitraryVariableSize,
@@ -219,7 +220,13 @@ export const getDefaultConfig = () => {
             'luminosity',
         ] as const
     const scaleMaskImagePosition = () =>
-        [isNumber, isPercent, isArbitraryVariablePosition, isArbitraryPosition] as const
+        [
+            isNumber,
+            isPercent,
+            isArbitraryVariableMaskPosition,
+            isArbitraryPosition,
+            isArbitraryLength,
+        ] as const
     const scaleBlur = () =>
         [
             // Deprecated since Tailwind CSS v4.0.0

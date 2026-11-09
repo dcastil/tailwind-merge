@@ -160,6 +160,30 @@ test('supports Tailwind CSS v4.1 features', () => {
         ),
     ).toBe('mask-[something] mask-contain')
     expect(twMerge('mask-type-luminance mask-type-alpha')).toBe('mask-type-alpha')
+    // Arbitrary lengths and unlabeled variables in mask gradient stops are positions
+    expect(twMerge('mask-b-from-[20px] mask-b-from-red-500')).toBe(
+        'mask-b-from-[20px] mask-b-from-red-500',
+    )
+    expect(twMerge('mask-b-from-[20px] mask-b-from-50%')).toBe('mask-b-from-50%')
+    expect(twMerge('mask-b-from-50% mask-b-from-[20px]')).toBe('mask-b-from-[20px]')
+    expect(twMerge('mask-l-to-[50%] mask-l-to-3')).toBe('mask-l-to-3')
+    expect(twMerge('mask-radial-to-[calc(100%-2rem)] mask-radial-to-black')).toBe(
+        'mask-radial-to-[calc(100%-2rem)] mask-radial-to-black',
+    )
+    expect(twMerge('mask-linear-from-[length:var(--x)] mask-linear-from-10')).toBe(
+        'mask-linear-from-10',
+    )
+    expect(twMerge('mask-b-from-(--stop) mask-b-from-red-500')).toBe(
+        'mask-b-from-(--stop) mask-b-from-red-500',
+    )
+    expect(twMerge('mask-conic-from-(--stop) mask-conic-from-(length:--other)')).toBe(
+        'mask-conic-from-(length:--other)',
+    )
+    // Arbitrary colors in mask gradient stops are still colors
+    expect(twMerge('mask-t-from-[#f00] mask-t-from-red-500 mask-t-from-[20px]')).toBe(
+        'mask-t-from-red-500 mask-t-from-[20px]',
+    )
+    expect(twMerge('mask-t-to-[hsl(0_0%_0%)] mask-t-to-(color:--c)')).toBe('mask-t-to-(color:--c)')
     expect(twMerge('shadow-md shadow-lg/25 text-shadow-md text-shadow-lg/25')).toBe(
         'shadow-lg/25 text-shadow-lg/25',
     )
