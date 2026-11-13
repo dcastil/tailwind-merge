@@ -47,9 +47,9 @@
         "version": "node ../../scripts/update-pinned-links.mjs && node ../../scripts/pin-readme-links.mjs"
     },
     "peerDependencies": {
-        "@tailwindcss/postcss": "~4.3.3",
-        "next": "^16.4.3",
-        "tailwindcss": "~4.3.3"
+        "@tailwindcss/postcss": "~4.3.5",
+        "next": "^16.4.6",
+        "tailwindcss": "~4.3.5"
     },
     "peerDependenciesMeta": {
         "@tailwindcss/postcss": {
@@ -57,22 +57,22 @@
         }
     },
     "dependencies": {
-        "@tailwindcss/node": "~4.3.3",
-        "@tailwindcss/oxide": "~4.3.3",
-        "enhanced-resolve": "^5.24.5",
-        "postcss": "^8.5.15",
+        "@tailwindcss/node": "~4.3.5",
+        "@tailwindcss/oxide": "~4.3.5",
+        "enhanced-resolve": "^5.26.1",
+        "postcss": "^8.5.32",
         "tailwind-merge": "workspace:^"
     },
     "devDependencies": {
         "@tailwind-merge/configurator": "workspace:*",
         "@tailwind-merge/plugin-core": "workspace:*",
-        "@tailwindcss/postcss": "~4.3.3",
+        "@tailwindcss/postcss": "~4.3.5",
         "@types/node": "catalog:",
         "eslint": "catalog:",
-        "next": "^16.3.3",
-        "react": "^19.2.0",
-        "react-dom": "^19.2.0",
-        "tailwindcss": "~4.3.3",
+        "next": "^16.4.6",
+        "react": "^19.3.1",
+        "react-dom": "^19.3.1",
+        "tailwindcss": "~4.3.5",
         "tsdown": "catalog:",
         "typescript": "catalog:",
         "vitest": "catalog:"
