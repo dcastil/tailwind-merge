@@ -19,15 +19,15 @@
         "@tailwind-merge/configurator": "workspace:*"
     },
     "peerDependencies": {
-        "@tailwindcss/node": "^4.3.3"
+        "@tailwindcss/node": "^4.3.5"
     },
     "devDependencies": {
-        "@tailwindcss/node": "^4.3.3",
-        "@tailwindcss/oxide": "^4.3.3",
+        "@tailwindcss/node": "^4.3.5",
+        "@tailwindcss/oxide": "^4.3.5",
         "@types/node": "catalog:",
         "eslint": "catalog:",
         "tailwind-merge": "workspace:*",
-        "tailwindcss": "^4.3.3",
+        "tailwindcss": "^4.3.5",
         "typescript": "catalog:",
         "vitest": "catalog:"
     }
