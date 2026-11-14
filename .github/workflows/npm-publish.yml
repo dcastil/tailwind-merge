@@ -20,7 +20,7 @@ jobs:
             - name: Use Node.js 24
               uses: actions/setup-node@v6
               with:
-                  node-version: 24.18.1
+                  node-version: 26.13.0
                   package-manager-cache: false
             - run: corepack enable
             - run: pnpm install --frozen-lockfile
@@ -58,7 +58,7 @@ jobs:
             - name: Use Node.js 24
               uses: actions/setup-node@v6
               with:
-                  node-version: 24.18.1
+                  node-version: 26.13.0
                   # No registry-url on purpose: it would write an .npmrc auth line referencing the unset NODE_AUTH_TOKEN, which pnpm's config loader rejects. pnpm publishes to its default registry through npm trusted publishing (OIDC), needing no token plumbing.
                   package-manager-cache: false
             - run: corepack enable
@@ -132,7 +132,7 @@ jobs:
             - name: Use Node.js 24
               uses: actions/setup-node@v6
               with:
-                  node-version: 24.18.1
+                  node-version: 26.13.0
                   package-manager-cache: false
             - run: corepack enable
             - run: pnpm install --frozen-lockfile
@@ -172,7 +172,7 @@ jobs:
             - name: Use Node.js 24
               uses: actions/setup-node@v6
               with:
-                  node-version: 24.18.1
+                  node-version: 26.13.0
                   # No registry-url on purpose: it would write an .npmrc auth line referencing the unset NODE_AUTH_TOKEN, which pnpm's config loader rejects. pnpm publishes to its default registry through npm trusted publishing (OIDC), needing no token plumbing.
                   package-manager-cache: false
             - run: corepack enable
