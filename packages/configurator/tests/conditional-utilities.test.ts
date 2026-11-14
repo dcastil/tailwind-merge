@@ -183,17 +183,18 @@ describe.each(['compact', 'exact'] as const)('%s conditional utility coverage', 
                 prune: prune ? { usedClasses } : undefined,
             })
 
-            for (const [name, scope] of [
-                ['entrance', '@starting-style'],
-                ['scoped', '@scope (.card)'],
-                ['layered', '@layer components'],
-            ]) {
+            for (const [name, context, scope] of [
+                ['entrance', '', ['&', '@starting-style']],
+                // Tailwind flattens a nested `@scope` and wraps its direct declarations in `:where(:scope)`, so they style the `.card` scope root inside the utility's element: a separate render target that can never cover the utility's own opacity.
+                ['scoped', ':scope', ['@scope (.scoped .card)', ':where(:scope)']],
+                ['layered', '', ['&', '@layer components']],
+            ] as const) {
                 expect(
-                    declaredDeclarations(designSystem, name!)?.filter(
+                    declaredDeclarations(designSystem, name)?.filter(
                         (entry) => entry.property === 'opacity',
                     ),
                 ).toEqual([
-                    expect.objectContaining({ conditional: true, scope: ['&', scope], value: '0' }),
+                    expect.objectContaining({ conditional: true, context, scope, value: '0' }),
                 ])
                 expect(twMerge(`${name} text-blue-500 opacity-100`)).toBe(
                     `${name} text-blue-500 opacity-100`,
