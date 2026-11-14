@@ -137,7 +137,7 @@ function analyzeSelector(
     // Prefer the nesting anchor over an ancestor class (`.dark &`), then the candidate's own class over any other: ancestor variants like `in-*` and `group-*` put their ancestor's class first (`:where(.dark *) .in-dark\:block`), and anchoring there would turn the utility's own element into a combinator target. A hexadecimal escape consumes its optional trailing space too (`\32 xl`): that space belongs to a numeric variant's class name, not a descendant selector.
     const anchorMatch = /&/.exec(subject) ?? findClassAnchor(subject, candidate)
     if (!anchorMatch) {
-        // No recognizable anchor means the block targets something unrelated (not emitted by current Tailwind); give it a distinct context so it can never collide with base declarations.
+        // No recognizable anchor means the block targets a different element, such as the `:where(:scope)` rule Tailwind emits for declarations directly inside a flattened `@scope` (they style the scope root, not the utility's element); give it a distinct context so it can never collide with base declarations.
         return {
             contextFragment: subject.replace(/\s+/g, ' '),
             conditional: false,

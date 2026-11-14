@@ -54,8 +54,8 @@
         "version": "node ../../scripts/update-pinned-links.mjs && node ../../scripts/pin-readme-links.mjs"
     },
     "peerDependencies": {
-        "@tailwindcss/vite": "~4.3.3",
-        "tailwindcss": "~4.3.3",
+        "@tailwindcss/vite": "~4.3.5",
+        "tailwindcss": "~4.3.5",
         "vite": "^6.0.0 || ^7.0.0 || ^8.0.0"
     },
     "peerDependenciesMeta": {
@@ -64,22 +64,22 @@
         }
     },
     "dependencies": {
-        "@tailwindcss/node": "~4.3.3",
-        "@tailwindcss/oxide": "~4.3.3",
-        "enhanced-resolve": "^5.24.5",
-        "postcss": "^8.5.15",
+        "@tailwindcss/node": "~4.3.5",
+        "@tailwindcss/oxide": "~4.3.5",
+        "enhanced-resolve": "^5.26.1",
+        "postcss": "^8.5.32",
         "tailwind-merge": "workspace:^"
     },
     "devDependencies": {
         "@tailwind-merge/configurator": "workspace:*",
         "@tailwind-merge/plugin-core": "workspace:*",
-        "@tailwindcss/vite": "~4.3.3",
+        "@tailwindcss/vite": "~4.3.5",
         "@types/node": "catalog:",
         "eslint": "catalog:",
-        "tailwindcss": "~4.3.3",
+        "tailwindcss": "~4.3.5",
         "tsdown": "catalog:",
         "typescript": "catalog:",
-        "vite": "^7.3.7",
+        "vite": "^7.3.8",
         "vitest": "catalog:"
     }
 }
