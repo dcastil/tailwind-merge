@@ -8,6 +8,7 @@ const {
     isArbitraryFamilyName,
     isArbitraryImage,
     isArbitraryLength,
+    isArbitraryMaskPosition,
     isArbitraryNumber,
     isArbitraryPosition,
     isArbitraryShadow,
@@ -17,6 +18,7 @@ const {
     isArbitraryVariableFamilyName,
     isArbitraryVariableImage,
     isArbitraryVariableLength,
+    isArbitraryVariableMaskPosition,
     isArbitraryVariablePosition,
     isArbitraryVariableShadow,
     isArbitraryVariableSize,
@@ -126,6 +128,38 @@ test('isArbitraryNumber', () => {
     expect(isArbitraryNumber('[black]')).toBe(false)
     expect(isArbitraryNumber('black')).toBe(false)
     expect(isArbitraryNumber('450')).toBe(false)
+})
+
+test('isArbitraryMaskPosition', () => {
+    expect(isArbitraryMaskPosition('[20px]')).toBe(true)
+    expect(isArbitraryMaskPosition('[_20px]')).toBe(true)
+    expect(isArbitraryMaskPosition('[20%]')).toBe(true)
+    expect(isArbitraryMaskPosition('[0]')).toBe(true)
+    expect(isArbitraryMaskPosition('[-.25turn]')).toBe(true)
+    expect(isArbitraryMaskPosition('[length:var(--position)]')).toBe(true)
+    expect(isArbitraryMaskPosition('[number:var(--position)]')).toBe(true)
+    expect(isArbitraryMaskPosition('[angle:var(--position)]')).toBe(true)
+    expect(isArbitraryMaskPosition('[position:var(--position)]')).toBe(true)
+    expect(isArbitraryMaskPosition('[percentage:20%]')).toBe(true)
+    expect(isArbitraryMaskPosition('[var(--position)]')).toBe(true)
+    expect(isArbitraryMaskPosition('[env(safe-area-inset-top)]')).toBe(true)
+    expect(isArbitraryMaskPosition('[round(nearest,1rem,1px)]')).toBe(true)
+    expect(isArbitraryMaskPosition('[inherit]')).toBe(true)
+    expect(isArbitraryMaskPosition('[___initial]')).toBe(true)
+    expect(isArbitraryMaskPosition('[revert-layer]')).toBe(true)
+
+    expect(isArbitraryMaskPosition('[color:var(--color)]')).toBe(false)
+    expect(isArbitraryMaskPosition('[#ff0000]')).toBe(false)
+    expect(isArbitraryMaskPosition('[red]')).toBe(false)
+    expect(isArbitraryMaskPosition('[transparent]')).toBe(false)
+    expect(isArbitraryMaskPosition('[currentColor]')).toBe(false)
+    expect(isArbitraryMaskPosition('[hsl(0_0%_0%)]')).toBe(false)
+    expect(isArbitraryMaskPosition('[RGB(100%_0%_0%)]')).toBe(false)
+    expect(isArbitraryMaskPosition('[color(srgb_100%_0%_0%)]')).toBe(false)
+    expect(isArbitraryMaskPosition('[light-dark(white,rgb(0_0_0/50%))]')).toBe(false)
+    expect(isArbitraryMaskPosition('[--alpha(red/50%)]')).toBe(false)
+    expect(isArbitraryMaskPosition('20%')).toBe(false)
+    expect(isArbitraryMaskPosition('(length:--position)')).toBe(false)
 })
 
 test('isArbitraryPosition', () => {
@@ -238,6 +272,17 @@ test('isArbitraryVariablePosition', () => {
     expect(isArbitraryVariablePosition('(test)')).toBe(false)
     expect(isArbitraryVariablePosition('position:test')).toBe(false)
     expect(isArbitraryVariablePosition('percentage:test')).toBe(false)
+})
+
+test('isArbitraryVariableMaskPosition', () => {
+    expect(isArbitraryVariableMaskPosition('(--position)')).toBe(true)
+    expect(isArbitraryVariableMaskPosition('(length:--position)')).toBe(true)
+    expect(isArbitraryVariableMaskPosition('(number:--position)')).toBe(true)
+    expect(isArbitraryVariableMaskPosition('(angle:--position)')).toBe(true)
+    expect(isArbitraryVariableMaskPosition('(position:--position)')).toBe(true)
+    expect(isArbitraryVariableMaskPosition('(color:--color)')).toBe(false)
+    expect(isArbitraryVariableMaskPosition('[var(--position)]')).toBe(false)
+    expect(isArbitraryVariableMaskPosition('--position')).toBe(false)
 })
 
 test('isArbitraryVariableShadow', () => {

@@ -6,6 +6,7 @@ import {
     isArbitraryFamilyName,
     isArbitraryImage,
     isArbitraryLength,
+    isArbitraryMaskPosition,
     isArbitraryNumber,
     isArbitraryPosition,
     isArbitraryShadow,
@@ -15,6 +16,7 @@ import {
     isArbitraryVariableFamilyName,
     isArbitraryVariableImage,
     isArbitraryVariableLength,
+    isArbitraryVariableMaskPosition,
     isArbitraryVariablePosition,
     isArbitraryVariableShadow,
     isArbitraryVariableSize,
@@ -219,7 +221,7 @@ export const getDefaultConfig = () => {
             'luminosity',
         ] as const
     const scaleMaskImagePosition = () =>
-        [isNumber, isPercent, isArbitraryVariablePosition, isArbitraryPosition] as const
+        [isNumber, isPercent, isArbitraryVariableMaskPosition, isArbitraryMaskPosition] as const
     const scaleBlur = () =>
         [
             // Deprecated since Tailwind CSS v4.0.0
@@ -2539,6 +2541,14 @@ export const getDefaultConfig = () => {
             ],
             'border-color-x': ['border-color-s', 'border-color-e', 'border-color-r', 'border-color-l'],
             'border-color-y': ['border-color-bs', 'border-color-be', 'border-color-t', 'border-color-b'],
+            'mask-image-x-from-pos': ['mask-image-r-from-pos', 'mask-image-l-from-pos'],
+            'mask-image-x-to-pos': ['mask-image-r-to-pos', 'mask-image-l-to-pos'],
+            'mask-image-x-from-color': ['mask-image-r-from-color', 'mask-image-l-from-color'],
+            'mask-image-x-to-color': ['mask-image-r-to-color', 'mask-image-l-to-color'],
+            'mask-image-y-from-pos': ['mask-image-t-from-pos', 'mask-image-b-from-pos'],
+            'mask-image-y-to-pos': ['mask-image-t-to-pos', 'mask-image-b-to-pos'],
+            'mask-image-y-from-color': ['mask-image-t-from-color', 'mask-image-b-from-color'],
+            'mask-image-y-to-color': ['mask-image-t-to-color', 'mask-image-b-to-color'],
             translate: ['translate-x', 'translate-y', 'translate-none'],
             'translate-none': ['translate', 'translate-x', 'translate-y', 'translate-z'],
             'scroll-m': [

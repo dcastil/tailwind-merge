@@ -59,3 +59,12 @@ test('handles light-dark() functions with percentages correctly', () => {
         'stroke-[light-dark(white,rgb(0_0_0/50%))] stroke-2',
     )
 })
+
+test('handles --alpha() and uppercase color functions with percentages correctly', () => {
+    expect(twMerge('text-lg text-[--alpha(red/50%)]')).toBe('text-lg text-[--alpha(red/50%)]')
+    expect(twMerge('text-[--alpha(red/50%)] text-lg')).toBe('text-[--alpha(red/50%)] text-lg')
+    expect(twMerge('text-red-500 text-[--alpha(red/50%)]')).toBe('text-[--alpha(red/50%)]')
+    expect(twMerge('text-lg text-[RGB(0_0_0/50%)]')).toBe('text-lg text-[RGB(0_0_0/50%)]')
+    expect(twMerge('border-2 border-[HSL(0_0%_0%)]')).toBe('border-2 border-[HSL(0_0%_0%)]')
+    expect(twMerge('text-red-500 text-[RGB(0_0_0/50%)]')).toBe('text-[RGB(0_0_0/50%)]')
+})
