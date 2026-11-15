@@ -4,9 +4,9 @@ const fractionRegex = /^\d+(?:\.\d+)?\/\d+(?:\.\d+)?$/
 const tshirtUnitRegex = /^(\d+(\.\d+)?)?(xs|sm|md|lg|xl)$/
 const lengthUnitRegex =
     /\d+(%|px|r?em|[sdl]?v([hwib]|min|max)|pt|pc|in|cm|mm|cap|ch|ex|r?lh|cq(w|h|i|b|min|max))|\b(calc|min|max|clamp)\(.+\)|^0$/
-const colorFunctionRegex = /^(rgba?|hsla?|hwb|(ok)?(lab|lch)|color-mix|color|light-dark)\(.+\)$/
-const maskColorFunctionRegex =
-    /^(rgba?|hsla?|hwb|(ok)?(lab|lch)|color-mix|color|light-dark|--alpha)\(/i
+// Case-insensitive because CSS function names are, and includes Tailwind's `--alpha()` because it resolves to a color.
+const colorFunctionRegex =
+    /^(rgba?|hsla?|hwb|(ok)?(lab|lch)|color-mix|color|light-dark|--alpha)\(.+\)$/i
 const maskPositionRegex =
     /^(?:_*[+-]?(?:\d|\.\d)|[\w-]+\(|_*(?:inherit|initial|revert(?:-layer)?|unset)_*$)/i
 // Shadow always begins with x and y offset separated by underscore optionally prepended by inset
@@ -33,8 +33,8 @@ const isLengthOnly = (value: string) =>
     lengthUnitRegex.test(value) && !colorFunctionRegex.test(value)
 
 const isMaskPosition = (value: string) =>
-    // Mask stops default to positions for variables and non-color CSS functions, including angles.
-    maskPositionRegex.test(value) && !maskColorFunctionRegex.test(value)
+    // Mask stops default to positions for variables and non-color CSS functions, including angles, so color functions need to be excluded explicitly.
+    maskPositionRegex.test(value) && !colorFunctionRegex.test(value)
 
 const isNever = () => false
 
