@@ -365,36 +365,34 @@ These validators check for basic patterns and types:
 
 These validators check arbitrary values (values in square brackets `[...]`):
 
-| Validator               | Description                                                                               | Example Match                                                              | Common Use                        |
-| ----------------------- | ----------------------------------------------------------------------------------------- | -------------------------------------------------------------------------- | --------------------------------- |
-| `isArbitraryValue`      | Checks if value is enclosed in brackets                                                   | `[something]`                                                              | Generic arbitrary value detection |
-| `isArbitraryLength`     | Checks for arbitrary length values                                                        | `[3%]`, `[4px]`, `[length:var(--my-var)]`                                  | Width, height, spacing            |
-| `isArbitraryNumber`     | Checks for arbitrary numbers or `number:` labeled values                                  | `[450]`, `[number:var(--value)]`                                           | Font-weight, z-index              |
-| `isArbitraryWeight`     | Checks for arbitrary font weight values or `weight:`/`number:` labeled values             | `[400]`, `[bold]`, `[weight:var(--fw)]`                                    | Font-weight                       |
-| `isArbitraryFamilyName` | Checks for `family-name:` labeled values                                                  | `[family-name:Open_Sans]`                                                  | Font-family                       |
-| `isArbitraryPosition`   | Checks for `position:` labeled values                                                     | `[position:200px_100px]`                                                   | Background-position               |
-| `isArbitrarySize`       | Checks for `size:` labeled values                                                         | `[size:200px_100px]`                                                       | Background-size                   |
-| `isArbitraryImage`      | Checks for image-like values (starts with `image:`, `url:`, `linear-gradient(`, etc.)     | `[url('/path.png')]`, `[image:var(--img)]`                                 | Background-image                  |
-| `isArbitraryShadow`     | Checks for shadow patterns (two lengths separated by underscore, optionally with `inset`) | `[0_35px_60px_-15px_rgba(0,0,0,0.3)]`, `[inset_0_4px_8px_rgba(0,0,0,0.1)]` | Box-shadow, text-shadow           |
-
-`isArbitraryMaskPosition` recognizes mask stop positions such as `[20px]`, `[.25turn]`, and `[var(--position)]`, while preserving named, hexadecimal, function, and explicitly labeled colors as colors. Unlike generic position validators, it follows the mask utilities' default to positions for non-color functions and type labels.
+| Validator                 | Description                                                                               | Example Match                                                              | Common Use                        |
+| ------------------------- | ----------------------------------------------------------------------------------------- | -------------------------------------------------------------------------- | --------------------------------- |
+| `isArbitraryValue`        | Checks if value is enclosed in brackets                                                   | `[something]`                                                              | Generic arbitrary value detection |
+| `isArbitraryLength`       | Checks for arbitrary length values                                                        | `[3%]`, `[4px]`, `[length:var(--my-var)]`                                  | Width, height, spacing            |
+| `isArbitraryNumber`       | Checks for arbitrary numbers or `number:` labeled values                                  | `[450]`, `[number:var(--value)]`                                           | Font-weight, z-index              |
+| `isArbitraryWeight`       | Checks for arbitrary font weight values or `weight:`/`number:` labeled values             | `[400]`, `[bold]`, `[weight:var(--fw)]`                                    | Font-weight                       |
+| `isArbitraryFamilyName`   | Checks for `family-name:` labeled values                                                  | `[family-name:Open_Sans]`                                                  | Font-family                       |
+| `isArbitraryPosition`     | Checks for `position:` labeled values                                                     | `[position:200px_100px]`                                                   | Background-position               |
+| `isArbitraryMaskPosition` | Checks for lengths, numbers, angles, non-color functions, or any label except `color:`    | `[20px]`, `[.25turn]`, `[var(--position)]`                                 | Mask gradient stop positions      |
+| `isArbitrarySize`         | Checks for `size:` labeled values                                                         | `[size:200px_100px]`                                                       | Background-size                   |
+| `isArbitraryImage`        | Checks for image-like values (starts with `image:`, `url:`, `linear-gradient(`, etc.)     | `[url('/path.png')]`, `[image:var(--img)]`                                 | Background-image                  |
+| `isArbitraryShadow`       | Checks for shadow patterns (two lengths separated by underscore, optionally with `inset`) | `[0_35px_60px_-15px_rgba(0,0,0,0.3)]`, `[inset_0_4px_8px_rgba(0,0,0,0.1)]` | Box-shadow, text-shadow           |
 
 ### Arbitrary Variable Validators
 
 These validators check arbitrary CSS variables (values in parentheses `(...)`):
 
-| Validator                       | Description                                                       | Example Match                           | Common Use           |
-| ------------------------------- | ----------------------------------------------------------------- | --------------------------------------- | -------------------- |
-| `isArbitraryVariable`           | Checks if value is a CSS variable in parentheses                  | `(--my-var)`                            | Generic CSS variable |
-| `isArbitraryVariableLength`     | Checks for variables with `length` label                          | `(length:--my-length)`                  | Length properties    |
-| `isArbitraryVariableSize`       | Checks for variables with `size`, `length`, or `percentage` label | `(size:--my-size)`                      | Size properties      |
-| `isArbitraryVariablePosition`   | Checks for variables with `position` label                        | `(position:--my-position)`              | Position properties  |
-| `isArbitraryVariableImage`      | Checks for variables with `image` or `url` label                  | `(image:--my-image)`                    | Image properties     |
-| `isArbitraryVariableFamilyName` | Checks for variables with `family-name` label                     | `(family-name:--my-font)`               | Font-family          |
-| `isArbitraryVariableWeight`     | Checks for variables with `weight` or `number` label, or no label | `(weight:--my-fw)`, `(--my-weight)`     | Font-weight          |
-| `isArbitraryVariableShadow`     | Checks for variables with `shadow` label or no label              | `(shadow:--my-shadow)`, `(--my-shadow)` | Shadow properties    |
-
-`isArbitraryVariableMaskPosition` recognizes mask stop variables such as `(--position)`, `(length:--position)`, and `(angle:--position)`. A `color:` label, as in `(color:--mask-color)`, keeps the variable in the color group.
+| Validator                         | Description                                                       | Example Match                           | Common Use                   |
+| --------------------------------- | ----------------------------------------------------------------- | --------------------------------------- | ---------------------------- |
+| `isArbitraryVariable`             | Checks if value is a CSS variable in parentheses                  | `(--my-var)`                            | Generic CSS variable         |
+| `isArbitraryVariableLength`       | Checks for variables with `length` label                          | `(length:--my-length)`                  | Length properties            |
+| `isArbitraryVariableSize`         | Checks for variables with `size`, `length`, or `percentage` label | `(size:--my-size)`                      | Size properties              |
+| `isArbitraryVariablePosition`     | Checks for variables with `position` label                        | `(position:--my-position)`              | Position properties          |
+| `isArbitraryVariableMaskPosition` | Checks for variables with any label except `color`, or no label   | `(length:--my-stop)`, `(--my-stop)`     | Mask gradient stop positions |
+| `isArbitraryVariableImage`        | Checks for variables with `image` or `url` label                  | `(image:--my-image)`                    | Image properties             |
+| `isArbitraryVariableFamilyName`   | Checks for variables with `family-name` label                     | `(family-name:--my-font)`               | Font-family                  |
+| `isArbitraryVariableWeight`       | Checks for variables with `weight` or `number` label, or no label | `(weight:--my-fw)`, `(--my-weight)`     | Font-weight                  |
+| `isArbitraryVariableShadow`       | Checks for variables with `shadow` label or no label              | `(shadow:--my-shadow)`, `(--my-shadow)` | Shadow properties            |
 
 ### Usage Examples
 
