@@ -559,7 +559,19 @@ export const getDefaultConfig = () => {
              * Flex
              * @see https://tailwindcss.com/docs/flex
              */
-            flex: [{ flex: [isNumber, isFraction, 'auto', 'initial', 'none', isArbitraryValue] }],
+            flex: [
+                {
+                    flex: [
+                        isNumber,
+                        isFraction,
+                        'auto',
+                        'initial',
+                        'none',
+                        isArbitraryVariable,
+                        isArbitraryValue,
+                    ],
+                },
+            ],
             /**
              * Flex Grow
              * @see https://tailwindcss.com/docs/flex-grow

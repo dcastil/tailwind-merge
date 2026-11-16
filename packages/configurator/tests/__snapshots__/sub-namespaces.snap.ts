@@ -310,7 +310,19 @@ export const getConfig = () => {
             ],
             'flex-direction': [{ flex: ['row', 'row-reverse', 'col', 'col-reverse'] }],
             'flex-wrap': [{ flex: ['nowrap', 'wrap', 'wrap-reverse'] }],
-            flex: [{ flex: [isNumber, isFraction, 'auto', 'initial', 'none', isArbitraryValue] }],
+            flex: [
+                {
+                    flex: [
+                        isNumber,
+                        isFraction,
+                        'auto',
+                        'initial',
+                        'none',
+                        isArbitraryVariable,
+                        isArbitraryValue,
+                    ],
+                },
+            ],
             grow: [{ grow: ['', isNumber, isArbitraryVariable, isArbitraryValue] }],
             shrink: [{ shrink: ['', isNumber, isArbitraryVariable, isArbitraryValue] }],
             order: [
