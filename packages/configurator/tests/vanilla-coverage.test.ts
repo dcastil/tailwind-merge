@@ -15,9 +15,7 @@ const INTENTIONAL_DIVERGENCES: { pair: string; reason: string }[] = [
     { pair: 'col-end → col-start-end', reason: 'composition, tailwind-merge#176' },
     { pair: 'row-start → row-start-end', reason: 'composition, tailwind-merge#176' },
     { pair: 'row-end → row-start-end', reason: 'composition, tailwind-merge#176' },
-    // `sr-only` does reset position, size, spacing, overflow and white-space, and those are real conflicts now (tailwind-merge#722): the unprefixed utilities sort after `sr-only`, so keeping them undoes the hide, and `not-sr-only` resets the same properties itself. Border width is the exception. `not-sr-only` does not restore it, so removing an earlier `border-2` would also drop the border after the reveal.
-    { pair: '* → sr', reason: 'border width survives not-sr-only' },
-    // `not-sr-only` re-declares the same properties as `sr-only`, so the oracle has it control an earlier `relative` or `p-4`. But it reveals rather than overrides: Tailwind emits those utilities after `not-sr-only`, so they apply to the revealed element today (`sr-only md:relative md:p-4 md:not-sr-only`), and removing them would drop that styling. Only `sr-only` conflicts with them; `not-sr-only` conflicts with `sr-only` alone.
+    // `sr-only` conflicts with the position, size, spacing, overflow and white-space utilities it resets (tailwind-merge#722), which agrees with the oracle; border width and min/max sizes stay, which also agrees because `sr-only` doesn't control them. `not-sr-only` re-declares the same properties as `sr-only`, so the oracle has it control an earlier `relative` or `p-4`. But it reveals rather than overrides: Tailwind emits those utilities after `not-sr-only`, so they apply to the revealed element today (`sr-only md:relative md:p-4 md:not-sr-only`), and removing them would drop that styling. Only `sr-only` conflicts with them; `not-sr-only` conflicts with `sr-only` alone.
     { pair: '* → not-sr', reason: 'reveal, styling applies after not-sr-only' },
 ]
 

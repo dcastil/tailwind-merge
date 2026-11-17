@@ -67,8 +67,6 @@ test('sr utilities override the properties they reset', () => {
     expect(twMerge('absolute fixed sticky sr-only')).toBe('sr-only')
 
     expect(twMerge('w-full h-screen size-full sr-only')).toBe('sr-only')
-    expect(twMerge('min-w-full max-w-xs min-h-screen max-h-full sr-only')).toBe('sr-only')
-    expect(twMerge('min-inline-full max-block-screen sr-only')).toBe('sr-only')
     expect(twMerge('p-4 px-2 ps-1 pt-1 m-4 mx-2 -mt-1 sr-only')).toBe('sr-only')
     expect(twMerge('overflow-auto overflow-x-visible whitespace-nowrap sr-only')).toBe('sr-only')
 
@@ -97,4 +95,13 @@ test('sr utilities override the properties they reset', () => {
     expect(twMerge('border-2 sr-only')).toBe('border-2 sr-only')
     expect(twMerge('sr-only border-2')).toBe('sr-only border-2')
     expect(twMerge('border-t-2 not-sr-only')).toBe('border-t-2 not-sr-only')
+
+    // `not-sr-only` does not reset min/max sizes either, so they have to survive the reveal too.
+    expect(twMerge('min-w-full max-w-xs min-h-screen max-h-full sr-only')).toBe(
+        'min-w-full max-w-xs min-h-screen max-h-full sr-only',
+    )
+    expect(twMerge('min-inline-full max-block-screen sr-only')).toBe(
+        'min-inline-full max-block-screen sr-only',
+    )
+    expect(twMerge('min-w-full sr-only md:not-sr-only')).toBe('min-w-full sr-only md:not-sr-only')
 })

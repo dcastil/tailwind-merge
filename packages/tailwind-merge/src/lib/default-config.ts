@@ -2496,7 +2496,7 @@ export const getDefaultConfig = () => {
             'fvn-fraction': ['fvn-normal'],
             'line-clamp': ['display', 'overflow'],
             // Tailwind emits these utilities after `sr-only`, so keeping an earlier `relative` or `p-4` undoes the hide. Removing them is safe because `not-sr-only` resets the same properties when the element is revealed.
-            // Border width stays independent because `not-sr-only` doesn't reset it, so a border survives the reveal.
+            // Border width and min/max sizes stay independent because `not-sr-only` doesn't reset them, so they still apply once the element is revealed. While hidden they don't undo the hide: the element is absolutely positioned and clipped away.
             // `not-sr-only` only conflicts with `sr-only`: Tailwind emits these utilities after it too, so an earlier `relative` or `p-4` is meant to apply once the element is visible.
             sr: [
                 'not-sr',
@@ -2504,14 +2504,6 @@ export const getDefaultConfig = () => {
                 'size',
                 'w',
                 'h',
-                'min-w',
-                'max-w',
-                'min-h',
-                'max-h',
-                'min-inline-size',
-                'max-inline-size',
-                'min-block-size',
-                'max-block-size',
                 'p',
                 'px',
                 'py',
