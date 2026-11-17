@@ -229,7 +229,7 @@ test('class map has correct class groups at first part', () => {
         my: ['my'],
         no: ['text-decoration'],
         normal: ['fvn-normal', 'text-transform'],
-        not: ['font-style', 'sr'],
+        not: ['font-style', 'not-sr'],
         object: ['object-fit', 'object-position'],
         oldstyle: ['fvn-figure'],
         opacity: ['opacity'],

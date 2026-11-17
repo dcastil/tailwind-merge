@@ -379,7 +379,12 @@ export const getDefaultConfig = () => {
              * Screen Reader Only
              * @see https://tailwindcss.com/docs/display#screen-reader-only
              */
-            sr: ['sr-only', 'not-sr-only'],
+            sr: ['sr-only'],
+            /**
+             * Not Screen Reader Only
+             * @see https://tailwindcss.com/docs/display#screen-reader-only
+             */
+            'not-sr': ['not-sr-only'],
             /**
              * Floats
              * @see https://tailwindcss.com/docs/float
@@ -2490,11 +2495,11 @@ export const getDefaultConfig = () => {
             'fvn-spacing': ['fvn-normal'],
             'fvn-fraction': ['fvn-normal'],
             'line-clamp': ['display', 'overflow'],
-            // `sr-only` and `not-sr-only` both reset these, and Tailwind emits the
-            // unprefixed utilities later in the stylesheet, so keeping an earlier
-            // `relative` or `p-4` undoes the hide. `not-sr-only` does not reset
-            // border width, which stays independent so a border survives the reveal.
+            // Tailwind emits these utilities after `sr-only`, so keeping an earlier `relative` or `p-4` undoes the hide. Removing them is safe because `not-sr-only` resets the same properties when the element is revealed.
+            // Border width stays independent because `not-sr-only` doesn't reset it, so a border survives the reveal.
+            // `not-sr-only` only conflicts with `sr-only`: Tailwind emits these utilities after it too, so an earlier `relative` or `p-4` is meant to apply once the element is visible.
             sr: [
+                'not-sr',
                 'position',
                 'size',
                 'w',
@@ -2534,6 +2539,7 @@ export const getDefaultConfig = () => {
                 'overflow-y',
                 'whitespace',
             ],
+            'not-sr': ['sr'],
             rounded: [
                 'rounded-s',
                 'rounded-e',

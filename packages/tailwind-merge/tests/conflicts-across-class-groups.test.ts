@@ -65,7 +65,6 @@ test('sr utilities override the properties they reset', () => {
     expect(twMerge('relative sr-only')).toBe('sr-only')
     expect(twMerge('relative mb-1 sr-only')).toBe('sr-only')
     expect(twMerge('absolute fixed sticky sr-only')).toBe('sr-only')
-    expect(twMerge('static not-sr-only')).toBe('not-sr-only')
 
     expect(twMerge('w-full h-screen size-full sr-only')).toBe('sr-only')
     expect(twMerge('min-w-full max-w-xs min-h-screen max-h-full sr-only')).toBe('sr-only')
@@ -77,10 +76,21 @@ test('sr utilities override the properties they reset', () => {
     expect(twMerge('sr-only relative')).toBe('sr-only relative')
     expect(twMerge('sr-only p-4')).toBe('sr-only p-4')
     expect(twMerge('not-sr-only relative')).toBe('not-sr-only relative')
+    expect(twMerge('sr-only not-sr-only')).toBe('not-sr-only')
+    expect(twMerge('not-sr-only sr-only')).toBe('sr-only')
     expect(twMerge('relative md:sr-only')).toBe('relative md:sr-only')
     expect(twMerge('hover:p-4 hover:sr-only')).toBe('hover:sr-only')
     expect(twMerge('sr-only md:not-sr-only md:relative md:p-4')).toBe(
         'sr-only md:not-sr-only md:relative md:p-4',
+    )
+
+    // Tailwind emits these utilities after `not-sr-only` as well, so they apply once the element is revealed.
+    expect(twMerge('relative p-4 not-sr-only')).toBe('relative p-4 not-sr-only')
+    expect(twMerge('w-full overflow-auto whitespace-nowrap not-sr-only')).toBe(
+        'w-full overflow-auto whitespace-nowrap not-sr-only',
+    )
+    expect(twMerge('sr-only md:relative md:p-4 md:not-sr-only')).toBe(
+        'sr-only md:relative md:p-4 md:not-sr-only',
     )
 
     // `not-sr-only` does not restore border width, so a border has to survive both orders.
