@@ -3,7 +3,7 @@ const arbitraryVariableRegex = /^\((?:(\w[\w-]*):)?(.+)\)$/i
 const fractionRegex = /^\d+(?:\.\d+)?\/\d+(?:\.\d+)?$/
 const tshirtUnitRegex = /^(\d+(\.\d+)?)?(xs|sm|md|lg|xl)$/
 const lengthUnitRegex =
-    /\d+(%|px|r?em|[sdl]?v([hwib]|min|max)|pt|pc|in|cm|mm|cap|ch|ex|r?lh|cq(w|h|i|b|min|max))|\b(calc|min|max|clamp)\(.+\)|^0$/
+    /\d+(%|px|r?em|[sdl]?v([hwib]|min|max)|pt|pc|in|cm|mm|Q|cap|ch|ex|r?lh|cq(w|h|i|b|min|max))|\b(calc|min|max|clamp)\(.+\)|^0$/
 // Case-insensitive because CSS function names are, and includes Tailwind's `--alpha()` because it resolves to a color.
 const colorFunctionRegex =
     /^(rgba?|hsla?|hwb|(ok)?(lab|lch)|color-mix|color|light-dark|contrast-color|device-cmyk|--alpha)\(.+\)$/i

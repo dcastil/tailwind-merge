@@ -29,6 +29,15 @@ test('handles simple conflicts with arbitrary values correctly', () => {
     expect(twMerge('text-[0.5px] text-(--my-0)')).toBe('text-[0.5px] text-(--my-0)')
 })
 
+test('handles quarter-millimeter lengths correctly', () => {
+    expect(twMerge('text-[1Q] text-red-500')).toBe('text-[1Q] text-red-500')
+    expect(twMerge('text-red-500 text-[1Q]')).toBe('text-red-500 text-[1Q]')
+    expect(twMerge('text-[1Q] text-lg')).toBe('text-lg')
+    expect(twMerge('text-lg text-[1Q]')).toBe('text-[1Q]')
+    expect(twMerge('border-[1Q] border-red-500')).toBe('border-[1Q] border-red-500')
+    expect(twMerge('outline-[1Q] outline-red-500')).toBe('outline-[1Q] outline-red-500')
+})
+
 test('handles arbitrary length conflicts with labels and modifiers correctly', () => {
     expect(twMerge('hover:m-[2px] hover:m-[length:var(--c)]')).toBe('hover:m-[length:var(--c)]')
     expect(twMerge('hover:focus:m-[2px] focus:hover:m-[length:var(--c)]')).toBe(
