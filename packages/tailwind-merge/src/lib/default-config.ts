@@ -1101,6 +1101,7 @@ export const getDefaultConfig = () => {
                         'from-font',
                         'auto',
                         isArbitraryVariableLength,
+                        isArbitraryVariablePosition,
                         isArbitraryLength,
                     ],
                 },
