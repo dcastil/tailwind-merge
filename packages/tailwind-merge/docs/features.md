@@ -15,7 +15,6 @@ twMerge('p-5 p-2 p-4') // → 'p-4'
 ```ts
 twMerge('p-3 px-5') // → 'p-3 px-5'
 twMerge('inset-x-4 right-4') // → 'inset-x-4 right-4'
-twMerge('place-items-center items-start') // → 'place-items-center items-start'
 ```
 
 ### Resolves non-trivial conflicts
@@ -23,7 +22,6 @@ twMerge('place-items-center items-start') // → 'place-items-center items-start
 ```ts
 twMerge('inset-x-px -inset-1') // → '-inset-1'
 twMerge('bottom-auto inset-y-6') // → 'inset-y-6'
-twMerge('items-start justify-items-start place-items-center') // → 'place-items-center'
 twMerge('inline block') // → 'block'
 ```
 
