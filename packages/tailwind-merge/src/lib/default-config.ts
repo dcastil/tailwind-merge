@@ -1100,7 +1100,7 @@ export const getDefaultConfig = () => {
                         isNumber,
                         'from-font',
                         'auto',
-                        isArbitraryVariable,
+                        isArbitraryVariableLength,
                         isArbitraryLength,
                     ],
                 },

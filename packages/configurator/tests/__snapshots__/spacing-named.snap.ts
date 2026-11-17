@@ -849,7 +849,7 @@ export const getConfig = () => {
             'text-decoration-style': [{ decoration: ['solid', 'dashed', 'dotted', 'double', 'wavy'] }],
             'text-decoration-thickness': [
                 {
-                    decoration: [isNumber, 'from-font', 'auto', isArbitraryVariable, isArbitraryLength],
+                    decoration: [isNumber, 'from-font', 'auto', isArbitraryVariableLength, isArbitraryLength],
                 },
             ],
             'text-decoration-color': [{ decoration: [...scaleColor, isArbitraryVariable, isArbitraryValue] }],
