@@ -48,6 +48,8 @@ test('handles arbitrary length conflicts with labels and modifiers correctly', (
 test('handles complex arbitrary value conflicts correctly', () => {
     expect(twMerge('grid-rows-[1fr,auto] grid-rows-2')).toBe('grid-rows-2')
     expect(twMerge('grid-rows-[repeat(20,minmax(0,1fr))] grid-rows-3')).toBe('grid-rows-3')
+    expect(twMerge('line-clamp-[calc(var(--characters)/100)] line-clamp-3')).toBe('line-clamp-3')
+    expect(twMerge('line-clamp-2 line-clamp-[var(--lines)]')).toBe('line-clamp-[var(--lines)]')
 })
 
 test('handles ambiguous arbitrary values correctly', () => {
