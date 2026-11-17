@@ -45,6 +45,17 @@ test('handles arbitrary length conflicts with labels and modifiers correctly', (
     ).toBe('border-b border-some-coloooor')
 })
 
+test.each([
+    "content-[']:_hello']",
+    'content-["]:_hello"]',
+    String.raw`content-['it\'s]:_hello']`,
+    String.raw`content-["say\"]:_hello"]`,
+    String.raw`content-['\\']`,
+])('handles quoted delimiters in arbitrary values: %s', (className) => {
+    expect(twMerge(className, "content-['world']")).toBe("content-['world']")
+    expect(twMerge("content-['world']", className)).toBe(className)
+})
+
 test('handles complex arbitrary value conflicts correctly', () => {
     expect(twMerge('grid-rows-[1fr,auto] grid-rows-2')).toBe('grid-rows-2')
     expect(twMerge('grid-rows-[repeat(20,minmax(0,1fr))] grid-rows-3')).toBe('grid-rows-3')
