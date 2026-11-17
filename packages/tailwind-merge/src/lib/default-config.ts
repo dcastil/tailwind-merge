@@ -379,7 +379,12 @@ export const getDefaultConfig = () => {
              * Screen Reader Only
              * @see https://tailwindcss.com/docs/display#screen-reader-only
              */
-            sr: ['sr-only', 'not-sr-only'],
+            sr: ['sr-only'],
+            /**
+             * Not Screen Reader Only
+             * @see https://tailwindcss.com/docs/display#screen-reader-only
+             */
+            'not-sr': ['not-sr-only'],
             /**
              * Floats
              * @see https://tailwindcss.com/docs/float
@@ -2490,6 +2495,43 @@ export const getDefaultConfig = () => {
             'fvn-spacing': ['fvn-normal'],
             'fvn-fraction': ['fvn-normal'],
             'line-clamp': ['display', 'overflow'],
+            // Tailwind emits these utilities after `sr-only`, so keeping an earlier `relative` or `p-4` undoes the hide. Removing them is safe because `not-sr-only` resets the same properties when the element is revealed.
+            // Border width and min/max sizes stay independent because `not-sr-only` doesn't reset them, so they still apply once the element is revealed. While hidden they don't undo the hide: the element is absolutely positioned and clipped away.
+            // `not-sr-only` only conflicts with `sr-only`: Tailwind emits these utilities after it too, so an earlier `relative` or `p-4` is meant to apply once the element is visible.
+            sr: [
+                'not-sr',
+                'position',
+                'size',
+                'w',
+                'h',
+                'p',
+                'px',
+                'py',
+                'ps',
+                'pe',
+                'pbs',
+                'pbe',
+                'pt',
+                'pr',
+                'pb',
+                'pl',
+                'm',
+                'mx',
+                'my',
+                'ms',
+                'me',
+                'mbs',
+                'mbe',
+                'mt',
+                'mr',
+                'mb',
+                'ml',
+                'overflow',
+                'overflow-x',
+                'overflow-y',
+                'whitespace',
+            ],
+            'not-sr': ['sr'],
             rounded: [
                 'rounded-s',
                 'rounded-e',

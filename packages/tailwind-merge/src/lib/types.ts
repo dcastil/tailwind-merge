@@ -458,6 +458,7 @@ export type DefaultClassGroupIds =
     | 'mt'
     | 'mx'
     | 'my'
+    | 'not-sr'
     | 'object-fit'
     | 'object-position'
     | 'opacity'
