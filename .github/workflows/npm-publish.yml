@@ -39,9 +39,9 @@ jobs:
             - uses: martinbeentjes/npm-get-version-action@v1.3.1
               id: package-version
             - run: yarn version --no-git-tag-version --new-version ${{ steps.package-version.outputs.current-version }}-dev.${{ github.sha }}
-              # npm install -g npm@latest is necessary to make provenance available (available since v9.6.5 or so). More info: https://docs.npmjs.com/generating-provenance-statements
-            - run: npm install -g npm@latest
-            - run: npm publish --access public --tag dev
+              # Trusted publishing (OIDC) needs npm 11.5.1 or newer. npm is pinned to major version 11 because newer majors require a newer Node.js version than the one used here, so `npm@latest` would break this step.
+            - run: npm install -g npm@11
+            - run: npm publish --access public --tag dev --provenance
 
     publish-prod:
         if: github.event_name == 'release' && github.event.action == 'published'
@@ -71,6 +71,7 @@ jobs:
                   path: dist
                   if-no-files-found: error
             - run: yarn test:exports
-              # npm install -g npm@latest is necessary to make provenance available (available since v9.6.5 or so). More info: https://docs.npmjs.com/generating-provenance-statements
-            - run: npm install -g npm@latest
-            - run: npm publish --tag tailwind-merge-2
+              # Trusted publishing (OIDC) needs npm 11.5.1 or newer. npm is pinned to major version 11 because newer majors require a newer Node.js version than the one used here, so `npm@latest` would break this step.
+            - run: npm install -g npm@11
+            # Publishes through trusted publishing without a token. --provenance is explicit so a release can't silently lose its attestation like 2.6.0 and 2.6.1 did.
+            - run: npm publish --tag tailwind-merge-2 --provenance
