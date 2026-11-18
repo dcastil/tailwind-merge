@@ -1,9 +1,3 @@
-align-content → place-content  |  content-baseline place-content-baseline  |  kept both, Tailwind: merge
-align-items → place-items  |  items-baseline-last place-items-center  |  kept both, Tailwind: merge
-align-self → place-self  |  self-baseline place-self-center  |  kept both, Tailwind: merge
-justify-content → place-content  |  justify-baseline place-content-baseline  |  kept both, Tailwind: merge
-justify-items → place-items  |  justify-items-center-safe place-items-center  |  kept both, Tailwind: merge
-justify-self → place-self  |  justify-self-center place-self-center  |  kept both, Tailwind: merge
 leading → font-size  |  leading-0.5 text-3xl  |  merged, Tailwind: keep both
 mask-composite → mask-image-b-from-color  |  mask-exclude mask-b-from-amber-100  |  kept both, Tailwind: merge
 mask-composite → mask-image-b-from-pos  |  mask-exclude mask-b-from-0%  |  kept both, Tailwind: merge
