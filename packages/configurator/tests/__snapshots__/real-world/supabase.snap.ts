@@ -1883,7 +1883,7 @@ export const getConfig = () => {
                 'mask-radial-to-surface-300',
                 'mask-radial-to-surface-400',
             ],
-            'mask-image-radial-shape': [{ 'mask-radial': ['circle', 'ellipse'] }],
+            'mask-image-radial-shape': [{ mask: ['circle', 'ellipse'] }],
             'mask-image-radial-size': [{ 'mask-radial': [{ closest: ['side', 'corner'], farthest: ['side', 'corner'] }] }],
             'mask-image-radial-pos': [
                 {

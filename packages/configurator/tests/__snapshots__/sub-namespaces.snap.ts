@@ -1335,7 +1335,7 @@ export const getConfig = () => {
                 { 'mask-radial-to': [...scaleColor, isArbitraryVariable, isArbitraryValue] },
                 'mask-radial-to-surface',
             ],
-            'mask-image-radial-shape': [{ 'mask-radial': ['circle', 'ellipse'] }],
+            'mask-image-radial-shape': [{ mask: ['circle', 'ellipse'] }],
             'mask-image-radial-size': [{ 'mask-radial': [{ closest: ['side', 'corner'], farthest: ['side', 'corner'] }] }],
             'mask-image-radial-pos': [
                 {

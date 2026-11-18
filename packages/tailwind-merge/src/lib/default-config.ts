@@ -1722,7 +1722,7 @@ export const getDefaultConfig = () => {
             'mask-image-radial-to-pos': [{ 'mask-radial-to': scaleMaskImagePosition() }],
             'mask-image-radial-from-color': [{ 'mask-radial-from': scaleColor() }],
             'mask-image-radial-to-color': [{ 'mask-radial-to': scaleColor() }],
-            'mask-image-radial-shape': [{ 'mask-radial': ['circle', 'ellipse'] }],
+            'mask-image-radial-shape': [{ mask: ['circle', 'ellipse'] }],
             'mask-image-radial-size': [
                 { 'mask-radial': [{ closest: ['side', 'corner'], farthest: ['side', 'corner'] }] },
             ],
