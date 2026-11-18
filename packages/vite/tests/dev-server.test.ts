@@ -9,6 +9,7 @@ import * as fallbackRuntime from '../src/runtime'
 import {
     RUNTIME_SPECIFIER,
     fixturesDirectory,
+    replaceFile,
     updateAfter,
     setupPluginTests,
     waitForWatcher,
@@ -102,7 +103,7 @@ test.each([
 
     const update = await updateAfter(
         plugin,
-        () => writeFile(themePath, "module.exports = { big: '2rem' }\n"),
+        () => replaceFile(themePath, "module.exports = { big: '2rem' }\n"),
         (result) => result.reloaded,
     )
     expect(update).toEqual({ trigger: 'config', regenerated: true, reloaded: true })
