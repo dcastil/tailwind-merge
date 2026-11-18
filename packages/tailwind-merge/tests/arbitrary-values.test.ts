@@ -38,6 +38,21 @@ test('handles quarter-millimeter lengths correctly', () => {
     expect(twMerge('outline-[1Q] outline-red-500')).toBe('outline-[1Q] outline-red-500')
 })
 
+test('handles lengths using the --spacing() function correctly', () => {
+    expect(twMerge('border-[--spacing(4)] border-transparent')).toBe(
+        'border-[--spacing(4)] border-transparent',
+    )
+    expect(twMerge('border-[--spacing(4)] border-2')).toBe('border-2')
+    expect(twMerge('border-y-[--spacing(4)] border-y-transparent')).toBe(
+        'border-y-[--spacing(4)] border-y-transparent',
+    )
+    expect(twMerge('text-[--spacing(4)] text-red-500')).toBe('text-[--spacing(4)] text-red-500')
+    expect(twMerge('text-[--spacing(4)] text-lg')).toBe('text-lg')
+    expect(twMerge('outline-[--spacing(1)] outline-red-500')).toBe(
+        'outline-[--spacing(1)] outline-red-500',
+    )
+})
+
 test('handles arbitrary length conflicts with labels and modifiers correctly', () => {
     expect(twMerge('hover:m-[2px] hover:m-[length:var(--c)]')).toBe('hover:m-[length:var(--c)]')
     expect(twMerge('hover:focus:m-[2px] focus:hover:m-[length:var(--c)]')).toBe(
