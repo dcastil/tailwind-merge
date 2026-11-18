@@ -150,7 +150,7 @@ const isArbitraryValue = (classPart: string) => /^\[.+\]$/.test(classPart)
 const fillClassGroup = [{ fill: ['current', isArbitraryValue] }]
 ```
 
-Because the function is under the `fill` key, it will only get called for classes which start with `fill-`. Also, the function only gets passed the part of the class name which comes after `fill-`, this way you can use the same function in multiple class groups. tailwind-merge exports its own [validators](./api-reference.md#validators), so you don't need to recreate them.
+Because the function is under the `fill` key, it will only get called for classes which start with `fill-`. Also, the function only gets passed the part of the class name which comes after `fill-`, this way you can use the same function in multiple class groups. tailwind-merge exports its own [validators](./api-reference.md#validators), so you don't need to recreate them. Read more about when and with what validators get called in [how classes are matched to class groups](#how-classes-are-matched-to-class-groups).
 
 You can use an empty string (`''`) as a class part if you want to indicate that the preceding part was the end. This is useful for defining elements which are marked as `DEFAULT` in the Tailwind config.
 
@@ -160,6 +160,107 @@ const filterClassGroup = [{ filter: ['', 'none'] }]
 ```
 
 Each class group is defined under its ID in the `classGroups` object in the config. This ID is only used internally, and the only thing that matters is that it is unique among all class groups.
+
+### How classes are matched to class groups
+
+To get the most out of validators, it helps to know how tailwind-merge finds the class group of a class.
+
+tailwind-merge first strips everything from the class that isn't part of its base: modifiers like `hover:`, the important modifier `!`, a postfix modifier like `/50` and the minus sign of negative values. The rest is split at every dash (`-`) into class parts which are matched against the class groups from left to right:
+
+1. tailwind-merge follows the strings and object keys of the class groups for as long as they match the class parts. Strings and keys with dashes in them count as multiple class parts, so `{ 'text-label': ['sm'] }` is the same as `{ text: [{ label: ['sm'] }] }`.
+2. If the class ends exactly where a string or an empty string (`''`) is defined, the class belongs to that class group.
+3. If there are class parts left over, the validators defined at the reached position are called with the rest of the class, which is all remaining class parts joined with dashes. The class belongs to the class group of the first validator which returns `true`.
+4. If none of them match, tailwind-merge goes back one class part at a time and calls the validators defined there, again with the rest of the class from that position on.
+
+Let's say there is a class group with a validator under the `shiny` key.
+
+```ts
+const shinyClassGroup = [{ shiny: [isShinyValue] }]
+```
+
+This is what `isShinyValue` gets called with for different classes:
+
+| Class                    | Value passed to `isShinyValue`             |
+| ------------------------ | ------------------------------------------ |
+| `shiny-foo-bar`          | `foo-bar`                                  |
+| `hover:shiny-baz!`       | `baz`                                      |
+| `-shiny-2`               | `2`                                        |
+| `md:shiny-big/50`        | `big`, then `big/50` if that doesn't match |
+| `shiny-[calc(100%-2px)]` | `[calc(100%-2px)]`                         |
+| `shiny`                  | not called                                 |
+
+A few things follow from this:
+
+- **Strings and keys always win over validators.** The validator for text colors accepts any value after `text-`, but `text-center` still ends up in the text alignment class group because `center` is defined there as a string.
+
+    ```ts
+    twMerge('text-red-500 text-center') // → 'text-red-500 text-center'
+    ```
+
+- **Validators further into the class win over validators closer to its start.** A validator defined at the top level of a class group gets passed the entire class, but only after everything else failed to match.
+- **Among validators at the same position, the first one defined wins.** Class groups are processed in the order in which they are defined in the config and validators within a class group in the order of its array. Class groups you add with `extend` come after all class groups of the default config. Validators you add to an existing class group with `extend` are appended to that class group, which keeps its place in the order.
+
+#### Using validators correctly
+
+Let's say you have the custom font size classes `text-label-sm`, `text-label-md` and `text-label-lg`. It is tempting to write a validator which checks the entire class.
+
+```ts
+import { extendTailwindMerge } from 'tailwind-merge'
+
+const customTwMerge = extendTailwindMerge({
+    extend: {
+        classGroups: {
+            // ↓ Don't do this
+            'font-size': [(className: string) => /^text-label-/.test(className)],
+        },
+    },
+})
+
+// The text color gets removed although the classes don't conflict
+customTwMerge('text-red-500 text-label-sm') // → 'text-label-sm'
+```
+
+The validator sits at the top level of the class group, so it is only called if nothing further into the class matches. But `text-label-sm` starts with `text`, and under that key the default config has the validator for text colors which accepts any value. The custom validator is never called and tailwind-merge treats `text-label-sm` as a text color.
+
+Instead, keep as much of the class static as you can and only validate what comes after it.
+
+```ts
+import { extendTailwindMerge, validators } from 'tailwind-merge'
+
+const customTwMerge = extendTailwindMerge({
+    extend: {
+        classGroups: {
+            // ↓ `text-label` is static, the validator only gets passed the part after `text-label-`
+            'font-size': [{ 'text-label': [validators.isAny] }],
+        },
+    },
+})
+
+customTwMerge('text-red-500 text-label-sm') // → 'text-red-500 text-label-sm'
+customTwMerge('text-lg text-label-sm') // → 'text-label-sm'
+```
+
+Some rules of thumb:
+
+- If you can enumerate the values, use strings instead of a validator, e.g. `{ 'text-label': ['sm', 'md', 'lg'] }`. Strings can't be shadowed by a validator from another class group.
+- Put the beginning of the class into object keys and let the validator check only the part that varies. A validator never sees the keys it is defined under, so don't test for them in it.
+- If several class groups have validators under the same key, define the stricter ones first. A validator which accepts everything like `validators.isAny` needs to come last because no validator after it is ever called.
+
+    ```ts
+    const customTwMerge = extendTailwindMerge<'btn-size' | 'btn-color'>({
+        extend: {
+            classGroups: {
+                'btn-size': [{ btn: ['sm', 'lg', validators.isNumber] }],
+                // ↓ Needs to be defined after `btn-size`, otherwise `btn-4` would be a button color
+                'btn-color': [{ btn: [validators.isAny] }],
+            },
+        },
+    })
+
+    customTwMerge('btn-primary btn-4') // → 'btn-primary btn-4'
+    ```
+
+- A new class group can't claim classes under a key where the default config already accepts any value, which is the case for all color classes like `text-*`, `bg-*` and `border-*`. Use a more specific key like in the example above, or add your definitions to the existing class group they belong to. `font-size` is defined before `text-color` in the default config, so a validator added to it gets called before the one for text colors.
 
 ### Conflicting class groups
 

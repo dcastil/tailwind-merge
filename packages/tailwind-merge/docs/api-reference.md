@@ -337,7 +337,7 @@ interface Validators {
 }
 ```
 
-An object containing all the validators used in tailwind-merge. They are useful if you want to use a custom config with [`extendTailwindMerge`](#extendtailwindmerge) or [`createTailwindMerge`](#createtailwindmerge).
+An object containing all the validators used in tailwind-merge. They are useful if you want to use a custom config with [`extendTailwindMerge`](#extendtailwindmerge) or [`createTailwindMerge`](#createtailwindmerge). Check out [using validators correctly](./configuration.md#using-validators-correctly) to learn where to place them in a class group.
 
 **Example usage**:
 

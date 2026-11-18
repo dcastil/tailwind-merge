@@ -10,7 +10,7 @@ const twMergeExampleRegex =
     /twMerge\((?<arguments>[\w\s\-:[\]#(),!&%\n'"]+?)\)(?!.*(?<!\/\/.*)')\s*\n?\s*\/\/\s*→\s*['"](?<result>.+)['"]/g
 
 test('docs examples', () => {
-    expect.assertions(63)
+    expect.assertions(64)
 
     return forEachFile(['README.md', 'docs/**/*.md'], (fileContent) => {
         Array.from(fileContent.matchAll(twMergeExampleRegex)).forEach((match) => {
