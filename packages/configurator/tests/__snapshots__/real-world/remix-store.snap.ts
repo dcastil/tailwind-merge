@@ -1919,7 +1919,7 @@ export const getConfig = () => {
                     ],
                 },
             ],
-            'mask-image-radial-shape': [{ 'mask-radial': ['circle', 'ellipse'] }],
+            'mask-image-radial-shape': [{ mask: ['circle', 'ellipse'] }],
             'mask-image-radial-size': [{ 'mask-radial': [{ closest: ['side', 'corner'], farthest: ['side', 'corner'] }] }],
             'mask-image-radial-pos': [
                 {

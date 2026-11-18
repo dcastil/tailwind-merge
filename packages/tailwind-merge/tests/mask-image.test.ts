@@ -148,3 +148,15 @@ test('mask axis conflicts respect modifiers and important classes', () => {
     expect(twMerge('mask-t-from-50%! mask-y-from-20%!')).toBe('mask-y-from-20%!')
     expect(twMerge('mask-t-from-50%! mask-y-from-20%')).toBe('mask-t-from-50%! mask-y-from-20%')
 })
+
+test('mask radial shapes use the class names Tailwind generates', () => {
+    expect(twMerge('mask-circle mask-ellipse')).toBe('mask-ellipse')
+    expect(twMerge('mask-ellipse mask-circle')).toBe('mask-circle')
+    expect(twMerge('mask-radial-from-50% mask-ellipse md:mask-circle mask-circle')).toBe(
+        'mask-radial-from-50% md:mask-circle mask-circle',
+    )
+    expect(twMerge('mask-circle mask-radial-closest-side mask-radial-at-top')).toBe(
+        'mask-circle mask-radial-closest-side mask-radial-at-top',
+    )
+    expect(twMerge('mask-circle mask-none mask-add')).toBe('mask-circle mask-none mask-add')
+})
