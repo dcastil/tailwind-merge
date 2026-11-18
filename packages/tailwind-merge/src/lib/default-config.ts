@@ -1036,7 +1036,7 @@ export const getDefaultConfig = () => {
              * @see https://tailwindcss.com/docs/line-clamp
              */
             'line-clamp': [
-                { 'line-clamp': [isNumber, 'none', isArbitraryVariable, isArbitraryNumber] },
+                { 'line-clamp': [isNumber, 'none', isArbitraryVariable, isArbitraryValue] },
             ],
             /**
              * Line Height

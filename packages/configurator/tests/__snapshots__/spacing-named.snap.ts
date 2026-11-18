@@ -23,7 +23,6 @@ export const getConfig = () => {
         isPercent,
         isArbitraryVariableFamilyName,
         isArbitraryFamilyName,
-        isArbitraryNumber,
         isArbitraryVariablePosition,
         isArbitraryPosition,
         isArbitraryVariableSize,
@@ -34,6 +33,7 @@ export const getConfig = () => {
         isArbitraryShadow,
         isArbitraryVariableMaskPosition,
         isArbitraryMaskPosition,
+        isArbitraryNumber,
     } = v
 
     /** The `--spacing-*` theme values. */
@@ -827,7 +827,7 @@ export const getConfig = () => {
             'fvn-spacing': ['proportional-nums', 'tabular-nums'],
             'fvn-fraction': ['diagonal-fractions', 'stacked-fractions'],
             tracking: [{ tracking: [...scaleTracking, isArbitraryVariable, isArbitraryValue] }],
-            'line-clamp': [{ 'line-clamp': [isNumber, 'none', isArbitraryVariable, isArbitraryNumber] }],
+            'line-clamp': [{ 'line-clamp': [isNumber, 'none', isArbitraryVariable, isArbitraryValue] }],
             leading: [
                 {
                     leading: [
