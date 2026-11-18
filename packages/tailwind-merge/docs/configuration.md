@@ -155,14 +155,14 @@ const shinyClassGroup = [{ shiny: [isShinyValue] }]
 
 This is what `isShinyValue` gets called with for different classes:
 
-| Class                    | Value passed to `isShinyValue` |
-| ------------------------ | ------------------------------ |
-| `shiny-foo-bar`          | `foo-bar`                      |
-| `hover:shiny-baz!`       | `baz`                          |
-| `-shiny-2`               | `2`                            |
-| `md:shiny-big/50`        | `big`                          |
-| `shiny-[calc(100%-2px)]` | `[calc(100%-2px)]`             |
-| `shiny`                  | not called                     |
+| Class                    | Value passed to `isShinyValue`             |
+| ------------------------ | ------------------------------------------ |
+| `shiny-foo-bar`          | `foo-bar`                                  |
+| `hover:shiny-baz!`       | `baz`                                      |
+| `-shiny-2`               | `2`                                        |
+| `md:shiny-big/50`        | `big`, then `big/50` if that doesn't match |
+| `shiny-[calc(100%-2px)]` | `[calc(100%-2px)]`                         |
+| `shiny`                  | not called                                 |
 
 A few things follow from this:
 
@@ -232,7 +232,7 @@ Some rules of thumb:
         },
     })
 
-    customTwMerge('btn-4 btn-primary btn-lg') // → 'btn-primary btn-lg'
+    customTwMerge('btn-primary btn-4') // → 'btn-primary btn-4'
     ```
 
 - A new class group can't claim classes under a key where the default config already accepts any value, which is the case for all color classes like `text-*`, `bg-*` and `border-*`. Use a more specific key like in the example above, or add your definitions to the existing class group they belong to. `font-size` is defined before `text-color` in the default config, so a validator added to it gets called before the one for text colors.
