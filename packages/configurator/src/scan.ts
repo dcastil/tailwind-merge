@@ -5,7 +5,7 @@ import { type GlobEntry, type Scanner, type SourceEntry } from '@tailwindcss/oxi
 
 import { cssStatements, segment } from './css-statements.ts'
 import { type TailwindIntegration } from './design-system.ts'
-import { createModuleResolver, createStylesheetResolver } from './resolvers.ts'
+import { createModuleResolver, createStylesheetResolver, prepareModuleLoad } from './resolvers.ts'
 
 export interface SourceScannerOptions {
     /** Content of the Tailwind CSS entrypoint. */
@@ -50,6 +50,10 @@ export interface UsageScan {
 export async function createSourceScanner(options: SourceScannerOptions): Promise<SourceScanner> {
     const dependencies = new Set<string>()
     const stylesheets = new Set<string>()
+    const resolveModule = createModuleResolver(
+        options.integration?.resolveJs,
+        options.integration?.onDependency,
+    )
     const compiler = await compile(options.css, {
         base: options.base,
         customCssResolver: createStylesheetResolver(
@@ -57,10 +61,12 @@ export async function createSourceScanner(options: SourceScannerOptions): Promis
             (file) => stylesheets.add(file),
             options.integration?.onDependency,
         ),
-        customJsResolver: createModuleResolver(
-            options.integration?.resolveJs,
-            options.integration?.onDependency,
-        ),
+        // Resolution is the only hook before Tailwind imports a config or plugin. This compile can run concurrently with design-system loading, so both prepare the module the same way before either import.
+        async customJsResolver(id, base) {
+            const file = await resolveModule(id, base)
+            await prepareModuleLoad(file, options.integration?.onDependency)
+            return file
+        },
         onDependency: (dependencyPath) => {
             dependencies.add(dependencyPath)
             options.integration?.onDependency?.(dependencyPath)

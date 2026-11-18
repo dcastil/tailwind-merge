@@ -1,9 +1,11 @@
 import { mkdir, mkdtemp, rm, writeFile } from 'node:fs/promises'
 import path from 'node:path'
 
+import { loadModule } from '@tailwindcss/node'
+import { clearRequireCache } from '@tailwindcss/node/require-cache'
 import { afterEach, beforeEach, expect, test } from 'vitest'
 
-import { createModuleResolver, trackModuleDependencies } from '../src/resolvers'
+import { createModuleResolver, prepareModuleLoad, trackModuleDependencies } from '../src/resolvers'
 
 import { fixtureBase } from './fixture-utils'
 
@@ -106,4 +108,66 @@ test('watches the nearest existing directory for a missing local path without wa
     dependencies.clear()
     await expect(resolve('./generated/theme.cjs', directory)).resolves.toBe(path.join(directory, 'generated/theme.cjs'))
     expect([...dependencies]).toEqual([path.join(directory, 'generated/theme.cjs')])
+})
+
+test.each([
+    ['a bare re-export', "module.exports = require('./tokens.cjs')", (value: unknown) => value],
+    ['a spread re-export', "module.exports = { ...require('./tokens.cjs') }", (value: unknown) => value],
+    ['a re-exporting property', "module.exports = { tokens: require('./tokens.cjs') }", (value: unknown) => ({ tokens: value })],
+    ['a nested require', "module.exports = { theme: { tokens: require('./tokens.cjs') } }", (value: unknown) => ({ theme: { tokens: value } })],
+])('reloads a CommonJS dependency behind %s on every load, also after a failed one', async (_, source, expected) => {
+    const entrypoint = path.join(directory, 'theme.cjs')
+    const tokens = path.join(directory, 'tokens.cjs')
+    await writeFile(entrypoint, `${source}\n`)
+    // The way an integration reloads a config: clear the tracked graph, prepare, then let Tailwind import with a cache-busting query.
+    const load = async () => {
+        // Tailwind's cache-busting query is the current millisecond; two loads within one would share an ESM cache entry.
+        await new Promise((resolve) => setTimeout(resolve, 2))
+        clearRequireCache([entrypoint, tokens])
+        await prepareModuleLoad(entrypoint)
+        return (await loadModule('./theme.cjs', directory, () => {})).module
+    }
+
+    for (const size of ['1rem', '2rem', '3rem']) {
+        await writeFile(tokens, `module.exports = { size: '${size}' }\n`)
+        // Without preparation Node hands the entrypoint an empty object for its re-exported dependency from the second load on.
+        expect(await load()).toEqual(expected({ size }))
+    }
+
+    // A broken dependency must surface instead of loading as an empty object, and its repair must load.
+    await writeFile(tokens, 'module.exports = {\n')
+    await expect(load()).rejects.toThrow()
+    await writeFile(tokens, "module.exports = { size: '4rem' }\n")
+    expect(await load()).toEqual(expected({ size: '4rem' }))
+})
+
+test.each([
+    ['an ESM file in a CommonJS package', 'theme.js', undefined, 'globalThis.__twmLoads = (globalThis.__twmLoads ?? 0) + 1\nexport default {}\n'],
+    ['a file in an ESM package', 'theme.js', 'module', 'globalThis.__twmLoads = (globalThis.__twmLoads ?? 0) + 1\nexport default {}\n'],
+    ['an .mjs file', 'theme.mjs', undefined, 'globalThis.__twmLoads = (globalThis.__twmLoads ?? 0) + 1\nexport default {}\n'],
+])('does not evaluate %s ahead of the import', async (_, name, type, source) => {
+    const globals = globalThis as { __twmLoads?: number }
+    delete globals.__twmLoads
+    await writeFile(path.join(directory, 'package.json'), JSON.stringify(type ? { type } : {}))
+    const entrypoint = path.join(directory, name)
+    await writeFile(entrypoint, source)
+
+    await prepareModuleLoad(entrypoint)
+    expect(globals.__twmLoads).toBeUndefined()
+    await loadModule(`./${name}`, directory, () => {})
+    expect(globals.__twmLoads).toBe(1)
+    delete globals.__twmLoads
+})
+
+test('loads a CommonJS .js config once, for both the preparation and the import', async () => {
+    const globals = globalThis as { __twmLoads?: number }
+    delete globals.__twmLoads
+    await writeFile(path.join(directory, 'package.json'), '{}')
+    const entrypoint = path.join(directory, 'theme.js')
+    await writeFile(entrypoint, "globalThis.__twmLoads = (globalThis.__twmLoads ?? 0) + 1\nmodule.exports = { size: '1rem' }\n")
+
+    await prepareModuleLoad(entrypoint)
+    expect((await loadModule('./theme.js', directory, () => {})).module).toEqual({ size: '1rem' })
+    expect(globals.__twmLoads).toBe(1)
+    delete globals.__twmLoads
 })
