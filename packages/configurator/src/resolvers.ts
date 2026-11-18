@@ -1,5 +1,6 @@
 import fs from 'node:fs'
 import { readFile, stat } from 'node:fs/promises'
+import { createRequire } from 'node:module'
 import path from 'node:path'
 
 import { type Resolver } from '@tailwindcss/node'
@@ -38,6 +39,25 @@ export function createModuleResolver(
         onDependency,
         onDependency,
     )
+}
+
+/**
+ * Call between resolving a config/plugin module and letting Tailwind import it. Reports the module's local graph first, so an integration records each file (and its modification time) before anything reads it and a missing transitive target is reported even when loading fails. Then loads a CommonJS module through `require`, so the import that follows finds it already evaluated.
+ *
+ * The second step works around Node's handling of a CommonJS file loaded with `import()`, which is how Tailwind loads every module (with a cache-busting query; an integration clears `require.cache` before). For the dependencies such a file re-exports — `module.exports = require('./x')`, `{ ...require('./x') }`, `{ key: require('./x') }` — Node registers a placeholder module before running the file. On the first load the file's own `require` loads the placeholder properly. On later loads `require` takes a shortcut through Node's memory of where that request resolved last time, finds the placeholder still unloaded, and returns its empty exports as if it were a circular dependency: the re-exported theme silently disappears from the second regeneration on, and a syntax error in the dependency is swallowed with it. A module that `require` has already evaluated gets no placeholders, and `import()` reuses its exports.
+ */
+export async function prepareModuleLoad(file: string, onDependency?: (file: string) => void) {
+    if (onDependency) {
+        await trackModuleDependencies(file, onDependency)
+    }
+    if (!isCommonJsModule(file)) {
+        return
+    }
+    try {
+        nodeRequire(file)
+    } catch {
+        // Tailwind's import of the same file follows and reports the failure, with its fallback loader for what Node cannot load natively.
+    }
 }
 
 /**
@@ -88,6 +108,45 @@ export async function trackModuleDependencies(file: string, onDependency: (file:
                 await visit(dependency)
             }
         }))
+    }
+}
+
+/**
+ * Whether Node evaluates the file as CommonJS, as far as that can be told without loading it: by extension, or for the ambiguous extensions by the closest package.json. Files with ESM syntax are left out even in a CommonJS package, where Node would detect and load them as ESM; requiring one would evaluate it a second time next to Tailwind's import. A wrong guess in the other direction only skips the workaround.
+ */
+function isCommonJsModule(file: string): boolean {
+    const extension = path.extname(file)
+    if (extension === '.cjs' || extension === '.cts') {
+        return true
+    }
+    if (extension !== '.js' && extension !== '.ts') {
+        return false
+    }
+    try {
+        return closestPackageType(file) !== 'module' && !ESM_SYNTAX_PATTERN.test(fs.readFileSync(file, 'utf8'))
+    } catch {
+        return false
+    }
+}
+
+/** The `type` field of the package.json that governs a file, like Node's lookup: the closest one decides, even without a `type`. */
+function closestPackageType(file: string): unknown {
+    let directory = path.dirname(file)
+    for (;;) {
+        let manifest: string | undefined
+        try {
+            manifest = fs.readFileSync(path.join(directory, 'package.json'), 'utf8')
+        } catch {
+            // No manifest at this level.
+        }
+        if (manifest !== undefined) {
+            return (JSON.parse(manifest) as { type?: unknown }).type
+        }
+        const parent = path.dirname(directory)
+        if (parent === directory) {
+            return undefined
+        }
+        directory = parent
     }
 }
 
@@ -160,3 +219,8 @@ const MODULE_IMPORT_PATTERNS = [
     /\b(?:import|export)\s+(?:[^'";]*?\s+from\s*)?['"]([^'"]+)['"]/g,
     /\b(?:require|import)\s*\(\s*['"`]([^'"`]+)['"`]/g,
 ]
+
+/** A statement-level `import` or `export`, which makes Node treat a file as ESM regardless of its package. Dynamic `import()` and property names do not count. */
+const ESM_SYNTAX_PATTERN = /^\s*(?:import\s*(?:[\w$*{'"]|$)|export\s+[\w${*])/m
+
+const nodeRequire = createRequire(import.meta.url)

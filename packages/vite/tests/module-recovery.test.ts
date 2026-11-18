@@ -11,6 +11,7 @@ import {
     hasLiteral,
     libraryAliases,
     nextWatchBuild,
+    replaceFile,
     setupPluginTests,
     updateAfter,
     waitForWatcher,
@@ -53,6 +54,11 @@ test.each([
     const recovered = await server.ssrLoadModule(RUNTIME_SPECIFIER)
     expect(recovered.twMerge('text-huge text-sm')).toBe('text-sm')
     expect((await server.transformRequest(RUNTIME_SPECIFIER))?.code).not.toContain('getDefaultConfig')
+
+    // The module is a bare re-export of its dependency, which Node stops reloading from the second successful import on unless the configurator loads it through `require` first. A duplicate watcher event for the repair is enough to cause that second import.
+    const again = await updateAfter(plugin, () => replaceFile(tokensPath, `module.exports = ${module}\n// unchanged theme\n`))
+    expect(again).toEqual({ trigger: 'config', regenerated: true, reloaded: false })
+    expect((await server.ssrLoadModule(RUNTIME_SPECIFIER)).twMerge('text-huge text-sm')).toBe('text-sm')
 })
 
 test.each([
