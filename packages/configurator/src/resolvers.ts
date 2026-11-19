@@ -45,6 +45,8 @@ export function createModuleResolver(
  * Call between resolving a config/plugin module and letting Tailwind import it. Reports the module's local graph first, so an integration records each file (and its modification time) before anything reads it and a missing transitive target is reported even when loading fails. Then loads a CommonJS module through `require`, so the import that follows finds it already evaluated.
  *
  * The second step works around Node's handling of a CommonJS file loaded with `import()`, which is how Tailwind loads every module (with a cache-busting query; an integration clears `require.cache` before). For the dependencies such a file re-exports — `module.exports = require('./x')`, `{ ...require('./x') }`, `{ key: require('./x') }` — Node registers a placeholder module before running the file. On the first load the file's own `require` loads the placeholder properly. On later loads `require` takes a shortcut through Node's memory of where that request resolved last time, finds the placeholder still unloaded, and returns its empty exports as if it were a circular dependency: the re-exported theme silently disappears from the second regeneration on, and a syntax error in the dependency is swallowed with it. A module that `require` has already evaluated gets no placeholders, and `import()` reuses its exports.
+ *
+ * Reported as https://github.com/nodejs/node/issues/67611. The step can go once every Node line the repo supports ships a fix.
  */
 export async function prepareModuleLoad(file: string, onDependency?: (file: string) => void) {
     if (onDependency) {
