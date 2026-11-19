@@ -2497,7 +2497,6 @@ export const getDefaultConfig = () => {
             mx: ['ms', 'me', 'mr', 'ml'],
             my: ['mbs', 'mbe', 'mt', 'mb'],
             size: ['w', 'h'],
-            'font-size': ['leading'],
             'fvn-normal': [
                 'fvn-ordinal',
                 'fvn-slashed-zero',
@@ -2643,6 +2642,7 @@ export const getDefaultConfig = () => {
             'touch-pz': ['touch'],
         },
         conflictingClassGroupModifiers: {
+            // Only a font size with a line-height modifier like `text-lg/7` sets `line-height` directly. Without a modifier, font sizes don't conflict with `leading-*`: arbitrary ones only set `font-size`, and the theme ones set `line-height: var(--tw-leading, …)`, so an earlier `leading-*` keeps applying in Tailwind's CSS.
             'font-size': ['leading'],
         },
         postfixLookupClassGroups: ['container-type'],
