@@ -564,7 +564,19 @@ export const getDefaultConfig = () => {
              * Flex
              * @see https://tailwindcss.com/docs/flex
              */
-            flex: [{ flex: [isNumber, isFraction, 'auto', 'initial', 'none', isArbitraryValue] }],
+            flex: [
+                {
+                    flex: [
+                        isNumber,
+                        isFraction,
+                        'auto',
+                        'initial',
+                        'none',
+                        isArbitraryVariable,
+                        isArbitraryValue,
+                    ],
+                },
+            ],
             /**
              * Flex Grow
              * @see https://tailwindcss.com/docs/flex-grow
@@ -1036,7 +1048,7 @@ export const getDefaultConfig = () => {
              * @see https://tailwindcss.com/docs/line-clamp
              */
             'line-clamp': [
-                { 'line-clamp': [isNumber, 'none', isArbitraryVariable, isArbitraryNumber] },
+                { 'line-clamp': [isNumber, 'none', isArbitraryVariable, isArbitraryValue] },
             ],
             /**
              * Line Height
@@ -1105,7 +1117,8 @@ export const getDefaultConfig = () => {
                         isNumber,
                         'from-font',
                         'auto',
-                        isArbitraryVariable,
+                        isArbitraryVariableLength,
+                        isArbitraryVariablePosition,
                         isArbitraryLength,
                     ],
                 },
@@ -1709,7 +1722,7 @@ export const getDefaultConfig = () => {
             'mask-image-radial-to-pos': [{ 'mask-radial-to': scaleMaskImagePosition() }],
             'mask-image-radial-from-color': [{ 'mask-radial-from': scaleColor() }],
             'mask-image-radial-to-color': [{ 'mask-radial-to': scaleColor() }],
-            'mask-image-radial-shape': [{ 'mask-radial': ['circle', 'ellipse'] }],
+            'mask-image-radial-shape': [{ mask: ['circle', 'ellipse'] }],
             'mask-image-radial-size': [
                 { 'mask-radial': [{ closest: ['side', 'corner'], farthest: ['side', 'corner'] }] },
             ],
@@ -2474,6 +2487,9 @@ export const getDefaultConfig = () => {
             'inset-y': ['inset-bs', 'inset-be', 'top', 'bottom'],
             flex: ['basis', 'grow', 'shrink'],
             gap: ['gap-x', 'gap-y'],
+            'place-content': ['align-content', 'justify-content'],
+            'place-items': ['align-items', 'justify-items'],
+            'place-self': ['align-self', 'justify-self'],
             p: ['px', 'py', 'ps', 'pe', 'pbs', 'pbe', 'pt', 'pr', 'pb', 'pl'],
             px: ['ps', 'pe', 'pr', 'pl'],
             py: ['pbs', 'pbe', 'pt', 'pb'],
@@ -2481,7 +2497,6 @@ export const getDefaultConfig = () => {
             mx: ['ms', 'me', 'mr', 'ml'],
             my: ['mbs', 'mbe', 'mt', 'mb'],
             size: ['w', 'h'],
-            'font-size': ['leading'],
             'fvn-normal': [
                 'fvn-ordinal',
                 'fvn-slashed-zero',
@@ -2627,6 +2642,7 @@ export const getDefaultConfig = () => {
             'touch-pz': ['touch'],
         },
         conflictingClassGroupModifiers: {
+            // Only a font size with a line-height modifier like `text-lg/7` sets `line-height` directly. Without a modifier, font sizes don't conflict with `leading-*`: arbitrary ones only set `font-size`, and the theme ones set `line-height: var(--tw-leading, …)`, so an earlier `leading-*` keeps applying in Tailwind's CSS.
             'font-size': ['leading'],
         },
         postfixLookupClassGroups: ['container-type'],

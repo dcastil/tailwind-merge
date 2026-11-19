@@ -1,5 +1,27 @@
 # Changelog for v2 releases
 
+## v2.6.2
+
+### Other
+
+- Publish 2.x releases with provenance by [@dcastil](https://github.com/dcastil) in [#757](https://github.com/dcastil/tailwind-merge/pull/757)
+    - v2.6.0 and v2.6.1 were published without npm provenance attestations, which pnpm's `trustPolicy: no-downgrade` reports as a possible package takeover ([#668](https://github.com/dcastil/tailwind-merge/issues/668), [#720](https://github.com/dcastil/tailwind-merge/issues/720)). This release contains no code changes. It is published from CI with provenance again, so installs of `tailwind-merge@^2` resolve to an attested version.
+
+**Full Changelog**: [`v2.6.1...v2.6.2`](https://github.com/dcastil/tailwind-merge/compare/v2.6.1...v2.6.2)
+
+Thanks to [@manavm1990](https://github.com/manavm1990), [@langy](https://github.com/langy), [@roboflow](https://github.com/roboflow), [@syntaxfm](https://github.com/syntaxfm), [@getsentry](https://github.com/getsentry), [@codecov](https://github.com/codecov), a private sponsor, [@block](https://github.com/block), [@openclaw](https://github.com/openclaw), [@sourcegraph](https://github.com/sourcegraph), [@jbisasky](https://github.com/jbisasky), [@frontendmasters](https://github.com/frontendmasters) and more via [@thnxdev](https://github.com/thnxdev) for sponsoring tailwind-merge! ❤️
+
+## v2.6.1
+
+### Bug Fixes
+
+- Fix arbitrary value using `color-mix` not being detected as color by [@dcastil](https://github.com/dcastil) in [#591](https://github.com/dcastil/tailwind-merge/pull/591)
+    - This fix was backported from [v3.3.1](https://github.com/dcastil/tailwind-merge/releases/tag/v3.3.1) to make it available for v2 users.
+
+**Full Changelog**: [`v2.6.0...v2.6.1`](https://github.com/dcastil/tailwind-merge/compare/v2.6.0...v2.6.1)
+
+Thanks to [@brandonmcconnell](https://github.com/brandonmcconnell), [@manavm1990](https://github.com/manavm1990), [@langy](https://github.com/langy), [@roboflow](https://github.com/roboflow), [@syntaxfm](https://github.com/syntaxfm), [@getsentry](https://github.com/getsentry), [@codecov](https://github.com/codecov), a private sponsor, [@block](https://github.com/block), [@openclaw](https://github.com/openclaw) and more via [@thnxdev](https://github.com/thnxdev) for sponsoring tailwind-merge! ❤️
+
 ## v2.6.0
 
 ### New Features

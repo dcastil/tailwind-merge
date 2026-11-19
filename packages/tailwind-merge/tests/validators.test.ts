@@ -101,6 +101,9 @@ test('isArbitraryImage', () => {
 test('isArbitraryLength', () => {
     expect(isArbitraryLength('[3.7%]')).toBe(true)
     expect(isArbitraryLength('[481px]')).toBe(true)
+    expect(isArbitraryLength('[1Q]')).toBe(true)
+    expect(isArbitraryLength('[--spacing(4)]')).toBe(true)
+    expect(isArbitraryLength('[--spacing(0.5)_--spacing(2)]')).toBe(true)
     expect(isArbitraryLength('[19.1rem]')).toBe(true)
     expect(isArbitraryLength('[50vw]')).toBe(true)
     expect(isArbitraryLength('[56vh]')).toBe(true)
@@ -113,8 +116,11 @@ test('isArbitraryLength', () => {
     expect(isArbitraryLength('[12px')).toBe(false)
     expect(isArbitraryLength('12px]')).toBe(false)
     expect(isArbitraryLength('one')).toBe(false)
+    expect(isArbitraryLength('[-1*--spacing(4)]')).toBe(false)
     expect(isArbitraryLength('[color(display-p3_1_0_0/50%)]')).toBe(false)
     expect(isArbitraryLength('[light-dark(white,rgb(0_0_0/50%))]')).toBe(false)
+    expect(isArbitraryLength('[contrast-color(hsl(0_0%_0%))]')).toBe(false)
+    expect(isArbitraryLength('[device-cmyk(0%_0%_0%_100%)]')).toBe(false)
 })
 
 test('isArbitraryNumber', () => {

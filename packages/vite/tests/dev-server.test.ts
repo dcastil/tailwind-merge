@@ -9,6 +9,7 @@ import * as fallbackRuntime from '../src/runtime'
 import {
     RUNTIME_SPECIFIER,
     fixturesDirectory,
+    replaceFile,
     updateAfter,
     setupPluginTests,
     waitForWatcher,
@@ -102,13 +103,46 @@ test.each([
 
     const update = await updateAfter(
         plugin,
-        () => writeFile(themePath, "module.exports = { big: '2rem' }\n"),
+        () => replaceFile(themePath, "module.exports = { big: '2rem' }\n"),
         (result) => result.reloaded,
     )
     expect(update).toEqual({ trigger: 'config', regenerated: true, reloaded: true })
     const after = await server.ssrLoadModule(RUNTIME_SPECIFIER)
     expect(after.twMerge('text-big text-sm')).toBe('text-sm')
     expect(after.twMerge('text-huge text-sm')).toBe('text-huge text-sm')
+})
+
+// Node hands a CommonJS file an empty object for a dependency it re-exports once the file is imported a second time, unless the configurator loads it through `require` first. The shapes are the ones Node treats as re-exports; the first edit alone passes without that.
+test.each([
+    ['@config', 'module.exports = require("./theme.cjs")', (sizes: string) => `{ theme: { extend: { fontSize: ${sizes} } } }`],
+    ['@config', 'module.exports = { ...require("./theme.cjs") }', (sizes: string) => `{ theme: { extend: { fontSize: ${sizes} } } }`],
+    ['@config', 'module.exports = { theme: require("./theme.cjs") }', (sizes: string) => `{ extend: { fontSize: ${sizes} } }`],
+    ['@plugin', 'module.exports = require("./theme.cjs")', (sizes: string) => `{ handler() {}, config: { theme: { extend: { fontSize: ${sizes} } } } }`],
+    ['@plugin', 'module.exports = { handler() {}, ...require("./theme.cjs") }', (sizes: string) => `{ config: { theme: { extend: { fontSize: ${sizes} } } } }`],
+    ['@plugin', 'module.exports = { handler() {}, config: require("./theme.cjs") }', (sizes: string) => `{ theme: { extend: { fontSize: ${sizes} } } }`],
+] as const)('%s keeps reloading a re-exported CommonJS dependency over repeated edits (%s)', async (directive, config, theme) => {
+    const root = await copyFixture('app')
+    const themePath = path.join(root, 'theme.cjs')
+    await writeFile(themePath, `module.exports = ${theme("{ first: '1rem' }")}\n`)
+    await writeFile(path.join(root, 'tailwind.config.cjs'), `${config}\n`)
+    await writeFile(path.join(root, 'app.css'), `@import 'tailwindcss';\n${directive} './tailwind.config.cjs';\n@source inline('text-first text-second text-third text-fourth text-sm');\n`)
+    // Dev pruning adds the source scanner's own load of the same module next to the design system's.
+    const { server, plugin } = await startServer(root, { options: { prune: { dev: true } } })
+    await waitForWatcher(server, themePath)
+    expect((await server.ssrLoadModule(RUNTIME_SPECIFIER)).twMerge('text-first text-sm')).toBe('text-sm')
+
+    let previous = 'first'
+    for (const name of ['second', 'third', 'fourth']) {
+        await updateAfter(
+            plugin,
+            () => replaceFile(themePath, `module.exports = ${theme(`{ ${name}: '1rem' }`)}\n`),
+            (result) => result.reloaded,
+        )
+        const runtime = await server.ssrLoadModule(RUNTIME_SPECIFIER)
+        expect(runtime.twMerge(`text-${name} text-sm`)).toBe('text-sm')
+        expect(runtime.twMerge(`text-${previous} text-sm`)).toBe(`text-${previous} text-sm`)
+        previous = name
+    }
 })
 
 test('a theme-irrelevant edit regenerates without invalidating (the stability gate)', async () => {

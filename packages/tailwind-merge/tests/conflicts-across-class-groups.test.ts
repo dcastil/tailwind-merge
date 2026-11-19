@@ -35,6 +35,29 @@ test('axis shorthands override logical sides', () => {
     expect(twMerge('scroll-pbe-2 scroll-py-4')).toBe('scroll-py-4')
 })
 
+test('place shorthands override align and justify longhands', () => {
+    // place-content, place-items and place-self compile to the CSS shorthands that set both their align-* and justify-* longhands.
+    expect(twMerge('content-start place-content-center')).toBe('place-content-center')
+    expect(twMerge('justify-start place-content-center')).toBe('place-content-center')
+    expect(twMerge('content-start justify-between place-content-center')).toBe(
+        'place-content-center',
+    )
+    expect(twMerge('place-content-center content-start')).toBe('place-content-center content-start')
+    expect(twMerge('items-start place-items-center')).toBe('place-items-center')
+    expect(twMerge('items-baseline-last place-items-center')).toBe('place-items-center')
+    expect(twMerge('justify-items-start place-items-center')).toBe('place-items-center')
+    expect(twMerge('place-items-center items-start')).toBe('place-items-center items-start')
+    expect(twMerge('self-start place-self-center')).toBe('place-self-center')
+    expect(twMerge('justify-self-start place-self-center')).toBe('place-self-center')
+    expect(twMerge('place-self-center justify-self-start')).toBe(
+        'place-self-center justify-self-start',
+    )
+    expect(twMerge('items-start md:place-items-center')).toBe('items-start md:place-items-center')
+    expect(twMerge('justify-items-start place-content-center')).toBe(
+        'justify-items-start place-content-center',
+    )
+})
+
 test('ring and shadow classes do not create conflict', () => {
     expect(twMerge('ring shadow')).toBe('ring shadow')
     expect(twMerge('ring-2 shadow-md')).toBe('ring-2 shadow-md')
@@ -53,6 +76,28 @@ test('touch classes do create conflicts correctly', () => {
         'touch-pan-x touch-pan-y touch-pinch-zoom',
     )
     expect(twMerge('touch-pan-x touch-pan-y touch-pinch-zoom touch-auto')).toBe('touch-auto')
+})
+
+test('font-size classes only override leading with a line-height modifier', () => {
+    // Arbitrary font sizes only set `font-size`, so they don't affect `leading-*`
+    expect(twMerge('leading-6 text-[1.5rem]')).toBe('leading-6 text-[1.5rem]')
+    expect(twMerge('leading-[1.75rem] text-[1.5rem]')).toBe('leading-[1.75rem] text-[1.5rem]')
+    expect(twMerge('leading-6 text-[length:12px]')).toBe('leading-6 text-[length:12px]')
+    expect(twMerge('leading-6 text-(length:--my-size)')).toBe('leading-6 text-(length:--my-size)')
+
+    // Theme font sizes set `line-height: var(--tw-leading, …)`, so an earlier `leading-*` keeps applying
+    expect(twMerge('leading-6 text-lg')).toBe('leading-6 text-lg')
+    expect(twMerge('leading-none text-base')).toBe('leading-none text-base')
+    expect(twMerge('text-sm leading-6 text-lg')).toBe('leading-6 text-lg')
+
+    // A line-height modifier sets `line-height` directly and overrides `leading-*`
+    expect(twMerge('leading-6 text-lg/7')).toBe('text-lg/7')
+    expect(twMerge('leading-6 text-[1.5rem]/6')).toBe('text-[1.5rem]/6')
+    expect(twMerge('leading-6 text-[length:12px]/4')).toBe('text-[length:12px]/4')
+
+    // Font sizes still override each other
+    expect(twMerge('text-lg text-[1.5rem]')).toBe('text-[1.5rem]')
+    expect(twMerge('text-[1.5rem] text-lg')).toBe('text-lg')
 })
 
 test('line-clamp classes do create conflicts correctly', () => {

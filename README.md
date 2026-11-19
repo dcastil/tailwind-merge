@@ -5,7 +5,7 @@
 <div align="center">
     <br />
     <a href="https://github.com/dcastil/tailwind-merge">
-        <img src="https://github.com/dcastil/tailwind-merge/raw/tailwind-merge@3.7.0/packages/tailwind-merge/assets/logo.svg" alt="tailwind-merge" height="150px" />
+        <img src="https://github.com/dcastil/tailwind-merge/raw/tailwind-merge@3.7.1/packages/tailwind-merge/assets/logo.svg" alt="tailwind-merge" height="150px" />
     </a>
 </div>
 
@@ -27,17 +27,17 @@ twMerge('px-2 py-1 bg-red hover:bg-dark-red', 'p-3 bg-[#B91C1C]')
 
 ## Get started
 
-- [What is it for](https://github.com/dcastil/tailwind-merge/blob/tailwind-merge@3.7.0/packages/tailwind-merge/docs/what-is-it-for.md)
-- [When and how to use it](https://github.com/dcastil/tailwind-merge/blob/tailwind-merge@3.7.0/packages/tailwind-merge/docs/when-and-how-to-use-it.md)
-- [Features](https://github.com/dcastil/tailwind-merge/blob/tailwind-merge@3.7.0/packages/tailwind-merge/docs/features.md)
-- [Limitations](https://github.com/dcastil/tailwind-merge/blob/tailwind-merge@3.7.0/packages/tailwind-merge/docs/limitations.md)
-- [Configuration](https://github.com/dcastil/tailwind-merge/blob/tailwind-merge@3.7.0/packages/tailwind-merge/docs/configuration.md)
-- [Recipes](https://github.com/dcastil/tailwind-merge/blob/tailwind-merge@3.7.0/packages/tailwind-merge/docs/recipes.md)
-- [API reference](https://github.com/dcastil/tailwind-merge/blob/tailwind-merge@3.7.0/packages/tailwind-merge/docs/api-reference.md)
-- [Writing plugins](https://github.com/dcastil/tailwind-merge/blob/tailwind-merge@3.7.0/packages/tailwind-merge/docs/writing-plugins.md)
-- [Versioning](https://github.com/dcastil/tailwind-merge/blob/tailwind-merge@3.7.0/packages/tailwind-merge/docs/versioning.md)
-- [Contributing](https://github.com/dcastil/tailwind-merge/blob/tailwind-merge@3.7.0/packages/tailwind-merge/docs/contributing.md)
-- [Similar packages](https://github.com/dcastil/tailwind-merge/blob/tailwind-merge@3.7.0/packages/tailwind-merge/docs/similar-packages.md)
+- [What is it for](https://github.com/dcastil/tailwind-merge/blob/tailwind-merge@3.7.1/packages/tailwind-merge/docs/what-is-it-for.md)
+- [When and how to use it](https://github.com/dcastil/tailwind-merge/blob/tailwind-merge@3.7.1/packages/tailwind-merge/docs/when-and-how-to-use-it.md)
+- [Features](https://github.com/dcastil/tailwind-merge/blob/tailwind-merge@3.7.1/packages/tailwind-merge/docs/features.md)
+- [Limitations](https://github.com/dcastil/tailwind-merge/blob/tailwind-merge@3.7.1/packages/tailwind-merge/docs/limitations.md)
+- [Configuration](https://github.com/dcastil/tailwind-merge/blob/tailwind-merge@3.7.1/packages/tailwind-merge/docs/configuration.md)
+- [Recipes](https://github.com/dcastil/tailwind-merge/blob/tailwind-merge@3.7.1/packages/tailwind-merge/docs/recipes.md)
+- [API reference](https://github.com/dcastil/tailwind-merge/blob/tailwind-merge@3.7.1/packages/tailwind-merge/docs/api-reference.md)
+- [Writing plugins](https://github.com/dcastil/tailwind-merge/blob/tailwind-merge@3.7.1/packages/tailwind-merge/docs/writing-plugins.md)
+- [Versioning](https://github.com/dcastil/tailwind-merge/blob/tailwind-merge@3.7.1/packages/tailwind-merge/docs/versioning.md)
+- [Contributing](https://github.com/dcastil/tailwind-merge/blob/tailwind-merge@3.7.1/packages/tailwind-merge/docs/contributing.md)
+- [Similar packages](https://github.com/dcastil/tailwind-merge/blob/tailwind-merge@3.7.1/packages/tailwind-merge/docs/similar-packages.md)
 
 <!-- tailwind-merge-docs:end -->
 

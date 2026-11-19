@@ -6,7 +6,7 @@ import { type Resolver, __unstable__loadDesignSystem, loadModule } from '@tailwi
 import type * as TailwindEngine from 'tailwindcss'
 
 import { type DeclarationEntry, parseDeclarations } from './declarations.ts'
-import { createModuleResolver, createStylesheetResolver, trackModuleDependencies } from './resolvers.ts'
+import { createModuleResolver, createStylesheetResolver, prepareModuleLoad } from './resolvers.ts'
 
 export type { DeclarationEntry } from './declarations.ts'
 
@@ -99,10 +99,8 @@ async function loadDesignSystem(css: string, base: string, integration?: Tailwin
         },
         async loadModule(id, from) {
             const file = await resolveModule(id, from)
-            // Tailwind reports a module's transitive imports only after importing it. Walk them first, so an integration records each file (and its modification time) before the import reads it, and so a missing transitive target is reported even when the import fails.
-            if (integration.onDependency) {
-                await trackModuleDependencies(file, integration.onDependency)
-            }
+            // Tailwind reports a module's transitive imports only after importing it, and its import alone does not reload every CommonJS dependency.
+            await prepareModuleLoad(file, integration.onDependency)
             // Tailwind only collects transitive dependencies and busts ESM caches for relative module requests. Aliases resolving to local configs/plugins must follow that same path.
             return loadModule(
                 `./${path.relative(from, file)}`,

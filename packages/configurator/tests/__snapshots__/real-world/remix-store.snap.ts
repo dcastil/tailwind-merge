@@ -23,7 +23,6 @@ export const getConfig = () => {
         isPercent,
         isArbitraryVariableFamilyName,
         isArbitraryFamilyName,
-        isArbitraryNumber,
         isArbitraryVariablePosition,
         isArbitraryPosition,
         isArbitraryVariableSize,
@@ -34,6 +33,7 @@ export const getConfig = () => {
         isArbitraryShadow,
         isArbitraryVariableMaskPosition,
         isArbitraryMaskPosition,
+        isArbitraryNumber,
     } = v
 
     /** The bare `--spacing` multiplier is set, which makes every number a valid spacing value (e.g. p-13). */
@@ -303,7 +303,19 @@ export const getConfig = () => {
             ],
             'flex-direction': [{ flex: ['row', 'row-reverse', 'col', 'col-reverse'] }],
             'flex-wrap': [{ flex: ['nowrap', 'wrap', 'wrap-reverse'] }],
-            flex: [{ flex: [isNumber, isFraction, 'auto', 'initial', 'none', isArbitraryValue] }],
+            flex: [
+                {
+                    flex: [
+                        isNumber,
+                        isFraction,
+                        'auto',
+                        'initial',
+                        'none',
+                        isArbitraryVariable,
+                        isArbitraryValue,
+                    ],
+                },
+            ],
             grow: [{ grow: ['', isNumber, isArbitraryVariable, isArbitraryValue] }],
             shrink: [{ shrink: ['', isNumber, isArbitraryVariable, isArbitraryValue] }],
             order: [
@@ -791,7 +803,7 @@ export const getConfig = () => {
             'fvn-spacing': ['proportional-nums', 'tabular-nums'],
             'fvn-fraction': ['diagonal-fractions', 'stacked-fractions'],
             tracking: [{ tracking: [...scaleTracking, isArbitraryVariable, isArbitraryValue] }],
-            'line-clamp': [{ 'line-clamp': [isNumber, 'none', isArbitraryVariable, isArbitraryNumber] }],
+            'line-clamp': [{ 'line-clamp': [isNumber, 'none', isArbitraryVariable, isArbitraryValue] }],
             leading: [
                 {
                     leading: [
@@ -848,7 +860,14 @@ export const getConfig = () => {
             'text-decoration-style': [{ decoration: ['solid', 'dashed', 'dotted', 'double', 'wavy'] }],
             'text-decoration-thickness': [
                 {
-                    decoration: [isNumber, 'from-font', 'auto', isArbitraryVariable, isArbitraryLength],
+                    decoration: [
+                        isNumber,
+                        'from-font',
+                        'auto',
+                        isArbitraryVariableLength,
+                        isArbitraryVariablePosition,
+                        isArbitraryLength,
+                    ],
                 },
             ],
             'text-decoration-color': [
@@ -1919,7 +1938,7 @@ export const getConfig = () => {
                     ],
                 },
             ],
-            'mask-image-radial-shape': [{ 'mask-radial': ['circle', 'ellipse'] }],
+            'mask-image-radial-shape': [{ mask: ['circle', 'ellipse'] }],
             'mask-image-radial-size': [{ 'mask-radial': [{ closest: ['side', 'corner'], farthest: ['side', 'corner'] }] }],
             'mask-image-radial-pos': [
                 {
@@ -2411,6 +2430,9 @@ export const getConfig = () => {
             'inset-y': ['inset-bs', 'inset-be', 'top', 'bottom'],
             flex: ['basis', 'grow', 'shrink'],
             gap: ['gap-x', 'gap-y'],
+            'place-content': ['align-content', 'justify-content'],
+            'place-items': ['align-items', 'justify-items'],
+            'place-self': ['align-self', 'justify-self'],
             p: ['px', 'py', 'ps', 'pe', 'pbs', 'pbe', 'pt', 'pr', 'pb', 'pl'],
             px: ['ps', 'pe', 'pr', 'pl'],
             py: ['pbs', 'pbe', 'pt', 'pb'],
@@ -2418,7 +2440,6 @@ export const getConfig = () => {
             mx: ['ms', 'me', 'mr', 'ml'],
             my: ['mbs', 'mbe', 'mt', 'mb'],
             size: ['w', 'h'],
-            'font-size': ['leading'],
             'fvn-normal': ['fvn-ordinal', 'fvn-slashed-zero', 'fvn-figure', 'fvn-spacing', 'fvn-fraction'],
             'fvn-ordinal': ['fvn-normal'],
             'fvn-slashed-zero': ['fvn-normal'],

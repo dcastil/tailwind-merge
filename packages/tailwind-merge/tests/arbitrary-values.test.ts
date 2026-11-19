@@ -29,6 +29,30 @@ test('handles simple conflicts with arbitrary values correctly', () => {
     expect(twMerge('text-[0.5px] text-(--my-0)')).toBe('text-[0.5px] text-(--my-0)')
 })
 
+test('handles quarter-millimeter lengths correctly', () => {
+    expect(twMerge('text-[1Q] text-red-500')).toBe('text-[1Q] text-red-500')
+    expect(twMerge('text-red-500 text-[1Q]')).toBe('text-red-500 text-[1Q]')
+    expect(twMerge('text-[1Q] text-lg')).toBe('text-lg')
+    expect(twMerge('text-lg text-[1Q]')).toBe('text-[1Q]')
+    expect(twMerge('border-[1Q] border-red-500')).toBe('border-[1Q] border-red-500')
+    expect(twMerge('outline-[1Q] outline-red-500')).toBe('outline-[1Q] outline-red-500')
+})
+
+test('handles lengths using the --spacing() function correctly', () => {
+    expect(twMerge('border-[--spacing(4)] border-transparent')).toBe(
+        'border-[--spacing(4)] border-transparent',
+    )
+    expect(twMerge('border-[--spacing(4)] border-2')).toBe('border-2')
+    expect(twMerge('border-y-[--spacing(4)] border-y-transparent')).toBe(
+        'border-y-[--spacing(4)] border-y-transparent',
+    )
+    expect(twMerge('text-[--spacing(4)] text-red-500')).toBe('text-[--spacing(4)] text-red-500')
+    expect(twMerge('text-[--spacing(4)] text-lg')).toBe('text-lg')
+    expect(twMerge('outline-[--spacing(1)] outline-red-500')).toBe(
+        'outline-[--spacing(1)] outline-red-500',
+    )
+})
+
 test('handles arbitrary length conflicts with labels and modifiers correctly', () => {
     expect(twMerge('hover:m-[2px] hover:m-[length:var(--c)]')).toBe('hover:m-[length:var(--c)]')
     expect(twMerge('hover:focus:m-[2px] focus:hover:m-[length:var(--c)]')).toBe(
@@ -45,9 +69,22 @@ test('handles arbitrary length conflicts with labels and modifiers correctly', (
     ).toBe('border-b border-some-coloooor')
 })
 
+test.each([
+    "content-[']:_hello']",
+    'content-["]:_hello"]',
+    String.raw`content-['it\'s]:_hello']`,
+    String.raw`content-["say\"]:_hello"]`,
+    String.raw`content-['\\']`,
+])('handles quoted delimiters in arbitrary values: %s', (className) => {
+    expect(twMerge(className, "content-['world']")).toBe("content-['world']")
+    expect(twMerge("content-['world']", className)).toBe(className)
+})
+
 test('handles complex arbitrary value conflicts correctly', () => {
     expect(twMerge('grid-rows-[1fr,auto] grid-rows-2')).toBe('grid-rows-2')
     expect(twMerge('grid-rows-[repeat(20,minmax(0,1fr))] grid-rows-3')).toBe('grid-rows-3')
+    expect(twMerge('line-clamp-[calc(var(--characters)/100)] line-clamp-3')).toBe('line-clamp-3')
+    expect(twMerge('line-clamp-2 line-clamp-[var(--lines)]')).toBe('line-clamp-[var(--lines)]')
 })
 
 test('handles ambiguous arbitrary values correctly', () => {

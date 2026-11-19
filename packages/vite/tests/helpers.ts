@@ -1,4 +1,4 @@
-import { cp, mkdir, rm, symlink } from 'node:fs/promises'
+import { cp, mkdir, rename, rm, symlink, writeFile } from 'node:fs/promises'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
@@ -177,6 +177,7 @@ export async function waitForWatcher(server: ViteDevServer, file: string): Promi
 
 /**
  * Performs an edit and resolves with what the plugin did in reaction: the updates it reports through its api, combined into one (`regenerated`/`reloaded` true when any update in the batch had them). Combining matters because file watchers can deliver one save as several events spaced further apart than the plugin's debounce, so one edit may come out as a reload followed by a no-op re-scan; the batch ends after a quiet window longer than the debounce.
+ * The combined trigger follows the plugin's own priority: `'config'` when any update in the batch was one, since a config update subsumes a source re-scan. Taking the first update's trigger instead mislabels the batch whenever an unrelated no-op re-scan is reported just before the awaited regeneration; with dev pruning and no Tailwind Vite plugin the server also watches the working directory, where parallel test files write their fixture copies.
  * Positive checks can require an outcome before settling: under load, an earlier no-op can finish while the requested regeneration is still running, outlasting the quiet window. The caller's test timeout still fails if the required outcome never arrives.
  */
 export function updateAfter(
@@ -190,7 +191,7 @@ export function updateAfter(
         const unsubscribe = plugin.api.onUpdate((update) => {
             combined = combined
                 ? {
-                      trigger: combined.trigger,
+                      trigger: combined.trigger === 'config' ? 'config' : update.trigger,
                       regenerated: combined.regenerated || update.regenerated,
                       reloaded: combined.reloaded || update.reloaded,
                   }
@@ -206,6 +207,16 @@ export function updateAfter(
         })
         void edit()
     })
+}
+
+/**
+ * Replaces a file's content in one step, the way editors save: the new content is written next to the fixture copy and renamed over the target. `writeFile` truncates before it writes, so a regeneration already pending from an earlier watcher event can read the file empty in between, reload once with a config missing that file's theme values, and reload again when the content arrives — possibly after `updateAfter`'s quiet window, leaving the test asserting on the intermediate module. Use it for edits whose intermediate empty state would itself change the generated config.
+ */
+export async function replaceFile(file: string, content: string): Promise<void> {
+    // Outside the Vite root, so the staging file is neither a scanned source nor a tracked dependency, and on the same filesystem, so the rename is atomic.
+    const staging = path.join(path.dirname(file), '..', `.staging-${path.basename(file)}`)
+    await writeFile(staging, content)
+    await rename(staging, file)
 }
 
 /** Whether the built output contains `value` as a string literal, whichever quote style the bundler printed. */

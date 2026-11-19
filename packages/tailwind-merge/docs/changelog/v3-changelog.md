@@ -1,5 +1,36 @@
 # Changelog for v3 releases
 
+## v3.7.1
+
+### Bug Fixes
+
+- Fix font sizes without a line-height modifier removing earlier `leading-*` classes by [@dcastil](https://github.com/dcastil) in [#761](https://github.com/dcastil/tailwind-merge/pull/761)
+    - In Tailwind CSS v4, an earlier `leading-*` class still applies after a font size like `text-lg` or `text-[1.5rem]`, so `twMerge('leading-6 text-lg')` now keeps both classes. Font sizes with a line-height modifier like `text-lg/7` still override `leading-*`.
+    - Thanks to [@chatman-media](https://github.com/chatman-media) for finding this for arbitrary font sizes in [#681](https://github.com/dcastil/tailwind-merge/pull/681).
+- Fix arbitrary values using `--spacing()` being classified as colors instead of lengths by [@dcastil](https://github.com/dcastil) in [#758](https://github.com/dcastil/tailwind-merge/pull/758)
+- Fix `mask-circle` and `mask-ellipse` not merging by [@0z5a](https://github.com/0z5a) in [#756](https://github.com/dcastil/tailwind-merge/pull/756)
+- Fix `flex-(--var)` not merging with other flex classes by [@asssslay](https://github.com/asssslay) in [#751](https://github.com/dcastil/tailwind-merge/pull/751)
+- Fix `decoration-(--var)` being classified as thickness instead of color by [@asssslay](https://github.com/asssslay) in [#753](https://github.com/dcastil/tailwind-merge/pull/753)
+- Fix arbitrary `line-clamp` values like `line-clamp-[calc(var(--characters)/100)]` not merging by [@asssslay](https://github.com/asssslay) in [#752](https://github.com/dcastil/tailwind-merge/pull/752)
+- Fix `place-*` classes not overriding `content-*`, `items-*`, `self-*` and `justify-*` classes by [@mkantautas](https://github.com/mkantautas) in [#731](https://github.com/dcastil/tailwind-merge/pull/731)
+- Fix lengths using the `Q` unit not being recognized by [@Marve10s](https://github.com/Marve10s) in [#727](https://github.com/dcastil/tailwind-merge/pull/727)
+- Fix brackets and other delimiters inside quoted arbitrary values like `data-[label='[']` breaking class parsing by [@Don-Yin](https://github.com/Don-Yin) in [#730](https://github.com/dcastil/tailwind-merge/pull/730)
+- Fix arbitrary values using `contrast-color()` or `device-cmyk()` being classified as lengths instead of colors by [@Don-Yin](https://github.com/Don-Yin) in [#729](https://github.com/dcastil/tailwind-merge/pull/729)
+- Fix `sr-only` not overriding the position, size, spacing, overflow and white-space classes it resets by [@kory-kaai](https://github.com/kory-kaai) in [#726](https://github.com/dcastil/tailwind-merge/pull/726)
+- Fix `mask-x-*` and `mask-y-*` not overriding the matching edge classes and arbitrary mask stop positions being classified as colors by [@Nelmad](https://github.com/Nelmad) in [#748](https://github.com/dcastil/tailwind-merge/pull/748)
+    - This also fixes arbitrary values using `--alpha()` or uppercase color functions like `RGB()` being classified as lengths instead of colors.
+- Fix postfix modifiers not being recognized on classes with a leading important modifier like `!text-lg/7` by [@beduldul](https://github.com/beduldul) in [#721](https://github.com/dcastil/tailwind-merge/pull/721)
+
+### Documentation
+
+- Explain how classes are matched to class groups and how to use validators by [@itsthilinar](https://github.com/itsthilinar) in [#750](https://github.com/dcastil/tailwind-merge/pull/750)
+- Show how to enforce importing `twMerge` from one place with ESLint by [@oyobbeb](https://github.com/oyobbeb) in [#738](https://github.com/dcastil/tailwind-merge/pull/738)
+- Recommend importing `twMerge` from one project-owned file by [@dcastil](https://github.com/dcastil) in [`b53ceaf`](https://github.com/dcastil/tailwind-merge/commit/b53ceaf6e9900edf8edb03f65d0e2fbf5104adfa) and [`7fcb814`](https://github.com/dcastil/tailwind-merge/commit/7fcb814ea439b749aa18b72415b0e21837811853)
+
+**Full Changelog**: [`tailwind-merge@3.7.0...tailwind-merge@3.7.1`](https://github.com/dcastil/tailwind-merge/compare/tailwind-merge@3.7.0...tailwind-merge@3.7.1)
+
+Thanks to [@manavm1990](https://github.com/manavm1990), [@langy](https://github.com/langy), [@roboflow](https://github.com/roboflow), [@syntaxfm](https://github.com/syntaxfm), [@getsentry](https://github.com/getsentry), [@codecov](https://github.com/codecov), a private sponsor, [@block](https://github.com/block), [@openclaw](https://github.com/openclaw), [@sourcegraph](https://github.com/sourcegraph), [@jbisasky](https://github.com/jbisasky), [@frontendmasters](https://github.com/frontendmasters) and more via [@thnxdev](https://github.com/thnxdev) for sponsoring tailwind-merge! ❤️
+
 ## v3.7.0
 
 ### New Features

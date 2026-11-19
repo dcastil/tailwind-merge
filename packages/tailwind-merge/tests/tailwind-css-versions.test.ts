@@ -84,11 +84,25 @@ test('supports Tailwind CSS v4.0 features', () => {
         'font-stretch-50%',
     )
     expect(twMerge('col-span-full col-2 row-span-3 row-4')).toBe('col-2 row-4')
+    expect(twMerge('flex-1 flex-(--my-flex)')).toBe('flex-(--my-flex)')
+    expect(twMerge('grow flex-(--my-flex) flex-none')).toBe('flex-none')
     expect(twMerge('via-red-500 via-(--mobile-header-gradient)')).toBe(
         'via-(--mobile-header-gradient)',
     )
     expect(twMerge('via-red-500 via-(length:--mobile-header-gradient)')).toBe(
         'via-red-500 via-(length:--mobile-header-gradient)',
+    )
+    expect(twMerge('decoration-(--my-color) decoration-2')).toBe(
+        'decoration-(--my-color) decoration-2',
+    )
+    expect(twMerge('decoration-(--my-color) decoration-red-500')).toBe('decoration-red-500')
+    expect(twMerge('decoration-(length:--my-thickness) decoration-2')).toBe('decoration-2')
+    expect(twMerge('decoration-(percentage:--my-thickness) decoration-2')).toBe('decoration-2')
+    expect(twMerge('decoration-(percentage:--my-thickness) decoration-red-500')).toBe(
+        'decoration-(percentage:--my-thickness) decoration-red-500',
+    )
+    expect(twMerge('decoration-(color:--my-color) decoration-2')).toBe(
+        'decoration-(color:--my-color) decoration-2',
     )
     // shadow-inner is deprecated in v4 but still sets --tw-shadow, so it conflicts with other shadow utilities and not with shadow color utilities
     expect(twMerge('shadow-inner shadow-lg')).toBe('shadow-lg')

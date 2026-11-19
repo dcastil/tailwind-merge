@@ -55,6 +55,8 @@ The hot paths are `src/lib/merge-classlist.ts` and `src/lib/class-group-utils.ts
     - `tests/class-group-conflicts.test.ts`
     - `tests/conflicts-across-class-groups.test.ts`
 
+- Any `default-config.ts` change also flows into `packages/configurator`: its emitted-module snapshots (`tests/__snapshots__/**/*.snap.ts`) copy the default config's groups and conflicts, and the vanilla-coverage ratchet lists the default config's gaps (see [configurator development](./configurator.md#debugging-and-validation)). Run the configurator suite and review both snapshot diffs.
+
 - Change parser/modifier behavior:
     - `src/lib/parse-class-name.ts`
     - `src/lib/sort-modifiers.ts`
@@ -79,7 +81,7 @@ The hot paths are `src/lib/merge-classlist.ts` and `src/lib/class-group-utils.ts
 ## Testing strategy in this repo
 
 - Unit/behavior tests are granular by feature area in `tests/*.test.ts`.
-- Color-function regression tests should verify preservation of length utilities and replacement of other colors in `tests/colors.test.ts`. `colorFunctionRegex` in `src/lib/validators.ts` is the single list of color functions: both the length validator and the mask position validator exclude values matching it, so extend that list instead of adding a utility-specific copy.
+- Color-function regression tests should verify preservation of length utilities and replacement of other colors in `tests/colors.test.ts`. `colorFunctionRegex` in `src/lib/validators.ts` is the single list of color functions: both the length validator and the mask position validator exclude values matching it, so extend that list instead of adding a utility-specific copy. Tailwind's own detection differs in one place: inside mask stops it treats `contrast-color()` and `device-cmyk()` as positions, which tailwind-merge accepts because such a class only produces a broken gradient.
 - Mask axis conflicts are directional: each `mask-image-x-*` group overrides its left/right counterparts, and each `mask-image-y-*` group overrides top/bottom. A later edge class doesn't remove an earlier axis class: Tailwind emits edge rules after axis rules for both stop positions and stop colors (as it does for `border-r-*` after `border-x-*`), so the later edge class refines the axis. Keep `from`/`to` and position/color groups independent, with regressions in `tests/mask-image.test.ts`. The configurator copies these conflicts into emitted modules, so changes also require reviewing and updating its file snapshots.
 - Mask stop arbitrary values need the mask-specific position validators: lengths, numbers, angles, and unlabeled variables are positions, while colors must remain independent. Generic background-position validators only recognize position labels and would misclassify these mask positions as colors. Keep changes scoped to masks; the configurator also serializes the validators into its emitted-module snapshots.
 - `tests/tailwind-css-versions.test.ts` is the compatibility anchor for Tailwind feature coverage by version.
