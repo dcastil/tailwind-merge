@@ -19,7 +19,7 @@ jobs:
             - name: Use Node.js 24
               uses: actions/setup-node@v7
               with:
-                  node-version: 24.22.2
+                  node-version: 26.13.1
             - run: corepack enable
             - run: pnpm install --frozen-lockfile
             - name: Run benchmark
