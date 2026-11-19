@@ -78,6 +78,28 @@ test('touch classes do create conflicts correctly', () => {
     expect(twMerge('touch-pan-x touch-pan-y touch-pinch-zoom touch-auto')).toBe('touch-auto')
 })
 
+test('font-size classes only override leading with a line-height modifier', () => {
+    // Arbitrary font sizes only set `font-size`, so they don't affect `leading-*`
+    expect(twMerge('leading-6 text-[1.5rem]')).toBe('leading-6 text-[1.5rem]')
+    expect(twMerge('leading-[1.75rem] text-[1.5rem]')).toBe('leading-[1.75rem] text-[1.5rem]')
+    expect(twMerge('leading-6 text-[length:12px]')).toBe('leading-6 text-[length:12px]')
+    expect(twMerge('leading-6 text-(length:--my-size)')).toBe('leading-6 text-(length:--my-size)')
+
+    // Theme font sizes set `line-height: var(--tw-leading, …)`, so an earlier `leading-*` keeps applying
+    expect(twMerge('leading-6 text-lg')).toBe('leading-6 text-lg')
+    expect(twMerge('leading-none text-base')).toBe('leading-none text-base')
+    expect(twMerge('text-sm leading-6 text-lg')).toBe('leading-6 text-lg')
+
+    // A line-height modifier sets `line-height` directly and overrides `leading-*`
+    expect(twMerge('leading-6 text-lg/7')).toBe('text-lg/7')
+    expect(twMerge('leading-6 text-[1.5rem]/6')).toBe('text-[1.5rem]/6')
+    expect(twMerge('leading-6 text-[length:12px]/4')).toBe('text-[length:12px]/4')
+
+    // Font sizes still override each other
+    expect(twMerge('text-lg text-[1.5rem]')).toBe('text-[1.5rem]')
+    expect(twMerge('text-[1.5rem] text-lg')).toBe('text-lg')
+})
+
 test('line-clamp classes do create conflicts correctly', () => {
     expect(twMerge('overflow-auto inline line-clamp-1')).toBe('line-clamp-1')
     expect(twMerge('line-clamp-1 overflow-auto inline')).toBe('line-clamp-1 overflow-auto inline')

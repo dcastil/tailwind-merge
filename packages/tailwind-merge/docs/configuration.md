@@ -311,7 +311,7 @@ When we think of our example, the `px` class group creates a conflict which is r
 
 ### Postfix modifiers conflicting with class groups
 
-Tailwind CSS allows postfix modifiers for some classes. E.g. you can set font-size and line-height together with `text-lg/7` with `/7` being the postfix modifier. This means that any line-height classes preceding a font-size class with a modifier should be removed.
+Tailwind CSS allows postfix modifiers for some classes. E.g. you can set font-size and line-height together with `text-lg/7` with `/7` being the postfix modifier. This means that any line-height classes preceding a font-size class with a modifier should be removed. Without the modifier, font-size classes don't set a line-height that overrides `leading-*` classes in Tailwind CSS v4, so they don't conflict with them.
 
 For this tailwind-merge has the `conflictingClassGroupModifiers` object in its config with the same shape as `conflictingClassGroups` explained in the [section above](#conflicting-class-groups). This time the key is the ID of a class group whose modifier _creates_ a conflict and the value is an array of IDs of class groups which _receive_ the conflict.
 

@@ -1,4 +1,3 @@
-leading → font-size  |  leading-0.5 text-3xl  |  merged, Tailwind: keep both
 mask-composite → mask-image-b-from-color  |  mask-exclude mask-b-from-amber-100  |  kept both, Tailwind: merge
 mask-composite → mask-image-b-from-pos  |  mask-exclude mask-b-from-0%  |  kept both, Tailwind: merge
 mask-composite → mask-image-b-to-color  |  mask-exclude mask-b-to-amber-100  |  kept both, Tailwind: merge

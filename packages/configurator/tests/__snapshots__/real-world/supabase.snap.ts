@@ -2332,7 +2332,6 @@ export const getConfig = () => {
             mx: ['ms', 'me', 'mr', 'ml'],
             my: ['mbs', 'mbe', 'mt', 'mb'],
             size: ['w', 'h'],
-            'font-size': ['leading'],
             'fvn-normal': ['fvn-ordinal', 'fvn-slashed-zero', 'fvn-figure', 'fvn-spacing', 'fvn-fraction'],
             'fvn-ordinal': ['fvn-normal'],
             'fvn-slashed-zero': ['fvn-normal'],

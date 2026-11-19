@@ -136,9 +136,9 @@ const twMerge = extendTailwindMerge<AdditionalClassGroupIds, AdditionalThemeGrou
         conflictingClassGroups: {
             // ↓ ID of class group which creates a conflict with…
             //           ↓ …classes from groups with these IDs
-            //   Here we remove the default conflict between the font-size and leading class
-            //   groups.
-            'font-size': [],
+            //   Here we remove the default conflict between the line-clamp and the display and
+            //   overflow class groups.
+            'line-clamp': [],
         },
         // ↓ Conflicts between the postfix modifier of a group and a different class group to
         //   override
