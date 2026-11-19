@@ -18,6 +18,11 @@
             "description": "Keep the compiler used to verify the documented minimum TypeScript version pinned",
             "matchDepNames": ["typescript-compat"],
             "enabled": false
+        },
+        {
+            "description": "Keep devEngines.runtime at the documented Node.js floor. With rangeStrategy bump, Renovate would raise it to every new Node.js release, while only the workflows' node-version should follow new releases.",
+            "matchDepTypes": ["devEngines.runtime"],
+            "enabled": false
         }
     ]
 }
