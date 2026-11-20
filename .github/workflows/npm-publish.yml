@@ -17,10 +17,10 @@ jobs:
             - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
               with:
                   persist-credentials: false
-            - name: Use Node.js 24
+            - name: Use Node.js 26
               uses: actions/setup-node@v7
               with:
-                  node-version: 24.22.2
+                  node-version: 26.13.1
                   package-manager-cache: false
             - run: corepack enable
             - run: pnpm install --frozen-lockfile
@@ -55,10 +55,10 @@ jobs:
             - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
               with:
                   persist-credentials: false
-            - name: Use Node.js 24
+            - name: Use Node.js 26
               uses: actions/setup-node@v7
               with:
-                  node-version: 24.22.2
+                  node-version: 26.13.1
                   # No registry-url on purpose: it would write an .npmrc auth line referencing the unset NODE_AUTH_TOKEN, which pnpm's config loader rejects. pnpm publishes to its default registry through npm trusted publishing (OIDC), needing no token plumbing.
                   package-manager-cache: false
             - run: corepack enable
@@ -129,10 +129,10 @@ jobs:
             - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
               with:
                   persist-credentials: false
-            - name: Use Node.js 24
+            - name: Use Node.js 26
               uses: actions/setup-node@v7
               with:
-                  node-version: 24.22.2
+                  node-version: 26.13.1
                   package-manager-cache: false
             - run: corepack enable
             - run: pnpm install --frozen-lockfile
@@ -169,10 +169,10 @@ jobs:
             - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
               with:
                   persist-credentials: false
-            - name: Use Node.js 24
+            - name: Use Node.js 26
               uses: actions/setup-node@v7
               with:
-                  node-version: 24.22.2
+                  node-version: 26.13.1
                   # No registry-url on purpose: it would write an .npmrc auth line referencing the unset NODE_AUTH_TOKEN, which pnpm's config loader rejects. pnpm publishes to its default registry through npm trusted publishing (OIDC), needing no token plumbing.
                   package-manager-cache: false
             - run: corepack enable
