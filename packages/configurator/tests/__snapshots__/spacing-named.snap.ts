@@ -1631,6 +1631,8 @@ export const getConfig = () => {
             'mask-image-y-to-color': ['mask-image-t-to-color', 'mask-image-b-to-color'],
             translate: ['translate-x', 'translate-y', 'translate-none'],
             'translate-none': ['translate', 'translate-x', 'translate-y', 'translate-z'],
+            scale: ['scale-x', 'scale-y', 'scale-z'],
+            skew: ['skew-x', 'skew-y'],
             'scroll-m': ['scroll-mx', 'scroll-my', 'scroll-ms', 'scroll-me', 'scroll-mbs', 'scroll-mbe', 'scroll-mt', 'scroll-mr', 'scroll-mb', 'scroll-ml'],
             'scroll-mx': ['scroll-ms', 'scroll-me', 'scroll-mr', 'scroll-ml'],
             'scroll-my': ['scroll-mbs', 'scroll-mbe', 'scroll-mt', 'scroll-mb'],
