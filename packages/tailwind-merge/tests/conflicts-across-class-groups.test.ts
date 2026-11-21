@@ -150,3 +150,19 @@ test('sr utilities override the properties they reset', () => {
     )
     expect(twMerge('min-w-full sr-only md:not-sr-only')).toBe('min-w-full sr-only md:not-sr-only')
 })
+
+test('scale and skew shorthands override their axis classes', () => {
+    expect(twMerge('scale-x-75 scale-50')).toBe('scale-50')
+    expect(twMerge('scale-y-75 scale-z-50 scale-100')).toBe('scale-100')
+    expect(twMerge('-scale-x-100 scale-[1.7]')).toBe('scale-[1.7]')
+    expect(twMerge('skew-x-6 skew-3')).toBe('skew-3')
+    expect(twMerge('skew-y-12 -skew-6')).toBe('-skew-6')
+
+    // The axis class after the shorthand only replaces one axis, so both have to stay.
+    expect(twMerge('scale-50 scale-x-75')).toBe('scale-50 scale-x-75')
+    expect(twMerge('skew-3 skew-x-6')).toBe('skew-3 skew-x-6')
+
+    // Different variants do not conflict.
+    expect(twMerge('hover:scale-x-75 scale-50')).toBe('hover:scale-x-75 scale-50')
+    expect(twMerge('scale-x-75 hover:skew-3')).toBe('scale-x-75 hover:skew-3')
+})

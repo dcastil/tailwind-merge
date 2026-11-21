@@ -79,7 +79,6 @@ overflow-y → line-clamp  |  overflow-y-clip line-clamp-2  |  kept both, Tailwi
 scale-3d → scale  |  scale-3d -scale-50  |  kept both, Tailwind: merge
 scale-3d → scale-x  |  scale-3d -scale-x-50  |  kept both, Tailwind: merge
 scale-3d → scale-y  |  scale-3d -scale-y-50  |  kept both, Tailwind: merge
-scale-z → scale  |  -scale-z-50 -scale-50  |  kept both, Tailwind: merge
 scale-z → scale-x  |  -scale-z-50 -scale-x-50  |  kept both, Tailwind: merge
 scale-z → scale-y  |  -scale-z-50 -scale-y-50  |  kept both, Tailwind: merge
 translate-none → translate-x  |  translate-none -translate-x-0.5  |  kept both, Tailwind: merge
