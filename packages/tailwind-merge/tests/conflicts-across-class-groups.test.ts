@@ -105,6 +105,19 @@ test('line-clamp classes do create conflicts correctly', () => {
     expect(twMerge('line-clamp-1 overflow-auto inline')).toBe('line-clamp-1 overflow-auto inline')
 })
 
+test('truncate overrides the properties it sets', () => {
+    expect(twMerge('text-clip truncate')).toBe('truncate')
+    expect(twMerge('text-ellipsis truncate')).toBe('truncate')
+    expect(twMerge('md:text-clip md:truncate')).toBe('md:truncate')
+    expect(twMerge('overflow-visible overflow-x-auto overflow-y-scroll truncate')).toBe('truncate')
+    expect(twMerge('whitespace-normal truncate')).toBe('truncate')
+    expect(twMerge('truncate text-clip')).toBe('truncate text-clip')
+    expect(twMerge('truncate text-ellipsis')).toBe('truncate text-ellipsis')
+    expect(twMerge('truncate overflow-visible')).toBe('truncate overflow-visible')
+    expect(twMerge('truncate whitespace-normal')).toBe('truncate whitespace-normal')
+    expect(twMerge('whitespace-normal md:truncate')).toBe('whitespace-normal md:truncate')
+})
+
 test('sr utilities override the properties they reset', () => {
     // Tailwind emits `relative` after `sr-only`, so both classes leave the element in flow.
     expect(twMerge('relative sr-only')).toBe('sr-only')

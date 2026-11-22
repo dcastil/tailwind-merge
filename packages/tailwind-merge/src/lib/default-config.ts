@@ -1144,7 +1144,12 @@ export const getDefaultConfig = () => {
              * Text Overflow
              * @see https://tailwindcss.com/docs/text-overflow
              */
-            'text-overflow': ['truncate', 'text-ellipsis', 'text-clip'],
+            'text-overflow': ['text-ellipsis', 'text-clip'],
+            /**
+             * Truncate
+             * @see https://tailwindcss.com/docs/text-overflow
+             */
+            truncate: ['truncate'],
             /**
              * Text Wrap
              * @see https://tailwindcss.com/docs/text-wrap
@@ -2510,6 +2515,8 @@ export const getDefaultConfig = () => {
             'fvn-spacing': ['fvn-normal'],
             'fvn-fraction': ['fvn-normal'],
             'line-clamp': ['display', 'overflow'],
+            // Tailwind emits `truncate` before the `overflow`, `text-overflow` and `whitespace` utilities, so keeping an earlier `overflow-x-auto` or `whitespace-normal` undoes part of it. A later one is meant to override just its own property.
+            truncate: ['text-overflow', 'overflow', 'overflow-x', 'overflow-y', 'whitespace'],
             // Tailwind emits these utilities after `sr-only`, so keeping an earlier `relative` or `p-4` undoes the hide. Removing them is safe because `not-sr-only` resets the same properties when the element is revealed.
             // Border width and min/max sizes stay independent because `not-sr-only` doesn't reset them, so they still apply once the element is revealed. While hidden they don't undo the hide: the element is absolutely positioned and clipped away.
             // `not-sr-only` only conflicts with `sr-only`: Tailwind emits these utilities after it too, so an earlier `relative` or `p-4` is meant to apply once the element is visible.

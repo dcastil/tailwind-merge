@@ -604,6 +604,7 @@ export type DefaultClassGroupIds =
     | 'translate-y'
     | 'translate-z'
     | 'translate'
+    | 'truncate'
     | 'underline-offset'
     | 'vertical-align'
     | 'visibility'
