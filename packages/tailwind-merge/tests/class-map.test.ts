@@ -349,7 +349,7 @@ test('class map has correct class groups at first part', () => {
         transform: ['transform', 'transform-style'],
         transition: ['transition', 'transition-behavior'],
         translate: ['translate', 'translate-none', 'translate-x', 'translate-y', 'translate-z'],
-        truncate: ['text-overflow'],
+        truncate: ['truncate'],
         underline: ['text-decoration', 'underline-offset'],
         uppercase: ['text-transform'],
         via: ['gradient-via', 'gradient-via-pos'],
