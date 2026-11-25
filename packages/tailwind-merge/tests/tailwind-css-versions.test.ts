@@ -83,6 +83,12 @@ test('supports Tailwind CSS v4.0 features', () => {
     expect(twMerge('font-stretch-expanded font-stretch-[66.66%] font-stretch-50%')).toBe(
         'font-stretch-50%',
     )
+    expect(twMerge('font-stretch-50% font-stretch-(--my-stretch)')).toBe(
+        'font-stretch-(--my-stretch)',
+    )
+    expect(twMerge('font-stretch-(--my-stretch) font-sans')).toBe(
+        'font-stretch-(--my-stretch) font-sans',
+    )
     expect(twMerge('col-span-full col-2 row-span-3 row-4')).toBe('col-2 row-4')
     expect(twMerge('flex-1 flex-(--my-flex)')).toBe('flex-(--my-flex)')
     expect(twMerge('grow flex-(--my-flex) flex-none')).toBe('flex-none')
@@ -310,6 +316,12 @@ test('supports Tailwind CSS v4.2 features', () => {
     )
     expect(twMerge('font-features-["smcp"] normal-nums')).toBe('font-features-["smcp"] normal-nums')
     expect(twMerge('font-sans font-features-["smcp"]')).toBe('font-sans font-features-["smcp"]')
+    expect(twMerge('font-features-["smcp"] font-features-(--my-features)')).toBe(
+        'font-features-(--my-features)',
+    )
+    expect(twMerge('font-features-(--my-features) font-sans')).toBe(
+        'font-features-(--my-features) font-sans',
+    )
 
     // Fractions with decimal numerator/denominator
 

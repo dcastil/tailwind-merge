@@ -992,6 +992,7 @@ export const getDefaultConfig = () => {
                         'extra-expanded',
                         'ultra-expanded',
                         isPercent,
+                        isArbitraryVariable,
                         isArbitraryValue,
                     ],
                 },
@@ -1007,7 +1008,7 @@ export const getDefaultConfig = () => {
              * Font Feature Settings
              * @see https://tailwindcss.com/docs/font-feature-settings
              */
-            'font-features': [{ 'font-features': [isArbitraryValue] }],
+            'font-features': [{ 'font-features': [isArbitraryVariable, isArbitraryValue] }],
             /**
              * Font Variant Numeric
              * @see https://tailwindcss.com/docs/font-variant-numeric
